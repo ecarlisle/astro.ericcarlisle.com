@@ -22,7 +22,7 @@ const Header: React.FC<Props> = (props:Props) => {
         {
           MAIN_NAVIGATION.map((page, index) => (
           <li key={index}>
-            <a className={page.url === props.path ? "active": ""} href={ page.url }>{ page.title }</a>
+            <a className={page.url === props.path ? "active": ""} href={`${page.url}/`}>{ page.title }</a>
           </li>
           ))
         }
