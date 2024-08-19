@@ -12,7 +12,7 @@ export default defineConfig({
   root: ".",
   site: "https://ericcarlisle.com",
   srcDir: "./src",
-  trailingSlash: "ignore",
+  trailingSlash: "always",
   type: "static",
   build: {
     format: "directory",
