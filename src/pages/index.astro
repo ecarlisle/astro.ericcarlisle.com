@@ -1,0 +1,46 @@
+---
+import Layout from  "../layouts/Main.astro";
+import { getCollection } from 'astro:content';
+import { ReadableDateFormat } from "../lib/DateUtils";
+
+export const title = "Eric Carlisle: UI, UX Engineer";
+export const description = "";
+export const ogimage = {
+  alt: "Eric Carlisle: UI, UX Engineer",
+  height: 630,
+  width: 1200,
+  type: "image/jpeg",
+  url: "/images/og/eric-carlisle_OG.jpg",
+}
+
+export const ogtype = "website";
+export const twimage = "/images/tw/ueric-carlisle_800w_TW.jpg";
+
+const posts = (await getCollection('posts')).filter(post => post.data.draft === false).sort(
+	(a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf(),
+);
+---
+
+<Layout title={title}
+				description={description}
+				ogimage={ogimage}
+				ogtype={ogtype}
+				twimage={twimage}>
+
+	<p class="home-intro">Eric Carlisle is a Full-Stack Engineer with focus on UI Innovation and UX Strategy.</p>
+
+	<h2>Latest Posts</h2>
+	<ul class="square">
+	{
+		posts.map((post) => (
+		<li>
+			<strong>
+				{ReadableDateFormat(post.data.publishDate)} :
+			</strong>
+			<a href={post.data.title}>
+				{post.data.title}
+			</a>
+		</li>
+	))}
+	</ul>
+</Layout>

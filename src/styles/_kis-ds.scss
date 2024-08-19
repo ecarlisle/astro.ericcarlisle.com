@@ -1,0 +1,96 @@
+@use 'sass:map';
+
+/* @link https://utopia.fyi/type/calculator?c=320,16,1.2,1240,18,1.2,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
+
+:root {
+  --text-size--2: clamp(0.6944rem, 0.6643rem + 0.151vw, 0.7813rem);
+  --text-size--1: clamp(0.8333rem, 0.7971rem + 0.1812vw, 0.9375rem);
+  --text-size-0: clamp(1rem, 0.9565rem + 0.2174vw, 1.125rem);
+  --text-size-1: clamp(1.2rem, 1.1478rem + 0.2609vw, 1.35rem);
+  --text-size-2: clamp(1.44rem, 1.3774rem + 0.313vw, 1.62rem);
+  --text-size-3: clamp(1.728rem, 1.6529rem + 0.3757vw, 1.944rem);
+  --text-size-4: clamp(2.0736rem, 1.9834rem + 0.4508vw, 2.3328rem);
+  --text-size-5: clamp(2.4883rem, 2.3801rem + 0.5409vw, 2.7994rem);
+}
+
+/* @link https://utopia.fyi/space/calculator?c=400,16,1.25,1280,20,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,&g=s,l,xl,12 */
+
+:root {
+  --space-3xs: clamp(0.25rem, 0.2216rem + 0.1136vw, 0.3125rem);
+  --space-2xs: clamp(0.5rem, 0.4432rem + 0.2273vw, 0.625rem);
+  --space-xs: clamp(0.75rem, 0.6648rem + 0.3409vw, 0.9375rem);
+  --space-s: clamp(1rem, 0.8864rem + 0.4545vw, 1.25rem);
+  --space-m: clamp(1.5rem, 1.3295rem + 0.6818vw, 1.875rem);
+  --space-l: clamp(2rem, 1.7727rem + 0.9091vw, 2.5rem);
+  --space-xl: clamp(3rem, 2.6591rem + 1.3636vw, 3.75rem);
+  --space-2xl: clamp(4rem, 3.5455rem + 1.8182vw, 5rem);
+  --space-3xl: clamp(6rem, 5.3182rem + 2.7273vw, 7.5rem);
+
+  /* One-up pairs */
+  --space-3xs-2xs: clamp(0.25rem, 0.0795rem + 0.6818vw, 0.625rem);
+  --space-2xs-xs: clamp(0.5rem, 0.3011rem + 0.7955vw, 0.9375rem);
+  --space-xs-s: clamp(0.75rem, 0.5227rem + 0.9091vw, 1.25rem);
+  --space-s-m: clamp(1rem, 0.6023rem + 1.5909vw, 1.875rem);
+  --space-m-l: clamp(1.5rem, 1.0455rem + 1.8182vw, 2.5rem);
+  --space-l-xl: clamp(2rem, 1.2045rem + 3.1818vw, 3.75rem);
+  --space-xl-2xl: clamp(3rem, 2.0909rem + 3.6364vw, 5rem);
+  --space-2xl-3xl: clamp(4rem, 2.4091rem + 6.3636vw, 7.5rem);
+}
+
+:root {
+  --breakpoint-tablet: 25rem, /* 400px */
+  --breakpoint-laptop: 48rem, /* 768px */
+  --breakpoint-desktop: 64rem, /* 1024px */
+  --breakpoint-widest: 80rem; /* 1280px */
+
+	--color-black: #282828;
+	--color-blue-primary:#0369A1;
+	--color-blue-accent: #38BDF8;
+	--color-gray-primary: #9ca3af;
+	--color-gray-accent: #e5e7eb;
+	--color-dark-orange: #a15C03;
+	--color-white: #FFF;
+}
+
+$breakpoints: (
+  sm: 25rem, /* 400px */
+  md: 48rem, /* 768px */
+  lg: 64rem, /* 1024px */
+  xl: 80rem, /* 1280px */
+);
+
+@function breakpoints($arg) {
+	@return map.get($breakpoints, $arg);
+};
+
+@font-face {
+	font-display: swap;
+	font-family: "visby";
+	font-style: normal;
+	font-weight: 600;
+	src: url("/fonts/visby-semibold.woff2") format(woff2);
+}
+
+@font-face {
+	font-display: swap;
+	font-family: "inter-regular";
+	font-style: normal;
+	font-weight: 400;
+	src: url("/fonts/inter-regular.woff2") format(woff2);
+}
+
+@font-face {
+	font-display: swap;
+	font-family: "inter-semibold";
+	font-style: normal;
+	font-weight: 600;
+	src: url("/fonts/inter-regular.woff2") format(woff2);
+}
+
+@font-face {
+	font-display: swap;
+	font-family: "robotomono";
+	font-style: normal;
+	font-weight: 400;
+	src: url("/fonts/robotomono-regular.woff2") format(woff2);
+}

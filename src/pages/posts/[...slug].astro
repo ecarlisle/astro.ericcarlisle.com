@@ -1,0 +1,28 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import Layout from "../../layouts/Main.astro";
+import ArticleImage from "../../components/react/ArticleImage";
+import Tags from "../../components/react/Tags"
+import { Iso8601DateFormat, ReadableDateFormat } from "../../lib/DateUtils";
+
+export async function getStaticPaths() {
+	const posts = await getCollection('posts');
+	return posts.map((post) => ({
+		params: { slug: post.slug },
+		props: post,
+	}));
+}
+type Props = CollectionEntry<'posts'>;
+
+const post = Astro.props;
+const { Content } = await post.render();
+---
+
+<Layout {...post.data}>
+	<article>
+		<time datetime={Iso8601DateFormat(post.data.publishDate)}>{ReadableDateFormat(post.data.publishDate)}</time>
+		<ArticleImage width={800} height={450} images={post.data.images} />
+		<Tags tags={post.data.tags} />
+		<Content />
+	</article>
+</Layout>

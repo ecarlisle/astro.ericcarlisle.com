@@ -1,0 +1,8 @@
+@use "sass:map";
+@use "./kis-ds.scss" as *;
+
+@mixin mq($size) {
+	@media all and (min-width: map.get($breakpoints, $size)) {
+		@content;
+	}
+}

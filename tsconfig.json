@@ -1,0 +1,48 @@
+{
+  "extends": "astro/tsconfigs/base",
+  "compilerOptions": {
+    "allowJs": true,
+    "allowImportingTsExtensions": true,
+    "baseUrl": ".",
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "Node",
+    "jsx": "preserve",
+    "jsxImportSource": "react",
+    "noEmit": true,
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "skipDefaultLibCheck": true,
+    "types": [
+      "node"
+    ],
+    "paths": {
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@images/*": [
+        "./src/images/*"
+      ],
+      "@layouts/*": [
+        "./src/layouts/*"
+      ],
+      "@src/*": [
+        "./src/*"
+      ]
+    }
+  },
+  "include": [
+    "./src/**/*",
+    "eleventy.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

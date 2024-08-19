@@ -1,0 +1,51 @@
+---
+import Layout from "../../layouts/Main.astro";
+import { getCollection } from 'astro:content';
+import ArticleImage from "../../components/react/ArticleImage";
+import Tags from "../../components/react/Tags"
+import { parse } from 'node-html-parser';
+import { Iso8601DateFormat, ReadableDateFormat } from "../../lib/DateUtils";
+
+export const title = "Posts";
+export const description = "Hello";
+export const ogimage = {
+  alt: "3D-printed USB, SD, and MicroSD media holder",
+  height: 630,
+  width: 1200,
+  type: "image/jpeg",
+  url: "/images/posts/usb-and-sd-media-holder_OG.jpg",
+};
+export const ogtype = "blog";
+export const twimage = "/images/posts/usb-and-sd-media-holder_OG.jpg";
+
+const posts = (await getCollection('posts')).filter(post => post.data.draft === false).sort(
+	(a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf(),
+);
+
+---
+<Layout title={title}
+				description={description}
+				ogimage={ogimage}
+				ogtype={ogtype}
+				twimage={twimage}>
+
+		{
+		posts.map((post) => (
+			<li class="blogroll">
+				<article>
+					<time datetime={Iso8601DateFormat(post.data.publishDate)}>{ReadableDateFormat(post.data.publishDate)}</time>
+					<a href={`/posts/${post.slug}/`}>
+						<h2 class="title" set:html={post.data.title} />
+					</a>
+					<div class="summary">
+						<ArticleImage width={800} height={450} images={post.data.images} />
+						<div>
+							{parse(post.body).querySelector("excerpt")}
+							<Tags tags={post.data.tags} />
+						</div>
+					</div>
+				</article>
+			</li>
+		))
+	}
+</Layout>

@@ -1,0 +1,136 @@
+---
+import "../styles/main.scss";
+import { SITE_LOCALE, SOCIAL_PROFILES, THREED_PRINTING_PROFILES, SITE_NAME, TWITTER_SITE} from "../consts";
+
+const rootURL = new URL("/", Astro.site);
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+const { title, description, publishDate, updateDate, ogimage, ogtype, twimage} = Astro.props;
+
+// List of profile URLs needed for Person structured data.
+const profile_urls:string[] = [];
+SOCIAL_PROFILES.map(profile => {
+	profile_urls.push(profile.url);
+});
+THREED_PRINTING_PROFILES.map(profile => {
+	profile_urls.push(profile.url);
+});
+
+
+const WebsiteSchema = {
+	"@context": "https://schema.org",
+  "@type": "WebSite",
+  "url": rootURL,
+    "name": SITE_NAME,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": `${rootURL}search?q={search_term_string}`,
+      "query-input": "required name=search_term_string"
+    }
+}
+
+// TODO: Retrofit PersonSchema into global config
+const PersonSchema = {
+	"@context": "https://schema.org",
+	"@type": "Person",
+	"email": "eric.carlisle@gmail.com",
+	"description": "UI Engineer, UX Strategist, Speaker, Mentor, Maker",
+	"name": "Eric Carlisle",
+	"image": "https://www.ericcarlisle.com/images/global/eric-carlisle-800x800.png",
+	"alumniOf": [
+		{
+		"@type": "CollegeOrUniversity",
+		"name": "University of South Carolina",
+		"sameAs": "https://sc.edu/"
+		},
+		{
+		"@type": "CollegeOrUniversity",
+		"name": "Johns Hopkins Carey Business School",
+		"sameAs": "https://carey.jhu.edu/"
+		}
+	],
+	"url": {rootURL},
+	"sameAs" : profile_urls,
+}
+
+// TODO : Conditionally add Article strcutured data for posts.
+---
+<head>
+
+{ import.meta.env.MODE === "production" &&
+<script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3"></script>
+<script is:inline>
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-70E1BWCFJ3');
+</script>
+}
+
+<!-- Global Metadata -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+
+<!-- Font preloads -->
+<link rel="preload" href="/fonts/inter-regular.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/visby-semibold.woff2" as="font" type="font/woff2" crossorigin />
+
+<!-- Favicon -->
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+
+<!-- Generator -->
+<meta name="generator" content={Astro.generator} />
+
+<!-- Theme Color (Chrome, Firefox OS and Opera) -->
+<meta name="theme-color" content="#0369A1" />
+
+<!-- Search Engine crawling, caching -->
+<meta name="robots" content="index,follow" />
+<meta name="googlebot" content="index,follow" />
+
+<!-- Canonical URL -->
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+
+<!-- Open Graph -->
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={new URL(ogimage.url, Astro.url)} />
+<meta property="og:image:type" content={ogimage.type} />
+<meta property="og:image:width" content={ogimage.width} />
+<meta property="og:image:height" content={ogimage.height} />
+<meta property="og:locale" content={SITE_LOCALE} />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta property="og:type" content={ogtype} />
+<meta property="og:url" content={Astro.url} />
+
+<!-- Open Graph Article -->
+{ ogtype === "article" &&
+<meta property='article:author' content='Eric Carlisle' />
+<meta property='article:published_time' content={publishDate} />
+<meta property='article:modified_time' content={updateDate ? updateDate : publishDate} />
+}
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:image" content={new URL(twimage, Astro.url)} />
+<meta property="twitter:site" content={TWITTER_SITE} />
+
+<!-- Structured Data -->
+<script is:inline type="application/ld+json" set:html={JSON.stringify(WebsiteSchema)} />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(PersonSchema)} />
+
+
+<style lang="scss"></style>
+
+</head>
