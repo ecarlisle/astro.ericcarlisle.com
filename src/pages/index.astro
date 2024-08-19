@@ -37,7 +37,7 @@ const posts = (await getCollection('posts')).filter(post => post.data.draft === 
 			<strong>
 				{ReadableDateFormat(post.data.publishDate)} :
 			</strong>
-			<a href={post.data.title}>
+			<a href={`/posts/${post.slug}/`}>
 				{post.data.title}
 			</a>
 		</li>
