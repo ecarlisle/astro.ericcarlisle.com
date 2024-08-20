@@ -33,7 +33,18 @@ const posts = (await getCollection('posts')).filter(post => post.data.draft === 
 		posts.map((post) => (
 			<li class="blogroll">
 				<article>
-					<time datetime={Iso8601DateFormat(post.data.publishDate)}>{ReadableDateFormat(post.data.publishDate)}</time>
+					<div class="byline">
+						<div>
+							<strong>Posted:&nbsp;</strong>
+							<time datetime={Iso8601DateFormat(post.data.publishDate)}>{ReadableDateFormat(post.data.publishDate)}</time>
+						</div>
+						<div>
+							{ post.data.updatedDate &&
+								<strong>Updated:&nbsp;</strong>
+								<time datetime={Iso8601DateFormat(post.data.updatedDate)}>{ReadableDateFormat(post.data.updatedDate)}</time>
+							}
+						</div>
+					</div>
 					<a href={`/posts/${post.slug}/`}>
 						<h2 class="title" set:html={post.data.title} />
 					</a>

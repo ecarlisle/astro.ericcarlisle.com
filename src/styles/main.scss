@@ -209,7 +209,6 @@ article {
 
 time {
 	color: var(--color-dark-orange);
-	display: block;
 	font: 600 var(--text-size--1)/ 1.5 inter, sans-serif;
 	margin: 0 0  var(--space-3xs);
 }
@@ -256,10 +255,12 @@ strong {
 }
 
 .byline {
-	display: flex;
 	font-size: var(--text-size--1);
-	text-align: right;
 	padding: 0 0 var(--space-3xs);
+	@include mq(sm) {
+		justify-content: space-between;
+		display: flex;
+	}
 }
 
 .profile-image img {
@@ -319,6 +320,6 @@ strong {
 }
 
 p.home-intro {
-		font: var(--text-size-3)/ 1.3 inter, sans-serif;
+	font: var(--text-size-3)/ 1.3 inter, sans-serif;
 }
 

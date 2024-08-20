@@ -20,7 +20,18 @@ const { Content } = await post.render();
 
 <Layout {...post.data}>
 	<article>
-		<time datetime={Iso8601DateFormat(post.data.publishDate)}>{ReadableDateFormat(post.data.publishDate)}</time>
+		<div class="byline">
+			<div>
+				<strong>Posted:&nbsp;</strong>
+				<time datetime={Iso8601DateFormat(post.data.publishDate)}>{ReadableDateFormat(post.data.publishDate)}</time>
+			</div>
+			<div>
+				{ post.data.updatedDate &&
+					<strong>Updated:&nbsp;</strong>
+					<time datetime={Iso8601DateFormat(post.data.updatedDate)}>{ReadableDateFormat(post.data.updatedDate)}</time>
+				}
+			</div>
+		</div>
 		<ArticleImage width={800} height={450} images={post.data.images} />
 		<Tags tags={post.data.tags} />
 		<Content />
