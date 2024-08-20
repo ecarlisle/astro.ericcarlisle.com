@@ -5,7 +5,7 @@ import Aside from "@components/react/Aside";
 import Footer from "@components/react/Footer";
 
 const { frontmatter} = Astro.props;
-const { title, description, publishDate, updateDate, ogimage, twimage } = typeof frontmatter !== "undefined" ? frontmatter : Astro.props;
+const { title, description, publishDate, updateDate, ogtype, ogimage, twimage } = typeof frontmatter !== "undefined" ? frontmatter : Astro.props;
 
 const { pathname } = Astro.url;
 ---
@@ -15,6 +15,7 @@ const { pathname } = Astro.url;
 						description={description}
 						publishDate={publishDate}
 						updateDate={updateDate}
+						ogtype={ogtype}
 						ogimage={ogimage}
 						twimage={twimage}
 						/>
