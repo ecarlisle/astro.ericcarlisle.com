@@ -109,7 +109,7 @@ const PersonSchema = {
 <meta property="og:locale" content={SITE_LOCALE} />
 <meta property="og:site_name" content={SITE_NAME} />
 <meta property="og:type" content={ogtype} />
-<meta property="og:url" content={Astro.url} />
+<meta property="og:url" content={canonicalURL} />
 
 <!-- Open Graph Article -->
 { ogtype === "article" &&
@@ -122,7 +122,7 @@ const PersonSchema = {
 <meta property="twitter:card" content="summary_large_image" />
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
-<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:url" content={canonicalURL} />
 <meta property="twitter:image" content={new URL(twimage, Astro.url)} />
 <meta property="twitter:site" content={TWITTER_SITE} />
 

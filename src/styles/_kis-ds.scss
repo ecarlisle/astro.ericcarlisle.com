@@ -42,14 +42,17 @@
   --breakpoint-laptop: 48rem, /* 768px */
   --breakpoint-desktop: 64rem, /* 1024px */
   --breakpoint-widest: 80rem; /* 1280px */
+}
 
-	--color-black: #282828;
-	--color-blue-primary:#0369A1;
-	--color-blue-accent: #38BDF8;
-	--color-gray-primary: #9ca3af;
-	--color-gray-accent: #e5e7eb;
-	--color-dark-orange: #a15C03;
-	--color-white: #FFF;
+:root {
+	--color-text: #282828;						/* hsl(0, 0%, 16%) */
+	--brand-color:#0369A1;						/* hsl(201, 96%, 32%) */
+	--color-brand-accent: #38BDF8;		/* hsl(198, 93%, 60%) */
+	--color-neutral: #9ca3af;				/* hsl(218, 11%, 65%) */
+	--color-neutral-accent: #e5e7eb; /* hsl(218, 11%, 65%) */
+	--color-brand-inverse: #a15C03;	/* hsl(34, 96%, 32%) */
+	--color-success:  #19a102;				/* hsl(111, 98%, 32%) */
+	--color-background: #ffffff;			/* hsl(0, 0%, 100%) */
 }
 
 $breakpoints: (
@@ -61,7 +64,7 @@ $breakpoints: (
 
 @function breakpoints($arg) {
 	@return map.get($breakpoints, $arg);
-};
+}
 
 @font-face {
 	font-display: swap;

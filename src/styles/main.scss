@@ -11,8 +11,8 @@
 }
 
 body {
-	background-color: var(--color-white);
-	color: var(--color-black);
+	background-color: var(--color-background);
+	color: var(--color-text);
 	font: var(--text-size-0)/ 1.5 inter, sans-serif;
 	letter-spacing: 0.01vw;
 	max-width: var(--breakpoint-desktop);
@@ -27,20 +27,20 @@ body {
 
 h1, h2, h3, h4 {
 	a {
-		color: var(--color-black);
+		color: var(--color-text);
 		&:is(:hover, :focus, .active) {
-			color: var(--color-black);
+			color: var(--color-text);
 			text-decoration: none;
 		}
 		&:focus {
-			outline: 1px solid var(--color-blue-primary);
+			outline: 1px solid var(--brand-color);
 		}
 	}
 }
 
 h1 {
 	font: 500 var(--text-size-5)/ 1.2 visby, sans-serif;
-	border: 1px solid var(--color-blue-accent);
+	border: 1px solid var(--color-brand-accent);
 	border-width: 0 0 0 var(--space-3xs);
 	margin: 0 0 var(--space-s) 0;
 	padding: var(--space-3xs) var(--space-s);
@@ -68,7 +68,7 @@ p {
 
 hr {
 	border-width: 1px 0 0 0;
-	border-color: var(--color-gray-accent);
+	border-color: var(----color-neutral-accent);
 	margin: 0 0 var(--space-m);
 }
 
@@ -78,19 +78,19 @@ img.responsive {
 }
 
 [aria-current] {
-	background-color: var(--color-white);
+	background-color: var(--color-background);
 }
 
 a {
-	color: var(--color-blue-primary);
+	color: var(--brand-color);
 	&:is(:hover, :focus, .active)  {
-		color: var(--color-blue-primary);
-		text-decoration: underline var(--color-blue-accent);
+		color: var(--brand-color);
+		text-decoration: underline var(--color-brand-accent);
 		text-underline-offset: 3px;
 		text-decoration-thickness: 2px;
 	}
 	&:focus  {
-		outline: 1px solid var(--color-blue-primary);
+		outline: 1px solid var(--brand-color);
 	}
 	> img:only-child {
 	  display: block;
@@ -105,9 +105,9 @@ main {
 
 
 .main-aside {
-	@include mq(md) {
+	@include mq(lg) {
 		display: grid;
-		grid-template-columns: 2fr 1fr;
+		grid-template-columns: 9fr 3fr;
 	}
 }
 
@@ -116,8 +116,8 @@ header.global {
 }
 
 footer.global {
-	border-top: solid 1px #bbb;
-	border-bottom: solid var(--space-3xs) var(--color-blue-primary);
+	border-top: solid 1px var(--color-neutral);
+	border-bottom: solid var(--space-3xs) var(--brand-color);
 	margin: var(--space-s) 0 0 0;
 	padding: var(--space-s-m);
 	display: flex;
@@ -132,7 +132,7 @@ img.logo {
 
 nav.global {
 	border-bottom: solid 1px #bbb;
-	border-top: solid var(--space-3xs) var(--color-blue-primary);
+	border-top: solid var(--space-3xs) var(--brand-color);
 	padding: var(--space-s-m);
 
 	ul {
@@ -178,15 +178,35 @@ aside {
 	padding: var(--space-s-m);
 }
 
+ul.social-icons {
+	display: flex;
+	justify-content: center;
+	column-gap: var(--space-s);
+	flex-wrap: wrap;
+	@include mq(lg) {
+		column-gap: var(--space-3xs);
+		flex-wrap: nowrap;
+		justify-content: space-around;
+	}
+	svg {
+		height: var(--space-l);
+		width: var(--space-l);
+		@include mq(lg) {
+			height: var(--space-m);
+			width: var(--space-m);
+		}
+	}
+}
+
 svg.social-icon {
-	height: var(--space-xl-l);
-	width: var(--space-xl-l);
+	height: var(--space-m);
+	width: var(--space-m);
 }
 
 nav.social {
 	margin: 0 auto;
 	ul li {
-		padding: 0 var(--space-2xs) 0;
+		padding: 0 var(--space-3xs) 0;
 	}
 }
 
@@ -196,19 +216,19 @@ pre code {
 
 article {
 	img {
- 		border: solid 2px var(--color-black);
+ 		border: solid 2px var(--color-text);
 		border-radius: var(--space-3xs);
 	}
 	.tags {
 		text-align: right;
-		color: var(--color-dark-orange);
+		color: var(--color-brand-inverse );
 		font: 600 var(--text-size--1)/ 1.5 inter, sans-serif;
 		margin: 0 0 var(--space-s);
 	}
 }
 
 time {
-	color: var(--color-dark-orange);
+	color: var(--color-brand-inverse);
 	font: 600 var(--text-size--1)/ 1.5 inter, sans-serif;
 	margin: 0 0  var(--space-3xs);
 }
@@ -268,14 +288,14 @@ strong {
 }
 
 .profile-image img {
-	border: 2px solid var(--color-blue-primary);
+	border: 2px solid var(--brand-color);
 	border-radius: 50%;
 	margin: 0 0 var(--space-s);
 }
 
 .blogroll {
 	.summary {
-		border-bottom: 1px solid var(--color-gray-primary);
+		border-bottom: 1px solid var(--color-neutral);
 		margin: 0 0 var(--space-s);
 		p {
 			margin: 0 0 var(--space-3xs);
@@ -312,7 +332,7 @@ strong {
 	}
 	section {
 		padding: var(--space-xs) 0;
-		border-bottom: 1px solid var(--color-gray-primary);
+		border-bottom: 1px solid var(--color-neutral);
 		margin-bottom:  var(--space-m);
 		@include mq(lg) {
 			display: grid;

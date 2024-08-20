@@ -13,10 +13,10 @@ export const ogimage = {
   height: 630,
   width: 1200,
   type: "image/jpeg",
-  url: "/images/posts/usb-and-sd-media-holder_OG.jpg",
+  url: "/images/og/eric-carlisle_OG.jpg",
 };
 export const ogtype = "blog";
-export const twimage = "/images/posts/usb-and-sd-media-holder_OG.jpg";
+export const twimage = "/images/tw/eric-carlisle_TW.jpg";
 
 const posts = (await getCollection('posts')).filter(post => post.data.draft === false).sort(
 	(a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf(),

@@ -10,12 +10,12 @@ const Aside= () => {
       </picture>
 
       <nav className="social">
-        <ul>
+        <ul className="social-icons">
           {
             SOCIAL_PROFILES.map((profile, index) => (
               <li key={index}>
                 <a href={ profile.url} aria-label={`${profile.name} Profile`}>
-                  <svg width="24" height="24" className="social-icon" viewBox="0 0 32 32">
+                  <svg width="36" height="36" viewBox="0 0 32 32">
                     <use href={`#icon-${profile.name.toLowerCase()}`}></use>
                   </svg>
                 </a>
@@ -24,7 +24,7 @@ const Aside= () => {
           }
           <li>
             <a href="/feed.xml" aria-label="RSS Feed">
-              <svg width="24" height="24" className="social-icon" viewBox="0 0 32 32">
+              <svg width="36" height="36" className="social-icon" viewBox="0 0 32 32">
                 <use href="#icon-rss"></use>
               </svg>
             </a>
