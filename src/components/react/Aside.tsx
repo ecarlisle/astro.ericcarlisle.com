@@ -23,7 +23,7 @@ const Aside= () => {
             ))
           }
           <li>
-            <a href="/feed.xml" aria-label="RSS Feed">
+            <a href="/rss.xml" aria-label="RSS Feed">
               <svg width="36" height="36" className="social-icon" viewBox="0 0 32 32">
                 <use href="#icon-rss"></use>
               </svg>
