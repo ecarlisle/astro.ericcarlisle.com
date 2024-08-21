@@ -49,7 +49,7 @@ const posts = (await getCollection('posts')).filter(post => post.data.draft === 
 						<h2 class="title" set:html={post.data.title} />
 					</a>
 					<div class="summary">
-						<ArticleImage width={800} height={450} images={post.data.images} />
+						<ArticleImage width={900} height={506} images={post.data.images} />
 						<div>
 							{parse(post.body).querySelector("excerpt")}
 							<Tags tags={post.data.tags} />
