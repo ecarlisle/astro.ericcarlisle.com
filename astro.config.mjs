@@ -3,6 +3,8 @@ import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import react from "@astrojs/react";
 
+import playformCompress from "@playform/compress";
+
 // https://astro.build/config
 export default defineConfig({
   cacheDir: "./cache",
@@ -26,9 +28,7 @@ export default defineConfig({
   devToolbar: {
     enabled: false
   },
-  integrations: [mdx(), sitemap(),
-		react({
-    	include: ['**/react/*']
- 	 })
-	]
+  integrations: [mdx(), sitemap(), react({
+    include: ['**/react/*']
+  }), playformCompress()]
 });
