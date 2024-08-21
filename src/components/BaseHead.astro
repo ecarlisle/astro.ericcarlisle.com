@@ -1,9 +1,10 @@
 ---
 import "../styles/main.scss";
-import { SITE_LOCALE, SOCIAL_PROFILES, THREED_PRINTING_PROFILES, SITE_NAME, TWITTER_SITE} from "../consts";
+import { SITE_LOCALE, SOCIAL_PROFILES, THREED_PRINTING_PROFILES, SITE_NAME, TWITTER_SITE, SITE_LOGO_PATH} from "../consts";
 
 const rootURL = new URL("/", Astro.site);
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const logoURL = new URL(SITE_LOGO_PATH, Astro.site);
 
 const { title, description, publishDate, updateDate, ogimage, ogtype, twimage} = Astro.props;
 
@@ -52,6 +53,13 @@ const PersonSchema = {
 	"url": {rootURL},
 	"sameAs" : profile_urls,
 }
+
+const organizationSchema = {
+  "@context": "https://schema.org/",
+  "@type": "Organization",
+  "url": rootURL,
+  "logo": logoURL
+};
 
 // TODO : Conditionally add Article strcutured data for posts.
 ---
@@ -129,6 +137,7 @@ const PersonSchema = {
 <!-- Structured Data -->
 <script is:inline type="application/ld+json" set:html={JSON.stringify(WebsiteSchema)} />
 <script is:inline type="application/ld+json" set:html={JSON.stringify(PersonSchema)} />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
 
 <style lang="scss"></style>
 

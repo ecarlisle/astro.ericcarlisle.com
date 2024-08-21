@@ -2,6 +2,7 @@ export const SITE_TITLE = "Eric Carlisle : UI, UX Engineer"
 export const SITE_DESCRIPTION = "I am a technologist, innovator, and educator. My strongest areas of expertise are UI Development, UX Strategy, Mentoring, Speaking, and Making.";
 export const SITE_LOCALE = "en_US";
 export const SITE_NAME = "Eric Carlisle : UI, UX Engineer"
+export const SITE_LOGO_PATH = "/images/global/eric-carlisle-logo.png"
 export const TWITTER_SITE = "@eric_carlisle"
 
 export const MAIN_NAVIGATION = [
