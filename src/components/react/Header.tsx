@@ -1,5 +1,5 @@
 import React from "react";
-import { MAIN_NAVIGATION } from "@src/consts";
+import { MAIN_NAVIGATION, SITE_NAME } from "@src/consts";
 
 interface Props {
   path:string,
@@ -9,14 +9,10 @@ const Header: React.FC<Props> = (props:Props) => {
   return (
     <header className="global">
       <nav className="global">
-        <a href="/">
-          <img
-            className="logo responsive"
-            src="/images/global/eric-carlisle-logo.svg"
-            alt="Eric Carlisle : UI, UX Engineer"
-            width="90"
-            height="32"
-          />
+        <a href="/" title={SITE_NAME}>
+					<svg width="90" height="32" viewBox="0 0 90 32">
+          	<use href="#logo-eric-carlisle" />
+          </svg>
         </a>
         <ul>
         {

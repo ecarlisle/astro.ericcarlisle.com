@@ -45,14 +45,33 @@
 }
 
 :root {
-	--color-text: #282828;						/* hsl(0, 0%, 16%) */
-	--brand-color:#0369A1;						/* hsl(201, 96%, 32%) */
-	--color-brand-accent: #38BDF8;		/* hsl(198, 93%, 60%) */
-	--color-neutral: #9ca3af;				/* hsl(218, 11%, 65%) */
-	--color-neutral-accent: #e5e7eb; /* hsl(218, 11%, 65%) */
-	--color-brand-inverse: #a15C03;	/* hsl(34, 96%, 32%) */
-	--color-success:  #19a102;				/* hsl(111, 98%, 32%) */
-	--color-background: #ffffff;			/* hsl(0, 0%, 100%) */
+	color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: light) {
+	:root {
+		--color-text: hsl(0, 0%, 16%);		  					/* #282828 */
+		--color-brand: hsl(201, 96%, 32%); 					/* #0369A1 */
+		--color-brand-accent: hsl(198, 93%, 60%);		/* #38BDF8 */
+		--color-neutral: hsl(218, 11%, 65%);					/* #9ca3af */
+		--color-neutral-accent: hsl(218, 11%, 65%);	/* #e5e7eb */
+		--color-brand-inverse: hsl(34, 96%, 32%);		/* #a15C03 */
+		--color-success: hsl(111, 98%, 32%);					/* #19a102 */
+		--color-background: hsl(0, 0%, 100%);				/* #ffffff */
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-text: hsl(0, 0%, 100%);							/* #ffffff */
+		--color-brand: hsl(198, 93%, 60%);						/* #0369A1 */
+		--color-brand-accent: hsl(201, 96%, 32%);		/* #38BDF8 */
+		--color-neutral: hsl(218, 11%, 65%);					/* #9ca3af */
+		--color-neutral-accent: hsl(218, 11%, 65%);	/* #e5e7eb; */
+		--color-brand-inverse: hsl(34, 96%, 52%);		/* #fa940f */
+		--color-success: hsl(111, 98%, 32%); 				/* #19a102 */
+		--color-background: #282828;									/* hsl(0, 0%, 16%) */
+	}
 }
 
 $breakpoints: (

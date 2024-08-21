@@ -34,7 +34,7 @@ h1, h2, h3, h4 {
 			text-decoration: none;
 		}
 		&:focus {
-			outline: 1px solid var(--brand-color);
+			outline: 1px solid var(--color-brand);
 		}
 	}
 }
@@ -83,15 +83,15 @@ img.responsive {
 }
 
 a {
-	color: var(--brand-color);
+	color: var(--color-brand);
 	&:is(:hover, :focus, .active)  {
-		color: var(--brand-color);
+		color: var(--color-brand);
 		text-decoration: underline var(--color-brand-accent);
 		text-underline-offset: 3px;
 		text-decoration-thickness: 2px;
 	}
 	&:focus  {
-		outline: 1px solid var(--brand-color);
+		outline: 1px solid var(--color-brand);
 	}
 	> img:only-child {
 	  display: block;
@@ -118,7 +118,7 @@ header.global {
 
 footer.global {
 	border-top: solid 1px var(--color-neutral);
-	border-bottom: solid var(--space-3xs) var(--brand-color);
+	border-bottom: solid var(--space-3xs) var(--color-brand);
 	margin: var(--space-s) 0 0 0;
 	padding: var(--space-s-m);
 	display: flex;
@@ -133,7 +133,7 @@ img.logo {
 
 nav.global {
 	border-bottom: solid 1px #bbb;
-	border-top: solid var(--space-3xs) var(--brand-color);
+	border-top: solid var(--space-3xs) var(--color-brand);
 	padding: var(--space-s-m);
 
 	ul {
@@ -150,6 +150,7 @@ nav.global {
 		}
 		li {
 			margin: 0 0 0 var(--space-m);
+			vertical-align: middle;
 			a {
 				font-size: var(--text-size-0);
 			}
@@ -289,28 +290,34 @@ strong {
 }
 
 .profile-image img {
-	border: 2px solid var(--brand-color);
+	border: 2px solid var(--color-brand);
 	border-radius: 50%;
 	margin: 0 0 var(--space-s);
 }
 
 .blogroll {
-	.summary {
-		border-bottom: 1px solid var(--color-neutral);
-		margin: 0 0 var(--space-s);
-		p {
-			margin: 0 0 var(--space-3xs);
+	article {
+		margin: 0 0 var(--space-m);
+		.byline {
+			margin: 0 0 var(--space-2xs);
 		}
-		.tags {
-			text-align: right;
-			color: var(--color-dark-orange);
-			font: 600 var(--text-size--1)/ 1.5 inter, sans-serif;
-			margin: var(--space-s) 0;
-		}
-		@include mq(lg) {
-			display: grid;
-			gap: 1rem;
-			grid-template-columns: 1fr 1fr;
+		.summary {
+			border-bottom: 1px solid var(--color-neutral);
+			margin: 0 0 var(--space-s);
+			p {
+				margin: 0 0 var(--space-3xs);
+			}
+			.tags {
+				text-align: right;
+				color: var(--color-brand-inverse);
+				font: 600 var(--text-size--1)/ 1.5 inter, sans-serif;
+				margin: var(--space-s) 0;
+			}
+			@include mq(lg) {
+				display: grid;
+				gap: 1rem;
+				grid-template-columns: 1fr 1fr;
+			}
 		}
 	}
 }
