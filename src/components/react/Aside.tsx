@@ -6,7 +6,7 @@ const Aside= () => {
       <picture className="profile-image">
         <source srcSet="/images/global/eric-carlisle_512.webp 2x, /images/global/eric-carlisle_512.webp" type="image/webp" />
         <source srcSet="/images/global/eric-carlisle_512.avif 2x, /images/global/eric-carlisle_512.avif" type="image/avif" />
-        <img alt="Eric Carlisle" height="256" loading="lazy" srcSet="/images/global/eric-carlisle_512.jpg 2x, /images/profile/eric-carlisle_512.jpg" width="256" />
+        <img alt="Eric Carlisle" height="256" srcSet="/images/global/eric-carlisle_512.jpg 2x, /images/profile/eric-carlisle_512.jpg" width="256" />
       </picture>
 
       <nav className="social">
