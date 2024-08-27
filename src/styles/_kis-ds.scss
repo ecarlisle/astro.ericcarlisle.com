@@ -38,10 +38,13 @@
 }
 
 :root {
-  --breakpoint-tablet: 25rem, /* 400px */
-  --breakpoint-laptop: 48rem, /* 768px */
-  --breakpoint-desktop: 64rem, /* 1024px */
-  --breakpoint-widest: 80rem; /* 1280px */
+  --breakpoint-tablet: 25rem,		/* 400px */
+  --breakpoint-laptop: 48rem,		/* 768px */
+  --breakpoint-desktop: 64rem,	/* 1024px */
+  --breakpoint-widest: 80rem;		/* 1280px */
+	--border-radius-sm: 0.25rem;	/* 4px */
+	--border-radius-md: 0.5rem;		/* 8px */
+	--border-radius-full: 50%;    /* full rounding */
 }
 
 :root {

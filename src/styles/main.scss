@@ -19,13 +19,28 @@ body {
 	max-width: var(--breakpoint-desktop);
 }
 
+/* maxtain max width on document body */
 .wrapper {
 	max-width: 80rem;
 	margin: 0 auto;
 }
 
-/* Headings */
+/* Skip to navigation, content links */
+.skip-to {
+	position: absolute;
+	left: var(--space-s);
+	top: var(--space-s);
+	& a {
+		padding: var(--space-2xs);
+		&:not(:focus) {
+			clip: rect(0, 0, 0, 0);
+			overflow: hidden;
+			position: absolute;
+		}
+	}
+}
 
+/* Headings */
 h1, h2, h3, h4 {
 	a {
 		color: var(--color-text);

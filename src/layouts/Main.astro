@@ -20,10 +20,14 @@ const { pathname } = Astro.url;
 						twimage={twimage}
 						/>
   <body>
+		<div class="skip-to">
+			<a href="#main-nav">Skip to Navigation</a>
+			<a href="#main-content">Skip to Content</a>
+		</div>
 		<div class="wrapper">
       <Header path={pathname} />
       <div class="main-aside">
-        <main>
+        <main id="main-content">
 					<!-- NOTE: Excluding H1 Header for homepage. -->
 					{ pathname !== "/" &&
 	          <h1>{title}</h1>
