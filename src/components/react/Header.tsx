@@ -8,7 +8,7 @@ interface Props {
 const Header: React.FC<Props> = (props:Props) => {
   return (
     <header className="global">
-      <nav className="global" id="main-nav">
+      <nav className="global" id="main-nav" aria-label="global navigation">
         <a href="/" title={SITE_NAME}>
 					<svg width="90" height="32" viewBox="0 0 90 32">
           	<use href="#logo-eric-carlisle" />
