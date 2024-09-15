@@ -31,6 +31,7 @@ body {
 	left: var(--space-s);
 	top: var(--space-s);
 	& a {
+		background: var(--color-background);
 		padding: var(--space-2xs);
 		&:not(:focus) {
 			clip: rect(0, 0, 0, 0);
