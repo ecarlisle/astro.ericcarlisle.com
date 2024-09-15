@@ -368,8 +368,10 @@ strong {
 	}
 }
 
-p.home-intro {
+h1.home-intro {
+	border-width: 0;
 	font: var(--text-size-3)/ 1.3 inter, sans-serif;
+	padding-left: 0;
 }
 
 lite-youtube {
