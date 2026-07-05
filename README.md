@@ -5,7 +5,6 @@ Personal blog at https://ericcarlisle.com. Built with Astro 7 static site
 generation. Technical deep-dives on web performance, accessibility, React,
 and modern CSS architecture.
 
-
 Stack
 -----
 
