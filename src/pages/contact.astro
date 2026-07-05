@@ -45,7 +45,12 @@ const showTurnstileDevWarning = import.meta.env.DEV && !turnstileSiteKey;
         <input type="hidden" name="ts" value="" />
 
         {turnstileSiteKey ? (
-          <div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
+          <div
+            class="cf-turnstile"
+            data-sitekey={turnstileSiteKey}
+            data-response-field="true"
+            data-response-field-name="cf-turnstile-response"
+          ></div>
         ) : showTurnstileDevWarning ? (
           <p class="callout">
             Development warning: <code>PUBLIC_TURNSTILE_SITE_KEY</code> is not configured, so form verification is unavailable.
