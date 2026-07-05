@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MODEL="flux_2_klein_4b_q6p.ckpt"
+DRAW_THINGS="draw-things-cli"
+PROMPT=""
+NEGATIVE=""
+OUTPUT=""
+WIDTH="1216"
+HEIGHT="640"
+STEPS=""
+SEED=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --model|--low-ram) shift ;;
+    --prompt) PROMPT="$2"; shift 2 ;;
+    --negative-prompt) NEGATIVE="$2"; shift 2 ;;
+    --output) OUTPUT="$2"; shift 2 ;;
+    --width) WIDTH="$2"; shift 2 ;;
+    --height) HEIGHT="$2"; shift 2 ;;
+    --steps) STEPS="$2"; shift 2 ;;
+    --seed) SEED="$2"; shift 2 ;;
+    -h|--help)
+      echo "Usage: $(basename "$0") --prompt TEXT --output PATH [options]"
+      echo "Model: $MODEL via draw-things-cli"
+      exit 0
+      ;;
+    *) echo "Unknown: $1"; exit 1 ;;
+  esac
+done
+
+if [[ -z "$PROMPT" || -z "$OUTPUT" ]]; then
+  echo "Error: --prompt and --output are required" >&2
+  exit 1
+fi
+
+GEN_OUTPUT="$OUTPUT"
+if [[ "$OUTPUT" == *.webp ]]; then
+  GEN_OUTPUT="${OUTPUT%.webp}.png"
+fi
+
+DT_ARGS=(
+  --model "$MODEL"
+  --models-dir "/Volumes/BACKUP/dt"
+  --prompt "$PROMPT"
+  --output "$GEN_OUTPUT"
+  --disable-preview
+)
+
+[[ -n "$WIDTH" ]] && DT_ARGS+=(--width "$WIDTH")
+[[ -n "$HEIGHT" ]] && DT_ARGS+=(--height "$HEIGHT")
+[[ -n "$STEPS" ]] && DT_ARGS+=(--steps "$STEPS")
+[[ -n "$SEED" ]] && DT_ARGS+=(-s "$SEED")
+[[ -n "$NEGATIVE" ]] && DT_ARGS+=(--negative-prompt "$NEGATIVE")
+
+echo "  draw-things-cli generate ..."
+"$DRAW_THINGS" generate "${DT_ARGS[@]}"

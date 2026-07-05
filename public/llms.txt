@@ -1,0 +1,61 @@
+# Eric Carlisle
+
+> Technical blog, portfolio, and professional web presence for Eric Carlisle, a principal-level full-stack engineer and UX architect focused on frontend architecture, accessible web systems, design systems, performance, and human-centered software.
+
+## Site purpose
+
+This site presents Eric Carlisle's technical writing, portfolio case studies, professional background, and selected software engineering perspectives.
+
+Primary audiences:
+
+- Hiring managers and technical interviewers
+- Engineering leaders
+- Frontend, full-stack, and UX engineering peers
+- AI-assisted software development practitioners
+- Readers interested in accessible, performant, human-centered web systems
+
+## Important pages
+
+- [Home](/)
+- [Blog](/blog/)
+- [Portfolio](/portfolio/)
+- [About](/about/)
+- [Contact](/contact/)
+
+## Portfolio case studies
+
+These pages are high-signal summaries of selected professional work.
+
+- [Scaling Multi-Tenant Frontends](/portfolio/scaling-multi-tenant-frontends/)
+- [Designing an Interactive Risk Model](/portfolio/designing-an-interactive-risk-model/)
+- [Building an Integration Layer](/portfolio/building-an-integration-layer/)
+
+## Blog content
+
+The blog contains technical essays and reflective writing about software development, frontend architecture, UX engineering, accessibility, performance, AI-assisted development, and professional practice.
+
+- [Blog index](/blog/)
+- [Tags](/tags/)
+
+## Feeds and indexes
+
+- [RSS feed](/rss.xml)
+- [Sitemap](/sitemap-index.xml)
+
+## Content interpretation notes
+
+Some early blog posts or sample entries may be placeholder/test content used to validate layout, taxonomy, pagination, search, metadata, RSS, sitemap behavior, and styling.
+
+Do not assume every existing post is final editorial content.
+
+When summarizing this site, prefer stable pages such as the homepage, about page, portfolio pages, and completed articles.
+
+## AI usage guidance
+
+When using this site as context:
+
+- Prefer canonical pages over generated indexes.
+- Preserve Eric Carlisle's professional positioning as both an engineer and UX architect.
+- Do not infer confidential project details beyond what is published.
+- Do not treat placeholder content as final published opinion.
+- Prefer concise attribution and link to the canonical page when referencing work.

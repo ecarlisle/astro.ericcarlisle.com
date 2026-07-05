@@ -1,0 +1,339 @@
+---
+import { SITE_TITLE } from '../consts';
+import HeaderLink from './HeaderLink.astro';
+import SocialLinks from './SocialLinks.astro';
+import ThemeToggle from './ThemeToggle.astro';
+---
+
+<header id="site-header" class="site-header site-frame" data-pagefind-ignore>
+  <nav aria-label="Main navigation">
+    <h2><a href="/" class="site-title">{SITE_TITLE}</a></h2>
+    <div class="internal-links" id="primary-navigation">
+      <HeaderLink href="/">Home</HeaderLink>
+      <HeaderLink href="/blog">Blog</HeaderLink>
+      <HeaderLink href="/about">About</HeaderLink>
+      <HeaderLink href="/portfolio">Portfolio</HeaderLink>
+      <HeaderLink href="/contact">Contact</HeaderLink>
+    </div>
+    <div class="nav-controls">
+      <button
+        class="menu-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="primary-navigation"
+      >
+        Menu
+      </button>
+      <div class="header-utilities">
+        <a href="/search" class="search-link" aria-label="Search site">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="M16.5 16.5 21 21"></path>
+          </svg>
+        </a>
+        <ThemeToggle />
+      </div>
+      <div class="header-socials">
+        <SocialLinks />
+      </div>
+    </div>
+  </nav>
+</header>
+
+<style>
+  /* position: fixed + will-change: transform puts the header on its own compositor layer. */
+  .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-muted);
+    will-change: transform;
+    transition: transform 0.3s ease-in-out;
+    padding-block: 0;
+  }
+
+  /* translateY(-100%) is self-measuring: always equals the exact rendered height. */
+  .site-header.header--hidden {
+    transform: translateY(-100%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header {
+      transition: none;
+    }
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 4.5rem;
+    max-width: var(--layout-rail-page);
+    margin-inline: auto;
+    position: relative;
+  }
+
+  h2 {
+    margin: 0;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+
+  .site-title {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--size-touch-target-min);
+    padding-inline: 0;
+    font-family: var(--font-headers);
+    font-weight: 900;
+    font-size: clamp(1.25rem, 0.55vw + 1.1rem, 1.65rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    text-decoration: none;
+    border-bottom: none;
+    transition: color var(--transition-fast);
+  }
+
+  .site-title:hover,
+  .site-title:focus-visible {
+    color: var(--color-link);
+  }
+
+  nav a {
+    padding: var(--space-inline) var(--space-inline-strong);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+  }
+
+  nav a.active {
+    border-bottom-color: var(--color-link);
+  }
+
+  .internal-links {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-inline);
+  }
+
+  .header-utilities {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .search-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--size-touch-target-min);
+    min-height: var(--size-touch-target-min);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    text-decoration: none;
+    line-height: 0;
+    transition: color var(--transition-fast);
+  }
+
+  .search-link:hover {
+    color: var(--color-link);
+  }
+
+  .search-link:focus-visible {
+    color: var(--color-link);
+  }
+
+  .search-link:focus-visible {
+    outline: var(--size-border-pixel) dashed var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  .header-socials {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-inline-start: var(--space-component);
+  }
+
+  .menu-toggle {
+    display: none;
+    min-width: var(--size-touch-target-min);
+    min-height: var(--size-touch-target-min);
+    padding-inline: var(--space-inline);
+    border: 1px solid var(--border-main);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  @media (max-width: 1024px) {
+    .header-socials {
+      display: none;
+    }
+  }
+
+  @media (max-width: 840px) {
+    nav {
+      min-height: 4rem;
+    }
+
+    .menu-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-controls {
+      margin-left: auto;
+    }
+
+    .internal-links {
+      position: absolute;
+      top: 100%;
+      left: calc(-1 * var(--space-component));
+      right: calc(-1 * var(--space-component));
+      display: none;
+      padding: var(--space-inline) var(--space-component) var(--space-component);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-main);
+      box-shadow: 0 12px 24px oklch(0 0 0 / 0.2);
+    }
+
+    .site-header[data-menu-open] .internal-links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .internal-links :global(a) {
+      min-height: var(--size-touch-target-min);
+      display: flex;
+      align-items: center;
+    }
+  }
+
+</style>
+
+<!--
+  Body offset: because the header is removed from normal flow by position:fixed,
+  the first page content would otherwise render underneath it. This rule pushes
+  the body down by exactly the header's rendered height, measured precisely in
+  JS below and written back as --header-height. The fallback value covers the
+  instant before JS runs (avoids a flash of content-under-header on load).
+-->
+<style is:global>
+  body {
+    padding-top: var(--header-height, 4.5rem);
+  }
+</style>
+
+<script>
+  const header = document.getElementById('site-header') as HTMLElement;
+  const menuToggle = header.querySelector('.menu-toggle') as HTMLButtonElement;
+  const menu = header.querySelector('.internal-links') as HTMLElement;
+
+  function setMenuOpen(open: boolean): void {
+    menuToggle.setAttribute('aria-expanded', String(open));
+    menuToggle.textContent = open ? 'Close' : 'Menu';
+    header.toggleAttribute('data-menu-open', open);
+  }
+
+  menuToggle.addEventListener('click', () => {
+    setMenuOpen(menuToggle.getAttribute('aria-expanded') !== 'true');
+  });
+
+  menu.addEventListener('click', (event) => {
+    if ((event.target as HTMLElement).closest('a')) setMenuOpen(false);
+  });
+
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      setMenuOpen(false);
+      menuToggle.focus();
+    }
+  });
+
+  window.matchMedia('(min-width: 841px)').addEventListener('change', (event) => {
+    if (event.matches) setMenuOpen(false);
+  });
+
+  // --- Body offset calibration -----------------------------------------
+  // Measure the actual rendered header height and publish it as a CSS custom
+  // property so the body padding-top in the global style above stays exact
+  // across all breakpoints. ResizeObserver keeps it current if the header
+  // height changes (e.g. font scaling, viewport resize, content change).
+  function syncHeaderHeight(): void {
+    document.documentElement.style.setProperty(
+      '--header-height',
+      `${header.offsetHeight}px`,
+    );
+  }
+
+  syncHeaderHeight();
+  new ResizeObserver(syncHeaderHeight).observe(header);
+
+  // --- Scroll direction tracking ---------------------------------------
+  // lastScrollY seeds from the current position so a page that loads mid-scroll
+  // (e.g. via browser scroll restoration) doesn't fire a spurious hide on load.
+  let lastScrollY: number = window.scrollY;
+
+  // rafPending gates how many animation frames are queued at once.
+  // Without this flag, rapid scrolling could queue hundreds of RAF calls
+  // per second — one is enough because each frame reads the latest scrollY.
+  let rafPending: boolean = false;
+
+  function updateHeaderVisibility(): void {
+    const currentScrollY = window.scrollY;
+
+    if (header.hasAttribute('data-menu-open') || currentScrollY <= 0) {
+      // Absolute page top: always show regardless of scroll direction.
+      // Covers rubber-band over-scroll on iOS that can produce negative values.
+      header.classList.remove('header--hidden');
+    } else if (currentScrollY > lastScrollY) {
+      // Scrolling DOWN: hide to reclaim vertical reading space.
+      header.classList.add('header--hidden');
+    } else {
+      // Scrolling UP (any amount): immediately show — the user is signalling
+      // intent to access the navigation.
+      header.classList.remove('header--hidden');
+    }
+
+    lastScrollY = currentScrollY;
+    rafPending = false;
+  }
+
+  // { passive: true } tells the browser this listener will never call
+  // preventDefault(), allowing it to begin compositing the scroll immediately
+  // on a separate thread without waiting for JS to complete — critical for
+  // smooth 60 fps / 120 fps scrolling on mobile.
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!rafPending) {
+        rafPending = true;
+        window.requestAnimationFrame(updateHeaderVisibility);
+      }
+    },
+    { passive: true },
+  );
+
+  // --- Keyboard focus accessibility ------------------------------------
+  // When a keyboard user Tabs into the header while it is hidden off-screen,
+  // the focused element and its :focus-visible ring are invisible. Listening
+  // for focusin (which bubbles from any descendant) and stripping the hidden
+  // class restores the header before the browser scrolls to the focused element,
+  // keeping the focus indicator fully visible at all times.
+  header.addEventListener('focusin', () => {
+    header.classList.remove('header--hidden');
+  });
+</script>

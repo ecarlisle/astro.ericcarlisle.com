@@ -1,0 +1,119 @@
+---
+import BaseHead from '@components/BaseHead.astro';
+import Footer from '@components/Footer.astro';
+import Header from '@components/Header.astro';
+import { getSortedPosts } from '@lib/blog-utils';
+import { SITE_TITLE } from '../../consts';
+
+const posts = await getSortedPosts();
+
+const tagMap = new Map<string, number>();
+for (const post of posts) {
+  for (const tag of post.data.tags ?? []) {
+    tagMap.set(tag, (tagMap.get(tag) ?? 0) + 1);
+  }
+}
+
+const allTags = [...tagMap.entries()].sort(([a], [b]) => a.localeCompare(b));
+
+const title = 'Tags';
+const schemaPosts = posts.map((p) => ({
+  title: p.data.title,
+  url: `/blog/${p.id}/`,
+}));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={`${title} — ${SITE_TITLE}`}
+      description={`Browse all ${allTags.length} topic tags across ${posts.length} posts.`}
+      pageType="collection"
+      collectionType="tags-index"
+      posts={schemaPosts}
+    />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <Header />
+    <main id="main-content" tabindex="-1" data-pagefind-body>
+      <section class="tags-index">
+        <header class="collection-header">
+          <h1>{title}</h1>
+          <p class="collection-description">
+            {allTags.length} tag{allTags.length !== 1 ? 's' : ''} across {posts.length} post{posts.length !== 1 ? 's' : ''}
+          </p>
+        </header>
+
+        {allTags.length > 0 ? (
+          <ul class="tags-index-list">
+            {allTags.map(([tag, count]) => (
+              <li>
+                <a href={`/tags/${tag}/`} class="tag-card">
+                  <span class="tag-card-name">{tag}</span>
+                  <span class="tag-card-count">{count} post{count !== 1 ? 's' : ''}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="callout">No tags yet. Check back once posts are published.</p>
+        )}
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  .tags-index {
+    margin-inline: auto;
+  }
+
+  .tags-index-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-component);
+  }
+
+  .tag-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-component);
+    background: var(--bg-surface);
+    border: var(--size-border-pixel) solid var(--border-muted);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition:
+      border-color var(--transition-fast),
+      transform var(--transition-fast),
+      box-shadow var(--transition-fast);
+    min-height: var(--size-touch-target-min);
+    justify-content: center;
+  }
+
+  .tag-card:hover {
+    border-color: var(--color-action);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px oklch(0 0 0 / 0.12);
+  }
+
+  .tag-card-name {
+    font-family: var(--font-headers);
+    font-weight: 600;
+    font-size: var(--type-size-h4);
+    color: var(--color-action);
+  }
+
+  .tag-card-count {
+    font-family: var(--font-mono);
+    font-size: var(--type-size-small);
+    color: var(--text-muted);
+  }
+</style>

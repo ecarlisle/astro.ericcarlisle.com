@@ -1,0 +1,493 @@
+@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource-variable/plus-jakarta-sans/wght.css";
+@import "@fontsource-variable/fira-code/wght.css";
+@import "./components.css";
+@import "./pagefind.css";
+
+:root {
+  /* Fonts */
+  --font-copy: "Inter Variable", system-ui, sans-serif;
+  --font-headers: "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-mono: "Fira Code Variable", ui-monospace, monospace;
+
+  /* Type sizes */
+  --type-size-body: clamp(1rem, calc(0.3vw + 0.94rem), 1.125rem); /* 16px -> 18px */
+  --type-size-small: clamp(0.8125rem, calc(0.2vw + 0.77rem), 0.9375rem); /* 13px -> 15px */
+  --type-size-h1: clamp(2rem, calc(3.64vw + 1.27rem), 4rem); /* 32px -> 64px */
+  --type-size-h2: clamp(1.625rem, calc(2.13vw + 1.2rem), 2.8rem); /* 26px -> 45px */
+  --type-size-h3: clamp(1.375rem, calc(1.14vw + 1.15rem), 2rem); /* 22px -> 32px */
+  --type-size-h4: clamp(1.125rem, calc(0.57vw + 1.07rem), 1.5rem); /* 18px -> 24px */
+  --type-size-h5: clamp(1rem, calc(0.28vw + 0.94rem), 1.1875rem); /* 16px -> 19px */
+  --type-size-base: var(--type-size-body);
+  --type-size-large: clamp(1.125rem, calc(0.35vw + 1.05rem), 1.375rem);
+  --type-size-card-title: clamp(1.375rem, calc(0.7vw + 1.2rem), 2rem);
+  --type-size-featured-card-title: clamp(1.75rem, calc(1.25vw + 1.45rem), 2.75rem);
+  --type-size-blockquote: 1.1em;
+
+  /* Line heights */
+  --line-height-body: 1.65;
+  --line-height-h1: 1.3;
+  --line-height-h2: 1.35;
+  --line-height-h3: 1.45;
+  --line-height-h4: 1.55;
+  --line-height-h5: 1.6;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* ========================================================================
+     Blue Relay — blue-led technical palette
+     ======================================================================== */
+  --bg-main: #0b1020;
+  --bg-surface: #111a2e;
+  --bg-surface-elevated: #18243a;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  --brand-primary: #5ea8ff;
+  --brand-accent: #38d9a9;
+  --brand-highlight: #ffb86b;
+
+  --border-main: #26344d;
+  --border-muted: #1a2638;
+  --border-control: #52627a;
+
+  /* Fluid vertical rhythm: 26.4px -> 33px. */
+  --rhythm: clamp(1.65rem, calc(0.75vw + 1.5rem), 2.0625rem);
+
+  /* Spacing — clean multiples of the baseline rhythm */
+  --space-xs: calc(var(--rhythm) * 0.5);
+  --space-sm: calc(var(--rhythm) * 0.75);
+  --space-md: calc(var(--rhythm) * 1);
+  --space-lg: calc(var(--rhythm) * 1.5);
+  --space-xl: calc(var(--rhythm) * 2);
+
+  /* Semantic spacing */
+  --space-inline: var(--space-xs);
+  --space-inline-strong: var(--space-sm);
+  --space-component: var(--space-md);
+  --space-component-lg: var(--space-lg);
+  --space-section: calc(var(--rhythm) * 2.5);
+  --space-layout: calc(var(--rhythm) * 3);
+
+  /* Semantic color roles */
+  --color-link: var(--brand-primary);
+  --color-link-hover: var(--brand-accent);
+  --color-action: var(--brand-primary);
+  --color-action-hover: #3d8ee0;
+  /* Focus-visible uses primary blue instead of brand-accent teal.
+     The teal --brand-accent is preserved for --color-link-hover and
+     --color-success where subtle green is intentional. */
+  --color-focus: var(--color-link);
+  --color-success: var(--brand-accent);
+
+  /* Semantic text roles */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  /* Semantic card roles */
+  --color-card-bg: var(--bg-surface);
+  --color-card-bg-elevated: var(--bg-surface-elevated);
+  --color-card-border: var(--border-main);
+
+  --focus-outline-width: var(--size-border-pixel);
+  --focus-outline-style: dashed;
+  --focus-outline-color: var(--color-focus);
+  --focus-outline-offset: 4px;
+
+  /* Transition & motion tokens */
+  --transition-fast: 0.15s ease-out;
+  --transition-normal: 0.25s ease-out;
+  --transition-slow: 0.4s ease-out;
+
+  /* Structural sizing tokens */
+  --size-border-pixel: 2px;
+  --size-border-thick: 4px;
+  --size-touch-target-min: 44px;
+
+  /* Layout rails */
+  --layout-rail-prose: 68ch;
+  --layout-rail-page: 72rem;
+  --layout-rail-wide: 80rem;
+
+  /* Breakpoints */
+  --bp-mobile: 720px;
+}
+
+/* ========================================================================
+   Light theme: explicit user toggle.
+   ======================================================================== */
+[data-theme="light"] {
+  --bg-main: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #e8eef7;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #475569;
+
+  --brand-primary: #005fcc;
+  --brand-accent: #007a5a;
+  --brand-highlight: #a14b00;
+  --color-action-hover: #004799;
+
+  --border-main: #cbd5e1;
+  --border-muted: #e2e8f0;
+  --border-control: #64748b;
+  color-scheme: light;
+}
+
+/* --- Follow system light preference when no manual override  --- */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg-main: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-surface-elevated: #e8eef7;
+
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #475569;
+
+    --brand-primary: #005fcc;
+    --brand-accent: #007a5a;
+    --brand-highlight: #a14b00;
+    --color-action-hover: #004799;
+
+    --border-main: #cbd5e1;
+    --border-muted: #e2e8f0;
+    --border-control: #64748b;
+    color-scheme: light;
+  }
+}
+
+/* --- Explicit dark override (wins over system light) -- */
+[data-theme="dark"] {
+  --bg-main: #0b1020;
+  --bg-surface: #111a2e;
+  --bg-surface-elevated: #18243a;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  --brand-primary: #5ea8ff;
+  --brand-accent: #38d9a9;
+  --brand-highlight: #ffb86b;
+  --color-action-hover: #3d8ee0;
+
+  --border-main: #26344d;
+  --border-muted: #1a2638;
+  --border-control: #52627a;
+  color-scheme: dark;
+}
+
+html {
+  box-sizing: border-box;
+  min-height: 100%;
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+/* =========================
+   PAGE STRUCTURE
+   ========================= */
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-copy);
+  font-size: var(--type-size-body);
+  line-height: var(--line-height-body);
+  text-align: left;
+  overflow-wrap: break-word;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-frame {
+  padding: var(--space-component);
+}
+
+/* ── Layout rail utilities ── */
+.rail {
+  width: min(100%, var(--layout-rail-page));
+  margin-inline: auto;
+}
+
+.rail--prose {
+  max-width: var(--layout-rail-prose);
+}
+
+.rail--page {
+  max-width: var(--layout-rail-page);
+}
+
+.rail--wide {
+  max-width: var(--layout-rail-wide);
+}
+
+main {
+  max-width: var(--layout-rail-page);
+  margin-inline: auto;
+  padding: var(--space-layout) var(--space-component);
+  flex: 1;
+}
+
+:focus-visible {
+  outline: var(--size-border-pixel) dashed var(--color-focus);
+  outline-offset: 4px;
+}
+
+::selection {
+  background: var(--brand-primary);
+  color: var(--bg-main);
+}
+
+/* =========================
+   TYPOGRAPHY
+   ========================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-headers);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--type-size-h1);
+  line-height: var(--line-height-h1);
+  margin-bottom: calc(var(--rhythm) * 1);
+}
+h2 {
+  font-size: var(--type-size-h2);
+  line-height: var(--line-height-h2);
+  margin-top: calc(var(--rhythm) * 2);
+  margin-bottom: calc(var(--rhythm) * 1);
+}
+h3 {
+  font-size: var(--type-size-h3);
+  line-height: var(--line-height-h3);
+  margin-top: calc(var(--rhythm) * 1.5);
+  margin-bottom: calc(var(--rhythm) * 0.5);
+}
+h4 {
+  font-size: var(--type-size-h4);
+  line-height: var(--line-height-h4);
+  margin-top: calc(var(--rhythm) * 1.5);
+  margin-bottom: calc(var(--rhythm) * 0.5);
+}
+h5 {
+  font-size: var(--type-size-h5);
+  line-height: var(--line-height-h5);
+  margin-top: calc(var(--rhythm) * 1);
+  margin-bottom: calc(var(--rhythm) * 0.5);
+}
+
+strong,
+b {
+  font-weight: 700;
+}
+em,
+i {
+  font-style: italic;
+}
+
+a {
+  color: var(--color-link);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-link-hover);
+}
+
+.prose {
+  margin-inline: auto;
+}
+
+p {
+  margin-bottom: var(--space-component);
+}
+
+.prose p,
+.prose li {
+  max-width: var(--layout-rail-prose);
+}
+
+.prose p {
+  line-height: var(--line-height-body);
+  text-wrap: pretty;
+}
+
+.prose h2 {
+  margin-top: var(--space-xl);
+  scroll-margin-top: calc(var(--header-height, 4.5rem) + var(--space-component));
+}
+
+.prose h3 {
+  margin-top: var(--space-lg);
+  scroll-margin-top: calc(var(--header-height, 4.5rem) + var(--space-component));
+}
+
+code {
+  padding: 0.2em 0.4em;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+}
+
+pre {
+  margin-bottom: var(--space-component);
+  padding: var(--space-component);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-main);
+  overflow-x: auto;
+}
+
+div.expressive-code {
+  margin-bottom: var(--space-component);
+}
+
+blockquote {
+  border-left: 4px solid var(--color-link);
+  padding: 0 var(--space-component);
+  margin: var(--space-section) 0;
+  font-size: var(--type-size-blockquote);
+  color: var(--text-secondary);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border-main);
+}
+
+@media (max-width: 720px) {
+  main {
+    padding: var(--space-component);
+  }
+}
+
+/* Skip-link */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--space-component);
+  z-index: 9999;
+  padding: var(--space-inline) var(--space-component);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: var(--size-border-pixel) solid var(--color-focus);
+  font-weight: 700;
+  text-decoration: none;
+  transition: top var(--transition-normal);
+}
+
+.skip-link:focus {
+  top: var(--space-component);
+}
+
+.sr-only {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  position: absolute !important;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* =========================
+   READING PROGRESS BAR
+   ========================= */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 101;
+  height: 3px;
+  background: var(--color-link);
+  width: 0%;
+  pointer-events: none;
+  transition: width 50ms linear;
+}
+
+/* =========================
+   CARD ANIMATIONS
+   ========================= */
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-enter {
+  animation: card-enter 0.4s ease-out both;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .card-enter {
+      animation: card-enter 0.6s ease-out both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 25%;
+    }
+  }
+}

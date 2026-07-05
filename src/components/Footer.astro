@@ -1,0 +1,31 @@
+---
+import SocialLinks from './SocialLinks.astro';
+
+const today = new Date();
+---
+
+<footer class="site-frame" data-pagefind-ignore>
+		&copy; {today.getFullYear()} Eric Carlisle. All rights reserved.
+		<div class="social-links">
+			<SocialLinks />
+		</div>
+</footer>
+<style>
+footer {
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* social links layout only */
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-inline);
+  margin-top: var(--space-component);
+}
+
+.social-links a {
+  text-decoration: none;
+  color: inherit;
+}
+</style>

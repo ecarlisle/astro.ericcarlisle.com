@@ -1,0 +1,162 @@
+---
+import Layout from '../layouts/BlogPost.astro';
+
+const sent = Astro.url.searchParams.get('sent') === '1';
+---
+
+<Layout pageType="contact" title="Contact" description="Get in touch with the blog author.">
+  {sent ? (
+    <p class="contact-success" role="status">Your message has been sent! Thank you for reaching out.</p>
+  ) : (
+    <div class="prose contact-section">
+      <p>Have a question, suggestion, or just want to say hi? Fill out the form below and I&rsquo;ll get back to you as soon as possible.</p>
+      <form action="/api/contact" method="POST" id="contact-form" class="contact-form">
+        <label>
+          <span>Name</span>
+          <input type="text" name="name" required autocomplete="given-name" />
+        </label>
+        <label>
+          <span>Email</span>
+          <input type="email" name="email" required autocomplete="email" />
+        </label>
+        <label>
+          <span>Subject</span>
+          <input type="text" name="subject" required autocomplete="off" />
+        </label>
+        <label>
+          <span>Message</span>
+          <textarea name="message" rows="6" required autocomplete="off"></textarea>
+        </label>
+
+        <div class="honeypot" aria-hidden="true">
+          <label for="botField">Leave this empty</label>
+          <input id="botField" type="text" name="botField" autocomplete="off" tabindex="-1" />
+        </div>
+
+        <input type="hidden" name="ts" value="" />
+
+        <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY}></div>
+
+        <button type="submit" class="button contact-submit">Send Message</button>
+
+        <p class="contact-error" id="contact-error" role="alert" hidden></p>
+      </form>
+
+      <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+      <script is:inline type="module">
+        const tsInput = document.querySelector('input[name="ts"]');
+        if (tsInput) tsInput.value = Date.now().toString();
+
+        const form = document.getElementById('contact-form');
+        const submitBtn = form?.querySelector('.contact-submit');
+        const errorEl = document.getElementById('contact-error');
+
+        if (form && submitBtn) {
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (submitBtn.disabled) return;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending\u2026';
+            if (errorEl) errorEl.hidden = true;
+
+            try {
+              const formData = new FormData(form);
+              const resp = await fetch(import.meta.env.PUBLIC_CONTACT_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(Object.fromEntries(formData)),
+              });
+              const data = await resp.json();
+              if (resp.ok && data.ok) {
+                window.location.href = '/contact?sent=1';
+              } else {
+                throw new Error(data.error || 'Failed to send message');
+              }
+            } catch (err) {
+              if (errorEl) {
+                errorEl.textContent = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+                errorEl.hidden = false;
+              }
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Send Message';
+            }
+          });
+        }
+      </script>
+    </div>
+  )}
+</Layout>
+
+<style>
+  .contact-section {
+    max-width: var(--layout-rail-prose);
+    margin: 0 auto;
+  }
+
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-component);
+  }
+
+  .contact-form label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-inline);
+    font-family: var(--font-copy);
+    font-size: var(--type-size-body);
+    color: var(--text-primary);
+  }
+
+  .contact-form input,
+  .contact-form textarea {
+    padding: var(--space-inline) var(--space-sm);
+    font-family: var(--font-copy);
+    font-size: var(--type-size-body);
+    color: var(--text-primary);
+    background: var(--bg-surface);
+    border: var(--size-border-pixel) solid var(--border-control);
+    border-radius: var(--radius-sm);
+    transition: border-color var(--transition-fast);
+  }
+
+  .contact-form input:focus,
+  .contact-form textarea:focus {
+    outline: none;
+    border-color: var(--color-action);
+    box-shadow: 0 0 0 1px var(--color-action);
+  }
+
+  .contact-form .honeypot {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+  }
+
+  .contact-submit {
+    align-self: flex-start;
+    min-width: 160px;
+    min-height: var(--size-touch-target-min);
+  }
+
+  .contact-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .contact-error {
+    font-size: var(--type-size-small);
+    color: var(--color-link);
+    margin: 0;
+  }
+
+  .contact-success {
+    font-size: var(--type-size-large);
+    margin-top: var(--space-section);
+    text-align: center;
+    color: var(--color-success);
+  }
+</style>

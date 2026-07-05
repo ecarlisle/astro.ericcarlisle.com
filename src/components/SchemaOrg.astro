@@ -1,0 +1,232 @@
+---
+import {
+  AUTHOR_AVATAR,
+  AUTHOR_BLUESKY,
+  AUTHOR_GITHUB,
+  AUTHOR_JOB_TITLE,
+  AUTHOR_LINKEDIN,
+  AUTHOR_MASTODON,
+  AUTHOR_NAME,
+  AUTHOR_ORG,
+  AUTHOR_WEBSITE,
+} from '../consts';
+
+type PostItem = {
+  title: string;
+  url: string;
+};
+
+type Props = {
+  type: 'homepage' | 'about' | 'contact' | 'portfolio' | 'article' | 'collection' | 'not-found';
+  title: string;
+  description: string;
+  url: string;
+  image: string;
+  collectionType?: 'main-feed' | 'tag-filter' | 'tags-index';
+  tagName?: string;
+  posts?: PostItem[];
+  pubDate?: Date;
+  updatedDate?: Date;
+  tags?: string[];
+  wordCount?: number;
+};
+
+const {
+  type,
+  title,
+  description,
+  url,
+  image,
+  collectionType = 'main-feed',
+  tagName,
+  posts = [],
+  pubDate,
+  updatedDate,
+  tags,
+  wordCount,
+} = Astro.props;
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? 'https://ericcarlisle.com';
+const pageUrl = url.replace(/\/$/, '');
+
+const personEntity = {
+  '@type': 'Person',
+  '@id': `${siteUrl}/#person`,
+  name: AUTHOR_NAME,
+  url: siteUrl,
+  image: {
+    '@type': 'ImageObject',
+    '@id': `${siteUrl}/#personImage`,
+    url: `${siteUrl}${AUTHOR_AVATAR}`,
+  },
+  sameAs: [AUTHOR_WEBSITE, AUTHOR_GITHUB, AUTHOR_LINKEDIN, AUTHOR_BLUESKY, AUTHOR_MASTODON],
+  jobTitle: AUTHOR_JOB_TITLE,
+  worksFor: {
+    '@type': 'Organization',
+    name: AUTHOR_ORG,
+  },
+};
+
+const websiteEntity = {
+  '@type': 'WebSite',
+  '@id': `${siteUrl}/#website`,
+  url: siteUrl,
+  name: AUTHOR_NAME,
+  publisher: { '@id': `${siteUrl}/#person` },
+};
+
+const graphArray: object[] = [personEntity, websiteEntity];
+
+switch (type) {
+  case 'homepage':
+  case 'collection': {
+    const collectionPageEntity: Record<string, unknown> = {
+      '@type': 'CollectionPage',
+      '@id': `${pageUrl}/#webpage`,
+      url,
+      name:
+        type === 'homepage'
+          ? title
+          : collectionType === 'tag-filter'
+            ? `Articles tagged with "${tagName}"`
+            : title,
+      description,
+      isPartOf: { '@id': `${siteUrl}/#website` },
+    };
+
+    if (collectionType === 'tag-filter' && tagName) {
+      collectionPageEntity.breadcrumb = {
+        '@type': 'BreadcrumbList',
+        '@id': `${pageUrl}/#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+          { '@type': 'ListItem', position: 2, name: 'Tags', item: `${siteUrl}/tags` },
+          { '@type': 'ListItem', position: 3, name: tagName, item: url },
+        ],
+      };
+    } else if (collectionType === 'tags-index') {
+      collectionPageEntity.breadcrumb = {
+        '@type': 'BreadcrumbList',
+        '@id': `${pageUrl}/#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+          { '@type': 'ListItem', position: 2, name: 'Tags', item: `${siteUrl}/tags` },
+        ],
+      };
+    } else if (type === 'collection' && collectionType === 'main-feed') {
+      collectionPageEntity.breadcrumb = {
+        '@type': 'BreadcrumbList',
+        '@id': `${pageUrl}/#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: url },
+        ],
+      };
+    }
+
+    if (posts.length > 0) {
+      collectionPageEntity.mainEntity = {
+        '@type': 'ItemList',
+        numberOfItems: posts.length,
+        itemListElement: posts.map((post, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: post.title,
+          url: post.url.startsWith('http') ? post.url : `${siteUrl}${post.url}`,
+        })),
+      };
+    }
+
+    graphArray.push(collectionPageEntity);
+    break;
+  }
+
+  case 'article': {
+    const articleBreadcrumb = {
+      '@type': 'BreadcrumbList',
+      '@id': `${pageUrl}/#breadcrumb`,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+        { '@type': 'ListItem', position: 2, name: 'Blog', item: `${siteUrl}/blog` },
+        { '@type': 'ListItem', position: 3, name: title, item: url },
+      ],
+    };
+
+    graphArray.push(
+      {
+        '@type': 'BlogPosting',
+        '@id': `${pageUrl}/#article`,
+        mainEntityOfPage: url,
+        headline: title,
+        description,
+        datePublished: pubDate ? pubDate.toISOString() : new Date().toISOString(),
+        ...(updatedDate && { dateModified: updatedDate.toISOString() }),
+        ...(tags && tags.length > 0 && { articleSection: tags.join(', ') }),
+        ...(wordCount && { wordCount }),
+        ...(wordCount && { timeRequired: `PT${Math.ceil(wordCount / 200)}M` }),
+        author: { '@id': `${siteUrl}/#person` },
+        publisher: { '@id': `${siteUrl}/#person` },
+        image: {
+          '@type': 'ImageObject',
+          '@id': `${pageUrl}/#primaryimage`,
+          url: image.startsWith('http') ? image : `${siteUrl}${image}`,
+          width: 1200,
+          height: 630,
+        },
+        inLanguage: 'en-US',
+      },
+      articleBreadcrumb,
+    );
+    break;
+  }
+
+  case 'about':
+  case 'contact':
+    graphArray.push({
+      '@type': type === 'about' ? 'ProfilePage' : 'ContactPage',
+      '@id': `${pageUrl}/#webpage`,
+      url,
+      name: title,
+      description,
+      mainEntity: { '@id': `${siteUrl}/#person` },
+    });
+    break;
+
+  case 'portfolio':
+    graphArray.push({
+      '@type': 'WebPage',
+      '@id': `${pageUrl}/#webpage`,
+      url,
+      name: title,
+      description,
+      mainEntity: {
+        '@type': 'CreativeWork',
+        name: title,
+        description,
+        url,
+        author: { '@id': `${siteUrl}/#person` },
+        creator: { '@id': `${siteUrl}/#person` },
+        inLanguage: 'en-US',
+        about: [
+          'Frontend engineering',
+          'UX architecture',
+          'Design systems',
+          'Web performance',
+          'Accessibility',
+          'Technical leadership',
+        ].map((topic) => ({ '@type': 'Thing', name: topic })),
+      },
+    });
+    break;
+
+  case 'not-found':
+    break;
+}
+
+const schemaGraph = {
+  '@context': 'https://schema.org',
+  '@graph': graphArray,
+};
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(schemaGraph)} />

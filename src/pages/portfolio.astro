@@ -1,0 +1,429 @@
+---
+import Layout from '../layouts/BlogPost.astro';
+---
+
+<Layout
+  title="Portfolio"
+  description="Selected projects and work by Principal Full-Stack Engineer Eric Carlisle."
+  pageType="portfolio"
+>
+  <header class="portfolio-hero">
+    <p class="lede">
+      I design and build enterprise software systems that turn complex product,
+      data, and platform problems into maintainable user experiences.
+    </p>
+    <p>
+      My work spans healthcare, digital media, retail commerce, and platform engineering, with a focus on frontend architecture, UX engineering, integration layers, performance, and accessibility.
+    </p>
+    <p class="portfolio-note">
+      Many projects were delivered inside enterprise environments where source code and internal systems cannot be publicly shared. These case studies focus on architecture, constraints, product decisions, and outcomes.
+    </p>
+  </header>
+
+  <section id="case-studies" class="case-studies">
+    <h2>Selected Case Studies</h2>
+
+    <article class="case-study">
+      <div class="case-study-overview">
+        <h3>Scaling Multi-Tenant Frontend Systems</h3>
+        <p class="meta">
+          <strong>Principal Software Engineer</strong>
+          Arc XP &middot; Digital Media / Publishing Platform &middot; 2018-2022
+        </p>
+        <p>
+          I worked with the Arc XP team to architect frontend standards for a multi-tenant enterprise CMS used by news publishers. We built a token-based design system customers could adapt to their own brands, along with responsive components for high-performance, accessible, SEO-friendly news sites. The work also included media components for responsive images and video playback.
+        </p>
+        <p>
+          I also helped migrate major publishers onto Arc XP, including the Los Angeles Times, Atlanta Journal-Constitution, Chicago Sun-Times, Gray Media, Le Parisien, El País, and Infobae. The work required a mix of client consulting, developer training, and frontend implementation to preserve each publisher’s brand while integrating with legacy CMS, data, vendor, and editorial workflow systems.
+        </p>
+        <div class="repo-links">
+          <h4 class="repo-links-label">Public repositories</h4>
+          <ul class="repo-list">
+            <li class="repo-item">
+              <a href="https://github.com/wpmedia/arc-themes-blocks" target="_blank" rel="noopener noreferrer" class="repo-link">wpmedia/arc-themes-blocks</a>
+              <span class="repo-context">Arc XP &middot; Arc Themes Blocks</span>
+            </li>
+            <li class="repo-item">
+              <a href="https://github.com/wpmedia/arc-themes-components" target="_blank" rel="noopener noreferrer" class="repo-link">wpmedia/arc-themes-components</a>
+              <span class="repo-context">Arc XP &middot; Arc Themes Components</span>
+            </li>
+            <li class="repo-item">
+              <a href="https://github.com/wpmedia/engine-theme-sdk" target="_blank" rel="noopener noreferrer" class="repo-link">wpmedia/engine-theme-sdk</a>
+              <span class="repo-context">Arc XP &middot; Engine Theme SDK</span>
+            </li>
+            <li class="repo-item">
+              <a href="https://github.com/wpmedia/news-theme-css" target="_blank" rel="noopener noreferrer" class="repo-link">wpmedia/news-theme-css</a>
+              <span class="repo-context">Arc XP &middot; News Theme CSS</span>
+            </li>
+
+            <li class="repo-item">
+              <a href="https://github.com/washingtonpost/arcads" target="_blank" rel="noopener noreferrer" class="repo-link">washingtonpost/arcads</a>
+              <span class="repo-context">Washington Post &middot; Arc Ads</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="case-study-details">
+        <div>
+          <h4>Focus areas</h4>
+          <div class="tags">
+            <span class="tag">Frontend Architecture</span>
+            <span class="tag">Design Systems</span>
+            <span class="tag">Performance</span>
+            <span class="tag">SEO</span>
+            <span class="tag">Accessibility</span>
+            <span class="tag">CMS Migration</span>
+            <span class="tag">Client Onboarding</span>
+          </div>
+        </div>
+        <div>
+          <h4>Highlights</h4>
+          <ul>
+            <li>Architected reusable frontend standards for a multi-tenant publishing CMS</li>
+            <li>Built brand-customizable design tokens and responsive news components</li>
+            <li>Supported major publisher migrations from legacy CMS and workflow systems</li>
+            <li>Delivered client consulting, developer training, and branded site implementations</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="case-study">
+      <div class="case-study-overview">
+        <h3>Reengineering Enterprise Commerce Performance</h3>
+        <p class="meta">
+          <strong>Senior UX Engineer</strong>
+          Under Armour &middot; Retail / Digital Commerce &middot; 2011-2013
+        </p>
+        <p>
+          I worked on Under Armour's ecommerce UX engineering team, helping maintain and reengineer a custom-built commerce platform rather than a packaged storefront system. My work spanned frontend architecture, UI implementation, performance optimization, accessibility, SEO, and responsive experiences across product pages, category pages, cart and checkout, campaign pages, navigation, search, and content-driven areas of the site.
+        </p>
+        <p>
+          I also supported data-informed UX decisions through A/B and multivariate testing, prototyping, QA collaboration, and integrations with third-party commerce services for marketplaces, reviews, ratings, analytics, and merchandising workflows. During the broader platform reengineering effort, I spearheaded UI optimization patterns and responsive implementation approaches that improved maintainability, performance, accessibility, and customer experience across a high-traffic retail environment.
+        </p>
+      </div>
+      <div class="case-study-details">
+        <div>
+          <h4>Focus areas</h4>
+          <div class="tags">
+            <span class="tag">Commerce UX Engineering</span>
+            <span class="tag">Frontend Architecture</span>
+            <span class="tag">Performance</span>
+            <span class="tag">SEO</span>
+            <span class="tag">Accessibility</span>
+            <span class="tag">A/B Testing</span>
+            <span class="tag">Responsive Design</span>
+          </div>
+        </div>
+        <div>
+          <h4>Highlights</h4>
+          <ul>
+            <li>Spearheaded UI optimization patterns for a custom ecommerce platform</li>
+            <li>Implemented responsive commerce experiences across core shopping flows</li>
+            <li>Supported data-informed UX decisions through A/B and multivariate testing</li>
+            <li>Integrated third-party commerce services across marketplace, review, analytics, and merchandising workflows</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="case-study">
+      <div class="case-study-overview">
+        <h3>Building Integration Layers for Product Teams</h3>
+        <p class="meta">
+          <strong>Full Stack Engineer</strong>
+          Blue Cross NC &middot; Healthcare &middot; 2024-2025
+        </p>
+        <p>
+          I built integration-layer architecture for Blue Cross NC healthcare
+          experiences spanning provider tools, internal admin, enrollment,
+          claims, customer service, and care navigation. The work centered on a
+          GraphQL gateway that aggregated upstream APIs, normalized inconsistent
+          data shapes, handled auth/context, caching, feature-flag routing, and
+          error handling, and gave frontend teams a more stable contract for
+          product delivery.
+        </p>
+        <p>
+          I also built Vue components, Web Components, GraphQL schemas and
+          resolvers, API contracts, integration services, testing patterns, and
+          controlled release workflows. This reduced frontend coupling to fragile
+          upstream systems, improved delivery consistency, and supported safer
+          releases in a healthcare environment with compliance, accessibility,
+          legacy-system, and production-risk constraints.
+        </p>
+      </div>
+      <div class="case-study-details">
+        <div>
+          <h4>Focus areas</h4>
+          <div class="tags">
+            <span class="tag">GraphQL</span>
+            <span class="tag">Integration Architecture</span>
+            <span class="tag">API Aggregation</span>
+            <span class="tag">Feature Flags</span>
+            <span class="tag">Vue</span>
+            <span class="tag">Web Components</span>
+            <span class="tag">Controlled Releases</span>
+          </div>
+        </div>
+        <div>
+          <h4>Highlights</h4>
+          <ul>
+            <li>Built a GraphQL gateway to aggregate APIs and normalize inconsistent healthcare data</li>
+            <li>Created stable API contracts that reduced frontend coupling to upstream services</li>
+            <li>Implemented feature-flag routing, error handling, caching, and controlled release patterns</li>
+            <li>Built reusable Vue and Web Component experiences for cross-framework product teams</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="case-study">
+      <div class="case-study-overview">
+        <h3>Designing Interactive Decision Experiences</h3>
+        <p class="meta">
+          <strong>Frontend Engineer / UX Architect</strong>
+          Aspida &middot; Financial Services / Insurance &middot; 2025-2026
+        </p>
+        <p>
+          I built a lifespan estimator for Aspida that translated actuarial inputs into a guided, approachable experience for retirement-planning conversations. The React application used a Context-based state machine to manage branching questions, user selections, progress, visualization states, animation states, and lifespan estimate logic.
+        </p>
+        <p>
+          The work balanced actuarial rigor with a lighter presentation, combining mortality data, hazard ratios, life expectancy ranges, and assumptions with responsive UI, data visualization, accessibility, and Rive-powered mascot animations. I collaborated with actuaries, executives, product, design, marketing, engineering, and compliance teams to make a difficult topic more engaging, understandable, and useful.
+        </p>
+      </div>
+      <div class="case-study-details">
+        <div>
+          <h4>Focus areas</h4>
+          <div class="tags">
+            <span class="tag">React</span>
+            <span class="tag">State Machines</span>
+            <span class="tag">Data Visualization</span>
+            <span class="tag">Interaction Design</span>
+            <span class="tag">Accessibility</span>
+            <span class="tag">Rive Animation</span>
+            <span class="tag">Actuarial Data</span>
+          </div>
+        </div>
+        <div>
+          <h4>Highlights</h4>
+          <ul>
+            <li>Built a state machine for branching questions, progress, visualization, and estimate logic</li>
+            <li>Translated actuarial data into an approachable retirement-planning experience</li>
+            <li>Integrated Rive-powered mascot animations as feedback and engagement cues</li>
+            <li>Aligned actuarial, product, design, engineering, marketing, and compliance stakeholders</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="work-method">
+    <h2>How I work</h2>
+    <p>
+      The common thread across these engagements is not a specific framework or
+      language. I focus on identifying constraints, simplifying complexity,
+      aligning stakeholders, and creating systems that help teams move faster
+      while improving outcomes for users.
+    </p>
+    <p>
+      If any of these case studies connect with the problems your team is
+      solving, I'd welcome a <a href="/contact">conversation</a>.
+    </p>
+  </section>
+</Layout>
+
+<style>
+  /* ── Portfolio hero / intro ── */
+  .portfolio-hero {
+    margin-bottom: var(--space-component-lg);
+    padding-bottom: var(--space-component);
+    border-bottom: var(--size-border-pixel) solid var(--border-main);
+  }
+
+  .portfolio-hero > * {
+    max-width: var(--layout-rail-prose);
+    margin-inline: 0;
+  }
+
+  .portfolio-hero h1 {
+    margin-bottom: var(--space-sm);
+  }
+
+  .portfolio-hero .lede {
+    font-size: var(--type-size-large);
+    line-height: 1.55;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+  }
+
+  .portfolio-hero p {
+    margin-block: 0 var(--space-sm);
+  }
+
+  .portfolio-hero p:last-child {
+    margin-bottom: 0;
+  }
+
+  .portfolio-note {
+    color: var(--text-muted);
+    font-size: var(--type-size-small);
+    border-inline-start: 2px solid var(--brand-accent);
+    padding-inline-start: var(--space-sm);
+    margin-block-start: var(--space-md);
+  }
+
+  /* ── Case studies section wrapper ── */
+  .case-studies {
+    max-width: var(--layout-rail-page);
+    margin-inline: auto;
+  }
+
+  .case-studies > h2 {
+    margin-top: 0;
+    margin-bottom: var(--space-md);
+  }
+
+  /* ── Individual case study card ── */
+  .case-study {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(18rem, 0.8fr);
+    column-gap: var(--space-component-lg);
+    row-gap: var(--space-section);
+    padding-block: var(--space-section);
+    border-bottom: var(--size-border-pixel) solid var(--border-main);
+  }
+
+  .case-study h3,
+  .case-study h4,
+  .work-method h2 {
+    margin-top: 0;
+  }
+
+  .case-study h3 {
+    max-width: 30ch;
+  }
+
+  .case-study-details {
+    display: grid;
+    align-content: start;
+    gap: var(--space-component-lg);
+  }
+
+  .case-study-details h4 {
+    margin-bottom: var(--space-inline);
+    font-size: var(--type-size-h5);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-inline);
+  }
+
+  ul {
+    padding-inline-start: 1.25em;
+    margin: 0;
+  }
+
+  ul li {
+    margin-bottom: var(--space-xs);
+  }
+
+  ul li::marker {
+    color: var(--color-link);
+  }
+
+  /* ── Repository links ── */
+  .repo-links {
+    margin-top: var(--space-component-lg);
+  }
+
+  .repo-links-label {
+    font-size: var(--type-size-small);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin: 0 0 var(--space-inline);
+  }
+
+  .repo-links-intro {
+    font-size: var(--type-size-small);
+    color: var(--text-secondary);
+    margin: 0 0 var(--space-inline);
+  }
+
+  .repo-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .repo-item {
+    display: grid;
+    grid-template-columns: 1.25rem 1fr;
+    column-gap: var(--space-inline);
+    align-items: start;
+    margin-bottom: var(--space-sm);
+  }
+
+  .repo-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .repo-item::before {
+    content: '';
+    display: block;
+    grid-row: 1;
+    grid-column: 1;
+    width: 1rem;
+    height: 1rem;
+    margin-block-start: 0.2em;
+    background-color: var(--text-muted);
+    mask-image: url('/icons/github.svg');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: url('/icons/github.svg');
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+  }
+
+  .repo-link {
+    grid-row: 1;
+    grid-column: 2;
+    font-size: var(--type-size-small);
+    font-family: var(--font-mono);
+    color: var(--color-link);
+    word-break: break-all;
+  }
+
+  .repo-context {
+    grid-row: 2;
+    grid-column: 2;
+    font-size: var(--type-size-small);
+    color: var(--text-muted);
+    margin-block-start: 0.15em;
+  }
+
+  .work-method {
+    max-width: var(--layout-rail-prose);
+    padding-top: var(--space-section);
+  }
+
+  @media (max-width: 800px) {
+    .case-study {
+      grid-template-columns: 1fr;
+      column-gap: var(--space-component-lg);
+      row-gap: var(--space-component-lg);
+    }
+  }
+
+  @media (max-width: 720px) {
+    .portfolio-hero {
+      margin-bottom: var(--space-component-lg);
+    }
+
+    .portfolio-note {
+      margin-block-start: var(--space-sm);
+    }
+  }
+</style>

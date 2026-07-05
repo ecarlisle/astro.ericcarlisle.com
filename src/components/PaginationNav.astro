@@ -1,0 +1,18 @@
+---
+const { prev, next } = Astro.props;
+---
+
+<nav class="post-nav" aria-label="Pagination">
+  {prev ? (
+    <a href={prev.url} rel="prev">
+      <span class="post-nav-label">{prev.label}</span>
+      {prev.title && <span class="post-nav-title">{prev.title}</span>}
+    </a>
+  ) : <div />}
+  {next ? (
+    <a href={next.url} rel="next" class="post-nav-next">
+      <span class="post-nav-label">{next.label}</span>
+      {next.title && <span class="post-nav-title">{next.title}</span>}
+    </a>
+  ) : <div />}
+</nav>

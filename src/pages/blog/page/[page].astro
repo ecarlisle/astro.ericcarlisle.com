@@ -1,0 +1,61 @@
+---
+import BaseHead from '@components/BaseHead.astro';
+import Footer from '@components/Footer.astro';
+import Header from '@components/Header.astro';
+import PaginationNav from '@components/PaginationNav.astro';
+import PostGrid from '@components/PostGrid.astro';
+import TagFilterBar from '@components/TagFilterBar.astro';
+import '@styles/feed.css';
+import { computeTagData, getSortedPosts, PAGE_SIZE } from '@lib/blog-utils';
+import { AUTHOR_NAME, SITE_TITLE } from '../../../consts';
+
+export async function getStaticPaths({
+  paginate,
+}: {
+  paginate: <T>(
+    data: T[],
+    opts?: { pageSize?: number },
+  ) => Array<{ params: { page: string }; props: { page: import('astro').Page<T> } }>;
+}) {
+  const allPosts = await getSortedPosts();
+  const pages = paginate(allPosts, { pageSize: PAGE_SIZE });
+  return pages.filter((p) => p.params.page !== '1');
+}
+
+const { page } = Astro.props;
+const posts = page.data;
+
+const allPosts = await getSortedPosts();
+const tagData = computeTagData(allPosts);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={`Blog — Page ${page.currentPage} — ${SITE_TITLE}`} description={`Blog posts page ${page.currentPage}`} pageType="collection" />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <Header />
+    <main id="main-content" tabindex="-1" data-pagefind-body>
+      <section class="feed">
+        <header class="collection-header">
+          <h1>Blog</h1>
+          <p class="collection-description">Page {page.currentPage} of {page.lastPage} ({page.total} total)</p>
+        </header>
+
+        <TagFilterBar
+          tagData={tagData}
+        />
+
+        <PostGrid posts={posts} author={AUTHOR_NAME} />
+
+        <PaginationNav
+          prev={page.url.prev ? { url: page.currentPage === 2 ? '/blog' : page.url.prev, label: '← Previous page' } : undefined}
+          next={page.url.next ? { url: page.url.next, label: 'Next page →' } : undefined}
+        />
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/fallowrc.json",
+  "ignorePatterns": [
+    "dist/**",
+    "node_modules/**",
+    "lighthouserc.js",
+    "formfiller.js",
+    ".tools/**",
+    "scripts/**"
+  ],
+  "ignoreDependencies": ["@images/*", "@astrojs/mdx", "@astrojs/sitemap", "lighthouse"],
+  "rules": {
+    "unused-files": "error",
+    "unused-dependencies": "off",
+    "unresolved-imports": "warn",
+    "unlisted-dependencies": "off"
+  }
+}

@@ -1,93 +1,85 @@
 ---
-import "../styles/main.scss";
-import { SITE_LOCALE, SOCIAL_PROFILES, THREED_PRINTING_PROFILES, SITE_NAME, TWITTER_SITE, SITE_LOGO_PATH} from "../consts";
+// Import the global.css file here so that it is included on
+// all pages through the use of the <BaseHead /> component.
+import '../styles/global.css';
+import FallbackImage from '@images/og-image.jpg';
+import type { ImageMetadata } from 'astro';
+import PagefindConfig from 'astro-pagefind/components/PagefindConfig.astro';
+import { AUTHOR_GITHUB, SITE_TITLE, WEBMENTION_IO_DOMAIN } from '../consts';
+import GoogleAnalytics from './GoogleAnalytics.astro';
+import SchemaOrg from './SchemaOrg.astro';
 
-const rootURL = new URL("/", Astro.site);
+interface Props {
+  title: string;
+  description: string;
+  socialTitle?: string;
+  socialDescription?: string;
+  image?: ImageMetadata;
+  pageType?:
+    | 'homepage'
+    | 'about'
+    | 'contact'
+    | 'portfolio'
+    | 'article'
+    | 'collection'
+    | 'not-found';
+  collectionType?: 'main-feed' | 'tag-filter' | 'tags-index';
+  tagName?: string;
+  posts?: Array<{ title: string; url: string }>;
+  pubDate?: Date;
+  updatedDate?: Date;
+  tags?: string[];
+  wordCount?: number;
+  twitterHandle?: string;
+  robots?: string;
+}
+
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const logoURL = new URL(SITE_LOGO_PATH, Astro.site);
 
-const { title, description, publishDate, updateDate, ogimage, ogtype, twimage} = Astro.props;
-
-// List of profile URLs needed for Person structured data.
-const profile_urls:string[] = [];
-SOCIAL_PROFILES.map(profile => {
-	profile_urls.push(profile.url);
-});
-THREED_PRINTING_PROFILES.map(profile => {
-	profile_urls.push(profile.url);
-});
-
-
-const WebsiteSchema = {
-	"@context": "https://schema.org",
-  "@type": "WebSite",
-  "url": rootURL,
-    "name": SITE_NAME,
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": `${rootURL}search?q={search_term_string}`,
-      "query-input": "required name=search_term_string"
-    }
-}
-
-// TODO: Retrofit PersonSchema into global config
-const PersonSchema = {
-	"@context": "https://schema.org",
-	"@type": "Person",
-	"email": "eric.carlisle@gmail.com",
-	"description": "UI Engineer, UX Strategist, Speaker, Mentor, Maker",
-	"name": "Eric Carlisle",
-	"image": "https://www.ericcarlisle.com/images/global/eric-carlisle-800x800.png",
-	"alumniOf": [
-		{
-		"@type": "CollegeOrUniversity",
-		"name": "University of South Carolina",
-		"sameAs": "https://sc.edu/"
-		},
-		{
-		"@type": "CollegeOrUniversity",
-		"name": "Johns Hopkins Carey Business School",
-		"sameAs": "https://carey.jhu.edu/"
-		}
-	],
-	"url": {rootURL},
-	"sameAs" : profile_urls,
-}
-
-const organizationSchema = {
-  "@context": "https://schema.org/",
-  "@type": "Organization",
-  "url": rootURL,
-  "logo": logoURL
-};
-
-// TODO : Conditionally add Article strcutured data for posts.
+const {
+  title,
+  description,
+  socialTitle,
+  socialDescription,
+  image = FallbackImage,
+  pageType,
+  collectionType,
+  tagName,
+  posts,
+  pubDate,
+  updatedDate,
+  tags,
+  wordCount,
+  twitterHandle,
+  robots = 'index, follow',
+} = Astro.props;
 ---
-<head>
+
+<!-- Theme: apply stored preference before first paint to prevent flash -->
+<script is:inline>
+  (function () {
+    var t = localStorage.getItem('theme');
+    if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    else if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  })();
+</script>
 
 <!-- Global Metadata -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-
-<!-- Font preloads -->
-<link rel="preload" href="/fonts/inter-regular.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="preload" href="/fonts/visby-semibold.woff2" as="font" type="font/woff2" crossorigin />
-
-<!-- Favicon -->
-<link rel="icon" href="/favicon.ico" sizes="32x32">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="manifest" href="/manifest.webmanifest">
-
-<!-- Generator -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+<link rel="webmention" href={`https://webmention.io/${WEBMENTION_IO_DOMAIN}/webmention`} />
+<link rel="me" href={AUTHOR_GITHUB} />
+<link
+	rel="alternate"
+	type="application/rss+xml"
+	title={SITE_TITLE}
+	href={new URL('rss.xml', Astro.site)}
+/>
 <meta name="generator" content={Astro.generator} />
-
-<!-- Theme Color (Chrome, Firefox OS and Opera) -->
-<meta name="theme-color" content="#0369A1" />
-
-<!-- Search Engine crawling, caching -->
-<meta name="robots" content="index,follow" />
-<meta name="googlebot" content="index,follow" />
+<GoogleAnalytics />
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
@@ -96,39 +88,59 @@ const organizationSchema = {
 <title>{title}</title>
 <meta name="title" content={title} />
 <meta name="description" content={description} />
+<meta name="robots" content={robots} />
 
-<!-- Open Graph -->
-<meta property="og:title" content={title} />
-<meta property="og:description" content={description} />
-<meta property="og:image" content={new URL(ogimage.url, Astro.url)} />
-<meta property="og:image:type" content={ogimage.type} />
-<meta property="og:image:width" content={ogimage.width} />
-<meta property="og:image:height" content={ogimage.height} />
-<meta property="og:locale" content={SITE_LOCALE} />
-<meta property="og:site_name" content={SITE_NAME} />
-<meta property="og:type" content={ogtype} />
-<meta property="og:url" content={canonicalURL} />
-
-<!-- Open Graph Article -->
-{ ogtype === "article" &&
-<meta property='article:author' content='Eric Carlisle' />
-<meta property='article:published_time' content={publishDate} />
-<meta property='article:modified_time' content={updateDate ? updateDate : publishDate} />
-}
+<!-- Open Graph / Facebook -->
+<meta property="og:locale" content="en_US" />
+<meta property="og:site_name" content={SITE_TITLE} />
+<meta property="og:type" content={pageType === 'article' ? 'article' : 'website'} />
+{pageType === 'article' && pubDate && (
+  <meta property="article:published_time" content={pubDate.toISOString()} />
+)}
+{pageType === 'article' && updatedDate && (
+  <meta property="article:modified_time" content={updatedDate.toISOString()} />
+)}
+<meta property="og:url" content={Astro.url} />
+<meta property="og:title" content={socialTitle ?? title} />
+<meta property="og:description" content={socialDescription ?? description} />
+<meta property="og:image" content={new URL(image.src, Astro.url)} />
+<meta property="og:image:width" content={String(image.width)} />
+<meta property="og:image:height" content={String(image.height)} />
+{pageType === 'article' && (<meta property="article:author" content="Eric Carlisle" />)}
+{pageType === 'article' && tags && tags.length > 0 && (
+  <meta property="article:section" content={tags[0]} />
+)}
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:title" content={title} />
-<meta property="twitter:description" content={description} />
-<meta property="twitter:url" content={canonicalURL} />
-<meta property="twitter:image" content={new URL(twimage, Astro.url)} />
-<meta property="twitter:site" content={TWITTER_SITE} />
+<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:title" content={socialTitle ?? title} />
+<meta property="twitter:description" content={socialDescription ?? description} />
+<meta property="twitter:image" content={new URL(image.src, Astro.url)} />
+{twitterHandle && (<meta property="twitter:site" content={twitterHandle} />)}
+{twitterHandle && pageType === 'article' && (
+  <meta property="twitter:creator" content={twitterHandle} />
+)}
 
-<!-- Structured Data -->
-<script is:inline type="application/ld+json" set:html={JSON.stringify(WebsiteSchema)} />
-<script is:inline type="application/ld+json" set:html={JSON.stringify(PersonSchema)} />
-<script is:inline type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
+{pageType === 'article' && tags && tags.map((tag) => (
+  <meta property="article:tag" content={tag} />
+))}
 
-<style lang="scss"></style>
-
-</head>
+<!-- JSON-LD Structured Data -->
+{pageType && (
+  <SchemaOrg
+    type={pageType}
+    title={title}
+    description={socialDescription ?? description}
+    url={canonicalURL.toString()}
+    image={new URL(image.src, Astro.url).toString()}
+    collectionType={collectionType}
+    tagName={tagName}
+    posts={posts}
+    pubDate={pubDate}
+    updatedDate={updatedDate}
+    tags={tags}
+    wordCount={wordCount}
+  />
+)}
+<PagefindConfig />

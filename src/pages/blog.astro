@@ -1,0 +1,45 @@
+---
+import BaseHead from '@components/BaseHead.astro';
+import Footer from '@components/Footer.astro';
+import Header from '@components/Header.astro';
+import PaginationNav from '@components/PaginationNav.astro';
+import PostGrid from '@components/PostGrid.astro';
+import TagFilterBar from '@components/TagFilterBar.astro';
+import '@styles/feed.css';
+import { computeTagData, getSortedPosts, PAGE_SIZE } from '@lib/blog-utils';
+import { AUTHOR_NAME, SITE_TITLE } from '../consts';
+
+const allPosts = await getSortedPosts();
+const posts = allPosts.slice(0, PAGE_SIZE);
+const totalPages = Math.ceil(allPosts.length / PAGE_SIZE);
+
+const tagData = computeTagData(allPosts);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={`Blog — ${SITE_TITLE}`} description="All blog posts" pageType="collection" />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <Header />
+    <main id="main-content" tabindex="-1" data-pagefind-body>
+      <section class="feed">
+        <header class="collection-header">
+          <h1>Blog</h1>
+          <p class="collection-description">All posts ({allPosts.length} total)</p>
+        </header>
+
+        <TagFilterBar tagData={tagData} />
+
+        <PostGrid posts={posts} author={AUTHOR_NAME} />
+
+        {totalPages > 1 && (
+          <PaginationNav next={{ url: '/blog/page/2', label: 'Next page →' }} />
+        )}
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>
