@@ -17,11 +17,21 @@ type PostItem = {
 };
 
 type Props = {
-  type: 'homepage' | 'about' | 'contact' | 'portfolio' | 'article' | 'collection' | 'not-found';
+  type:
+    | 'homepage'
+    | 'about'
+    | 'contact'
+    | 'portfolio'
+    | 'article'
+    | 'collection'
+    | 'search'
+    | 'not-found';
   title: string;
   description: string;
   url: string;
   image: string;
+  imageWidth: number;
+  imageHeight: number;
   collectionType?: 'main-feed' | 'tag-filter' | 'tags-index';
   tagName?: string;
   posts?: PostItem[];
@@ -37,6 +47,8 @@ const {
   description,
   url,
   image,
+  imageWidth,
+  imageHeight,
   collectionType = 'main-feed',
   tagName,
   posts = [],
@@ -142,9 +154,13 @@ switch (type) {
   }
 
   case 'article': {
+    const webpageId = `${pageUrl}/#webpage`;
+    const articleId = `${pageUrl}/#article`;
+    const breadcrumbId = `${pageUrl}/#breadcrumb`;
+    const primaryImageId = `${pageUrl}/#primaryimage`;
     const articleBreadcrumb = {
       '@type': 'BreadcrumbList',
-      '@id': `${pageUrl}/#breadcrumb`,
+      '@id': breadcrumbId,
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
         { '@type': 'ListItem', position: 2, name: 'Blog', item: `${siteUrl}/blog` },
@@ -154,13 +170,27 @@ switch (type) {
 
     graphArray.push(
       {
+        '@type': 'WebPage',
+        '@id': webpageId,
+        url,
+        name: title,
+        description,
+        isPartOf: { '@id': `${siteUrl}/#website` },
+        breadcrumb: { '@id': breadcrumbId },
+        primaryImageOfPage: { '@id': primaryImageId },
+        mainEntity: { '@id': articleId },
+      },
+      {
         '@type': 'BlogPosting',
-        '@id': `${pageUrl}/#article`,
-        mainEntityOfPage: url,
+        '@id': articleId,
+        url,
+        mainEntityOfPage: { '@id': webpageId },
         headline: title,
         description,
-        datePublished: pubDate ? pubDate.toISOString() : new Date().toISOString(),
-        ...(updatedDate && { dateModified: updatedDate.toISOString() }),
+        ...(pubDate && {
+          datePublished: pubDate.toISOString(),
+          dateModified: (updatedDate ?? pubDate).toISOString(),
+        }),
         ...(tags && tags.length > 0 && { articleSection: tags.join(', ') }),
         ...(wordCount && { wordCount }),
         ...(wordCount && { timeRequired: `PT${Math.ceil(wordCount / 200)}M` }),
@@ -168,10 +198,10 @@ switch (type) {
         publisher: { '@id': `${siteUrl}/#person` },
         image: {
           '@type': 'ImageObject',
-          '@id': `${pageUrl}/#primaryimage`,
+          '@id': primaryImageId,
           url: image.startsWith('http') ? image : `${siteUrl}${image}`,
-          width: 1200,
-          height: 630,
+          width: imageWidth,
+          height: imageHeight,
         },
         inLanguage: 'en-US',
       },
@@ -188,34 +218,31 @@ switch (type) {
       url,
       name: title,
       description,
+      isPartOf: { '@id': `${siteUrl}/#website` },
       mainEntity: { '@id': `${siteUrl}/#person` },
     });
     break;
 
   case 'portfolio':
     graphArray.push({
-      '@type': 'WebPage',
+      '@type': 'CollectionPage',
       '@id': `${pageUrl}/#webpage`,
       url,
       name: title,
       description,
-      mainEntity: {
-        '@type': 'CreativeWork',
-        name: title,
-        description,
-        url,
-        author: { '@id': `${siteUrl}/#person` },
-        creator: { '@id': `${siteUrl}/#person` },
-        inLanguage: 'en-US',
-        about: [
-          'Frontend engineering',
-          'UX architecture',
-          'Design systems',
-          'Web performance',
-          'Accessibility',
-          'Technical leadership',
-        ].map((topic) => ({ '@type': 'Thing', name: topic })),
-      },
+      isPartOf: { '@id': `${siteUrl}/#website` },
+      author: { '@id': `${siteUrl}/#person` },
+    });
+    break;
+
+  case 'search':
+    graphArray.push({
+      '@type': 'SearchResultsPage',
+      '@id': `${pageUrl}/#webpage`,
+      url,
+      name: title,
+      description,
+      isPartOf: { '@id': `${siteUrl}/#website` },
     });
     break;
 
