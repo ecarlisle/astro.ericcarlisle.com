@@ -1,0 +1,10 @@
+ul.grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#no-results {
+  text-align: center;
+  margin-bottom: var(--space-component);
+}

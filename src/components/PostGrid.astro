@@ -1,0 +1,52 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import Card from '@components/Card.astro';
+import { getPostWordCount } from '@lib/word-count';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+  author: string;
+  headingLevel?: 'h2' | 'h3' | 'h4';
+}
+
+const { posts, author, headingLevel = 'h2' } = Astro.props;
+---
+
+<ul class="grid grid--cards" id="post-grid">
+  {posts.map((post, i) => {
+    const wc = getPostWordCount(post);
+    return (
+      <Card
+        as="li"
+        title={post.data.title}
+        href={`/blog/${post.id}/`}
+        author={author}
+        pubDate={post.data.pubDate}
+        tags={post.data.tags}
+        readingTime={wc}
+        index={i}
+        headingLevel={headingLevel}
+      >
+        {post.data.heroImage && (
+          <Image
+            slot="image"
+            src={post.data.heroImage}
+            alt={post.data.coverAlt || post.data.title}
+            width={720}
+            height={360}
+          />
+        )}
+        <p>{post.data.description}</p>
+      </Card>
+    );
+  })}
+</ul>
+
+<style>
+  ul.grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+</style>

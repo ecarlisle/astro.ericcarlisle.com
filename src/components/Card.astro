@@ -1,0 +1,118 @@
+---
+type TagType = 'div' | 'article' | 'li';
+
+const {
+  as: Tag = 'div',
+  href,
+  title,
+  class: className,
+  author,
+  pubDate,
+  tags,
+  readingTime,
+  index = 0,
+  headingLevel: HeadingTag = 'h2',
+} = Astro.props as {
+  as?: TagType;
+  href?: string;
+  title?: string;
+  class?: string;
+  author?: string;
+  pubDate?: Date;
+  tags?: string[];
+  readingTime?: number;
+  index?: number;
+  headingLevel?: 'h2' | 'h3' | 'h4';
+};
+
+const hasImage = Astro.slots.has('image');
+const hasFooter = Astro.slots.has('footer');
+
+const dateISO = pubDate?.toISOString();
+const dateDisplay = pubDate?.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+const readingTimeMin = readingTime ? Math.ceil(readingTime / 200) : undefined;
+---
+
+<Tag
+  class:list={['card', className, 'card-enter']}
+  data-tags={tags?.join(',')}
+  style={`animation-delay: ${index * 0.05}s`}
+>
+  {hasImage && (
+    <div class="card-image">
+      <slot name="image" />
+    </div>
+  )}
+
+  <div class="card-body">
+    {title && href && (
+      <HeadingTag class="card-title">
+        <a href={href} class="card-link">{title}</a>
+      </HeadingTag>
+    )}
+    {title && !href && <HeadingTag class="card-title">{title}</HeadingTag>}
+
+    <slot />
+
+    <p class="meta">
+      {author && <strong>{author}</strong>}
+      {pubDate && <time datetime={dateISO}>{dateDisplay}</time>}
+      {readingTimeMin && <span class="reading-time">{readingTimeMin} min read</span>}
+    </p>
+
+    {tags && tags.length > 0 && (
+      <p class="meta meta-tags">
+        {tags.slice(0, 3).map((tag: string) => (
+          <a href={`/tags/${tag}/`} class="tag">{tag}</a>
+        ))}
+      </p>
+    )}
+  </div>
+
+  {hasFooter && (
+    <div class="card-footer">
+      <slot name="footer" />
+    </div>
+  )}
+</Tag>
+
+<style>
+  .card-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .card-link:not(:focus-visible)::after {
+    pointer-events: auto;
+  }
+
+  .card-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .card-footer {
+    position: relative;
+    z-index: 1;
+  }
+
+  .tag {
+    position: relative;
+    z-index: 1;
+  }
+
+  .meta-tags {
+    margin-top: var(--space-inline);
+  }
+</style>

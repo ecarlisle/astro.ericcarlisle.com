@@ -1,12 +1,36 @@
+# EditorConfig configuration for the 8-Bit Blog ecosystem
+# More details at https://editorconfig.org
+
+# Top-most EditorConfig file — stop searching parent directories
 root = true
 
+# ── Global Defaults (Matches all files) ──────────────────────────────────────
 [*]
 charset = utf-8
 end_of_line = lf
-indent_style = tab
-indent_size = 2
 insert_final_newline = true
-max_line_length = 100
 trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
 
+# ── Web Development Primitives (Astro, TS, JS, CSS) ──────────────────────────
+[*.{astro,js,mjs,ts,tsx,css,json}]
+indent_style = space
+indent_size = 2
 
+# ── Content Stores (Markdown and MDX) ────────────────────────────────────────
+[*.{md,mdx}]
+indent_style = space
+indent_size = 2
+# We preserve trailing whitespace in markdown because two trailing spaces 
+# is a native markdown convention for forcing a hard line break (<br />)
+trim_trailing_whitespace = false
+
+# ── System Engineering & Infrastructure ──────────────────────────────────────
+[*.{yml,yaml,toml}]
+indent_style = space
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+indent_size = 4

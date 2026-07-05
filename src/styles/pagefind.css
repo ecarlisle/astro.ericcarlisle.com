@@ -1,0 +1,271 @@
+/* ========================================================================
+   Pagefind — --pf-* token mapping
+   Uses :root:root to beat Pagefind's own :root and [data-pf-theme="dark"]
+   specificity (0,2,0 vs 0,1,1).
+   ======================================================================== */
+:root:root {
+  --pf-text: var(--text-primary);
+  --pf-text-secondary: var(--text-secondary);
+  --pf-text-muted: var(--text-muted);
+  --pf-background: var(--bg-surface);
+  --pf-border: var(--border-main);
+  --pf-border-focus: var(--color-focus);
+  --pf-skeleton: var(--bg-surface);
+  --pf-skeleton-shine: var(--bg-surface-elevated);
+  --pf-hover: var(--bg-surface-elevated);
+  --pf-mark: color-mix(in srgb, var(--brand-highlight) 28%, var(--bg-surface));
+  --pf-scroll-shadow: rgba(255, 255, 255, 0.08);
+
+  --pf-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --pf-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --pf-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+
+  --pf-outline-focus: var(--color-focus);
+  --pf-modal-backdrop: rgba(0, 0, 0, 0.7);
+  --pf-border-radius: var(--radius-md);
+  --pf-font: var(--font-copy);
+  --pf-modal-max-width: 640px;
+}
+
+:root:root[data-theme="light"] {
+  --pf-scroll-shadow: rgba(0, 0, 0, 0.08);
+
+  --pf-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --pf-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --pf-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.2);
+
+  --pf-modal-backdrop: rgba(0, 0, 0, 0.5);
+}
+
+/* System light preference without manual override */
+@media (prefers-color-scheme: light) {
+  :root:root:not([data-theme="dark"]) {
+    --pf-scroll-shadow: rgba(0, 0, 0, 0.08);
+
+    --pf-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --pf-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --pf-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.2);
+
+    --pf-modal-backdrop: rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* ========================================================================
+   Search page — Pagefind default UI
+   The #search scope beats Pagefind's component classes without !important.
+   ======================================================================== */
+#search {
+  --pagefind-ui-primary: var(--color-link);
+  --pagefind-ui-text: var(--color-text-primary);
+  --pagefind-ui-background: var(--color-card-bg);
+  --pagefind-ui-border: var(--color-card-border);
+  --pagefind-ui-tag: var(--color-card-bg-elevated);
+  --pagefind-ui-border-width: var(--size-border-pixel);
+  --pagefind-ui-border-radius: var(--radius-md);
+  --pagefind-ui-image-border-radius: var(--radius-md);
+  --pagefind-ui-font: var(--font-copy);
+}
+
+#search :where(.pagefind-ui) {
+  color: var(--color-text-primary);
+  font-family: var(--font-copy);
+}
+
+#search :where(.pagefind-ui__form)::before {
+  top: 50%;
+  left: var(--space-inline-strong);
+  background-color: var(--color-text-secondary);
+  transform: translateY(-50%);
+}
+
+#search :where(.pagefind-ui__search-input) {
+  min-height: var(--size-touch-target-min);
+  height: auto;
+  padding: var(--space-inline) 4.5rem var(--space-inline) calc(var(--space-inline-strong) + 1.75rem);
+  border-color: var(--border-control);
+  border-radius: var(--radius-md);
+  background: var(--color-card-bg);
+  color: var(--color-text-primary);
+  font: 600 var(--type-size-body) / 1.4 var(--font-copy);
+}
+
+#search :where(.pagefind-ui__search-input)::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 1;
+}
+
+#search :where(.pagefind-ui__search-input):focus {
+  outline: none;
+}
+
+#search :where(.pagefind-ui__search-input):focus-visible {
+  border-color: var(--focus-outline-color);
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-outline-width) var(--focus-outline-color);
+}
+
+#search :where(.pagefind-ui__search-clear) {
+  top: 50%;
+  right: var(--space-xs);
+  height: auto;
+  min-height: var(--size-touch-target-min);
+  padding-inline: var(--space-xs);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-link);
+  font-family: var(--font-copy);
+  font-size: var(--type-size-small);
+  font-weight: 700;
+  transform: translateY(-50%);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+#search :where(.pagefind-ui__search-clear):hover {
+  background: var(--color-card-bg-elevated);
+  color: var(--color-link-hover);
+}
+
+#search :where(.pagefind-ui__search-clear):focus-visible,
+#search :where(.pagefind-ui__button):focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-outline-color);
+  outline-offset: var(--focus-outline-offset);
+}
+
+#search :where(.pagefind-ui__results-area) {
+  margin-top: var(--space-component);
+}
+
+#search :where(.pagefind-ui__message) {
+  height: auto;
+  padding: var(--space-inline) 0;
+  color: var(--color-text-secondary);
+  font-size: var(--type-size-small);
+  font-weight: 600;
+  line-height: var(--line-height-body);
+}
+
+#search :where(.pagefind-ui__result) {
+  gap: var(--space-inline-strong);
+  margin-bottom: var(--space-inline);
+  padding: var(--space-component);
+  border: var(--size-border-pixel) solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-card-bg);
+}
+
+#search :where(.pagefind-ui__result):last-of-type {
+  border-bottom: var(--size-border-pixel) solid var(--color-card-border);
+}
+
+#search :where(.pagefind-ui__result-inner) {
+  margin-top: 0;
+}
+
+#search :where(.pagefind-ui__result-title) {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-headers);
+  font-size: var(--type-size-h5);
+  font-weight: 700;
+  line-height: var(--line-height-h5);
+}
+
+#search :where(.pagefind-ui__result-link) {
+  color: var(--color-link);
+  text-decoration: none;
+  text-underline-offset: 0.15em;
+}
+
+#search :where(.pagefind-ui__result-link):hover {
+  color: var(--color-link-hover);
+  text-decoration: underline;
+}
+
+#search :where(.pagefind-ui__result-excerpt) {
+  min-width: 0;
+  margin-top: var(--space-xs);
+  color: var(--color-text-secondary);
+  font-family: var(--font-copy);
+  font-size: var(--type-size-body);
+  line-height: var(--line-height-body);
+}
+
+#search :where(.pagefind-ui__result-excerpt mark) {
+  padding: 0.08em 0.18em;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--brand-highlight) 28%, var(--color-card-bg));
+  color: var(--color-text-primary);
+}
+
+#search :where(.pagefind-ui__result-nested) {
+  margin-top: var(--space-xs);
+  padding-left: var(--space-inline-strong);
+  color: var(--color-text-secondary);
+  font-size: var(--type-size-small);
+  line-height: var(--line-height-body);
+}
+
+#search :where(.pagefind-ui__result-thumb) {
+  width: min(28%, 7rem);
+  margin-top: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-card-bg-elevated);
+  overflow: hidden;
+}
+
+#search :where(.pagefind-ui__result-image) {
+  border-radius: var(--radius-md);
+}
+
+#search :where(.pagefind-ui__result-tags) {
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
+
+#search :where(.pagefind-ui__result-tag) {
+  padding: 0.2em 0.6em;
+  border-radius: 999px;
+  background: var(--color-card-bg-elevated);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--type-size-small);
+}
+
+#search :where(.pagefind-ui__button) {
+  width: auto;
+  min-height: var(--size-touch-target-min);
+  height: auto;
+  margin-top: var(--space-inline);
+  padding: var(--space-inline) var(--space-component);
+  border: var(--size-border-pixel) solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--color-action);
+  color: var(--bg-surface);
+  font-family: var(--font-copy);
+  font-size: var(--type-size-body);
+  font-weight: 700;
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+#search :where(.pagefind-ui__button):hover {
+  border-color: transparent;
+  background: var(--color-action-hover);
+  color: var(--bg-surface);
+  box-shadow: 0 4px 12px oklch(0 0 0 / 0.2);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 720px) {
+  #search :where(.pagefind-ui__result) {
+    padding: var(--space-inline-strong);
+  }
+
+  #search :where(.pagefind-ui__result-thumb) {
+    width: min(32%, 6rem);
+  }
+}

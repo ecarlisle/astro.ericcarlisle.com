@@ -1,0 +1,44 @@
+---
+import { type CollectionEntry, render } from 'astro:content';
+import { computeTagData, getSortedPosts } from '@lib/blog-utils';
+import { fetchWebmentions } from '@lib/webmentions';
+import { getPostWordCount } from '@lib/word-count';
+import BlogPost from '../../layouts/BlogPost.astro';
+
+export async function getStaticPaths() {
+  const posts = await getSortedPosts();
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: post,
+  }));
+}
+type Props = CollectionEntry<'blog'>;
+
+const post = Astro.props;
+const { Content } = await render(post);
+
+const wordCount = getPostWordCount(post);
+
+// Find adjacent posts for end-of-post navigation
+const allPosts = await getSortedPosts();
+
+const currentIndex = allPosts.findIndex((p) => p.id === post.id);
+const prevPost =
+  currentIndex < allPosts.length - 1
+    ? { title: allPosts[currentIndex + 1].data.title, slug: allPosts[currentIndex + 1].id }
+    : undefined;
+const nextPost =
+  currentIndex > 0
+    ? { title: allPosts[currentIndex - 1].data.title, slug: allPosts[currentIndex - 1].id }
+    : undefined;
+
+const tagData = computeTagData(allPosts);
+
+// Fetch webmentions for this post at build time
+const pageUrl = `${import.meta.env.SITE ?? 'https://ericcarlisle.com'}/blog/${post.id}/`;
+const webmentions = await fetchWebmentions(pageUrl);
+---
+
+<BlogPost {...post.data} wordCount={wordCount} prevPost={prevPost} nextPost={nextPost} tagData={tagData} webmentions={webmentions}>
+	<Content />
+</BlogPost>

@@ -1,46 +1,247 @@
 ---
-import Layout from  "../layouts/Main.astro";
-import { getCollection } from 'astro:content';
-import { ReadableDateFormat } from "../lib/DateUtils";
+import { Image } from 'astro:assets';
+import avatarImage from '@images/eric-carlisle.png';
+import BaseHead from '../components/BaseHead.astro';
+import Card from '../components/Card.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import '@styles/feed.css';
+import { AUTHOR_NAME, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { getSortedPosts } from '../lib/blog-utils';
 
-export const title = "Eric Carlisle: UI, UX Engineer";
-export const description = "I am a technologist, innovator, and educator. My strongest areas of expertise are UI Development, UX Strategy, Mentoring, Speaking, and Making.";
-export const ogimage = {
-  alt: "Eric Carlisle: UI, UX Engineer",
-  height: 630,
-  width: 1200,
-  type: "image/jpeg",
-  url: "/images/og/eric-carlisle_OG.jpg",
-}
-
-export const ogtype = "website";
-export const twimage = "/images/tw/eric-carlisle_TW.jpg";
-
-const posts = (await getCollection('posts')).filter(post => post.data.draft === false).sort(
-	(a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf(),
-);
+const posts = (await getSortedPosts()).slice(0, 6);
 ---
 
-<Layout title={title}
-				description={description}
-				ogimage={ogimage}
-				ogtype={ogtype}
-				twimage={twimage}>
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} pageType="homepage" />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <Header />
+    <main id="main-content" tabindex="-1" data-pagefind-body>
+      <header class="home-hero">
+        <div class="home-hero-content">
+          <h1>Hi, I&rsquo;m Eric Carlisle.</h1>
+          <p class="home-hero-role">Principal Frontend Engineer &amp; UX Architect</p>
+          <p class="home-hero-lede">
+            I help teams build better web experiences: accessible interfaces,
+            scalable frontend systems, thoughtful design systems, and
+            performance-minded architecture.
+          </p>
+          <p class="home-hero-sub">
+            I bring together engineering depth, UX judgment, and a practical
+            sense for what teams can maintain.
+          </p>
+          <div class="home-hero-actions">
+            <a href="/portfolio" class="button">View portfolio <span aria-hidden="true">→</span></a>
+            <a href="/blog" class="button button--outline">Read the blog <span aria-hidden="true">→</span></a>
+          </div>
+          <ul class="home-hero-chips" aria-label="Areas of focus">
+            <li class="chip">Frontend architecture</li>
+            <li class="chip">Design systems</li>
+            <li class="chip">Accessibility</li>
+            <li class="chip">Performance</li>
+            <li class="chip">UX strategy</li>
+          </ul>
+        </div>
+        <div class="home-hero-avatar">
+          <Image
+            src={avatarImage}
+            alt="Eric Carlisle"
+            width={320}
+            height={320}
+            quality={85}
+            loading="eager"
+            decoding="async"
+            class="avatar-img"
+          />
+        </div>
+      </header>
+      <section class="feed" aria-labelledby="latest-writing">
+        <header class="collection-header feed-heading">
+          <h2 id="latest-writing">Latest writing</h2>
+          <a href="/blog">Browse all articles <span aria-hidden="true">→</span></a>
+        </header>
+        <ul class="grid grid--cards grid--featured-first">
+          {posts.map((post) => (
+            <Card
+              as="li"
+              title={post.data.title}
+              href={`/blog/${post.id}/`}
+              author={AUTHOR_NAME}
+              pubDate={post.data.pubDate}
+              headingLevel="h3"
+            >
+              {post.data.heroImage && (
+                <Image
+                  slot="image"
+                  src={post.data.heroImage}
+                  alt={post.data.coverAlt || post.data.title}
+                  width={720}
+                  height={360}
+                />
+              )}
+              <p>{post.data.description}</p>
+            </Card>
+          ))}
+        </ul>
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>
 
-	<h1 class="home-intro">Eric Carlisle is a Full-Stack Engineer with focus on UI Innovation and UX Strategy.</h1>
+<style>
+  /* ── Hero grid: two-column on desktop, stack on mobile ── */
+  .home-hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-section) var(--space-section);
+    align-items: center;
+    margin-bottom: var(--space-layout);
+  }
 
-	<h2>Latest Posts</h2>
-	<ul class="square">
-	{
-		posts.map((post) => (
-		<li>
-			<strong>
-				{ReadableDateFormat(post.data.publishDate)} :
-			</strong>
-			<a href={`/posts/${post.slug}/`}>
-				{post.data.title}
-			</a>
-		</li>
-	))}
-	</ul>
-</Layout>
+  .home-hero-content {
+    max-width: var(--layout-rail-prose);
+  }
+
+  .home-hero h1 {
+    margin-bottom: var(--space-xs);
+  }
+
+  /* ── Role/title eyebrow ── */
+  .home-hero-role {
+    font-family: var(--font-mono);
+    font-size: var(--type-size-body);
+    color: var(--text-muted);
+    margin-bottom: var(--space-component);
+    letter-spacing: 0.02em;
+  }
+
+  .home-hero-lede {
+    font-size: var(--type-size-large);
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+  }
+
+  .home-hero-sub {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-component);
+  }
+
+  /* ── Action buttons ── */
+  .home-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-component);
+    margin-bottom: var(--space-component);
+  }
+
+  .button--outline {
+    background: transparent;
+    color: var(--color-action);
+    border: var(--size-border-pixel) solid var(--color-action);
+    transition:
+      background var(--transition-fast),
+      color var(--transition-fast),
+      border-color var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .button--outline:hover {
+    background: var(--bg-surface-elevated);
+    color: var(--color-action-hover);
+    border-color: var(--color-action-hover);
+    transform: translateY(-1px);
+  }
+
+  /* ── Identity chips (uses shared .tag class) ── */
+  .home-hero-chips {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-inline);
+  }
+
+  /* ── Avatar: standalone portrait with minimal ring ── */
+  .home-hero-avatar {
+    display: flex;
+    justify-content: center;
+  }
+
+  .avatar-img {
+    display: block;
+    border-radius: 50%;
+    width: 280px;
+    height: 280px;
+    object-fit: cover;
+    box-shadow: 0 0 0 var(--size-border-pixel) var(--border-muted);
+  }
+
+  /* ── Feed heading ── */
+  .feed-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-component);
+  }
+
+  .feed-heading h2 {
+    margin-bottom: 0;
+    margin-top: 0;
+  }
+
+  .feed-heading a {
+    flex: none;
+  }
+
+  /* ── Tablet and below ── */
+  @media (max-width: 800px) {
+    .home-hero {
+      grid-template-columns: 1fr;
+      gap: var(--space-component-lg);
+      margin-bottom: var(--space-section);
+    }
+
+    .home-hero-content {
+      max-width: none;
+    }
+
+    .home-hero h1 {
+      max-width: 15ch;
+    }
+
+    .home-hero-actions {
+      justify-content: center;
+    }
+
+    .home-hero-chips {
+      justify-content: center;
+    }
+
+    .home-hero-avatar {
+      order: -1;
+    }
+
+    .avatar-img {
+      width: 200px;
+      height: 200px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .feed-heading {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .avatar-img {
+      width: 140px;
+      height: 140px;
+    }
+  }
+</style>

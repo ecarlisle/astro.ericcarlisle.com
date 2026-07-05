@@ -1,0 +1,37 @@
+---
+import Layout from '../layouts/BlogPost.astro';
+---
+
+<Layout
+  title="Search"
+  description="Find articles, portfolio notes, and other site pages."
+  pageType="about"
+>
+  <p>
+    Find articles, portfolio notes, and other site pages.
+  </p>
+  <div id="search" class="search-ui" data-pagefind-ignore="all"></div>
+</Layout>
+
+<script is:inline>
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = '/pagefind/pagefind-ui.css';
+  document.head.appendChild(link);
+
+  const script = document.createElement('script');
+  script.src = '/pagefind/pagefind-ui.js';
+  script.onload = () => {
+    new window.PagefindUI({
+      element: '#search',
+      showSubResults: true,
+    });
+  };
+  document.head.appendChild(script);
+</script>
+
+<style>
+  .search-ui {
+    margin-top: var(--space-component-lg);
+  }
+</style>

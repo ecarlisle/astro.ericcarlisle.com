@@ -1,0 +1,325 @@
+---
+import { Image } from 'astro:assets';
+import BaseHead from '@components/BaseHead.astro';
+import Footer from '@components/Footer.astro';
+import FormattedDate from '@components/FormattedDate.astro';
+import Header from '@components/Header.astro';
+import PaginationNav from '@components/PaginationNav.astro';
+import ShareStrip from '@components/ShareStrip.astro';
+import TagFilterBar from '@components/TagFilterBar.astro';
+import Webmentions from '@components/Webmentions.astro';
+import type { TagData } from '@lib/blog-utils';
+import type { Webmention } from '@lib/webmentions';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  title: string;
+  description: string;
+  pageType?: 'article' | 'about' | 'contact' | 'portfolio';
+  pubDate?: Date;
+  updatedDate?: Date;
+  heroImage?: ImageMetadata;
+  coverAlt?: string;
+  tags?: string[];
+  socialTitle?: string;
+  socialDescription?: string;
+  socialImage?: ImageMetadata;
+  twitterHandle?: string;
+  share?: { enabled?: boolean; networks?: string[]; scheduledFor?: Date };
+  wordCount?: number;
+  prevPost?: { title: string; slug: string };
+  nextPost?: { title: string; slug: string };
+  tagData?: TagData;
+  webmentions?: Webmention[];
+}
+
+const {
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  heroImage,
+  coverAlt,
+  tags,
+  socialTitle,
+  socialDescription,
+  socialImage,
+  twitterHandle,
+  wordCount = 0,
+  pageType = 'article',
+  prevPost,
+  nextPost,
+  share,
+  tagData,
+  webmentions,
+} = Astro.props;
+
+const readingTimeMin = Math.ceil(wordCount / 200);
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+---
+
+<html lang="en">
+	<head>
+		<BaseHead
+      {title}
+      {description}
+      {socialTitle}
+      {socialDescription}
+      image={socialImage ?? heroImage}
+      {pageType}
+      {pubDate}
+      {updatedDate}
+      {tags}
+      {wordCount}
+      {twitterHandle}
+    />
+	<style>
+		main {
+			width: 100%;
+			min-width: 0;
+		}
+
+		.hero-image {
+			width: 100%;
+      max-width: 1020px;
+      margin: 0 auto var(--space-section);
+		}
+
+		.hero-image img {
+			display: block;
+			margin: 0 auto;
+			border-radius: var(--radius-lg);
+		}
+
+		.post-layout {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: flex-start;
+			gap: var(--space-component-lg);
+      position: relative;
+		}
+
+    .post-content {
+      flex: 999 1 0;
+      min-width: 0;
+      min-inline-size: 60%;
+    }
+
+		.post-sidebar {
+			position: sticky;
+			top: calc(var(--header-height, 4.5rem) + var(--space-component));
+			flex: 1 1 220px;
+			align-self: flex-start;
+		}
+
+		.sidebar-share {
+			margin-bottom: var(--space-component);
+			border-bottom: var(--size-border-pixel) solid var(--border-main);
+		}
+
+    .page-header {
+      max-width: var(--layout-rail-prose);
+      margin: 0 auto var(--space-component-lg);
+      padding-top: var(--space-component);
+    }
+
+    .page-header--article {
+      max-width: 1020px;
+    }
+
+    .page-header--portfolio {
+      max-width: none;
+    }
+
+    .page-header h1 {
+      max-width: 20ch;
+    }
+
+		.date {
+			margin-bottom: var(--space-xs);
+			color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: var(--space-inline);
+      font-family: var(--font-mono);
+		}
+
+		.last-updated-on {
+			font-style: italic;
+      width: 100%;
+		}
+
+    .article-tags {
+      margin-top: var(--space-sm);
+      text-align: center;
+    }
+	</style>
+	</head>
+
+	<body>
+    {pageType === 'article' && (
+      <div class="reading-progress" id="reading-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Reading progress"></div>
+    )}
+		<a href="#main-content" class="skip-link">Skip to main content</a>
+		<Header />
+		<main id="main-content" tabindex="-1" data-pagefind-body>
+      {pageType === 'article' && (
+        <a href="/blog" class="back-link">&larr; Back to all posts</a>
+      )}
+			<article>
+        <header
+          class:list={[
+            'page-header',
+            pageType === 'article' ? 'page-header--article' : 'page-header--standard',
+            pageType === 'portfolio' && 'page-header--portfolio',
+          ]}
+        >
+          {pageType === 'article' && pubDate && (
+            <div class="date">
+              <FormattedDate date={pubDate} />
+              {readingTimeMin > 0 && <span class="reading-time">{readingTimeMin} min read</span>}
+              {updatedDate && (
+                <div class="last-updated-on">
+                  Last updated on <FormattedDate date={updatedDate} />
+                </div>
+              )}
+            </div>
+          )}
+          <h1>{title}</h1>
+          <hr />
+        </header>
+        {heroImage && (
+          <div class="hero-image">
+            <Image
+              width={1020}
+              height={510}
+              src={heroImage}
+              alt={coverAlt || title}
+              widths={[510, 765, 1020]}
+              sizes="(min-width: 1200px) 1020px, (min-width: 720px) calc(100vw - 3.5rem), calc(100vw - 3rem)"
+            />
+          </div>
+        )}
+				<div class:list={['post-layout', pageType !== 'article' && 'post-layout--no-sidebar']}>
+					<div class="post-content">
+						<div class="prose">
+							<slot />
+						</div>
+
+            {pageType === 'article' && tags && tags.length > 0 && (
+              <div class="prose article-tags">
+                <TagFilterBar tags={tags} tagData={tagData} />
+              </div>
+            )}
+
+            {pageType === 'article' && (prevPost || nextPost) && (
+              <PaginationNav
+                prev={prevPost ? { url: `/blog/${prevPost.slug}/`, label: '← Previous', title: prevPost.title } : undefined}
+                next={nextPost ? { url: `/blog/${nextPost.slug}/`, label: 'Next →', title: nextPost.title } : undefined}
+              />
+            )}
+
+            {pageType === 'article' && webmentions && (
+              <Webmentions mentions={webmentions} />
+            )}
+					</div>
+
+          {pageType === 'article' && (
+            <aside class="post-sidebar" data-pagefind-ignore>
+              <div class="post-sidebar-inner">
+                {share?.enabled !== false && (
+                  <div class="sidebar-share">
+                    <ShareStrip {title} {pageUrl} />
+                  </div>
+                )}
+                <div class="toc" id="table-of-contents">
+                  <h3>On this page</h3>
+                  <nav aria-label="Table of contents">
+                    <ul id="toc-list"></ul>
+                  </nav>
+                </div>
+              </div>
+            </aside>
+          )}
+				</div>
+			</article>
+		</main>
+		<Footer />
+	</body>
+</html>
+
+<script>
+  const progressBar = document.getElementById('reading-progress') as HTMLDivElement;
+
+  function updateProgress(): void {
+    if (!progressBar) return;
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0;
+    progressBar.style.width = `${progress}%`;
+    progressBar.setAttribute('aria-valuenow', String(Math.round(progress)));
+  }
+
+  if (progressBar) {
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('resize', updateProgress, { passive: true });
+    updateProgress();
+  }
+
+  const article = document.querySelector('article');
+  const tocList = document.getElementById('toc-list');
+  if (article && tocList) {
+    const headings = article.querySelectorAll('.post-content h2, .post-content h3');
+    const items: Array<{ id: string; text: string; level: number }> = [];
+
+    headings.forEach((heading) => {
+      if (!heading.id) {
+        heading.id =
+          heading.textContent
+            ?.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '') || '';
+      }
+      items.push({
+        id: heading.id,
+        text: heading.textContent || '',
+        level: heading.tagName === 'H2' ? 2 : 3,
+      });
+    });
+
+    if (items.length > 0) {
+      items.forEach((item) => {
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = `#${item.id}`;
+        link.textContent = item.text;
+        if (item.level === 3) {
+          link.style.paddingLeft = 'var(--space-component)';
+        }
+        li.appendChild(link);
+        tocList.appendChild(li);
+      });
+
+      const tocLinks = tocList.querySelectorAll('a');
+      function updateActiveToc(): void {
+        let currentId = '';
+        items.forEach((item) => {
+          const element = document.getElementById(item.id);
+          if (element && element.getBoundingClientRect().top < 100) {
+            currentId = item.id;
+          }
+        });
+        tocLinks.forEach((link) => {
+          link.classList.toggle('active', link.getAttribute('href') === `#${currentId}`);
+        });
+      }
+      window.addEventListener('scroll', updateActiveToc, { passive: true });
+      updateActiveToc();
+    } else {
+      const toc = document.getElementById('table-of-contents') as HTMLElement;
+      toc.style.display = 'none';
+    }
+  }
+</script>

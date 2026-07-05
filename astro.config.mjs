@@ -1,34 +1,56 @@
-import { defineConfig } from "astro/config";
-import mdx from "@astrojs/mdx";
-import sitemap from "@astrojs/sitemap";
-import react from "@astrojs/react";
+// @ts-check
 
-import playformCompress from "@playform/compress";
+import mdx from '@astrojs/mdx';
+import partytown from '@astrojs/partytown';
+import sitemap from '@astrojs/sitemap';
+import compress from '@playform/compress';
+import { defineConfig } from 'astro/config';
+import expressiveCode from 'astro-expressive-code';
+import pagefind from 'astro-pagefind';
 
 // https://astro.build/config
 export default defineConfig({
-  cacheDir: "./cache",
-  compressHTML: true,
-  outDir: "./dist",
-  publicDir: "./public",
-  root: ".",
-  site: "https://ericcarlisle.com",
-  srcDir: "./src",
-  trailingSlash: "always",
-  type: "static",
-  build: {
-    format: "directory",
-    inlineStylesheets: "always"
+  site: 'https://ericcarlisle.com',
+  integrations: [
+    partytown({
+      config: {
+        forward: ['dataLayer.push'],
+      },
+    }),
+    expressiveCode({
+      themes: ['dark-plus'],
+      styleOverrides: {
+        codeFontFamily: 'var(--font-mono)',
+        uiFontFamily: 'var(--font-copy)',
+        borderRadius: 'var(--radius-md)',
+        frames: {
+          editorTabBarBackground: 'oklch(0.18 0.025 280)',
+          editorActiveTabBackground: 'oklch(0.12 0.015 280)',
+          terminalBackground: 'oklch(0.12 0.015 280)',
+        },
+      },
+      defaultProps: {
+        overridesByLang: {
+          bash: { frame: 'terminal' },
+          shell: { frame: 'terminal' },
+        },
+      },
+    }),
+    mdx(),
+    pagefind(),
+    sitemap(),
+    compress({
+      Image: false,
+    }),
+  ],
+  vite: {
+    resolve: {
+      alias: {
+        '@styles': '/src/styles',
+        '@images': '/src/assets/images',
+        '@components': '/src/components',
+        '@lib': '/src/lib',
+      },
+    },
   },
-  server: {
-    open: "/",
-    port: 3000,
-    host: true
-  },
-  devToolbar: {
-    enabled: false
-  },
-  integrations: [mdx(), sitemap(), react({
-    include: ['**/react/*']
-  }), playformCompress()]
 });

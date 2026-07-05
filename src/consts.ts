@@ -1,60 +1,15 @@
-export const SITE_TITLE = "Eric Carlisle : UI, UX Engineer"
-export const SITE_DESCRIPTION = "I am a technologist, innovator, and educator. My strongest areas of expertise are UI Development, UX Strategy, Mentoring, Speaking, and Making.";
-export const SITE_LOCALE = "en_US";
-export const SITE_NAME = "Eric Carlisle : UI, UX Engineer"
-export const SITE_LOGO_PATH = "/images/global/eric-carlisle-logo.png"
-export const TWITTER_SITE = "@eric_carlisle"
+export const SITE_TITLE = 'Eric Carlisle';
+export const SITE_DESCRIPTION =
+  'Principal Full-Stack Engineer & UX Architect. Technical deep-dives on web performance, accessibility, Astro, React, and modern CSS architecture.';
 
-export const MAIN_NAVIGATION = [
-  {
-    title: "About Me",
-    url: "/about",
-  },
-  {
-    title: "Posts",
-    url: "/posts",
-  },
-  {
-    title: "Portfolio",
-    url: "/portfolio",
-  },
-];
-
-export const SOCIAL_PROFILES = [
-  {
-    name: "GitHub",
-    url: "https://github.com/ecarlisle",
-  },
-  {
-    name: "LinkedIn",
-    url: "https://www.linkedin.com/in/ericcarlisle/",
-  },
-  {
-    name: "Mastodon",
-    url: "https://fosstodon.org/@ericcarlisle",
-  },
-  {
-    name: "Instagram",
-    url: "https://www.instagram.com/ericcarlisle/",
-  },
-];
-
-export const THREED_PRINTING_PROFILES = [
-	{
-    name: "Printables",
-    url: "https://www.printables.com/@EricCarlisle_1293126",
-  },
-	{
-    name: "Thingiverse",
-    url: "https://www.thingiverse.com/ecarlisle/designs",
-  },
-	{
-    name: "Tinkercad",
-    url: "https://www.tinkercad.com/users/cp60qc9UomJ-eric-carlisle",
-  },
-];
-
-export const GITHUB_DETAILS = {
-  repository: "https://github.com/ecarlisle/eleventy3.ericcarlisle.com",
-  branch: "/blob/main/",
-};
+export const AUTHOR_NAME = 'Eric Carlisle';
+export const AUTHOR_WEBSITE = 'https://ericcarlisle.com';
+export const AUTHOR_LINKEDIN = 'https://linkedin.com/in/ericcarlisle';
+export const AUTHOR_GITHUB = 'https://github.com/ecarlisle';
+export const AUTHOR_BLUESKY = 'https://bsky.app/profile/ericcarlisle.bsky.social';
+export const AUTHOR_MASTODON = 'https://fosstodon.org/@ericcarlisle';
+export const AUTHOR_AVATAR = '/eric-carlisle.webp';
+export const AUTHOR_JOB_TITLE = 'Principal Full-Stack Engineer & UX Architect';
+export const AUTHOR_ORG = 'Eric Carlisle Consulting';
+export const GA_MEASUREMENT_ID = 'G-70E1BWCFJ3';
+export const WEBMENTION_IO_DOMAIN = 'ericcarlisle.com';

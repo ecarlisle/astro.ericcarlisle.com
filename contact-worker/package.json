@@ -1,0 +1,18 @@
+{
+  "name": "ericcarlisle-contact-worker",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:prod": "wrangler deploy --env production",
+    "deploy:dev": "wrangler deploy --env development",
+    "typecheck": "tsc --noEmit",
+    "secrets": "wrangler secret put TURNSTILE_SECRET_KEY && wrangler secret put RESEND_API_KEY && wrangler secret put RESEND_FROM_EMAIL"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250401.0",
+    "typescript": "^5.8.0",
+    "wrangler": "^4.0.0"
+  }
+}
