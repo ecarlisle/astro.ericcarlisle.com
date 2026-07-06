@@ -51,8 +51,10 @@ jobs:
 
       - name: Check contact form public env presence
         run: |
-          test -n "$PUBLIC_TURNSTILE_SITE_KEY" && echo "Turnstile site key present" || echo "Turnstile site key missing"
-          test -n "$PUBLIC_CONTACT_API_URL" && echo "Contact API URL present" || echo "Contact API URL missing"
+          test -n "$PUBLIC_TURNSTILE_SITE_KEY" || (echo "Missing PUBLIC_TURNSTILE_SITE_KEY GitHub Actions variable" && exit 1)
+          test -n "$PUBLIC_CONTACT_API_URL" || (echo "Missing PUBLIC_CONTACT_API_URL GitHub Actions variable" && exit 1)
+          echo "Turnstile site key present"
+          echo "Contact API URL present: $PUBLIC_CONTACT_API_URL"
         env:
           PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
           PUBLIC_CONTACT_API_URL: ${{ vars.PUBLIC_CONTACT_API_URL }}
@@ -68,7 +70,9 @@ jobs:
         run: |
           echo "Checking contact form endpoint..."
           grep -o 'data-contact-api-url="[^"]*"' dist/contact/index.html || true
-          grep -o 'https://ericcarlisle-contact-worker.ericcarlisle.workers.dev' dist/contact/index.html
+          grep -o "$PUBLIC_CONTACT_API_URL" dist/contact/index.html
+        env:
+          PUBLIC_CONTACT_API_URL: ${{ vars.PUBLIC_CONTACT_API_URL }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
