@@ -119,12 +119,13 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
 
     .page-header {
       max-width: var(--layout-rail-prose);
-      margin: 0 auto var(--space-component-lg);
+      margin-bottom: var(--space-component-lg);
       padding-top: var(--space-component);
     }
 
     .page-header--article {
       max-width: 1020px;
+      margin-inline: auto;
     }
 
     .page-header--portfolio {
