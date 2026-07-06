@@ -39,11 +39,14 @@ export default defineConfig({
     mdx(),
     pagefind(),
     sitemap(),
-    compress({
-      Image: false,
-    }),
+    // compress({
+    //   Image: false,
+    // }),
   ],
   vite: {
+    css: {
+      transformer: 'postcss',
+    },
     resolve: {
       alias: {
         '@styles': '/src/styles',
