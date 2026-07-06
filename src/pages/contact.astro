@@ -9,10 +9,34 @@ const showTurnstileDevWarning = import.meta.env.DEV && !turnstileSiteKey;
 
 <Layout pageType="contact" title="Contact" description="Get in touch with the blog author.">
   {sent ? (
-    <p class="contact-success" role="status">Your message has been sent! Thank you for reaching out.</p>
+    <div class="prose contact-section">
+      <div
+        id="contact-success"
+        class="contact-success-card"
+        role="status"
+        tabindex="-1"
+      >
+        <div class="contact-success-icon" aria-hidden="true">🚀</div>
+        <h2>Message launched 🚀</h2>
+        <p>Thanks for reaching out. Your note is on its way to my inbox, and I&rsquo;ll get back to you soon.</p>
+        <p class="contact-success-note">Transmission received. Coffee-fueled reply pending.</p>
+      </div>
+    </div>
   ) : (
     <div class="prose contact-section">
       <p>Have a question, suggestion, or just want to say hi? Fill out the form below and I&rsquo;ll get back to you as soon as possible.</p>
+      <div
+        id="contact-success"
+        class="contact-success-card"
+        role="status"
+        tabindex="-1"
+        hidden
+      >
+        <div class="contact-success-icon" aria-hidden="true">🚀</div>
+        <h2>Message launched 🚀</h2>
+        <p>Thanks for reaching out. Your note is on its way to my inbox, and I&rsquo;ll get back to you soon.</p>
+        <p class="contact-success-note">Transmission received. Coffee-fueled reply pending.</p>
+      </div>
       <form
         action="/api/contact"
         method="POST"
@@ -72,6 +96,7 @@ const showTurnstileDevWarning = import.meta.env.DEV && !turnstileSiteKey;
         const form = document.getElementById('contact-form');
         const submitBtn = form?.querySelector('.contact-submit');
         const errorEl = document.getElementById('contact-error');
+        const successEl = document.getElementById('contact-success');
 
         if (form && submitBtn) {
           form.addEventListener('submit', async (e) => {
@@ -109,9 +134,19 @@ const showTurnstileDevWarning = import.meta.env.DEV && !turnstileSiteKey;
               });
               const data = await resp.json();
               if (resp.ok && data.ok) {
-                window.location.href = '/contact?sent=1';
+                form.hidden = true;
+
+                if (errorEl) {
+                  errorEl.hidden = true;
+                  errorEl.textContent = '';
+                }
+
+                if (successEl) {
+                  successEl.hidden = false;
+                  successEl.focus();
+                }
               } else {
-                throw new Error(data.error || 'Failed to send message');
+                throw new Error(data.error || `Failed to send message (${resp.status})`);
               }
             } catch (err) {
               if (errorEl) {
@@ -193,10 +228,39 @@ const showTurnstileDevWarning = import.meta.env.DEV && !turnstileSiteKey;
     margin: 0;
   }
 
-  .contact-success {
-    font-size: var(--type-size-large);
-    margin-top: var(--space-section);
-    text-align: center;
-    color: var(--color-success);
+  .contact-success-card {
+    padding: var(--space-component);
+    background: var(--bg-surface);
+    border: var(--size-border-pixel) solid var(--border-main);
+    border-left: var(--size-border-thick) solid var(--color-success);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+  }
+
+  .contact-success-icon {
+    font-size: var(--type-size-h2);
+    line-height: 1;
+  }
+
+  .contact-success-card h2 {
+    margin: 0;
+    font-size: var(--type-size-h2);
+    line-height: var(--line-height-h2);
+    color: var(--text-primary);
+  }
+
+  .contact-success-card p {
+    margin: 0;
+    color: var(--text-secondary);
+  }
+
+  .contact-success-card > * + * {
+    margin-top: var(--space-component);
+  }
+
+  .contact-success-note {
+    font-size: var(--type-size-small);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
   }
 </style>
