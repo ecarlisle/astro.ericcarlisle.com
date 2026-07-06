@@ -6,18 +6,18 @@
 // backticks inside the double-quoted echo trigger bash command substitution,
 // which both corrupts tool output and silently executes the very graphify
 // command we are only suggesting. Plain words render fine in opencode's TUI.
-import { existsSync } from "fs";
-import { join } from "path";
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 export const GraphifyPlugin = async ({ directory }) => {
   let reminded = false;
 
   return {
-    "tool.execute.before": async (input, output) => {
+    'tool.execute.before': async (input, output) => {
       if (reminded) return;
-      if (!existsSync(join(directory, "graphify-out", "graph.json"))) return;
+      if (!existsSync(join(directory, 'graphify-out', 'graph.json'))) return;
 
-      if (input.tool === "bash") {
+      if (input.tool === 'bash') {
         // ';' not '&&' — Windows PowerShell 5.1 rejects '&&' as a statement
         // separator, breaking the first bash command of the session (#1646).
         output.args.command =

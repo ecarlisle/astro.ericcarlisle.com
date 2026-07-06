@@ -106,11 +106,7 @@ async function verifyTurnstile(
 }
 
 async function sendEmail(body: ContactBody, env: Env): Promise<Response | null> {
-  const {
-    RESEND_API_KEY: resendKey,
-    RESEND_FROM_EMAIL: fromEmail,
-    RESEND_TO_EMAIL: toEmail,
-  } = env;
+  const { RESEND_API_KEY: resendKey, RESEND_FROM_EMAIL: fromEmail, RESEND_TO_EMAIL: toEmail } = env;
 
   const name = escapeHtml(body.name);
   const email = escapeHtml(body.email);

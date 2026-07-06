@@ -8,7 +8,8 @@
     "deploy:prod": "wrangler deploy --env production",
     "deploy:dev": "wrangler deploy --env development",
     "typecheck": "tsc --noEmit",
-    "secrets": "wrangler secret put TURNSTILE_SECRET_KEY && wrangler secret put RESEND_API_KEY && wrangler secret put RESEND_FROM_EMAIL && wrangler secret put RESEND_TO_EMAIL"  },
+    "secrets": "wrangler secret put TURNSTILE_SECRET_KEY && wrangler secret put RESEND_API_KEY && wrangler secret put RESEND_FROM_EMAIL && wrangler secret put RESEND_TO_EMAIL"
+  },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250401.0",
     "typescript": "^5.8.0",
