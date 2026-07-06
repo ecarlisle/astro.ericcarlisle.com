@@ -66,8 +66,9 @@ jobs:
 
       - name: Verify contact endpoint in built output
         run: |
-          grep -R "data-contact-api-url" dist/contact/index.html || true
-          grep -R "ericcarlisle-contact-worker.ericcarlisle.workers.dev" dist/contact/index.html
+          echo "Checking contact form endpoint..."
+          grep -o 'data-contact-api-url="[^"]*"' dist/contact/index.html || true
+          grep -o 'https://ericcarlisle-contact-worker.ericcarlisle.workers.dev' dist/contact/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
