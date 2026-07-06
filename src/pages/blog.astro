@@ -7,7 +7,7 @@ import PostGrid from '@components/PostGrid.astro';
 import TagFilterBar from '@components/TagFilterBar.astro';
 import '@styles/feed.css';
 import { computeTagData, getSortedPosts, PAGE_SIZE } from '@lib/blog-utils';
-import { AUTHOR_NAME, SITE_TITLE } from '../consts';
+import { AUTHOR_NAME } from '../consts';
 
 const allPosts = await getSortedPosts();
 const posts = allPosts.slice(0, PAGE_SIZE);
@@ -19,7 +19,7 @@ const tagData = computeTagData(allPosts);
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead title={`Blog — ${SITE_TITLE}`} description="All blog posts" pageType="collection" />
+    <BaseHead title="Blog" description="Articles on frontend architecture, web performance, accessibility, and modern CSS from Principal Frontend Engineer Eric Carlisle." pageType="collection" />
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>

@@ -7,7 +7,7 @@ import Header from '@components/Header.astro';
 import '@styles/feed.css';
 import { getSortedPosts } from '@lib/blog-utils';
 import { getPostWordCount } from '@lib/word-count';
-import { AUTHOR_NAME, SITE_TITLE } from '../../consts';
+import { AUTHOR_NAME } from '../../consts';
 
 export async function getStaticPaths() {
   const posts = await getSortedPosts();
@@ -27,7 +27,7 @@ const title = `Tagged: ${tag}`;
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead title={`${title} — ${SITE_TITLE}`} description={`Posts tagged with "${tag}"`} pageType="collection" />
+    <BaseHead title={title} description={`Posts tagged with "${tag}"`} pageType="collection" />
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>

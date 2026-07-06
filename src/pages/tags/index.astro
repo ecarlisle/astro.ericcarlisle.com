@@ -3,7 +3,6 @@ import BaseHead from '@components/BaseHead.astro';
 import Footer from '@components/Footer.astro';
 import Header from '@components/Header.astro';
 import { getSortedPosts } from '@lib/blog-utils';
-import { SITE_TITLE } from '../../consts';
 
 const posts = await getSortedPosts();
 
@@ -27,7 +26,7 @@ const schemaPosts = posts.map((p) => ({
 <html lang="en">
   <head>
     <BaseHead
-      title={`${title} — ${SITE_TITLE}`}
+      title={title}
       description={`Browse all ${allTags.length} topic tags across ${posts.length} posts.`}
       pageType="collection"
       collectionType="tags-index"

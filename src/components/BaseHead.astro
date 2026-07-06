@@ -35,7 +35,16 @@ interface Props {
   robots?: string;
 }
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+// Normalize canonical URLs to trailing-slash style for consistency.
+// Leaves root path (/) and file paths unchanged.
+function ensureTrailingSlash(url: URL): URL {
+  const pathname = url.pathname;
+  if (pathname === '/' || pathname.includes('.')) return url;
+  const normalized = pathname.endsWith('/') ? pathname : `${pathname}/`;
+  return new URL(normalized, url.origin);
+}
+
+const canonicalURL = ensureTrailingSlash(new URL(Astro.url.pathname, Astro.site));
 
 const {
   title,
@@ -54,6 +63,13 @@ const {
   twitterHandle,
   robots = 'index, follow',
 } = Astro.props;
+
+// Format title: homepage keeps custom title; all other pages use "Page Title | Eric Carlisle".
+// If a page already includes the site title (e.g. "Blog — Eric Carlisle"), strip it and re-format.
+const pageTitle =
+  pageType === 'homepage'
+    ? title
+    : `${title.replace(/\s*[—–-]\s*(Eric Carlisle)?\s*$/, '').trim()} | ${SITE_TITLE}`;
 ---
 
 <!-- Theme: apply stored preference before first paint to prevent flash -->
@@ -86,8 +102,8 @@ const {
 <link rel="canonical" href={canonicalURL} />
 
 <!-- Primary Meta Tags -->
-<title>{title}</title>
-<meta name="title" content={title} />
+<title>{pageTitle}</title>
+<meta name="title" content={pageTitle} />
 <meta name="description" content={description} />
 <meta name="robots" content={robots} />
 
@@ -101,10 +117,10 @@ const {
 {pageType === 'article' && updatedDate && (
   <meta property="article:modified_time" content={updatedDate.toISOString()} />
 )}
-<meta property="og:url" content={Astro.url} />
-<meta property="og:title" content={socialTitle ?? title} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={socialTitle ?? pageTitle} />
 <meta property="og:description" content={socialDescription ?? description} />
-<meta property="og:image" content={new URL(image.src, Astro.url)} />
+<meta property="og:image" content={new URL(image.src, canonicalURL)} />
 <meta property="og:image:width" content={String(image.width)} />
 <meta property="og:image:height" content={String(image.height)} />
 {pageType === 'article' && (<meta property="article:author" content="Eric Carlisle" />)}
@@ -114,10 +130,10 @@ const {
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:url" content={Astro.url} />
-<meta property="twitter:title" content={socialTitle ?? title} />
+<meta property="twitter:url" content={canonicalURL} />
+<meta property="twitter:title" content={socialTitle ?? pageTitle} />
 <meta property="twitter:description" content={socialDescription ?? description} />
-<meta property="twitter:image" content={new URL(image.src, Astro.url)} />
+<meta property="twitter:image" content={new URL(image.src, canonicalURL)} />
 {twitterHandle && (<meta property="twitter:site" content={twitterHandle} />)}
 {twitterHandle && pageType === 'article' && (
   <meta property="twitter:creator" content={twitterHandle} />
@@ -134,7 +150,7 @@ const {
     title={title}
     description={socialDescription ?? description}
     url={canonicalURL.toString()}
-    image={new URL(image.src, Astro.url).toString()}
+    image={new URL(image.src, canonicalURL).toString()}
     imageWidth={image.width}
     imageHeight={image.height}
     collectionType={collectionType}

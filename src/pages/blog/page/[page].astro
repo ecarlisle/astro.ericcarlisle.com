@@ -7,7 +7,7 @@ import PostGrid from '@components/PostGrid.astro';
 import TagFilterBar from '@components/TagFilterBar.astro';
 import '@styles/feed.css';
 import { computeTagData, getSortedPosts, PAGE_SIZE } from '@lib/blog-utils';
-import { AUTHOR_NAME, SITE_TITLE } from '../../../consts';
+import { AUTHOR_NAME } from '../../../consts';
 
 export async function getStaticPaths({
   paginate,
@@ -32,7 +32,7 @@ const tagData = computeTagData(allPosts);
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead title={`Blog — Page ${page.currentPage} — ${SITE_TITLE}`} description={`Blog posts page ${page.currentPage}`} pageType="collection" />
+    <BaseHead title={`Blog — Page ${page.currentPage}`} description={`Blog posts page ${page.currentPage}`} pageType="collection" />
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>

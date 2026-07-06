@@ -2,13 +2,12 @@
 import BaseHead from '@components/BaseHead.astro';
 import Footer from '@components/Footer.astro';
 import Header from '@components/Header.astro';
-import { SITE_TITLE } from '../consts';
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead title={`404 — ${SITE_TITLE}`} description="Page not found." pageType="not-found" robots="noindex" />
+    <BaseHead title="404" description="Page not found." pageType="not-found" robots="noindex" />
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>

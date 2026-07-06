@@ -87,7 +87,15 @@ const websiteEntity = {
   publisher: { '@id': `${siteUrl}/#person` },
 };
 
-const graphArray: object[] = [personEntity, websiteEntity];
+const blogEntity = {
+  '@type': 'Blog',
+  '@id': `${siteUrl}/#blog`,
+  url: `${siteUrl}/blog/`,
+  name: 'Blog',
+  publisher: { '@id': `${siteUrl}/#person` },
+};
+
+const graphArray: object[] = [personEntity, websiteEntity, blogEntity];
 
 switch (type) {
   case 'homepage':
@@ -163,7 +171,7 @@ switch (type) {
       '@id': breadcrumbId,
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
-        { '@type': 'ListItem', position: 2, name: 'Blog', item: `${siteUrl}/blog` },
+        { '@type': 'ListItem', position: 2, name: 'Blog', item: `${siteUrl}/blog/` },
         { '@type': 'ListItem', position: 3, name: title, item: url },
       ],
     };
@@ -191,7 +199,12 @@ switch (type) {
           datePublished: pubDate.toISOString(),
           dateModified: (updatedDate ?? pubDate).toISOString(),
         }),
-        ...(tags && tags.length > 0 && { articleSection: tags.join(', ') }),
+        ...(tags &&
+          tags.length > 0 && {
+            articleSection: tags.join(', '),
+            keywords: tags.join(', '),
+          }),
+        isPartOf: { '@id': `${siteUrl}/#blog` },
         ...(wordCount && { wordCount }),
         ...(wordCount && { timeRequired: `PT${Math.ceil(wordCount / 200)}M` }),
         author: { '@id': `${siteUrl}/#person` },
