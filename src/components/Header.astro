@@ -192,6 +192,29 @@ import ThemeToggle from './ThemeToggle.astro';
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 0.2em;
+    }
+
+    .menu-toggle::after {
+      content: '';
+      display: inline-block;
+      width: 0.35em;
+      height: 0.35em;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg);
+      margin-bottom: 0.15em;
+      transition: transform var(--transition-fast);
+    }
+
+    .menu-toggle[aria-expanded='true']::after {
+      transform: rotate(-135deg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .menu-toggle::after {
+        transition: none;
+      }
     }
 
     .nav-controls {
@@ -244,7 +267,6 @@ import ThemeToggle from './ThemeToggle.astro';
 
   function setMenuOpen(open: boolean): void {
     menuToggle.setAttribute('aria-expanded', String(open));
-    menuToggle.textContent = open ? 'Close' : 'Menu';
     header.toggleAttribute('data-menu-open', open);
   }
 
