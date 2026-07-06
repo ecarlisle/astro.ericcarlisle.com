@@ -99,19 +99,19 @@ If a requested task appears to require changes to one of these files, stop and a
 ## Skills
 
 For implementation work, always consult:
-- .skills/agent-safe-change.md
-- .skills/astro-static-implementation.md
-- .skills/performance-budget.md
+- .skills/agent-safe-change/SKILL.md
+- .skills/astro-static-implementation/SKILL.md
+- .skills/performance-budget/SKILL.md
 
 For UI work, also consult:
-- .skills/accessibility-review.md
-- .skills/design-system-css.md
+- .skills/accessibility/SKILL.md
+- .skills/design-system-css/SKILL.md
 
 For search work, also consult:
-- .skills/pagefind-search.md
+- .skills/pagefind-search/SKILL.md
 
 For metadata/content routes, also consult:
-- .skills/seo-content-metadata.md
+- .skills/seo-review/SKILL.md
 
 ## graphify
 
