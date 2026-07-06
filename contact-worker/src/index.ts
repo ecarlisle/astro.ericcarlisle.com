@@ -2,6 +2,7 @@ export interface Env {
   TURNSTILE_SECRET_KEY: string;
   RESEND_API_KEY: string;
   RESEND_FROM_EMAIL: string;
+  RESEND_TO_EMAIL: string;
 }
 
 interface ContactBody {
@@ -105,7 +106,11 @@ async function verifyTurnstile(
 }
 
 async function sendEmail(body: ContactBody, env: Env): Promise<Response | null> {
-  const { RESEND_API_KEY: resendKey, RESEND_FROM_EMAIL: fromEmail } = env;
+  const {
+    RESEND_API_KEY: resendKey,
+    RESEND_FROM_EMAIL: fromEmail,
+    RESEND_TO_EMAIL: toEmail,
+  } = env;
 
   const name = escapeHtml(body.name);
   const email = escapeHtml(body.email);
@@ -119,7 +124,7 @@ async function sendEmail(body: ContactBody, env: Env): Promise<Response | null> 
     },
     body: JSON.stringify({
       from: fromEmail,
-      to: fromEmail,
+      to: toEmail,
       subject: `[Contact] ${body.subject}`,
       reply_to: body.email,
       html: `
