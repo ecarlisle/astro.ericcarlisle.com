@@ -141,6 +141,11 @@ const showTurnstileDevWarning = import.meta.env.DEV && !turnstileSiteKey;
                   errorEl.textContent = '';
                 }
 
+                if (submitBtn) {
+                  submitBtn.disabled = false;
+                  submitBtn.textContent = 'Send Message';
+                }
+
                 if (successEl) {
                   successEl.hidden = false;
                   successEl.focus();
