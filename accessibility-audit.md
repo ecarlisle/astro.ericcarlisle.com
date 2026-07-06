@@ -1,7 +1,7 @@
 # Accessibility Audit
 
 **Project**: AstroBlog — Eric Carlisle's personal site
-**Date**: 2026-07-04
+**Date**: 2026-07-06 (initial: 2026-07-04)
 **Standard**: WCAG 2.2 AA
 **Auditor**: Automated (Lighthouse 13) + manual code review
 
@@ -11,8 +11,8 @@
 
 The site is in strong accessibility shape. Lighthouse reports 100/100 on every tested page. Manual review confirms clean semantic structure, consistent ARIA usage, proper keyboard behavior, and good color contrast throughout. No critical or high-severity issues were found.
 
-**Issues found**: 1 medium, 3 low, 2 advisory
-**Fixes applied**: 2
+**Issues found (cumulative)**: 2 medium, 5 low, 3 advisory
+**Fixes applied (cumulative)**: 8
 
 ---
 
@@ -77,7 +77,7 @@ The site is in strong accessibility shape. Lighthouse reports 100/100 on every t
 - **Why it matters**: Heading navigation users may be confused by an unexpected h2 before the page h1.
 - **Suggested fix**: Replace `<h2>` with a `<span>` or `<div>` for the site title wrapper, keeping `aria-label` semantics. Alternatively, keep the `<h2>` but ensure it's not announced as a heading (would need `role="presentation"` which breaks the semantic meaning). Not essential — many authoritative sites use this pattern.
 - **WCAG**: 1.3.1 Info and Relationships (A) — debatable violation
-- **Status**: Documented, not fixed (major change requiring design sign-off)
+- **Status**: ✅ Fixed (2026-07-06)
 
 #### L3. Empty `<div />` placeholders in PaginationNav
 
@@ -109,6 +109,57 @@ The site is in strong accessibility shape. Lighthouse reports 100/100 on every t
 
 ---
 
+### New Findings (2026-07-06)
+
+#### M2. 404 page's only `<h1>` hidden from assistive technology
+
+- **File**: `src/pages/404.astro` (line 16)
+- **Issue**: The page's only `<h1>` element has `aria-hidden="true"`, making it inaccessible to screen readers. Screen reader users navigating by heading get no page-level heading, making it harder to understand the page context.
+- **Why it matters**: Every page must have one accessible `<h1>`. Without it, screen reader users lose a key orientation landmark. The visible "404" text is the primary heading but is hidden from AT.
+- **Fixed**: Restructured so "Page not found" is the `<h1>` and "404" is decorative (`<p aria-hidden="true">`).
+- **WCAG**: 1.3.1 Info and Relationships (A)
+- **Status**: ✅ Fixed
+
+#### L4. Webmention avatar links use `title` instead of `aria-label`
+
+- **File**: `src/components/Webmentions.astro` (lines 52, 71)
+- **Issue**: Avatar links for reposts and likes use `title` attribute for their accessible name. The `title` attribute is not reliably exposed as an accessible name across all browsers and assistive technologies.
+- **Why it matters**: Icon-only links must have a reliable accessible name. Screen reader users may hear an unlabeled link if `title` is not supported.
+- **Fixed**: Changed `title` to `aria-label` on all webmention avatar links.
+- **WCAG**: 4.1.2 Name, Role, Value (A)
+- **Status**: ✅ Fixed
+
+#### L5. Portfolio repository links open in new tab without announcement
+
+- **File**: `src/pages/portfolio.astro` (lines 43–63)
+- **Issue**: Five external repository links use `target="_blank"` but do not inform users that they open in a new tab.
+- **Why it matters**: Screen reader and cognitive accessibility users need advance warning when a link opens a new context.
+- **Fixed**: Added visually hidden `<span class="sr-only"> (opens in new tab)</span>` to each repo link.
+- **WCAG**: 3.2.2 On Input (A) — advisory precedent
+- **Status**: ✅ Fixed
+
+#### L6. Contact form focus styles use `:focus` where `:focus-visible` would be better
+
+- **File**: `src/pages/contact.astro` (line 204–209)
+- **Issue**: Contact form input focus styles use `:focus` with `outline: none`, overriding the global `:focus-visible` dashed outline. The custom border/box-shadow focus indicator is applied on all focus (mouse and keyboard), but mouse users don't need a persistent focus ring.
+- **Why it matters**: `:focus-visible` ensures focus indicators appear only when the browser determines they are needed (typically keyboard navigation). This prevents visual clutter for mouse users while preserving a clear focus indicator for keyboard users.
+- **Fixed**: Changed `.contact-form input:focus, .contact-form textarea:focus` to `:focus-visible`.
+- **WCAG**: 2.4.7 Focus Visible (AA)
+- **Status**: ✅ Fixed
+
+### Advisory
+
+#### A3. Footer social links lack a navigation landmark
+
+- **File**: `src/components/Footer.astro` (line 9)
+- **Issue**: Social links in the footer are wrapped in a `<div>` without a landmark, making them less discoverable for screen reader users who navigate by landmark.
+- **Why it matters**: While the `<footer>` element provides a contentinfo landmark, adding a `<nav aria-label="Social links">` provides an additional navigation landmark that advanced users can jump to directly.
+- **Fixed**: Changed `<div class="social-links">` to `<nav aria-label="Social links" class="social-links">`.
+- **WCAG**: 1.3.1 Info and Relationships (A) — enhancement
+- **Status**: ✅ Fixed
+
+---
+
 ## Fixes Applied
 
 ### Fix 1: Contact success message live region
@@ -130,6 +181,60 @@ The site is in strong accessibility shape. Lighthouse reports 100/100 on every t
 - <div class="filter-bar">
 + <div class="filter-bar" role="group" aria-label="Post tags">
 ```
+
+### Fix 3: 404 page heading hierarchy
+
+**File**: `src/pages/404.astro`
+**Change**: Moved `<h1>` from decorative "404" text to meaningful "Page not found" text. The "404" number is now decorative with `aria-hidden`.
+
+```diff
+- <h1 class="not-found-code" aria-hidden="true">404</h1>
+- <p class="not-found-label">Page not found</p>
++ <p class="not-found-code" aria-hidden="true">404</p>
++ <h1 class="not-found-label">Page not found</h1>
+```
+
+### Fix 4: Webmention avatar links accessible names
+
+**File**: `src/components/Webmentions.astro`
+**Change**: Replaced `title` with `aria-label` on avatar links for reposts and likes.
+
+### Fix 5: Portfolio repository links announce new tab
+
+**File**: `src/pages/portfolio.astro`
+**Change**: Added `<span class="sr-only"> (opens in new tab)</span>` to five external repo links.
+
+### Fix 6: Contact form keyboard focus indicator
+
+**File**: `src/pages/contact.astro`
+**Change**: Changed `:focus` to `:focus-visible` on form input and textarea selectors.
+
+```diff
+- .contact-form input:focus,
+- .contact-form textarea:focus {
++ .contact-form input:focus-visible,
++ .contact-form textarea:focus-visible {
+```
+
+### Fix 7: Header site title heading level
+
+**File**: `src/components/Header.astro`
+**Change**: Replaced `<h2>` wrapper with `<span class="site-title-wrapper">` to fix heading outline order (previously h2 appeared before every page's h1).
+
+```diff
+- <h2><a href="/" class="site-title">{SITE_TITLE}</a></h2>
++ <span class="site-title-wrapper"><a href="/" class="site-title">{SITE_TITLE}</a></span>
+```
+
+### Fix 8: Footer social links landmark
+
+**File**: `src/components/Footer.astro`
+**Change**: Wrapped social links in `<nav aria-label="Social links">`.
+
+```diff
+- <div class="social-links">
++ <nav aria-label="Social links" class="social-links">
+
 
 ---
 
@@ -158,7 +263,12 @@ No contrast failures found.
 | ----- | ------ | ------ | ------ |
 | Add `role="status"` to contact success message | Minutes | Medium | ✅ Fixed |
 | Consistent group ARIA on tag filter | Minutes | Low | ✅ Fixed |
-| Replace `<h2>` site title with `<span>` | Small | Low | Deferred |
+| Replace `<h2>` site title with `<span>` | Small | Low | ✅ Fixed |
+| 404 page h1 hidden from AT | Minutes | Medium | ✅ Fixed |
+| Webmention avatar `title` → `aria-label` | Minutes | Low | ✅ Fixed |
+| Portfolio repo links announce new tab | Minutes | Low | ✅ Fixed |
+| Contact form `:focus` → `:focus-visible` | Minutes | Low | ✅ Fixed |
+| Footer social links nav landmark | Minutes | Advisory | ✅ Fixed |
 | Remove empty `<div />` in PaginationNav | Small | Very low | Deferred |
 
 ---
@@ -178,7 +288,7 @@ No contrast failures found.
 
 The site meets a high standard of accessibility with Lighthouse 100/100 across all tested pages. The two small fixes applied improve the contact form and tag filter semantics. No further urgent work is needed, but the following would strengthen the accessibility posture:
 
-1. **Deferred quick wins** (low effort): Replace `<h2>` site branding with `<span>` to clean up heading outline; clean up empty `<div>` in PaginationNav.
+1. **Deferred quick wins** (low effort): Clean up empty `<div>` in PaginationNav.
 2. **Manual QA** (medium effort): Screen reader walkthrough of key flows (home → blog → article, contact form submit).
 3. **Production verification** (low effort): Verify Pagefind and Turnstile accessibility in the live environment, as they are third-party components that may differ from static build.
 
@@ -186,10 +296,16 @@ The site meets a high standard of accessibility with Lighthouse 100/100 across a
 
 ## Files Changed (Fixes)
 
-- `src/pages/contact.astro` — added `role="status"` to success message
+- `src/pages/contact.astro` — added `role="status"` to success message; changed `:focus` to `:focus-visible`
 - `src/components/TagFilterBar.astro` — added `role="group" aria-label="Post tags"` to `hasTags` branch
+- `src/pages/404.astro` — restructured heading hierarchy
+- `src/components/Webmentions.astro` — `title` → `aria-label` on avatar links
+- `src/pages/portfolio.astro` — added new tab announcement to repo links
+- `src/components/Footer.astro` — added `nav` landmark for social links
+- `src/components/Header.astro` — replaced `<h2>` with `<span>` for site title
 
 ## Validation
 
-- `pnpm biome check src/` — 0 errors, 0 warnings
-- `pnpm build` — 42 pages built successfully
+- `pnpm typecheck` — 0 errors
+- `pnpm lint` — 0 errors, 0 warnings
+- `pnpm build` — all pages built successfully
