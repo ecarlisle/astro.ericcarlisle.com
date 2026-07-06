@@ -349,26 +349,6 @@ a:hover {
   color: var(--color-link-hover);
 }
 
-.prose a {
-  text-decoration: underline;
-  text-decoration-color: color-mix(in oklch, var(--color-link) 35%, transparent);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 0.2em;
-  transition:
-    color var(--transition-fast),
-    text-decoration-color var(--transition-fast);
-}
-
-.prose a:hover {
-  color: var(--color-link-hover);
-  text-decoration-color: var(--color-link-hover);
-}
-
-.prose a:focus-visible {
-  outline: var(--size-border-pixel) dashed var(--color-focus);
-  outline-offset: 4px;
-}
-
 .prose {
   margin-inline: auto;
 }
@@ -390,21 +370,6 @@ p {
 .prose h2 {
   margin-top: var(--space-xl);
   scroll-margin-top: calc(var(--header-height, 4.5rem) + var(--space-component));
-}
-
-.prose h2::before,
-.collection-header h1::before,
-.collection-header h2::before {
-  content: "";
-  display: inline-block;
-  width: 0.4em;
-  height: 0.4em;
-  margin-right: 0.55em;
-  margin-bottom: 0.1em;
-  background: color-mix(in oklch, var(--brand-accent) 80%, transparent);
-  border-radius: 1px;
-  transform: rotate(45deg);
-  vertical-align: middle;
 }
 
 .prose h3 {

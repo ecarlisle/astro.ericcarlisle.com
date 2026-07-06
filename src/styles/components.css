@@ -10,24 +10,6 @@
     border-color var(--transition-normal);
 }
 
-.card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: var(--space-component);
-  right: var(--space-component);
-  height: var(--size-border-pixel);
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    color-mix(in oklch, var(--color-link) 35%, transparent) 25%,
-    color-mix(in oklch, var(--color-link) 35%, transparent) 75%,
-    transparent 100%
-  );
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-  pointer-events: none;
-}
-
 .card .card-title {
   margin: 0;
   font-size: var(--type-size-card-title);
