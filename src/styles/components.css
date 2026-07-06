@@ -2,7 +2,7 @@
   position: relative;
   padding: var(--space-component);
   background: var(--color-card-bg);
-  border: var(--size-border-pixel) solid var(--bg-surface-elevated);
+  border: var(--size-border-pixel) solid var(--color-card-border);
   border-radius: var(--radius-lg);
   transition:
     transform var(--transition-normal),
@@ -24,8 +24,7 @@
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px oklch(0 0 0 / 0.15);
+  box-shadow: var(--shadow-lg);
   border-color: var(--color-action);
 }
 
@@ -46,10 +45,6 @@
   height: auto;
   aspect-ratio: 2 / 1;
   transition: transform var(--transition-slow);
-}
-
-.card:hover .card-image img {
-  transform: scale(1.03);
 }
 
 .callout {
@@ -161,6 +156,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: var(--size-touch-target-min);
   padding: var(--space-inline) var(--space-component);
   border-radius: var(--radius-md);
   background: var(--color-action);
@@ -180,8 +176,7 @@
 .button:hover {
   background: var(--color-action-hover);
   color: var(--bg-surface);
-  box-shadow: 0 4px 12px oklch(0 0 0 / 0.2);
-  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .post-nav {
@@ -338,5 +333,22 @@
 @media (max-width: 720px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ========================================================================
+   Motion-only hover effects — respect prefers-reduced-motion
+   ======================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  .card:hover {
+    transform: translateY(-4px);
+  }
+
+  .card:hover .card-image img {
+    transform: scale(1.03);
+  }
+
+  .button:hover {
+    transform: translateY(-1px);
   }
 }

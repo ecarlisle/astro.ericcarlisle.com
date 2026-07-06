@@ -104,6 +104,11 @@
   --transition-normal: 0.25s ease-out;
   --transition-slow: 0.4s ease-out;
 
+  /* Semantic shadow tokens */
+  --shadow-sm: 0 2px 8px oklch(0 0 0 / 0.15);
+  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.2);
+  --shadow-lg: 0 8px 24px oklch(0 0 0 / 0.22);
+
   /* Structural sizing tokens */
   --size-border-pixel: 2px;
   --size-border-thick: 4px;
@@ -268,8 +273,8 @@ main {
 }
 
 :focus-visible {
-  outline: var(--size-border-pixel) dashed var(--color-focus);
-  outline-offset: 4px;
+  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+  outline-offset: var(--focus-outline-offset);
 }
 
 ::selection {
@@ -354,7 +359,7 @@ a:hover {
 }
 
 p {
-  margin-bottom: var(--space-component);
+  margin: 0 0 var(--space-component);
 }
 
 .prose p,
