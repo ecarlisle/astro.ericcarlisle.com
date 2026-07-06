@@ -1,0 +1,205 @@
+{
+  "generatedAt": "2026-07-06T15:55:34.009Z",
+  "summary": {
+    "pagesScanned": 13,
+    "totalJsonLdBlocks": 11,
+    "topLevelEntityTypes": 10,
+    "nestedSupportingTypes": 4,
+    "pagesWithJsonLd": 11,
+    "pagesWithoutJsonLd": 2,
+    "parseErrors": 0
+  },
+  "topLevelTypeCoverage": {
+    "Blog": 11,
+    "Person": 11,
+    "WebSite": 11,
+    "CollectionPage": 5,
+    "BlogPosting": 2,
+    "BreadcrumbList": 2,
+    "WebPage": 2,
+    "ProfilePage": 1,
+    "ContactPage": 1,
+    "SearchResultsPage": 1
+  },
+  "nestedTypeCoverage": {
+    "ImageObject": 11,
+    "Organization": 11,
+    "BreadcrumbList": 3,
+    "ItemList": 1
+  },
+  "perPage": [
+    {
+      "url": "/404.html/",
+      "blocks": 1,
+      "topLevel": [
+        "Blog",
+        "Person",
+        "WebSite"
+      ],
+      "nested": [
+        "ImageObject",
+        "Organization"
+      ]
+    },
+    {
+      "url": "/about/",
+      "blocks": 1,
+      "topLevel": [
+        "Blog",
+        "Person",
+        "ProfilePage",
+        "WebSite"
+      ],
+      "nested": [
+        "ImageObject",
+        "Organization"
+      ]
+    },
+    {
+      "url": "/blog/250mm-trading-card-box/",
+      "blocks": 1,
+      "topLevel": [
+        "Blog",
+        "BlogPosting",
+        "BreadcrumbList",
+        "Person",
+        "WebPage",
+        "WebSite"
+      ],
+      "nested": [
+        "ImageObject",
+        "Organization"
+      ]
+    },
+    {
+      "url": "/blog/",
+      "blocks": 1,
+      "topLevel": [
+        "Blog",
+        "CollectionPage",
+        "Person",
+        "WebSite"
+      ],
+      "nested": [
+        "BreadcrumbList",
+        "ImageObject",
+        "Organization"
+      ]
+    },
+    {
+      "url": "/blog/why-do-i-need-all-this-usb-and-sd-media-holder/",
+      "blocks": 1,
+      "topLevel": [
+        "Blog",
+        "BlogPosting",
+        "BreadcrumbList",
+        "Person",
+        "WebPage",
+        "WebSite"
+      ],
+      "nested": [
+        "ImageObject",
+        "Organization"
+      ]
+    },
+    {
+      "url": "/contact/",
+      "blocks": 1,
+      "topLevel": [
+        "Blog",
+        "ContactPage",
+        "Person",
+        "WebSite"
+      ],
+      "nested": [
+        "ImageObject",
+        "Organization"
+      ]
+    },
+    {
+      "url": "/",
+      "blocks": 1,
+      "topLevel": [
+        "Blog",
+        "CollectionPage",
+        "Person",
+        "WebSite"
+      ],
+      "nested": [
+        "ImageObject",
+        "Organization"
+      ]
+    },
+    {
+      "url": "/portfolio/",
+      "blocks": 1,
+      "topLevel": [
+        "Blog",
+        "CollectionPage",
+        "Person",
+        "WebSite"
+      ],
+      "nested": [
+        "ImageObject",
+        "Organization"
+      ]
+    },
+    {
+      "url": "/posts/3d-printing/250mm-trading-card-box/",
+      "blocks": 0,
+      "topLevel": [],
+      "nested": []
+    },
+    {
+      "url": "/posts/3d-printing/why-do-i-need-all-this-usb-and-sd-media-holder/",
+      "blocks": 0,
+      "topLevel": [],
+      "nested": []
+    },
+    {
+      "url": "/search/",
+      "blocks": 1,
+      "topLevel": [
+        "Blog",
+        "Person",
+        "SearchResultsPage",
+        "WebSite"
+      ],
+      "nested": [
+        "ImageObject",
+        "Organization"
+      ]
+    },
+    {
+      "url": "/tags/3d-printing/",
+      "blocks": 1,
+      "topLevel": [
+        "Blog",
+        "CollectionPage",
+        "Person",
+        "WebSite"
+      ],
+      "nested": [
+        "BreadcrumbList",
+        "ImageObject",
+        "Organization"
+      ]
+    },
+    {
+      "url": "/tags/",
+      "blocks": 1,
+      "topLevel": [
+        "Blog",
+        "CollectionPage",
+        "Person",
+        "WebSite"
+      ],
+      "nested": [
+        "BreadcrumbList",
+        "ImageObject",
+        "ItemList",
+        "Organization"
+      ]
+    }
+  ]
+}
