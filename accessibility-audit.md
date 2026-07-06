@@ -11,7 +11,7 @@
 
 The site is in strong accessibility shape. Lighthouse reports 100/100 on every tested page. Manual review confirms clean semantic structure, consistent ARIA usage, proper keyboard behavior, and good color contrast throughout. No critical or high-severity issues were found.
 
-**Issues found (cumulative)**: 2 medium, 5 low, 3 advisory
+**Issues found (cumulative)**: 2 medium, 6 low, 3 advisory
 **Fixes applied (cumulative)**: 8
 
 ---
@@ -147,7 +147,7 @@ The site is in strong accessibility shape. Lighthouse reports 100/100 on every t
 - **WCAG**: 2.4.7 Focus Visible (AA)
 - **Status**: ✅ Fixed
 
-### Advisory
+### Advisory (new)
 
 #### A3. Footer social links lack a navigation landmark
 
