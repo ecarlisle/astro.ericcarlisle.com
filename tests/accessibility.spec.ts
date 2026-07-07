@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { SAMPLE_BLOG_SLUG } from './fixtures';
 
 /**
  * Accessibility regression checks using axe-core.
@@ -49,7 +50,7 @@ test('search (/search/) has no critical axe violations', async ({ page }) => {
 });
 
 test('blog post has no critical axe violations', async ({ page }) => {
-  await page.goto('/blog/250mm-trading-card-box/');
+  await page.goto(`/blog/${SAMPLE_BLOG_SLUG}/`);
 
   // Additional disabled rules for blog posts:
   // - region: the reading-progress bar sits outside <main> as a fixed

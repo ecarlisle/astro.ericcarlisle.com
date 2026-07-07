@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { SAMPLE_BLOG_SLUG } from './fixtures';
 
 /**
  * Route smoke tests.
@@ -40,7 +41,7 @@ test('/404 loads with an accessible h1', async ({ page }) => {
 });
 
 test('a representative blog post loads with a single accessible h1', async ({ page }) => {
-  await page.goto('/blog/250mm-trading-card-box/');
+  await page.goto(`/blog/${SAMPLE_BLOG_SLUG}/`);
   await expect(page).toHaveTitle(/.+/);
 
   const h1s = page.locator('h1:not([aria-hidden="true"])');
@@ -51,9 +52,10 @@ test('a representative blog post loads with a single accessible h1', async ({ pa
 test('the portfolio page renders case study content', async ({ page }) => {
   await page.goto('/portfolio/');
 
+  // Smoke test: at least one case study renders. Exact count is intentionally
+  // not asserted — content additions should not break this tripwire.
   const caseStudies = page.locator('.case-study');
   await expect(caseStudies.first()).toBeVisible();
-  await expect(caseStudies).toHaveCount(4);
 });
 
 test('the contact form has accessible structure', async ({ page }) => {
@@ -62,16 +64,17 @@ test('the contact form has accessible structure', async ({ page }) => {
   const form = page.locator('#contact-form');
   await expect(form).toBeVisible();
 
-  // Name, email, and message fields have accessible labels via wrapping <label>.
-  const nameInput = page.locator('input[name="name"]');
+  // Verify label association using getByLabel — this confirms each field
+  // has an accessible name derived from its wrapping <label> element.
+  const nameInput = page.getByLabel(/name/i);
   await expect(nameInput).toHaveAttribute('required', '');
   await expect(nameInput).toBeVisible();
 
-  const emailInput = page.locator('input[name="email"]');
+  const emailInput = page.getByLabel(/email/i);
   await expect(emailInput).toHaveAttribute('required', '');
   await expect(emailInput).toBeVisible();
 
-  const messageInput = page.locator('textarea[name="message"]');
+  const messageInput = page.getByLabel(/message/i);
   await expect(messageInput).toHaveAttribute('required', '');
   await expect(messageInput).toBeVisible();
 
