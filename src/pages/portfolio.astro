@@ -234,12 +234,19 @@ import Layout from '../layouts/BlogPost.astro';
   <section class="supporting-artifacts" aria-labelledby="supporting-artifacts-heading">
     <h2 id="supporting-artifacts-heading">Supporting Artifacts</h2>
     <p>
-      This site is built with a small, token-driven design system. The
-      <a href="/portfolio/design-system/">Design System Companion</a> is a live
-      reference for the typography, color tokens, spacing scale, layout rails,
-      components, accessibility notes, and implementation tradeoffs used across
-      the site.
+      This portfolio is also a small design-system exercise: fluid typography,
+      semantic color tokens, spacing rhythm, layout rails, component patterns,
+      and accessibility defaults. These artifacts document how the system works
+      behind the scenes.
     </p>
+    <a href="/portfolio/design-system/" class="artifact-card">
+      <span class="artifact-title">Design System Companion</span>
+      <span class="artifact-description">
+        A live example of how I document frontend systems: tokens, layout rules,
+        component behavior, accessibility decisions, and implementation tradeoffs.
+      </span>
+      <span class="artifact-cta">View the reference</span>
+    </a>
   </section>
 </Layout>
 
@@ -428,6 +435,57 @@ import Layout from '../layouts/BlogPost.astro';
 
   .supporting-artifacts h2 {
     margin-top: 0;
+  }
+
+  .artifact-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    max-width: var(--layout-rail-prose);
+    margin-top: var(--space-component);
+    padding: var(--space-component);
+    background: var(--bg-surface);
+    border: var(--size-border-pixel) solid var(--border-main);
+    border-radius: var(--radius-lg);
+    color: inherit;
+    text-decoration: none;
+    transition:
+      border-color var(--transition-fast),
+      box-shadow var(--transition-fast);
+  }
+
+  .artifact-card:hover {
+    border-color: var(--color-action);
+    box-shadow: var(--shadow-md);
+  }
+
+  .artifact-card:hover .artifact-cta {
+    color: var(--color-link-hover);
+  }
+
+  .artifact-title {
+    font-family: var(--font-headers);
+    font-size: var(--type-size-h4);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+  }
+
+  .artifact-description {
+    color: var(--text-secondary);
+  }
+
+  .artifact-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-top: var(--space-xs);
+    color: var(--color-link);
+    font-weight: var(--font-weight-bold);
+    transition: color var(--transition-fast);
+  }
+
+  .artifact-cta::after {
+    content: '→';
   }
 
   @media (max-width: 800px) {
