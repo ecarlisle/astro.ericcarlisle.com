@@ -1,9 +1,13 @@
 # Agent Workflow
 
+> For the full project organization guide, see `docs/development/agent-workflow.md`.
+
 When working in this repository:
 
 1. Read `AGENTS.md`.
-2. Check the relevant files in `docs/`.
+2. Check `specs/` for relevant change specifications.
+3. Load relevant `.skills/` files based on the task.
+4. Check the relevant files in `docs/`.
 3. Inspect source files before editing.
 4. Make the smallest safe change.
 5. Preserve performance, accessibility, SEO, and minimal JavaScript.
