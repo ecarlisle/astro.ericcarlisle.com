@@ -1,3 +1,27 @@
+---
+name: Accessibility Review
+slug: accessibility-review
+description: Use this skill when adding, changing, or reviewing UI for keyboard, screen reader, semantic, motion, and contrast accessibility.
+category: design
+applies_to:
+  - HTML
+  - CSS
+  - ARIA
+  - UI components
+  - forms
+  - navigation
+triggers:
+  - accessibility
+  - keyboard
+  - screen reader
+  - ARIA
+  - focus
+  - contrast
+  - motion
+  - semantic HTML
+priority: high
+version: 1
+---
 Accessibility Review Skill
 
 Use this skill whenever adding, changing, or reviewing UI, especially interactive components, navigation, forms, dialogs, theme controls, search, and social links.

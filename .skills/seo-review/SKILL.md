@@ -1,3 +1,24 @@
+---
+name: SEO Content Metadata
+slug: seo-content-metadata
+description: Use this skill when creating or editing pages, posts, images, links, structured data, or page metadata.
+category: content
+applies_to:
+  - SEO
+  - metadata
+  - structured data
+  - Open Graph
+  - content
+triggers:
+  - SEO
+  - metadata
+  - title
+  - description
+  - structured data
+  - Open Graph
+priority: medium
+version: 1
+---
 SEO Content Metadata Skill
 
 Use this skill when creating or editing pages, posts, portfolio entries, case studies, images, internal links, or page metadata.

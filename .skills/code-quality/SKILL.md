@@ -1,3 +1,24 @@
+---
+name: Code Quality Refactor
+slug: code-quality-refactor
+description: Use this skill when analyzing or refactoring code for readability, simplicity, and maintainability.
+category: engineering
+applies_to:
+  - TypeScript
+  - JavaScript
+  - CSS
+  - Astro
+  - refactoring
+triggers:
+  - refactor
+  - simplify
+  - cleanup
+  - readability
+  - maintainability
+  - dead code
+priority: medium
+version: 1
+---
 # Code Quality Refactor Skill
 
 Use this skill when analyzing or refactoring existing code for simplicity, readability, maintainability, and helpful documentation.

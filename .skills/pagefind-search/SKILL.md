@@ -1,3 +1,22 @@
+---
+name: Pagefind Search
+slug: pagefind-search
+description: Use this skill when implementing or modifying static site search with Pagefind.
+category: engineering
+applies_to:
+  - Pagefind
+  - static search
+  - Astro
+  - site search
+triggers:
+  - search
+  - Pagefind
+  - index
+  - query
+  - search page
+priority: medium
+version: 1
+---
 # Pagefind Search Skill
 
 Use this skill when implementing or modifying site search.

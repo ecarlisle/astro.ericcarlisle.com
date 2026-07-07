@@ -1,3 +1,23 @@
+---
+name: Agent Safe Change
+slug: agent-safe-change
+description: Use this skill for every implementation task to keep changes small, safe, and scoped.
+category: process
+applies_to:
+  - workflow
+  - implementation
+  - refactoring
+  - code review
+triggers:
+  - change
+  - edit
+  - implement
+  - refactor
+  - fix
+  - add feature
+priority: high
+version: 1
+---
 # Agent Safe Change Skill
 
 Use this skill for every implementation task.

@@ -1,3 +1,25 @@
+---
+name: Performance Budget
+slug: performance-budget
+description: Use this skill when adding dependencies, scripts, images, embeds, search, analytics, or interactive UI.
+category: engineering
+applies_to:
+  - Astro
+  - frontend
+  - performance
+  - Core Web Vitals
+  - Lighthouse
+triggers:
+  - dependency
+  - script
+  - image
+  - embed
+  - analytics
+  - interactive UI
+  - font
+priority: high
+version: 1
+---
 # Performance Budget Skill
 
 Use this skill when adding or changing dependencies, scripts, images, fonts, embeds, search, analytics, animation, data fetching, or interactive UI.

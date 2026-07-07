@@ -1,3 +1,25 @@
+---
+name: Design System CSS
+slug: design-system-css
+description: Use this skill when editing styles, spacing, typography, layout, or component appearance.
+category: design
+applies_to:
+  - CSS
+  - design tokens
+  - layout
+  - typography
+  - responsive design
+triggers:
+  - CSS
+  - style
+  - spacing
+  - typography
+  - layout
+  - component
+  - theme
+priority: medium
+version: 1
+---
 # Design System CSS Skill
 
 Use this skill when editing styles, spacing, typography, layout, or component appearance.

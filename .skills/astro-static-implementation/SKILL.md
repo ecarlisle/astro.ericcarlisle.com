@@ -1,3 +1,23 @@
+---
+name: Astro Static Implementation
+slug: astro-static-implementation
+description: Use this skill when editing Astro pages, layouts, components, and static output.
+category: engineering
+applies_to:
+  - Astro
+  - static sites
+  - components
+  - layouts
+triggers:
+  - Astro
+  - component
+  - layout
+  - page
+  - static output
+  - island
+priority: high
+version: 1
+---
 # Astro Static Implementation Skill
 
 Use this skill when editing Astro pages, layouts, and components.
