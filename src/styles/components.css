@@ -179,6 +179,24 @@
   box-shadow: var(--shadow-md);
 }
 
+.button--outline {
+  background: transparent;
+  color: var(--color-action);
+  border: var(--size-border-pixel) solid var(--color-action);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.button--outline:hover {
+  background: var(--bg-surface-elevated);
+  color: var(--color-action-hover);
+  border-color: var(--color-action-hover);
+  transform: translateY(-1px);
+}
+
 .post-nav {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -216,7 +234,7 @@
 
 .post-nav .post-nav-title {
   font-family: var(--font-headers);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 .post-nav .post-nav-next {
@@ -244,7 +262,7 @@
   color: var(--color-text-muted);
   font-size: inherit;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .toc nav ul {
@@ -318,7 +336,7 @@
   color: var(--color-action);
   font-family: var(--font-mono);
   font-size: var(--type-size-h3);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   line-height: 1.2;
 }
 

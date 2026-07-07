@@ -32,6 +32,17 @@
   --line-height-h4: 1.55;
   --line-height-h5: 1.6;
 
+  /* Font weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+
+  /* Letter spacing */
+  --letter-spacing-tight: -0.03em;
+  --letter-spacing-label: 0.05em;
+  --letter-spacing-wide: 0.08em;
+
   /* Radii */
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -293,7 +304,7 @@ h4,
 h5,
 h6 {
   font-family: var(--font-headers);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--text-primary);
   margin: 0;
 }
@@ -336,7 +347,7 @@ h5 {
 
 strong,
 b {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 em,
 i {
@@ -432,7 +443,7 @@ hr {
   background: var(--bg-surface);
   color: var(--text-primary);
   border: var(--size-border-pixel) solid var(--color-focus);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   text-decoration: none;
   transition: top var(--transition-normal);
 }

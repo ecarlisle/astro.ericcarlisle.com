@@ -52,6 +52,23 @@ Create these pages in order:
 | `--font-headers` | `"Plus Jakarta Sans Variable", system-ui, sans-serif` | Plus Jakarta Sans |
 | `--font-mono` | `"Fira Code Variable", ui-monospace, monospace` | Fira Code |
 
+### Font-weight tokens
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--font-weight-normal` | `400` | Body text, default copy |
+| `--font-weight-medium` | `600` | Tag-card names, result labels, reply author |
+| `--font-weight-bold` | `700` | Headings, buttons, active nav, stat values |
+| `--font-weight-black` | `900` | Site title |
+
+### Letter-spacing tokens
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--letter-spacing-tight` | `-0.03em` | Site title |
+| `--letter-spacing-label` | `0.05em` | Uppercase labels (TOC, share, webmentions, repo links) |
+| `--letter-spacing-wide` | `0.08em` | 404 label |
+
 ### Type scale (all use `clamp()`)
 
 | Token | Clamp value | Mobile ref | Desktop ref | Line-height token |
@@ -72,7 +89,7 @@ Create these pages in order:
 ### Heading defaults
 
 - Font family: `Plus Jakarta Sans`
-- Font weight: `700`
+- Font weight: `var(--font-weight-bold)` (`700`)
 - Color: `text-primary`
 - Margin: `0` (specific spacing applied per element)
 - `h1`, `h2`, `h3` use `text-wrap: balance`
@@ -95,14 +112,14 @@ Name each style `Desktop / ...` and `Mobile / ...` using the reference sizes abo
 - `Mono / Small`
 - `Tag / Chip`
 - `Button`
-- `Eyebrow` (uppercase, `letter-spacing: 0.05em`, `--type-size-small`)
+- `Eyebrow` (uppercase, `letter-spacing: var(--letter-spacing-label)`, `--type-size-small`)
 
 ### Usage notes
 
 - Body text in `.prose p` is max `68ch` wide.
 - `code` uses `var(--font-mono)` at `0.95em` with `--bg-surface` background and `--radius-sm` radius.
 - `pre` blocks use `--space-component` padding, `--bg-surface` background, `--border-main` border.
-- Uppercase labels (TOC heading, share label, webmentions heading, repo label) use `--type-size-small`, uppercase, `letter-spacing: 0.05em`, `--text-muted` color.
+- Uppercase labels (TOC heading, share label, webmentions heading, repo label) use `--type-size-small`, uppercase, `letter-spacing: var(--letter-spacing-label)`, `--text-muted` color.
 
 ---
 
@@ -354,7 +371,7 @@ Create a `Colors` collection with modes `Dark` and `Light`:
 - **Container:** `display: inline-flex`, min-height `--size-touch-target-min`, padding `--space-inline` `--space-component`, radius `--radius-md`, background `--color-action`, color `--bg-surface`.
 - **Typography:** `--type-size-body`.
 - **States:** Hover (`--color-action-hover`, `box-shadow: var(--shadow-md)`, `translateY(-1px)`).
-- **Variant:** `.button--outline` (homepage only) — transparent background, `--color-action` border/text.
+- **Variant:** `.button--outline` — shared transparent-background button with `--color-action` border/text; previously homepage-only, now in `src/styles/components.css`.
 - **Figma name:** `Button / Primary`, `Button / Outline`.
 
 ### Tag and Chip
@@ -523,18 +540,18 @@ Rules:
 3. Build a color variable collection named "Colors" with Dark and Light modes using the hex values in section 7.
 4. Build number variables for spacing tokens in section 5 (desktop values are fine; note mobile references).
 5. Create text styles for Desktop and Mobile using the type scale in section 4.
+   - Also create font-weight variables (`normal`, `medium`, `bold`, `black`) and letter-spacing variables (`tight`, `label`, `wide`) from section 4.
 6. Build each component listed in section 8 as a Figma component with the suggested Figma names.
 7. Build the page templates in section 9 as frames/artboards.
 8. Preserve exact CSS values: rems should map to px assuming 16px base, clamp() values should show both mobile and desktop reference sizes.
 9. Include focus states, hover states, and mobile variants where noted.
 10. On page 07 Implementation Notes, list the source files, any clamp() tokens, and the known gaps below.
 
-Known gaps to document:
-- Letter-spacing is not tokenized; ad-hoc values appear for site title (-0.03em), uppercase labels (0.05em), and 404 label (0.08em).
-- Font weights are not tokenized; headings use 700, site title uses 900.
-- The header height is dynamic and set by JS; design uses 4.5rem desktop / 4rem mobile as references.
-- .button--outline is implemented only on the homepage.
-- Pagefind search UI is a third-party widget restyled with project tokens.
+Known gaps / intentional exceptions to document:
+- `--header-height` is JS-managed with a 4.5rem fallback; the header measures its own rendered height and writes it back to this custom property so body padding stays exact.
+- Pagefind search UI is third-party markup injected at runtime and restyled via `src/styles/pagefind.css`; do not rebuild its internal component structure in Figma.
+- Portfolio case-study grid uses page-local sizing (`1.6fr / 0.8fr`) in `src/pages/portfolio.astro`, not a shared grid token.
+- Homepage hero role uses a one-off `letter-spacing: 0.02em` that is intentionally not tokenized.
 ```
 
 ---

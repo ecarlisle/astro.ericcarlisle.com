@@ -111,7 +111,7 @@ if (mentions.length === 0) return;
   .webmentions-heading {
     font-size: var(--type-size-small);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: var(--letter-spacing-label);
     color: var(--text-muted);
     margin-bottom: var(--space-component);
   }
@@ -149,7 +149,7 @@ if (mentions.length === 0) return;
 
   .wm-avatar-fallback {
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     color: var(--text-secondary);
   }
 
@@ -185,7 +185,7 @@ if (mentions.length === 0) return;
 
   .wm-reply-author {
     font-size: var(--type-size-small);
-    font-weight: 600;
+    font-weight: var(--font-weight-medium);
     color: var(--color-link);
     text-decoration: none;
   }

@@ -28,7 +28,7 @@ const isActive = href === pathname || href === `/${subpath?.[0] || ''}`;
   }
 
 	a.active {
-		font-weight: 700;
+		font-weight: var(--font-weight-bold);
 		border-bottom-color: var(--color-link);
 	}
 

@@ -115,7 +115,7 @@
   color: var(--color-link);
   font-family: var(--font-copy);
   font-size: var(--type-size-small);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   transform: translateY(-50%);
   transition:
     background var(--transition-fast),
@@ -142,7 +142,7 @@
   padding: var(--space-inline) 0;
   color: var(--color-text-secondary);
   font-size: var(--type-size-small);
-  font-weight: 600;
+  font-weight: var(--font-weight-medium);
   line-height: var(--line-height-body);
 }
 
@@ -168,7 +168,7 @@
   color: var(--color-text-primary);
   font-family: var(--font-headers);
   font-size: var(--type-size-h5);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   line-height: var(--line-height-h5);
 }
 
@@ -245,7 +245,7 @@
   color: var(--bg-surface);
   font-family: var(--font-copy);
   font-size: var(--type-size-body);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   transition:
     background var(--transition-fast),
     box-shadow var(--transition-fast),
