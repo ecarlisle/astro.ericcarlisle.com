@@ -35,6 +35,16 @@ function contentTypeFor(filePath) {
   return contentTypes.get(extname(filePath).toLowerCase()) || 'application/octet-stream';
 }
 
+function cacheControlFor(urlPath, filePath) {
+  if (urlPath.startsWith('/_astro/')) {
+    return 'public, max-age=31536000, immutable';
+  }
+  if (extname(filePath).toLowerCase() === '.html') {
+    return 'no-cache';
+  }
+  return 'public, max-age=86400';
+}
+
 function isWithinRoot(targetPath) {
   const rel = relative(root, targetPath);
   return !rel.startsWith('..') && !isAbsolute(rel);
@@ -92,7 +102,10 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  res.writeHead(200, { 'Content-Type': contentTypeFor(filePath) });
+  res.writeHead(200, {
+    'Content-Type': contentTypeFor(filePath),
+    'Cache-Control': cacheControlFor(url.pathname, filePath),
+  });
   const stream = createReadStream(filePath);
   stream.pipe(res);
   stream.on('error', () => {

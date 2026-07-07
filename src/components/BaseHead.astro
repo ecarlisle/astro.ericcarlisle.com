@@ -4,7 +4,6 @@
 import '../styles/global.css';
 import FallbackImage from '@images/og-image.jpg';
 import type { ImageMetadata } from 'astro';
-import PagefindConfig from 'astro-pagefind/components/PagefindConfig.astro';
 import { AUTHOR_GITHUB, SITE_TITLE, WEBMENTION_IO_DOMAIN } from '../consts';
 import GoogleAnalytics from './GoogleAnalytics.astro';
 import SchemaOrg from './SchemaOrg.astro';
@@ -162,4 +161,3 @@ const pageTitle =
     wordCount={wordCount}
   />
 )}
-<PagefindConfig />

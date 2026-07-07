@@ -56,6 +56,8 @@ const posts = (await getSortedPosts()).slice(0, 6);
             loading="eager"
             decoding="async"
             class="avatar-img"
+            widths={[140, 200, 280, 320]}
+            sizes="(min-width: 800px) 280px, (min-width: 600px) 200px, 140px"
           />
         </div>
       </header>
@@ -81,6 +83,8 @@ const posts = (await getSortedPosts()).slice(0, 6);
                   alt={post.data.coverAlt || post.data.title}
                   width={720}
                   height={360}
+                  loading="lazy"
+                  decoding="async"
                 />
               )}
               <p>{post.data.description}</p>
