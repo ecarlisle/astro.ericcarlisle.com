@@ -1,0 +1,5 @@
+{
+	"extensions": ["./extensions/astroblog.ts"],
+	"prompts": ["./prompts"],
+	"skills": ["../.skills"]
+}
