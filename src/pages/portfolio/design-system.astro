@@ -153,9 +153,11 @@ const knownGaps = [
   <div class="ds-hero">
     <p class="ds-hero-subtitle">Astro design system reference</p>
     <div class="ds-hero-meta">
-      <span>Built with Astro + vanilla CSS</span>
-      <span>Status: Living reference</span>
-      <span>Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+      <span class="ds-hero-badge">Astro + vanilla CSS</span>
+      <span class="ds-hero-badge">Living reference</span>
+      <span class="ds-hero-badge">
+        Updated {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+      </span>
     </div>
   </div>
 
@@ -361,10 +363,10 @@ const knownGaps = [
       <div class="ds-component-demo">
         <h4>HeaderLink</h4>
         <p class="ds-source">src/components/HeaderLink.astro</p>
-        <p>
+        <div class="demo-row">
           <HeaderLink href="/portfolio/design-system">Active</HeaderLink>
           <HeaderLink href="/blog">Inactive</HeaderLink>
-        </p>
+        </div>
       </div>
       <div class="ds-component-demo">
         <h4>Back link</h4>
@@ -403,10 +405,10 @@ const knownGaps = [
       <div class="ds-component-demo">
         <h4>Tag / Chip</h4>
         <p class="ds-source">src/styles/components.css</p>
-        <p>
+        <div class="demo-row">
           <a href="/tags/astro/" class="tag">Astro</a>
           <span class="chip">static chip</span>
-        </p>
+        </div>
       </div>
       <div class="ds-component-demo">
         <h4>TagFilterBar</h4>
@@ -427,20 +429,24 @@ const knownGaps = [
       <div class="ds-component-demo">
         <h4>Button</h4>
         <p class="ds-source">src/styles/components.css</p>
-        <p>
+        <div class="demo-row">
           <button type="button" class="button">Primary</button>
           <button type="button" class="button button--outline">Outline</button>
-        </p>
+        </div>
       </div>
       <div class="ds-component-demo">
         <h4>ThemeToggle</h4>
         <p class="ds-source">src/components/ThemeToggle.astro</p>
-        <ThemeToggle />
+        <div class="demo-row">
+          <ThemeToggle />
+        </div>
       </div>
       <div class="ds-component-demo">
         <h4>SocialLinks</h4>
         <p class="ds-source">src/components/SocialLinks.astro</p>
-        <SocialLinks />
+        <div class="demo-row">
+          <SocialLinks />
+        </div>
       </div>
     </div>
 
@@ -459,17 +465,23 @@ const knownGaps = [
           project tokens. The internals are not rebuilt here.
         </p>
       </div>
-      <div class="ds-component-demo">
+      <div class="ds-component-demo ds-component-demo--wide">
         <h4>Contact form fields</h4>
         <p class="ds-source">src/pages/contact.astro</p>
         <form class="contact-form ds-form">
-          <label>
-            <span>Name</span>
-            <input type="text" placeholder="Your name" />
-          </label>
+          <div class="ds-form-row">
+            <label>
+              <span>Name</span>
+              <input type="text" placeholder="Your name" />
+            </label>
+            <label>
+              <span>Email</span>
+              <input type="email" placeholder="you@example.com" />
+            </label>
+          </div>
           <label>
             <span>Message</span>
-            <textarea rows="3" placeholder="Your message"></textarea>
+            <textarea rows="4" placeholder="Your message"></textarea>
           </label>
           <button type="button" class="button">Send Message</button>
         </form>
@@ -514,7 +526,7 @@ const knownGaps = [
   </section>
 
   <section class="ds-section">
-    <h2>Known Gaps</h2>
+    <h2>Known Gaps &amp; Follow-ups</h2>
     <table class="ds-table">
       <thead>
         <tr>
@@ -587,15 +599,19 @@ const knownGaps = [
   .ds-hero-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-inline) var(--space-component);
-    font-size: var(--type-size-small);
-    color: var(--text-secondary);
+    gap: var(--space-inline);
   }
 
-  .ds-hero-meta span {
-    display: flex;
+  .ds-hero-badge {
+    display: inline-flex;
     align-items: center;
-    gap: var(--space-xs);
+    padding: 0.3em 0.8em;
+    font-family: var(--font-mono);
+    font-size: var(--type-size-small);
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+    border: var(--size-border-pixel) solid var(--border-main);
+    border-radius: 999px;
   }
 
   .ds-section {
@@ -730,15 +746,18 @@ const knownGaps = [
 
   .ds-color-card {
     display: flex;
+    flex-direction: column;
     gap: var(--space-sm);
-    align-items: flex-start;
+    padding: var(--space-sm);
+    background: var(--bg-surface);
+    border: var(--size-border-pixel) solid var(--border-main);
+    border-radius: var(--radius-md);
   }
 
   .ds-color-swatch {
-    width: 64px;
-    height: 64px;
-    flex-shrink: 0;
-    border-radius: var(--radius-md);
+    width: 100%;
+    aspect-ratio: 2 / 1;
+    border-radius: var(--radius-sm);
     border: var(--size-border-pixel) solid var(--border-main);
   }
 
@@ -770,7 +789,8 @@ const knownGaps = [
   }
 
   .ds-spacing-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 20ch 1fr;
     align-items: center;
     gap: var(--space-component);
   }
@@ -779,7 +799,6 @@ const knownGaps = [
     display: flex;
     flex-direction: column;
     gap: 0.15em;
-    min-width: 18ch;
     font-size: var(--type-size-small);
   }
 
@@ -793,8 +812,16 @@ const knownGaps = [
 
   .ds-spacing-bar {
     height: var(--space-sm);
+    min-width: 4px;
     background: var(--color-action);
     border-radius: var(--radius-sm);
+  }
+
+  @media (max-width: 720px) {
+    .ds-spacing-row {
+      grid-template-columns: 14ch 1fr;
+      gap: var(--space-sm);
+    }
   }
 
   .ds-rail-diagram {
@@ -847,7 +874,56 @@ const knownGaps = [
     color: var(--text-muted);
   }
 
+  .demo-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-inline);
+  }
+
   .ds-form {
-    max-width: var(--layout-rail-prose);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-component);
+    max-width: none;
+  }
+
+  .ds-form label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-inline);
+    font-size: var(--type-size-body);
+    color: var(--text-primary);
+  }
+
+  .ds-form input,
+  .ds-form textarea {
+    padding: var(--space-inline) var(--space-sm);
+    font-family: var(--font-copy);
+    font-size: var(--type-size-body);
+    color: var(--text-primary);
+    background: var(--bg-main);
+    border: var(--size-border-pixel) solid var(--border-control);
+    border-radius: var(--radius-sm);
+  }
+
+  .ds-form textarea {
+    resize: vertical;
+  }
+
+  .ds-form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-component);
+  }
+
+  .ds-component-demo--wide {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 720px) {
+    .ds-form-row {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
