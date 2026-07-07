@@ -230,6 +230,17 @@ import Layout from '../layouts/BlogPost.astro';
       solving, I'd welcome a <a href="/contact">conversation</a>.
     </p>
   </section>
+
+  <section class="supporting-artifacts" aria-labelledby="supporting-artifacts-heading">
+    <h2 id="supporting-artifacts-heading">Supporting Artifacts</h2>
+    <p>
+      This site is built with a small, token-driven design system. The
+      <a href="/portfolio/design-system/">Design System Companion</a> is a live
+      reference for the typography, color tokens, spacing scale, layout rails,
+      components, accessibility notes, and implementation tradeoffs used across
+      the site.
+    </p>
+  </section>
 </Layout>
 
 <style>
@@ -407,6 +418,16 @@ import Layout from '../layouts/BlogPost.astro';
   .work-method {
     max-width: var(--layout-rail-prose);
     padding-top: var(--space-section);
+  }
+
+  .supporting-artifacts {
+    max-width: var(--layout-rail-prose);
+    padding-top: var(--space-section);
+    border-top: var(--size-border-pixel) solid var(--border-main);
+  }
+
+  .supporting-artifacts h2 {
+    margin-top: 0;
   }
 
   @media (max-width: 800px) {
