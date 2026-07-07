@@ -49,7 +49,7 @@ if (mentions.length === 0) return;
           target="_blank"
           rel="noopener noreferrer"
           class="wm-avatar"
-          title={m.author?.name ? `Reposted by ${m.author.name}` : 'Repost'}
+          aria-label={m.author?.name ? `Reposted by ${m.author.name}` : 'Repost'}
         >
           {safeHttpUrl(m.author?.photo)
             ? <img src={safeHttpUrl(m.author?.photo)} alt="" width="28" height="28" loading="lazy" />
@@ -68,7 +68,7 @@ if (mentions.length === 0) return;
           target="_blank"
           rel="noopener noreferrer"
           class="wm-avatar"
-          title={m.author?.name ? `Liked by ${m.author.name}` : 'Like'}
+          aria-label={m.author?.name ? `Liked by ${m.author.name}` : 'Like'}
         >
           {safeHttpUrl(m.author?.photo)
             ? <img src={safeHttpUrl(m.author?.photo)} alt="" width="28" height="28" loading="lazy" />

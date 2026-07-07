@@ -201,8 +201,8 @@ const showTurnstileDevWarning = import.meta.env.DEV && !turnstileSiteKey;
     transition: border-color var(--transition-fast);
   }
 
-  .contact-form input:focus,
-  .contact-form textarea:focus {
+  .contact-form input:focus-visible,
+  .contact-form textarea:focus-visible {
     outline: none;
     border-color: var(--color-action);
     box-shadow: 0 0 0 1px var(--color-action);
