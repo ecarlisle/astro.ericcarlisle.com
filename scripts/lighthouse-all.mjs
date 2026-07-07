@@ -48,7 +48,7 @@ function slugFromUrl(url) {
 // Build with the production site URL (Lighthouse audits the built output
 // directly; it doesn't need canonical URLs to point to localhost).
 console.log('🔨 Building site…');
-execSync('npx astro build', { cwd: join(import.meta.dirname, '..'), stdio: 'inherit' });
+execSync('pnpm exec astro build', { cwd: join(import.meta.dirname, '..'), stdio: 'inherit' });
 
 if (!existsSync(DIST) || !readdirSync(DIST).length) {
   console.error('❌ Build produced no output. Aborting.');
@@ -119,7 +119,7 @@ for (const { url } of pages) {
   console.log(`  🔍 ${url}`);
   try {
     execSync(
-      `npx lighthouse "${fullUrl}" --output=html --output-path="${reportPath}" --quiet --chrome-flags="--headless=new --no-sandbox"`,
+      `pnpm exec lighthouse "${fullUrl}" --output=html --output-path="${reportPath}" --quiet --chrome-flags="--headless=new --no-sandbox"`,
       { cwd: join(import.meta.dirname, '..'), stdio: 'pipe', timeout: 120_000 },
     );
     console.log(`     ✅ Report → lh-reports/${slug}.html`);
