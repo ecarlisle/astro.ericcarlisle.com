@@ -11,7 +11,7 @@ import Layout from '../../layouts/BlogPost.astro';
 
 const title = 'Design System Companion';
 const description =
-  'A living reference for the typography, spacing, color, layout, components, and accessibility decisions implemented across ericcarlisle.com.';
+  'A curated reference for the typography, spacing, color, layout, components, and accessibility decisions implemented across ericcarlisle.com.';
 const pageUrl = 'https://ericcarlisle.com/portfolio/design-system/';
 
 const sampleDate = new Date('2024-06-15');
@@ -27,29 +27,110 @@ const tagData = {
   },
 };
 
-const colorSwatches = [
-  { token: '--bg-main', role: 'Page background' },
-  { token: '--bg-surface', role: 'Cards, header, code blocks' },
-  { token: '--bg-surface-elevated', role: 'Elevated surfaces, hover states' },
-  { token: '--text-primary', role: 'Headings, primary text' },
-  { token: '--text-secondary', role: 'Body text, descriptions' },
-  { token: '--text-muted', role: 'Meta, captions, labels' },
-  { token: '--brand-primary', role: 'Links, actions, focus' },
-  { token: '--brand-accent', role: 'Link hover, success states' },
-  { token: '--brand-highlight', role: 'Highlights, marks' },
-  { token: '--border-main', role: 'Card borders, dividers' },
-  { token: '--border-muted', role: 'Header border, subtle separators' },
-  { token: '--border-control', role: 'Form input borders' },
+const colorTokens = [
+  { token: '--bg-main', dark: '#0b1020', light: '#f8fafc', usage: 'Page background' },
+  { token: '--bg-surface', dark: '#111a2e', light: '#ffffff', usage: 'Cards, header, code blocks' },
+  {
+    token: '--bg-surface-elevated',
+    dark: '#18243a',
+    light: '#e8eef7',
+    usage: 'Elevated surfaces, hover states',
+  },
+  { token: '--text-primary', dark: '#f8fafc', light: '#0f172a', usage: 'Headings, primary text' },
+  {
+    token: '--text-secondary',
+    dark: '#cbd5e1',
+    light: '#334155',
+    usage: 'Body text, descriptions',
+  },
+  { token: '--text-muted', dark: '#94a3b8', light: '#475569', usage: 'Meta, captions, labels' },
+  { token: '--brand-primary', dark: '#5ea8ff', light: '#005fcc', usage: 'Links, actions, focus' },
+  {
+    token: '--brand-accent',
+    dark: '#38d9a9',
+    light: '#007a5a',
+    usage: 'Link hover, success states',
+  },
+  { token: '--brand-highlight', dark: '#ffb86b', light: '#a14b00', usage: 'Highlights, marks' },
+  { token: '--border-main', dark: '#26344d', light: '#cbd5e1', usage: 'Card borders, dividers' },
+  {
+    token: '--border-muted',
+    dark: '#1a2638',
+    light: '#e2e8f0',
+    usage: 'Header border, subtle separators',
+  },
+  { token: '--border-control', dark: '#52627a', light: '#64748b', usage: 'Form input borders' },
+];
+
+const semanticColors = [
+  { token: '--color-link', usage: 'Default links', darkSource: '--brand-primary' },
+  { token: '--color-link-hover', usage: 'Hovered links', darkSource: '--brand-accent' },
+  { token: '--color-action', usage: 'Buttons, CTAs', darkSource: '--brand-primary' },
+  { token: '--color-action-hover', usage: 'Button hover', darkSource: '#3d8ee0' },
+  { token: '--color-focus', usage: 'Focus outlines', darkSource: '--color-link' },
+  { token: '--color-success', usage: 'Success states', darkSource: '--brand-accent' },
+  { token: '--color-card-bg', usage: 'Card backgrounds', darkSource: '--bg-surface' },
+  {
+    token: '--color-card-bg-elevated',
+    usage: 'Elevated card backgrounds',
+    darkSource: '--bg-surface-elevated',
+  },
+  { token: '--color-card-border', usage: 'Card borders', darkSource: '--border-main' },
 ];
 
 const spacingTokens = [
-  '--space-xs',
-  '--space-sm',
-  '--space-md',
-  '--space-lg',
-  '--space-xl',
-  '--space-section',
-  '--space-layout',
+  { token: '--space-xs', value: 'calc(var(--rhythm) * 0.5)', mobile: '13 px', desktop: '17 px' },
+  { token: '--space-sm', value: 'calc(var(--rhythm) * 0.75)', mobile: '20 px', desktop: '25 px' },
+  { token: '--space-md', value: 'var(--rhythm)', mobile: '26 px', desktop: '33 px' },
+  { token: '--space-lg', value: 'calc(var(--rhythm) * 1.5)', mobile: '40 px', desktop: '50 px' },
+  { token: '--space-xl', value: 'calc(var(--rhythm) * 2)', mobile: '53 px', desktop: '66 px' },
+  {
+    token: '--space-section',
+    value: 'calc(var(--rhythm) * 2.5)',
+    mobile: '66 px',
+    desktop: '83 px',
+  },
+  { token: '--space-layout', value: 'calc(var(--rhythm) * 3)', mobile: '79 px', desktop: '99 px' },
+];
+
+const typeTokens = [
+  { token: '--type-size-h1', mobile: '32 px', desktop: '64 px', lineHeight: '--line-height-h1' },
+  { token: '--type-size-h2', mobile: '26 px', desktop: '45 px', lineHeight: '--line-height-h2' },
+  { token: '--type-size-h3', mobile: '22 px', desktop: '32 px', lineHeight: '--line-height-h3' },
+  { token: '--type-size-h4', mobile: '18 px', desktop: '24 px', lineHeight: '--line-height-h4' },
+  { token: '--type-size-h5', mobile: '16 px', desktop: '19 px', lineHeight: '--line-height-h5' },
+  {
+    token: '--type-size-large',
+    mobile: '18 px',
+    desktop: '22 px',
+    lineHeight: '--line-height-body',
+  },
+  {
+    token: '--type-size-body',
+    mobile: '16 px',
+    desktop: '18 px',
+    lineHeight: '--line-height-body',
+  },
+  {
+    token: '--type-size-small',
+    mobile: '13 px',
+    desktop: '15 px',
+    lineHeight: '--line-height-body',
+  },
+];
+
+const knownGaps = [
+  { item: 'Header height', note: 'JS-managed with a 4.5rem CSS fallback.' },
+  { item: 'Pagefind search UI', note: 'Third-party markup restyled by src/styles/pagefind.css.' },
+  {
+    item: 'Portfolio case-study grid',
+    note: 'Page-local 1.6fr / 0.8fr sizing in src/pages/portfolio.astro.',
+  },
+  { item: 'Hero role letter-spacing', note: 'One-off 0.02em on the homepage; not tokenized.' },
+  {
+    item: 'Page-specific motion',
+    note: 'Some scroll and hover behavior is local to individual pages.',
+  },
 ];
 ---
 
@@ -59,58 +140,108 @@ const spacingTokens = [
   pageType="portfolio"
   robots="noindex, follow"
 >
+  <div class="ds-hero">
+    <p class="ds-hero-subtitle">Implemented Astro design system</p>
+    <div class="ds-hero-meta">
+      <span>Source: Astro + vanilla CSS</span>
+      <span>Status: Living reference</span>
+      <span>Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+    </div>
+  </div>
+
   <section class="ds-section">
     <h2>Overview</h2>
     <p>
-      This page is a living reference for the design system already implemented
-      in the Astro site. The CSS custom properties, components, and layout
-      patterns shown here are the source of truth; this page only documents and
-      demonstrates what already exists.
+      This page documents the design system already built into the Astro site.
+      The CSS custom properties, components, and layout patterns here are the
+      source of truth; the page only renders and explains what already exists.
     </p>
     <p>
-      It is intended as a private-ish kitchen sink for my own reference, and may
-      later be shared with interviewers or hiring managers as a portfolio
-      artifact.
+      It is intended as a private reference and may later be shared with
+      interviewers or hiring managers as a portfolio artifact.
     </p>
   </section>
 
   <section class="ds-section">
     <h2>Design Principles</h2>
-    <ul>
-      <li><strong>Performance first</strong> — static output, minimal JavaScript.</li>
-      <li><strong>Minimal JavaScript</strong> — prefer Astro, HTML, and CSS.</li>
-      <li><strong>Semantic HTML</strong> — native elements before ARIA.</li>
-      <li><strong>Accessibility</strong> — keyboard, focus, contrast, reduced motion.</li>
-      <li><strong>Fluid responsive design</strong> — <code>clamp()</code> tokens, mobile-first.</li>
-      <li><strong>Content-first layout</strong> — readable measure, clear hierarchy.</li>
-    </ul>
+    <div class="ds-principles">
+      <div class="ds-principle">
+        <strong>Performance first</strong>
+        <span>Static output, minimal JavaScript, no global bundles for page-specific features.</span>
+      </div>
+      <div class="ds-principle">
+        <strong>Minimal JavaScript</strong>
+        <span>Prefer Astro, HTML, and CSS before adding client-side behavior.</span>
+      </div>
+      <div class="ds-principle">
+        <strong>Semantic HTML</strong>
+        <span>Native elements before ARIA; correct heading order; one h1 per page.</span>
+      </div>
+      <div class="ds-principle">
+        <strong>Accessibility</strong>
+        <span>Keyboard, visible focus, contrast, reduced motion, and touch targets.</span>
+      </div>
+      <div class="ds-principle">
+        <strong>Fluid responsive design</strong>
+        <span>clamp() tokens for type and spacing; mobile-first breakpoints.</span>
+      </div>
+      <div class="ds-principle">
+        <strong>Content-first layout</strong>
+        <span>Readable measure, generous whitespace, clear visual hierarchy.</span>
+      </div>
+    </div>
   </section>
 
   <section class="ds-section">
     <h2>Typography</h2>
-    <p>Headings use <code>var(--font-headers)</code> and body copy uses <code>var(--font-copy)</code>.</p>
-
-    <h1>Heading 1 — <code>var(--type-size-h1)</code></h1>
-    <h2>Heading 2 — <code>var(--type-size-h2)</code></h2>
-    <h3>Heading 3 — <code>var(--type-size-h3)</code></h3>
-    <h4>Heading 4 — <code>var(--type-size-h4)</code></h4>
-    <h5>Heading 5 — <code>var(--type-size-h5)</code></h5>
-
     <p>
-      Body text uses <code>var(--type-size-body)</code> with a line height of
-      <code>var(--line-height-body)</code>. <a href="#">Links are underlined</a> and use the brand primary color.
-    </p>
-    <p class="ds-small">
-      Small text uses <code>var(--type-size-small)</code>.
+      Headings use <code>var(--font-headers)</code>; body copy uses
+      <code>var(--font-copy)</code>; mono elements use
+      <code>var(--font-mono)</code>.
     </p>
 
+    <h3>Visual scale</h3>
+    <div class="ds-type-stack">
+      <div class="ds-type-sample ds-h1">Heading 1</div>
+      <div class="ds-type-sample ds-h2">Heading 2</div>
+      <div class="ds-type-sample ds-h3">Heading 3</div>
+      <div class="ds-type-sample ds-h4">Heading 4</div>
+      <div class="ds-type-sample ds-h5">Heading 5</div>
+      <div class="ds-type-sample ds-body">
+        Body text with a <a href="#">sample link</a> and <code>inline code</code>.
+      </div>
+      <div class="ds-type-sample ds-small">Small text for meta, captions, and labels.</div>
+    </div>
+
+    <h3>Token usage</h3>
+    <table class="ds-table">
+      <thead>
+        <tr>
+          <th>Token</th>
+          <th>Mobile</th>
+          <th>Desktop</th>
+          <th>Line height</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          typeTokens.map(({ token, mobile, desktop, lineHeight }) => (
+            <tr>
+              <td><code>{token}</code></td>
+              <td>{mobile}</td>
+              <td>{desktop}</td>
+              <td><code>{lineHeight}</code></td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+
+    <h3>Content samples</h3>
     <blockquote>
-      Blockquotes use a left border and slightly larger text. This is how a pull quote or emphasized statement appears.
+      Blockquotes use a left border and slightly larger text. This is how a pull
+      quote or emphasized statement appears.
     </blockquote>
-
-    <p>
-      Inline code looks like <code>var(--example)</code> and code blocks are wrapped in <code>pre</code> tags.
-    </p>
 
     <pre><code>/* Example token usage */
 .card {'{'}
@@ -123,32 +254,65 @@ const spacingTokens = [
   <section class="ds-section">
     <h2>Color Tokens</h2>
     <p>
-      The default theme is dark; a light theme is applied via
-      <code>[data-theme="light"]</code> or system preference. Swatches below show
-      the current computed value.
+      The default theme is dark. A light theme is applied via
+      <code>[data-theme="light"]</code> or system preference.
     </p>
-    <div class="ds-swatch-grid">
+
+    <h3>Core palette</h3>
+    <div class="ds-color-grid">
       {
-        colorSwatches.map(({ token, role }) => (
-          <div class="ds-swatch">
-            <div class="ds-swatch-color" style={`background: var(${token});`} />
-            <code>{token}</code>
-            <span>{role}</span>
+        colorTokens.map(({ token, dark, light, usage }) => (
+          <div class="ds-color-card">
+            <div class="ds-color-swatch" style={`background: var(${token});`} />
+            <div class="ds-color-info">
+              <code>{token}</code>
+              <span class="ds-color-usage">{usage}</span>
+              <span class="ds-color-modes">Dark: {dark} / Light: {light}</span>
+            </div>
           </div>
         ))
       }
     </div>
+
+    <h3>Semantic roles</h3>
+    <table class="ds-table">
+      <thead>
+        <tr>
+          <th>Token</th>
+          <th>Usage</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          semanticColors.map(({ token, usage, darkSource }) => (
+            <tr>
+              <td><code>{token}</code></td>
+              <td>{usage}</td>
+              <td><code>{darkSource}</code></td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
   </section>
 
   <section class="ds-section">
     <h2>Spacing Scale</h2>
-    <p>Spacing is derived from the fluid rhythm token <code>var(--rhythm)</code>.</p>
-    <div class="ds-spacing-stack">
+    <p>
+      Spacing is derived from the fluid rhythm token <code>var(--rhythm)</code>
+      (≈ 26 px on mobile, ≈ 33 px on desktop).
+    </p>
+    <div class="ds-spacing-table">
       {
-        spacingTokens.map((token) => (
+        spacingTokens.map(({ token, value, mobile, desktop }) => (
           <div class="ds-spacing-row">
-            <code>{token}</code>
-            <div class="ds-spacing-box" style={`width: var(${token}); height: var(${token});`} />
+            <div class="ds-spacing-label">
+              <code>{token}</code>
+              <span>{value}</span>
+              <span class="ds-spacing-px">{mobile} → {desktop}</span>
+            </div>
+            <div class="ds-spacing-bar" style={`width: var(${token});`} />
           </div>
         ))
       }
@@ -157,113 +321,158 @@ const spacingTokens = [
 
   <section class="ds-section">
     <h2>Layout Rails</h2>
-    <p>The site uses three content rails to control reading width and page width.</p>
-    <div class="ds-rail-demo rail--prose">
-      <code>.rail--prose</code> — max-width <code>68ch</code>
-    </div>
-    <div class="ds-rail-demo rail--page">
-      <code>.rail--page</code> — max-width <code>72rem</code>
-    </div>
-    <div class="ds-rail-demo rail--wide">
-      <code>.rail--wide</code> — max-width <code>80rem</code>
+    <p>
+      Reading width and page width are intentionally separate. Prose stays narrow
+      for readability, while pages and wide components can use more viewport
+      space.
+    </p>
+    <div class="ds-rail-diagram">
+      <div class="ds-rail-bar ds-rail-prose">
+        <span>.rail--prose</span>
+        <span>68ch — readable measure</span>
+      </div>
+      <div class="ds-rail-bar ds-rail-page">
+        <span>.rail--page</span>
+        <span>72rem — default page max</span>
+      </div>
+      <div class="ds-rail-bar ds-rail-wide">
+        <span>.rail--wide</span>
+        <span>80rem — wide layouts</span>
+      </div>
     </div>
   </section>
 
   <section class="ds-section">
     <h2>Components</h2>
 
-    <h3>Header Link</h3>
-    <p>
-      <HeaderLink href="/portfolio/design-system">Active header link</HeaderLink>
-      <HeaderLink href="/blog">Inactive header link</HeaderLink>
-    </p>
-
-    <h3>Button</h3>
-    <p>
-      <a href="#" class="button">Primary button</a>
-      <a href="#" class="button button--outline">Outline button</a>
-    </p>
-
-    <h3>Tag and Chip</h3>
-    <p>
-      <a href="#" class="tag">interactive tag</a>
-      <span class="chip">static chip</span>
-    </p>
-
-    <h3>Tag Filter Bar</h3>
-    <TagFilterBar tags={sampleTags} {tagData} />
-
-    <h3>Card</h3>
-    <Card
-      title="Sample card title"
-      href="#"
-      author={AUTHOR_NAME}
-      pubDate={sampleDate}
-      tags={sampleTags}
-      readingTime={350}
-    >
-      <p>
-        This card demonstrates the card component with title, meta, tags, and a
-        short description body.
-      </p>
-    </Card>
-
-    <h3>Callout</h3>
-    <div class="callout">
-      <strong>Callout title</strong> — This is a callout block used for
-      highlighted information or notes.
+    <h3>Navigation</h3>
+    <div class="ds-component-group">
+      <div class="ds-component-demo">
+        <h4>HeaderLink</h4>
+        <p class="ds-source">src/components/HeaderLink.astro</p>
+        <p>
+          <HeaderLink href="/portfolio/design-system">Active</HeaderLink>
+          <HeaderLink href="/blog">Inactive</HeaderLink>
+        </p>
+      </div>
+      <div class="ds-component-demo">
+        <h4>Back link</h4>
+        <p class="ds-source">src/styles/components.css</p>
+        <a href="/portfolio" class="back-link">← Back to portfolio</a>
+      </div>
+      <div class="ds-component-demo">
+        <h4>PaginationNav</h4>
+        <p class="ds-source">src/components/PaginationNav.astro</p>
+        <PaginationNav
+          prev={{ url: '#', label: '← Previous', title: 'Previous article' }}
+          next={{ url: '#', label: 'Next →', title: 'Next article' }}
+        />
+      </div>
     </div>
 
-    <h3>Social Links</h3>
-    <div class="ds-inline-demo">
-      <SocialLinks />
+    <h3>Content</h3>
+    <div class="ds-component-group">
+      <div class="ds-component-demo">
+        <h4>Card</h4>
+        <p class="ds-source">src/components/Card.astro</p>
+        <Card
+          title="Sample card title"
+          href="#"
+          author={AUTHOR_NAME}
+          pubDate={sampleDate}
+          tags={sampleTags}
+          readingTime={350}
+        >
+          <p>A short description rendered inside the card body.</p>
+        </Card>
+      </div>
+      <div class="ds-component-demo">
+        <h4>Tag / Chip</h4>
+        <p class="ds-source">src/styles/components.css</p>
+        <p>
+          <a href="#" class="tag">interactive tag</a>
+          <span class="chip">static chip</span>
+        </p>
+      </div>
+      <div class="ds-component-demo">
+        <h4>TagFilterBar</h4>
+        <p class="ds-source">src/components/TagFilterBar.astro</p>
+        <TagFilterBar tags={sampleTags} {tagData} />
+      </div>
+      <div class="ds-component-demo">
+        <h4>Callout</h4>
+        <p class="ds-source">src/styles/components.css</p>
+        <div class="callout">
+          <strong>Callout title</strong> — highlighted information or notes.
+        </div>
+      </div>
     </div>
 
-    <h3>Theme Toggle</h3>
-    <div class="ds-inline-demo">
-      <ThemeToggle />
+    <h3>Interaction</h3>
+    <div class="ds-component-group">
+      <div class="ds-component-demo">
+        <h4>Button</h4>
+        <p class="ds-source">src/styles/components.css</p>
+        <p>
+          <a href="#" class="button">Primary</a>
+          <a href="#" class="button button--outline">Outline</a>
+        </p>
+      </div>
+      <div class="ds-component-demo">
+        <h4>ThemeToggle</h4>
+        <p class="ds-source">src/components/ThemeToggle.astro</p>
+        <ThemeToggle />
+      </div>
+      <div class="ds-component-demo">
+        <h4>SocialLinks</h4>
+        <p class="ds-source">src/components/SocialLinks.astro</p>
+        <SocialLinks />
+      </div>
     </div>
 
-    <h3>Share Strip</h3>
-    <ShareStrip title={title} {pageUrl} />
-
-    <h3>Pagination</h3>
-    <PaginationNav
-      prev={{ url: '#', label: '← Previous', title: 'Previous article title' }}
-      next={{ url: '#', label: 'Next →', title: 'Next article title' }}
-    />
-
-    <h3>Contact Form Fields</h3>
-    <form class="contact-form ds-form">
-      <label>
-        <span>Name</span>
-        <input type="text" placeholder="Sample input" />
-      </label>
-      <label>
-        <span>Message</span>
-        <textarea rows="3" placeholder="Sample textarea"></textarea>
-      </label>
-      <button type="button" class="button">Send Message</button>
-    </form>
-
-    <h3>Search UI</h3>
-    <p>
-      The search interface is provided by Pagefind. Its markup is injected at
-      runtime and restyled via <code>src/styles/pagefind.css</code>; the
-      internals are not rebuilt here.
-    </p>
+    <h3>Integrations</h3>
+    <div class="ds-component-group">
+      <div class="ds-component-demo">
+        <h4>ShareStrip</h4>
+        <p class="ds-source">src/components/ShareStrip.astro</p>
+        <ShareStrip title={title} {pageUrl} />
+      </div>
+      <div class="ds-component-demo">
+        <h4>Search UI</h4>
+        <p class="ds-source">src/pages/search.astro, src/styles/pagefind.css</p>
+        <p>
+          Pagefind injects its markup at runtime; the site restyles it with
+          project tokens. The internals are not rebuilt here.
+        </p>
+      </div>
+      <div class="ds-component-demo">
+        <h4>Contact form fields</h4>
+        <p class="ds-source">src/pages/contact.astro</p>
+        <form class="contact-form ds-form">
+          <label>
+            <span>Name</span>
+            <input type="text" placeholder="Sample input" />
+          </label>
+          <label>
+            <span>Message</span>
+            <textarea rows="3" placeholder="Sample textarea"></textarea>
+          </label>
+          <button type="button" class="button">Send Message</button>
+        </form>
+      </div>
+    </div>
   </section>
 
   <section class="ds-section">
     <h2>Content Patterns</h2>
 
-    <h3>Article Intro</h3>
+    <h3>Article intro</h3>
     <p class="home-hero-lede">
       A large lede paragraph uses <code>var(--type-size-large)</code> to set up
       an article or section.
     </p>
 
-    <h3>Metadata / Date</h3>
+    <h3>Metadata row</h3>
     <p class="meta">
       <strong>{AUTHOR_NAME}</strong>
       <time datetime={sampleDate.toISOString()}>
@@ -272,43 +481,53 @@ const spacingTokens = [
       <span class="reading-time">3 min read</span>
     </p>
 
-    <h3>Tags</h3>
+    <h3>Tag list</h3>
     <p class="meta meta-tags">
       {sampleTags.map((tag) => <a href={`/tags/${tag}/`} class="tag">{tag}</a>)}
     </p>
-
-    <h3>Back Link</h3>
-    <a href="/portfolio" class="back-link">← Back to portfolio</a>
   </section>
 
   <section class="ds-section">
     <h2>Accessibility Notes</h2>
     <ul>
-      <li>
-        <strong>Skip link</strong> — keyboard users can jump to main content.
-      </li>
-      <li>
-        <strong>Focus states</strong> — visible <code>dashed</code> outline with
-        offset on interactive elements.
-      </li>
-      <li>
-        <strong>Touch targets</strong> — minimum <code>44px</code> for buttons
-        and icon links.
-      </li>
-      <li>
-        <strong>Color contrast</strong> — palettes are chosen for both dark and
-        light modes; avoid relying on color alone.
-      </li>
-      <li>
-        <strong>Semantic HTML</strong> — native headings, landmarks, lists, and
-        buttons before ARIA.
-      </li>
+      <li><strong>Skip link</strong> — keyboard users can jump to main content.</li>
+      <li><strong>Focus states</strong> — visible dashed outline with offset.</li>
+      <li><strong>Touch targets</strong> — minimum 44px for buttons and icon links.</li>
+      <li><strong>Color contrast</strong> — palettes are chosen for both dark and light modes.</li>
+      <li><strong>Semantic HTML</strong> — native elements before ARIA.</li>
+      <li><strong>Reduced motion</strong> — transitions and animations respect user preference.</li>
     </ul>
+  </section>
+
+  <section class="ds-section">
+    <h2>Known Gaps</h2>
+    <table class="ds-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          knownGaps.map(({ item, note }) => (
+            <tr>
+              <td>{item}</td>
+              <td>{note}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
   </section>
 
   <section class="ds-section">
     <h2>Implementation Notes</h2>
     <ul>
+      <li>
+        This page uses <code>:global(#main-content)</code> to widen the default
+        page rail while keeping prose text readable.
+      </li>
       <li>
         <code>--header-height</code> is measured and set by JavaScript; the CSS
         fallback is <code>4.5rem</code>.
@@ -318,18 +537,51 @@ const spacingTokens = [
         <code>src/styles/pagefind.css</code>.
       </li>
       <li>
-        Some page-specific styles (for example, the portfolio case-study grid)
-        use local sizing that is not yet captured by shared tokens.
+        Some page-specific styles use local sizing not yet captured by shared
+        tokens.
       </li>
       <li>
         This page is intentionally omitted from the main navigation and uses
-        <code>noindex, follow</code> metadata for now.
+        <code>noindex, follow</code> metadata.
       </li>
     </ul>
   </section>
 </Layout>
 
 <style>
+  :global(#main-content) {
+    max-width: var(--layout-rail-wide);
+  }
+
+  .ds-hero {
+    margin-bottom: var(--space-section);
+    padding-bottom: var(--space-component);
+    border-bottom: var(--size-border-pixel) solid var(--border-main);
+  }
+
+  .ds-hero-subtitle {
+    margin: 0 0 var(--space-xs);
+    font-family: var(--font-mono);
+    font-size: var(--type-size-small);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-label);
+  }
+
+  .ds-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-inline) var(--space-component);
+    font-size: var(--type-size-small);
+    color: var(--text-secondary);
+  }
+
+  .ds-hero-meta span {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
   .ds-section {
     margin-bottom: var(--space-section);
   }
@@ -342,41 +594,163 @@ const spacingTokens = [
     margin-top: var(--space-xl);
   }
 
+  .ds-section h4 {
+    margin-top: 0;
+    margin-bottom: var(--space-xs);
+  }
+
+  .ds-principles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-component);
+  }
+
+  .ds-principle {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-component);
+    background: var(--bg-surface);
+    border: var(--size-border-pixel) solid var(--border-main);
+    border-radius: var(--radius-lg);
+  }
+
+  .ds-principle strong {
+    color: var(--text-primary);
+  }
+
+  .ds-principle span {
+    font-size: var(--type-size-small);
+    color: var(--text-secondary);
+  }
+
+  .ds-type-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin: var(--space-component) 0;
+  }
+
+  .ds-type-sample {
+    padding: var(--space-sm) 0;
+    border-bottom: var(--size-border-pixel) solid var(--border-muted);
+  }
+
+  .ds-type-sample:last-child {
+    border-bottom: none;
+  }
+
+  .ds-h1 {
+    font-family: var(--font-headers);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--type-size-h1);
+    line-height: var(--line-height-h1);
+  }
+
+  .ds-h2 {
+    font-family: var(--font-headers);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--type-size-h2);
+    line-height: var(--line-height-h2);
+  }
+
+  .ds-h3 {
+    font-family: var(--font-headers);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--type-size-h3);
+    line-height: var(--line-height-h3);
+  }
+
+  .ds-h4 {
+    font-family: var(--font-headers);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--type-size-h4);
+    line-height: var(--line-height-h4);
+  }
+
+  .ds-h5 {
+    font-family: var(--font-headers);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--type-size-h5);
+    line-height: var(--line-height-h5);
+  }
+
+  .ds-body {
+    font-size: var(--type-size-body);
+    line-height: var(--line-height-body);
+  }
+
   .ds-small {
     font-size: var(--type-size-small);
     color: var(--text-muted);
   }
 
-  .ds-swatch-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: var(--space-component);
-    margin-top: var(--space-component);
+  .ds-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--space-component) 0;
+    font-size: var(--type-size-small);
   }
 
-  .ds-swatch {
+  .ds-table th,
+  .ds-table td {
+    padding: var(--space-inline) var(--space-sm);
+    text-align: left;
+    border-bottom: var(--size-border-pixel) solid var(--border-main);
+    vertical-align: top;
+  }
+
+  .ds-table th {
+    color: var(--text-muted);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .ds-color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-component);
+    margin: var(--space-component) 0;
+  }
+
+  .ds-color-card {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: flex-start;
+  }
+
+  .ds-color-swatch {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    border: var(--size-border-pixel) solid var(--border-main);
+  }
+
+  .ds-color-info {
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
   }
 
-  .ds-swatch-color {
-    aspect-ratio: 2 / 1;
-    border-radius: var(--radius-md);
-    border: var(--size-border-pixel) solid var(--border-main);
+  .ds-color-info code {
+    font-size: var(--type-size-small);
   }
 
-  .ds-swatch code,
-  .ds-swatch span {
+  .ds-color-usage,
+  .ds-color-modes {
     font-size: var(--type-size-small);
     color: var(--text-secondary);
   }
 
-  .ds-spacing-stack {
+  .ds-color-modes {
+    color: var(--text-muted);
+  }
+
+  .ds-spacing-table {
     display: flex;
     flex-direction: column;
     gap: var(--space-sm);
-    margin-top: var(--space-component);
+    margin: var(--space-component) 0;
   }
 
   .ds-spacing-row {
@@ -385,31 +759,76 @@ const spacingTokens = [
     gap: var(--space-component);
   }
 
-  .ds-spacing-row code {
-    min-width: 10ch;
+  .ds-spacing-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    min-width: 18ch;
+    font-size: var(--type-size-small);
   }
 
-  .ds-spacing-box {
+  .ds-spacing-label code {
+    font-size: inherit;
+  }
+
+  .ds-spacing-px {
+    color: var(--text-muted);
+  }
+
+  .ds-spacing-bar {
+    height: var(--space-sm);
     background: var(--color-action);
     border-radius: var(--radius-sm);
   }
 
-  .ds-rail-demo {
+  .ds-rail-diagram {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-component);
+    margin: var(--space-component) 0;
+  }
+
+  .ds-rail-bar {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-component);
     padding: var(--space-sm);
-    margin-bottom: var(--space-component);
     background: var(--bg-surface);
     border: var(--size-border-pixel) dashed var(--border-main);
     border-radius: var(--radius-md);
+    font-size: var(--type-size-small);
   }
 
-  .ds-rail-demo code {
-    color: var(--text-secondary);
+  .ds-rail-prose {
+    max-width: var(--layout-rail-prose);
   }
 
-  .ds-inline-demo {
-    display: flex;
-    align-items: center;
-    gap: var(--space-inline);
+  .ds-rail-page {
+    max-width: var(--layout-rail-page);
+  }
+
+  .ds-rail-wide {
+    max-width: var(--layout-rail-wide);
+  }
+
+  .ds-component-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-component);
+    margin-bottom: var(--space-component);
+  }
+
+  .ds-component-demo {
+    padding: var(--space-component);
+    background: var(--bg-surface);
+    border: var(--size-border-pixel) solid var(--border-main);
+    border-radius: var(--radius-lg);
+  }
+
+  .ds-source {
+    margin: 0 0 var(--space-sm);
+    font-size: var(--type-size-small);
+    color: var(--text-muted);
   }
 
   .ds-form {
