@@ -1,6 +1,6 @@
 ---
-name: Code Quality Refactor
-slug: code-quality-refactor
+name: code-quality
+title: Code Quality Refactor
 description: Use this skill when analyzing or refactoring code for readability, simplicity, and maintainability.
 category: engineering
 applies_to:

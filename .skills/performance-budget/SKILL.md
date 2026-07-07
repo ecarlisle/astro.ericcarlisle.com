@@ -1,6 +1,6 @@
 ---
-name: Performance Budget
-slug: performance-budget
+name: performance-budget
+title: Performance Budget
 description: Use this skill when adding dependencies, scripts, images, embeds, search, analytics, or interactive UI.
 category: engineering
 applies_to:

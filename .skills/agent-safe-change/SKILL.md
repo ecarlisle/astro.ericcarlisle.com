@@ -1,6 +1,6 @@
 ---
-name: Agent Safe Change
-slug: agent-safe-change
+name: agent-safe-change
+title: Agent Safe Change
 description: Use this skill for every implementation task to keep changes small, safe, and scoped.
 category: process
 applies_to:

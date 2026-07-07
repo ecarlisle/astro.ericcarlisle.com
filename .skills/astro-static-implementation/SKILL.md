@@ -1,6 +1,6 @@
 ---
-name: Astro Static Implementation
-slug: astro-static-implementation
+name: astro-static-implementation
+title: Astro Static Implementation
 description: Use this skill when editing Astro pages, layouts, components, and static output.
 category: engineering
 applies_to:

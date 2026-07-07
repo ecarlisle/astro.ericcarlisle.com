@@ -1,6 +1,6 @@
 ---
-name: Pagefind Search
-slug: pagefind-search
+name: pagefind-search
+title: Pagefind Search
 description: Use this skill when implementing or modifying static site search with Pagefind.
 category: engineering
 applies_to:

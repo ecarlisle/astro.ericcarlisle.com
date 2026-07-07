@@ -1,6 +1,6 @@
 ---
-name: SEO Content Metadata
-slug: seo-content-metadata
+name: seo-review
+title: SEO Content Metadata
 description: Use this skill when creating or editing pages, posts, images, links, structured data, or page metadata.
 category: content
 applies_to:

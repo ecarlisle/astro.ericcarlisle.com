@@ -1,6 +1,6 @@
 ---
-name: Design System CSS
-slug: design-system-css
+name: design-system-css
+title: Design System CSS
 description: Use this skill when editing styles, spacing, typography, layout, or component appearance.
 category: design
 applies_to:

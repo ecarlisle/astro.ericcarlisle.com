@@ -1,6 +1,6 @@
 ---
-name: Accessibility Review
-slug: accessibility-review
+name: accessibility
+title: Accessibility Review
 description: Use this skill when adding, changing, or reviewing UI for keyboard, screen reader, semantic, motion, and contrast accessibility.
 category: design
 applies_to:
