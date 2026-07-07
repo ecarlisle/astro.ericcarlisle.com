@@ -1,0 +1,418 @@
+---
+import Card from '../../components/Card.astro';
+import HeaderLink from '../../components/HeaderLink.astro';
+import PaginationNav from '../../components/PaginationNav.astro';
+import ShareStrip from '../../components/ShareStrip.astro';
+import SocialLinks from '../../components/SocialLinks.astro';
+import TagFilterBar from '../../components/TagFilterBar.astro';
+import ThemeToggle from '../../components/ThemeToggle.astro';
+import { AUTHOR_NAME } from '../../consts';
+import Layout from '../../layouts/BlogPost.astro';
+
+const title = 'Design System Companion';
+const description =
+  'A living reference for the typography, spacing, color, layout, components, and accessibility decisions implemented across ericcarlisle.com.';
+const pageUrl = 'https://ericcarlisle.com/portfolio/design-system/';
+
+const sampleDate = new Date('2024-06-15');
+const sampleTags = ['Astro', 'CSS', 'Accessibility'];
+
+const tagData = {
+  allTags: ['Astro', 'CSS', 'Accessibility', 'Performance'],
+  tagCounts: {
+    Astro: 3,
+    CSS: 5,
+    Accessibility: 2,
+    Performance: 1,
+  },
+};
+
+const colorSwatches = [
+  { token: '--bg-main', role: 'Page background' },
+  { token: '--bg-surface', role: 'Cards, header, code blocks' },
+  { token: '--bg-surface-elevated', role: 'Elevated surfaces, hover states' },
+  { token: '--text-primary', role: 'Headings, primary text' },
+  { token: '--text-secondary', role: 'Body text, descriptions' },
+  { token: '--text-muted', role: 'Meta, captions, labels' },
+  { token: '--brand-primary', role: 'Links, actions, focus' },
+  { token: '--brand-accent', role: 'Link hover, success states' },
+  { token: '--brand-highlight', role: 'Highlights, marks' },
+  { token: '--border-main', role: 'Card borders, dividers' },
+  { token: '--border-muted', role: 'Header border, subtle separators' },
+  { token: '--border-control', role: 'Form input borders' },
+];
+
+const spacingTokens = [
+  '--space-xs',
+  '--space-sm',
+  '--space-md',
+  '--space-lg',
+  '--space-xl',
+  '--space-section',
+  '--space-layout',
+];
+---
+
+<Layout
+  title={title}
+  {description}
+  pageType="portfolio"
+  robots="noindex, follow"
+>
+  <section class="ds-section">
+    <h2>Overview</h2>
+    <p>
+      This page is a living reference for the design system already implemented
+      in the Astro site. The CSS custom properties, components, and layout
+      patterns shown here are the source of truth; this page only documents and
+      demonstrates what already exists.
+    </p>
+    <p>
+      It is intended as a private-ish kitchen sink for my own reference, and may
+      later be shared with interviewers or hiring managers as a portfolio
+      artifact.
+    </p>
+  </section>
+
+  <section class="ds-section">
+    <h2>Design Principles</h2>
+    <ul>
+      <li><strong>Performance first</strong> — static output, minimal JavaScript.</li>
+      <li><strong>Minimal JavaScript</strong> — prefer Astro, HTML, and CSS.</li>
+      <li><strong>Semantic HTML</strong> — native elements before ARIA.</li>
+      <li><strong>Accessibility</strong> — keyboard, focus, contrast, reduced motion.</li>
+      <li><strong>Fluid responsive design</strong> — <code>clamp()</code> tokens, mobile-first.</li>
+      <li><strong>Content-first layout</strong> — readable measure, clear hierarchy.</li>
+    </ul>
+  </section>
+
+  <section class="ds-section">
+    <h2>Typography</h2>
+    <p>Headings use <code>var(--font-headers)</code> and body copy uses <code>var(--font-copy)</code>.</p>
+
+    <h1>Heading 1 — <code>var(--type-size-h1)</code></h1>
+    <h2>Heading 2 — <code>var(--type-size-h2)</code></h2>
+    <h3>Heading 3 — <code>var(--type-size-h3)</code></h3>
+    <h4>Heading 4 — <code>var(--type-size-h4)</code></h4>
+    <h5>Heading 5 — <code>var(--type-size-h5)</code></h5>
+
+    <p>
+      Body text uses <code>var(--type-size-body)</code> with a line height of
+      <code>var(--line-height-body)</code>. <a href="#">Links are underlined</a> and use the brand primary color.
+    </p>
+    <p class="ds-small">
+      Small text uses <code>var(--type-size-small)</code>.
+    </p>
+
+    <blockquote>
+      Blockquotes use a left border and slightly larger text. This is how a pull quote or emphasized statement appears.
+    </blockquote>
+
+    <p>
+      Inline code looks like <code>var(--example)</code> and code blocks are wrapped in <code>pre</code> tags.
+    </p>
+
+    <pre><code>/* Example token usage */
+.card {'{'}
+  padding: var(--space-component);
+  background: var(--color-card-bg);
+  border-radius: var(--radius-lg);
+{'}'}</code></pre>
+  </section>
+
+  <section class="ds-section">
+    <h2>Color Tokens</h2>
+    <p>
+      The default theme is dark; a light theme is applied via
+      <code>[data-theme="light"]</code> or system preference. Swatches below show
+      the current computed value.
+    </p>
+    <div class="ds-swatch-grid">
+      {
+        colorSwatches.map(({ token, role }) => (
+          <div class="ds-swatch">
+            <div class="ds-swatch-color" style={`background: var(${token});`} />
+            <code>{token}</code>
+            <span>{role}</span>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="ds-section">
+    <h2>Spacing Scale</h2>
+    <p>Spacing is derived from the fluid rhythm token <code>var(--rhythm)</code>.</p>
+    <div class="ds-spacing-stack">
+      {
+        spacingTokens.map((token) => (
+          <div class="ds-spacing-row">
+            <code>{token}</code>
+            <div class="ds-spacing-box" style={`width: var(${token}); height: var(${token});`} />
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="ds-section">
+    <h2>Layout Rails</h2>
+    <p>The site uses three content rails to control reading width and page width.</p>
+    <div class="ds-rail-demo rail--prose">
+      <code>.rail--prose</code> — max-width <code>68ch</code>
+    </div>
+    <div class="ds-rail-demo rail--page">
+      <code>.rail--page</code> — max-width <code>72rem</code>
+    </div>
+    <div class="ds-rail-demo rail--wide">
+      <code>.rail--wide</code> — max-width <code>80rem</code>
+    </div>
+  </section>
+
+  <section class="ds-section">
+    <h2>Components</h2>
+
+    <h3>Header Link</h3>
+    <p>
+      <HeaderLink href="/portfolio/design-system">Active header link</HeaderLink>
+      <HeaderLink href="/blog">Inactive header link</HeaderLink>
+    </p>
+
+    <h3>Button</h3>
+    <p>
+      <a href="#" class="button">Primary button</a>
+      <a href="#" class="button button--outline">Outline button</a>
+    </p>
+
+    <h3>Tag and Chip</h3>
+    <p>
+      <a href="#" class="tag">interactive tag</a>
+      <span class="chip">static chip</span>
+    </p>
+
+    <h3>Tag Filter Bar</h3>
+    <TagFilterBar tags={sampleTags} {tagData} />
+
+    <h3>Card</h3>
+    <Card
+      title="Sample card title"
+      href="#"
+      author={AUTHOR_NAME}
+      pubDate={sampleDate}
+      tags={sampleTags}
+      readingTime={350}
+    >
+      <p>
+        This card demonstrates the card component with title, meta, tags, and a
+        short description body.
+      </p>
+    </Card>
+
+    <h3>Callout</h3>
+    <div class="callout">
+      <strong>Callout title</strong> — This is a callout block used for
+      highlighted information or notes.
+    </div>
+
+    <h3>Social Links</h3>
+    <div class="ds-inline-demo">
+      <SocialLinks />
+    </div>
+
+    <h3>Theme Toggle</h3>
+    <div class="ds-inline-demo">
+      <ThemeToggle />
+    </div>
+
+    <h3>Share Strip</h3>
+    <ShareStrip title={title} {pageUrl} />
+
+    <h3>Pagination</h3>
+    <PaginationNav
+      prev={{ url: '#', label: '← Previous', title: 'Previous article title' }}
+      next={{ url: '#', label: 'Next →', title: 'Next article title' }}
+    />
+
+    <h3>Contact Form Fields</h3>
+    <form class="contact-form ds-form">
+      <label>
+        <span>Name</span>
+        <input type="text" placeholder="Sample input" />
+      </label>
+      <label>
+        <span>Message</span>
+        <textarea rows="3" placeholder="Sample textarea"></textarea>
+      </label>
+      <button type="button" class="button">Send Message</button>
+    </form>
+
+    <h3>Search UI</h3>
+    <p>
+      The search interface is provided by Pagefind. Its markup is injected at
+      runtime and restyled via <code>src/styles/pagefind.css</code>; the
+      internals are not rebuilt here.
+    </p>
+  </section>
+
+  <section class="ds-section">
+    <h2>Content Patterns</h2>
+
+    <h3>Article Intro</h3>
+    <p class="home-hero-lede">
+      A large lede paragraph uses <code>var(--type-size-large)</code> to set up
+      an article or section.
+    </p>
+
+    <h3>Metadata / Date</h3>
+    <p class="meta">
+      <strong>{AUTHOR_NAME}</strong>
+      <time datetime={sampleDate.toISOString()}>
+        {sampleDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+      </time>
+      <span class="reading-time">3 min read</span>
+    </p>
+
+    <h3>Tags</h3>
+    <p class="meta meta-tags">
+      {sampleTags.map((tag) => <a href={`/tags/${tag}/`} class="tag">{tag}</a>)}
+    </p>
+
+    <h3>Back Link</h3>
+    <a href="/portfolio" class="back-link">← Back to portfolio</a>
+  </section>
+
+  <section class="ds-section">
+    <h2>Accessibility Notes</h2>
+    <ul>
+      <li>
+        <strong>Skip link</strong> — keyboard users can jump to main content.
+      </li>
+      <li>
+        <strong>Focus states</strong> — visible <code>dashed</code> outline with
+        offset on interactive elements.
+      </li>
+      <li>
+        <strong>Touch targets</strong> — minimum <code>44px</code> for buttons
+        and icon links.
+      </li>
+      <li>
+        <strong>Color contrast</strong> — palettes are chosen for both dark and
+        light modes; avoid relying on color alone.
+      </li>
+      <li>
+        <strong>Semantic HTML</strong> — native headings, landmarks, lists, and
+        buttons before ARIA.
+      </li>
+    </ul>
+  </section>
+
+  <section class="ds-section">
+    <h2>Implementation Notes</h2>
+    <ul>
+      <li>
+        <code>--header-height</code> is measured and set by JavaScript; the CSS
+        fallback is <code>4.5rem</code>.
+      </li>
+      <li>
+        Pagefind search UI is third-party markup restyled by
+        <code>src/styles/pagefind.css</code>.
+      </li>
+      <li>
+        Some page-specific styles (for example, the portfolio case-study grid)
+        use local sizing that is not yet captured by shared tokens.
+      </li>
+      <li>
+        This page is intentionally omitted from the main navigation and uses
+        <code>noindex, follow</code> metadata for now.
+      </li>
+    </ul>
+  </section>
+</Layout>
+
+<style>
+  .ds-section {
+    margin-bottom: var(--space-section);
+  }
+
+  .ds-section h2 {
+    margin-top: 0;
+  }
+
+  .ds-section h3 {
+    margin-top: var(--space-xl);
+  }
+
+  .ds-small {
+    font-size: var(--type-size-small);
+    color: var(--text-muted);
+  }
+
+  .ds-swatch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: var(--space-component);
+    margin-top: var(--space-component);
+  }
+
+  .ds-swatch {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .ds-swatch-color {
+    aspect-ratio: 2 / 1;
+    border-radius: var(--radius-md);
+    border: var(--size-border-pixel) solid var(--border-main);
+  }
+
+  .ds-swatch code,
+  .ds-swatch span {
+    font-size: var(--type-size-small);
+    color: var(--text-secondary);
+  }
+
+  .ds-spacing-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-top: var(--space-component);
+  }
+
+  .ds-spacing-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-component);
+  }
+
+  .ds-spacing-row code {
+    min-width: 10ch;
+  }
+
+  .ds-spacing-box {
+    background: var(--color-action);
+    border-radius: var(--radius-sm);
+  }
+
+  .ds-rail-demo {
+    padding: var(--space-sm);
+    margin-bottom: var(--space-component);
+    background: var(--bg-surface);
+    border: var(--size-border-pixel) dashed var(--border-main);
+    border-radius: var(--radius-md);
+  }
+
+  .ds-rail-demo code {
+    color: var(--text-secondary);
+  }
+
+  .ds-inline-demo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-inline);
+  }
+
+  .ds-form {
+    max-width: var(--layout-rail-prose);
+  }
+</style>

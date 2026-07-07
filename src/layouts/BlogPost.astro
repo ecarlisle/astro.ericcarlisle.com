@@ -25,6 +25,7 @@ interface Props {
   socialDescription?: string;
   socialImage?: ImageMetadata;
   twitterHandle?: string;
+  robots?: string;
   share?: { enabled?: boolean; networks?: string[]; scheduledFor?: Date };
   wordCount?: number;
   prevPost?: { title: string; slug: string };
@@ -45,6 +46,7 @@ const {
   socialDescription,
   socialImage,
   twitterHandle,
+  robots,
   wordCount = 0,
   pageType = 'article',
   prevPost,
@@ -68,6 +70,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
       image={socialImage ?? heroImage}
       {pageType}
       {pubDate}
+      {robots}
       {updatedDate}
       {tags}
       {wordCount}
