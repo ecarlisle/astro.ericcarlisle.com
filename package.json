@@ -19,7 +19,9 @@
     "typecheck": "astro check",
     "lighthouse:all": "node scripts/lighthouse-all.mjs",
     "structured-data:report": "pnpm build && node scripts/jsonld-report.mjs",
-    "jsonld:report": "pnpm structured-data:report"
+    "jsonld:report": "pnpm structured-data:report",
+    "test:e2e": "playwright test",
+    "test:a11y": "playwright test tests/accessibility.spec.ts"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
@@ -31,10 +33,12 @@
     "@astrojs/partytown": "^2.1.7",
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.3",
+    "@axe-core/playwright": "^4.12.1",
     "@biomejs/biome": "^2.5.0",
     "@fontsource-variable/fira-code": "^5.2.7",
     "@fontsource-variable/inter": "^5.2.8",
     "@playform/compress": "^0.2.3",
+    "@playwright/test": "^1.61.1",
     "astro-expressive-code": "^0.43.1",
     "astro-pagefind": "^2.0.0",
     "fallow": "^2.91.0",
