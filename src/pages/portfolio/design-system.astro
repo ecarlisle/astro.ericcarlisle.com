@@ -120,16 +120,25 @@ const typeTokens = [
 ];
 
 const knownGaps = [
-  { item: 'Header height', note: 'JS-managed with a 4.5rem CSS fallback.' },
-  { item: 'Pagefind search UI', note: 'Third-party markup restyled by src/styles/pagefind.css.' },
+  {
+    item: 'Header height',
+    note: 'Measured at runtime by JavaScript; the CSS fallback is 4.5rem.',
+  },
+  {
+    item: 'Pagefind search UI',
+    note: 'Third-party markup restyled by src/styles/pagefind.css.',
+  },
   {
     item: 'Portfolio case-study grid',
     note: 'Page-local 1.6fr / 0.8fr sizing in src/pages/portfolio.astro.',
   },
-  { item: 'Hero role letter-spacing', note: 'One-off 0.02em on the homepage; not tokenized.' },
   {
-    item: 'Page-specific motion',
-    note: 'Some scroll and hover behavior is local to individual pages.',
+    item: 'Homepage role text',
+    note: 'One-off letter-spacing on the homepage hero role; not tokenized.',
+  },
+  {
+    item: 'Page-specific animations',
+    note: 'Scroll-driven header behavior and card entrance motion are scoped to specific pages.',
   },
 ];
 ---
@@ -140,10 +149,11 @@ const knownGaps = [
   pageType="portfolio"
   robots="noindex, follow"
 >
+<div data-pagefind-ignore>
   <div class="ds-hero">
-    <p class="ds-hero-subtitle">Implemented Astro design system</p>
+    <p class="ds-hero-subtitle">Astro design system reference</p>
     <div class="ds-hero-meta">
-      <span>Source: Astro + vanilla CSS</span>
+      <span>Built with Astro + vanilla CSS</span>
       <span>Status: Living reference</span>
       <span>Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
     </div>
@@ -152,12 +162,13 @@ const knownGaps = [
   <section class="ds-section">
     <h2>Overview</h2>
     <p>
-      This page documents the design system already built into the Astro site.
-      The CSS custom properties, components, and layout patterns here are the
-      source of truth; the page only renders and explains what already exists.
+      This page documents the design system implemented across the site. The
+      CSS custom properties, components, and layout patterns shown here are the
+      source of truth; the page renders and explains what is already in
+      production.
     </p>
     <p>
-      It is intended as a private reference and may later be shared with
+      It is intended as a personal reference and may later be shared with
       interviewers or hiring managers as a portfolio artifact.
     </p>
   </section>
@@ -196,7 +207,7 @@ const knownGaps = [
     <h2>Typography</h2>
     <p>
       Headings use <code>var(--font-headers)</code>; body copy uses
-      <code>var(--font-copy)</code>; mono elements use
+      <code>var(--font-copy)</code>; monospace elements use
       <code>var(--font-mono)</code>.
     </p>
 
@@ -217,10 +228,10 @@ const knownGaps = [
     <table class="ds-table">
       <thead>
         <tr>
-          <th>Token</th>
-          <th>Mobile</th>
-          <th>Desktop</th>
-          <th>Line height</th>
+          <th scope="col">Token</th>
+          <th scope="col">Mobile</th>
+          <th scope="col">Desktop</th>
+          <th scope="col">Line height</th>
         </tr>
       </thead>
       <tbody>
@@ -278,9 +289,9 @@ const knownGaps = [
     <table class="ds-table">
       <thead>
         <tr>
-          <th>Token</th>
-          <th>Usage</th>
-          <th>Source</th>
+          <th scope="col">Token</th>
+          <th scope="col">Usage</th>
+          <th scope="col">Source</th>
         </tr>
       </thead>
       <tbody>
@@ -376,21 +387,24 @@ const knownGaps = [
         <h4>Card</h4>
         <p class="ds-source">src/components/Card.astro</p>
         <Card
-          title="Sample card title"
-          href="#"
+          title="Designing with tokens"
+          href="/blog"
           author={AUTHOR_NAME}
           pubDate={sampleDate}
           tags={sampleTags}
           readingTime={350}
         >
-          <p>A short description rendered inside the card body.</p>
+          <p>
+            How CSS custom properties shape typography, spacing, color, and
+            layout across the site.
+          </p>
         </Card>
       </div>
       <div class="ds-component-demo">
         <h4>Tag / Chip</h4>
         <p class="ds-source">src/styles/components.css</p>
         <p>
-          <a href="#" class="tag">interactive tag</a>
+          <a href="/tags/astro/" class="tag">Astro</a>
           <span class="chip">static chip</span>
         </p>
       </div>
@@ -414,8 +428,8 @@ const knownGaps = [
         <h4>Button</h4>
         <p class="ds-source">src/styles/components.css</p>
         <p>
-          <a href="#" class="button">Primary</a>
-          <a href="#" class="button button--outline">Outline</a>
+          <button type="button" class="button">Primary</button>
+          <button type="button" class="button button--outline">Outline</button>
         </p>
       </div>
       <div class="ds-component-demo">
@@ -451,11 +465,11 @@ const knownGaps = [
         <form class="contact-form ds-form">
           <label>
             <span>Name</span>
-            <input type="text" placeholder="Sample input" />
+            <input type="text" placeholder="Your name" />
           </label>
           <label>
             <span>Message</span>
-            <textarea rows="3" placeholder="Sample textarea"></textarea>
+            <textarea rows="3" placeholder="Your message"></textarea>
           </label>
           <button type="button" class="button">Send Message</button>
         </form>
@@ -504,8 +518,8 @@ const knownGaps = [
     <table class="ds-table">
       <thead>
         <tr>
-          <th>Item</th>
-          <th>Note</th>
+          <th scope="col">Item</th>
+          <th scope="col">Note</th>
         </tr>
       </thead>
       <tbody>
@@ -525,8 +539,9 @@ const knownGaps = [
     <h2>Implementation Notes</h2>
     <ul>
       <li>
-        This page uses <code>:global(#main-content)</code> to widen the default
-        page rail while keeping prose text readable.
+        This page widens the default content rail to
+        <code>--layout-rail-wide</code> while keeping prose paragraphs at the
+        readable <code>--layout-rail-prose</code> measure.
       </li>
       <li>
         <code>--header-height</code> is measured and set by JavaScript; the CSS
@@ -546,6 +561,7 @@ const knownGaps = [
       </li>
     </ul>
   </section>
+</div>
 </Layout>
 
 <style>
