@@ -8,6 +8,9 @@ import { defineConfig } from 'astro/config';
 import expressiveCode from 'astro-expressive-code';
 import pagefind from 'astro-pagefind';
 
+import sentry from '@sentry/astro';
+import spotlightjs from '@spotlightjs/astro';
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://ericcarlisle.com',
@@ -38,10 +41,12 @@ export default defineConfig({
     }),
     mdx(),
     pagefind(),
-    sitemap(),
     // compress({
     //   Image: false,
     // }),
+    sitemap(),
+    sentry({ telemetry: false }),
+    spotlightjs(),
   ],
   vite: {
     css: {
