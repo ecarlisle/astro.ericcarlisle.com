@@ -1,5 +1,5 @@
 {
-	"extensions": ["./extensions/astroblog.ts"],
-	"prompts": ["./prompts"],
-	"skills": ["../.skills"]
+  "extensions": ["./extensions/astroblog.ts"],
+  "prompts": ["./prompts"],
+  "skills": ["../.skills"]
 }

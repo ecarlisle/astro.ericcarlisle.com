@@ -4,12 +4,11 @@ import mdx from '@astrojs/mdx';
 import partytown from '@astrojs/partytown';
 import sitemap from '@astrojs/sitemap';
 import compress from '@playform/compress';
+import sentry from '@sentry/astro';
+import spotlightjs from '@spotlightjs/astro';
 import { defineConfig } from 'astro/config';
 import expressiveCode from 'astro-expressive-code';
 import pagefind from 'astro-pagefind';
-
-import sentry from '@sentry/astro';
-import spotlightjs from '@spotlightjs/astro';
 
 // https://astro.build/config
 export default defineConfig({
