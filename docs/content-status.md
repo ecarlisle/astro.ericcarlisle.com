@@ -14,8 +14,7 @@ placeholder or test content. It exists to validate:
 - Metadata rendering
 - RSS and sitemap generation
 
-Do not treat every current post as final editorial content, and do not delete placeholder posts
-without considering the behaviors they support.
+Many current posts are placeholder or test content. Removing them without considering the behaviors they support (pagination, tags, search, metadata, RSS, sitemap) can leave gaps in test coverage.
 
 ## Real or Near-Real Content
 

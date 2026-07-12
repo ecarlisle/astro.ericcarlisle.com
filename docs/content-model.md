@@ -44,5 +44,4 @@ the page title, description, or hero image.
 
 ## Placeholder Content
 
-Many existing posts are placeholder or test posts. Do not treat every current post as final
-editorial content.
+Many existing posts are placeholder or test posts. Their presence does not indicate that their editorial content is final or ready to publish.

@@ -1,10 +1,8 @@
 # Reviewer Checklist
 
-This checklist supports the Reviewer role in AstroBlog orchestration.
+This checklist supports code review in AstroBlog.
 
 Use it to review diffs after implementation.
-
-Reviewer should remain read-only unless explicitly asked to edit.
 
 ## Required Output Format
 
@@ -57,7 +55,7 @@ Use `pnpm` only.
 Request changes if:
 
 - Relevant checks failed and were ignored.
-- The agent claims completion despite failing validation.
+- Completion is claimed despite failing validation.
 - The implementation affects build behavior but no build/typecheck was run or explained.
 
 ## 3. Accessibility

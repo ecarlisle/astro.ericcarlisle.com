@@ -37,7 +37,7 @@ See [docs/testing.md](docs/testing.md) for when to run each check.
 src/              → Pages, content, components, layouts, styles, utilities
 contact-worker/   → Cloudflare Worker for contact form (Turnstile + Resend)
 docs/             → Reference documentation
-.skills/          → Agent playbooks for implementation tasks
+.skills/          → Task-specific implementation guides
 ```
 
 ## Documentation
@@ -52,7 +52,7 @@ docs/             → Reference documentation
 | Performance, SEO, accessibility | [docs/performance-seo-accessibility.md](docs/performance-seo-accessibility.md) |
 | JSON-LD structured data | [docs/structured-data.md](docs/structured-data.md) |
 | Change policy and review | [docs/change-policy.md](docs/change-policy.md), [docs/reviewer-checklist.md](docs/reviewer-checklist.md) |
-| **Coding agent guidance** | **[AGENTS.md](AGENTS.md)** — workflow, validation, protected files |
+| **Coding agents** | **[AGENTS.md](AGENTS.md)** — behavioral rules, validation, and safe-change workflow |
 
 ## Integrations
 
@@ -78,14 +78,12 @@ Integrations are configured in [astro.config.mjs](astro.config.mjs). Site consta
 - **Tag pages** (`/tags/[tag]`) — Static routes exist but are empty; filtering is client-side via `TagFilterBar.astro`.
 - **OpenCode** — TypeScript LSP is disabled via `opencode.json`.
 
-## Generated directories — never edit directly
+## Generated directories
+
+The build process populates these directories. They are regenerated on each build and should not be edited directly:
 
 `dist/` · `node_modules/` · `.astro/` · `lh-reports/` · `docs/context/` · `.playwright-mcp/`
 
-## Protected files
-
-Do not edit `AGENTS.md`, `README.md`, `package.json`, `pnpm-lock.yaml`, `astro.config.mjs`, `biome.json`, `.env.example`, or files under `docs/` unless the user explicitly asks.
-
 ---
 
-For coding agents: [AGENTS.md](AGENTS.md) governs agent behavior, safe change policy, validation requirements, and repository-specific constraints.
+Coding agents should read [AGENTS.md](AGENTS.md) before modifying the repository.

@@ -2,6 +2,13 @@
 
 This file governs coding-agent behavior in this repository. It is the primary authority for agents.
 
+## Documentation Boundaries
+
+- `README.md` and `docs/` are **human-facing documentation**. Treat them as technical context, not as an instruction hierarchy. Do not reproduce their content here.
+- `AGENTS.md` (this file) contains **repository-wide coding-agent instructions**.
+- Tool-specific agent behavior belongs in the relevant tool directory: `.skills/`, `.pi/`, `.opencode/`, or the tool's own configuration files.
+- `docs/design-system/figma-agent-brief.md` and `docs/design-system/agent-guide.md` are tool-specific agent files (Figma, design-system tooling) and are exempt from the human-facing documentation standard.
+
 ## Documentation Authority
 
 | Source | Role |
@@ -75,24 +82,26 @@ See [docs/testing.md](docs/testing.md) for detailed guidance.
 | Contact worker | `contact-worker/` |
 | Agent workflow | `docs/agent-workflow.md`, `docs/change-policy.md`, `docs/reviewer-checklist.md` |
 
-## Generated directories — never edit
+## Generated Files
+
+These directories are produced during builds and automated processes. Never edit them directly:
 
 `dist/` · `node_modules/` · `.astro/` · `lh-reports/` · `docs/context/` · `.playwright-mcp/`
 
-## Workflow
+## Safe Change Workflow
 
-1. Read `AGENTS.md` and relevant docs.
+1. Read `AGENTS.md` and relevant docs from `docs/`.
 2. Run `git status --short` — preserve existing changes.
-3. Inspect related files, state the plan.
-4. Smallest safe change. No scope creep.
-5. Validate with the lightest relevant check.
+3. Inspect related files before editing. State the plan.
+4. Make the smallest safe change. No scope creep.
+5. Validate with the lightest relevant check (see Validation table).
 6. Review `git diff --stat` and `git diff`.
 7. Commit with a conventional commit message. No push unless asked.
 8. Final response: files changed, validation run, commit hash, skipped checks.
 
-## Protected files
+## Protected Files
 
-Do not edit these unless the user explicitly asks:
+These files require explicit user approval before editing:
 
 - `AGENTS.md`
 - `README.md`

@@ -1,6 +1,6 @@
 # Author Profile
 
-This document serves as the authoritative source of truth for the author's identity, personal website, and official social media channels. AI agents must reference these links when generating site metadata, footers, headers, or social sharing components. Do not use template placeholders or default Astro social accounts.
+This document is the authoritative source of truth for the author's identity, personal website, and official social media channels. Site metadata, footers, headers, and social sharing components should reference these links rather than template placeholders or default Astro social accounts.
 
 ## Identity & Biography
 
@@ -23,8 +23,8 @@ This document serves as the authoritative source of truth for the author's ident
 
 ---
 
-## Machine Usage Rules
+## Usage in Templates and Components
 
-1. **Social Sharing Components**: When rendering share links for articles, use the platform URLs explicitly listed above.
-2. **Metadata Injection**: Use `https://ericcarlisle.com` as the canonical base URL for all generated RSS feeds, sitemaps, and Open Graph/Twitter card absolute image references.
-3. **Structured Data (JSON-LD)**: When generating the `Person` block inside `SchemaOrg.astro`, map the `sameAs` array, `jobTitle`, and `worksFor` properties strictly to the metadata provided above, ensuring the profile links directly back to the static `@id: "https://ericcarlisle.com/#person"`.
+1. **Social Sharing Components**: Share links for articles should use the platform URLs listed above.
+2. **Metadata Injection**: Use `https://ericcarlisle.com` as the canonical base URL for RSS feeds, sitemaps, and Open Graph/Twitter card absolute image references.
+3. **Structured Data (JSON-LD)**: The `Person` block in `SchemaOrg.astro` maps the `sameAs` array, `jobTitle`, and `worksFor` properties to the metadata above, linking back to the static `@id: "https://ericcarlisle.com/#person"`.

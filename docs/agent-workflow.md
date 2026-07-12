@@ -1,22 +1,20 @@
-# Agent Workflow
+# Development Workflow
 
 > For the full project organization guide, see `docs/development/agent-workflow.md`.
 
-When working in this repository:
+## Standard Development Steps
 
-1. Read `AGENTS.md`.
-2. Check `specs/` for relevant change specifications.
-3. Load relevant `.skills/` files based on the task.
-4. Check the relevant files in `docs/`.
+1. Check `specs/` for relevant change specifications.
+2. Read the relevant files in `docs/`.
 3. Inspect source files before editing.
-4. Make the smallest safe change.
+4. Make the smallest safe change that satisfies the request.
 5. Preserve performance, accessibility, SEO, and minimal JavaScript.
 6. Run relevant checks when possible.
 7. Update docs when project behavior changes.
 
-## Preferred Checks
+## Validation
 
-Use:
+Use the checks relevant to the change:
 
 ```sh
 pnpm build
@@ -25,13 +23,11 @@ pnpm lint
 pnpm lighthouse:all
 ```
 
-Run only the checks relevant to the change when time or environment limits apply.
+Run only the checks relevant to the change when time or environment limits apply. See [testing.md](testing.md) for detailed guidance on when to run each check.
 
 ## Generated Files
 
-Do not edit generated output unless explicitly asked.
-
-Avoid:
+The build process produces output in several directories. These are regenerated on each build and should not be edited directly:
 
 - `dist/`
 - `node_modules/`

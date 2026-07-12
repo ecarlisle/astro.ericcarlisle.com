@@ -1,10 +1,10 @@
-# Agent Workflow and Project Organization
+# Project Organization
 
-This document explains how the AstroBlog repository is organized for agentic work.
+This document explains how the AstroBlog repository is organized.
 
 ## Top-level files
 
-- `AGENTS.md` — General rules for all agents working in this repo. Read this first.
+- `AGENTS.md` — Coding-agent behavioral rules, validation, and safe-change workflow.
 - `package.json` — Project scripts, dependencies, and package manager configuration.
 - `biome.json` — Biome formatter and linter configuration.
 - `astro.config.mjs` — Astro site configuration.
@@ -13,33 +13,21 @@ This document explains how the AstroBlog repository is organized for agentic wor
 
 ### `.skills/`
 
-Reusable task-specific agent instructions.
+Reusable task-specific implementation guides. Each skill lives in its own directory (`.skills/<name>/SKILL.md`) and includes YAML frontmatter so tools can load relevant skills based on context.
 
-- Each skill lives in its own directory: `.skills/<name>/SKILL.md`.
-- Skills include YAML frontmatter (`name`, `slug`, `description`, `category`, `applies_to`, `triggers`, `priority`, `version`) so agents can load relevant skills based on context.
-- Examples: accessibility review, performance budget, design-system work, portfolio review, Figma handoff.
-
-Agents should consult `.skills/` before starting implementation work.
+Examples: accessibility review, performance budget, design-system work, portfolio review, Figma handoff.
 
 ### `docs/`
 
 Human-readable project documentation.
 
-- `docs/development/` — Development workflow, testing, architecture, and agent guidance.
+- `docs/development/` — Development workflow, testing, architecture, and project organization.
 - `docs/design-system/` — Design-system documentation, including the Figma agent brief.
 - Other docs cover content conventions, change policy, deployment, SEO/accessibility, and project status.
 
-Docs are long-term reference material, not one-time change plans.
-
 ### `specs/`
 
-Concrete feature and change specifications.
-
-- Each spec describes one planned change, including requirements, constraints, acceptance criteria, and validation.
-- Use `specs/_template.md` as a starting point.
-- Specs are not reusable skills; they are single-use plans.
-
-Agents should read `specs/` before implementing any change that has a spec.
+Concrete feature and change specifications. Each spec describes one planned change, including requirements, constraints, acceptance criteria, and validation. Use `specs/_template.md` as a starting point. Specs are single-use plans, not reusable guides.
 
 ### `src/`
 
@@ -61,27 +49,23 @@ Project automation scripts.
 
 ### `.pi/`
 
-Pi-specific settings, extensions, commands, and local agent workflow helpers.
+Project-specific tool settings, extensions, commands, and prompt templates.
 
 - `.pi/settings.json` — Extension and skill paths.
-- `.pi/extensions/` — Project-local Pi extensions.
+- `.pi/extensions/` — Project-local extensions.
 - `.pi/prompts/` — Reusable prompt templates.
 
-## Typical agent workflow
+## Development Steps
 
-1. Read `AGENTS.md`.
-2. Check `specs/` for any relevant change specifications.
-3. Load relevant `.skills/` files based on the task.
-4. Read the docs that apply to the change area.
-5. Inspect source files before editing.
-6. Make the smallest safe change.
-7. Preserve performance, accessibility, SEO, and minimal JavaScript.
-8. Run the relevant checks.
-9. Update docs or specs when project behavior or conventions change.
+1. Check `specs/` for any relevant change specifications.
+2. Read the docs that apply to the change area.
+3. Inspect source files before editing.
+4. Make the smallest safe change.
+5. Preserve performance, accessibility, SEO, and minimal JavaScript.
+6. Run the relevant checks.
+7. Update docs or specs when project behavior or conventions change.
 
-## Validation commands
-
-Use these commands during development:
+## Validation Commands
 
 | Command | Purpose |
 |---------|---------|
@@ -93,16 +77,14 @@ Use these commands during development:
 | `pnpm structured-data:report` | Build + validate JSON-LD output |
 | `pnpm fallow:dead-code` | Dead code analysis |
 
-Run only the checks relevant to the change when time or environment limits apply.
+See [testing.md](../testing.md) for when to run each check.
 
-## Generated files
+## Generated Files
 
-Do not edit generated output unless explicitly asked.
+The build process produces output in several directories. These are regenerated on each build and should not be edited directly:
 
-Avoid:
-
-- `dist/`
-- `node_modules/`
-- `lh-reports/`
-- `docs/context/`
-- `.astro/`
+- `dist/` — Production build output
+- `node_modules/` — Package dependencies
+- `lh-reports/` — Lighthouse audit reports
+- `docs/context/` — Generated project context files
+- `.astro/` — Astro build cache

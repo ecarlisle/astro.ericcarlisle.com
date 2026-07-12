@@ -18,12 +18,12 @@ This is an Astro 7 static site.
 
 ## Generated Areas
 
-Avoid editing:
+These directories are produced during builds and automated processes. Changes made inside them will be overwritten:
 
-- `dist/`
-- `node_modules/`
-- `lh-reports/`
-- `docs/context/`
+- `dist/` — Production build output
+- `node_modules/` — Package dependencies
+- `lh-reports/` — Lighthouse audit reports
+- `docs/context/` — Generated project context files
 
 ## Notable Integrations
 
