@@ -250,7 +250,7 @@ const knownGaps = [
       </tbody>
     </table>
 
-    <h3>Content samples</h3>
+    <h3 id="content-samples">Content samples</h3>
     <blockquote>
       Blockquotes use a left border and slightly larger text. This is how a pull
       quote or emphasized statement appears.
@@ -361,7 +361,7 @@ const knownGaps = [
     <h3>Navigation</h3>
     <div class="ds-component-group">
       <div class="ds-component-demo">
-        <h4>HeaderLink</h4>
+        <h4 id="headerlink">HeaderLink</h4>
         <p class="ds-source">src/components/HeaderLink.astro</p>
         <div class="demo-row">
           <HeaderLink href="/portfolio/design-system">Active</HeaderLink>
@@ -369,12 +369,12 @@ const knownGaps = [
         </div>
       </div>
       <div class="ds-component-demo">
-        <h4>Back link</h4>
+        <h4 id="back-link">Back link</h4>
         <p class="ds-source">src/styles/components.css</p>
         <a href="/portfolio" class="back-link">← Back to portfolio</a>
       </div>
       <div class="ds-component-demo">
-        <h4>PaginationNav</h4>
+        <h4 id="paginationnav">PaginationNav</h4>
         <p class="ds-source">src/components/PaginationNav.astro</p>
         <PaginationNav
           prev={{ url: '#', label: '← Previous', title: 'Previous article' }}
@@ -386,7 +386,7 @@ const knownGaps = [
     <h3>Content</h3>
     <div class="ds-component-group">
       <div class="ds-component-demo">
-        <h4>Card</h4>
+        <h4 id="card">Card</h4>
         <p class="ds-source">src/components/Card.astro</p>
         <Card
           title="Designing with tokens"
@@ -403,7 +403,7 @@ const knownGaps = [
         </Card>
       </div>
       <div class="ds-component-demo">
-        <h4>Tag / Chip</h4>
+        <h4 id="tag-chip">Tag / Chip</h4>
         <p class="ds-source">src/styles/components.css</p>
         <div class="demo-row">
           <a href="/tags/astro/" class="tag">Astro</a>
@@ -411,12 +411,12 @@ const knownGaps = [
         </div>
       </div>
       <div class="ds-component-demo">
-        <h4>TagFilterBar</h4>
+        <h4 id="tagfilterbar">TagFilterBar</h4>
         <p class="ds-source">src/components/TagFilterBar.astro</p>
         <TagFilterBar tags={sampleTags} {tagData} />
       </div>
       <div class="ds-component-demo">
-        <h4>Callout</h4>
+        <h4 id="callout">Callout</h4>
         <p class="ds-source">src/styles/components.css</p>
         <div class="callout">
           <strong>Callout title</strong> — highlighted information or notes.
@@ -427,7 +427,7 @@ const knownGaps = [
     <h3>Interaction</h3>
     <div class="ds-component-group">
       <div class="ds-component-demo">
-        <h4>Button</h4>
+        <h4 id="button">Button</h4>
         <p class="ds-source">src/styles/components.css</p>
         <div class="demo-row">
           <button type="button" class="button">Primary</button>
@@ -435,14 +435,14 @@ const knownGaps = [
         </div>
       </div>
       <div class="ds-component-demo">
-        <h4>ThemeToggle</h4>
+        <h4 id="themetoggle">ThemeToggle</h4>
         <p class="ds-source">src/components/ThemeToggle.astro</p>
         <div class="demo-row">
           <ThemeToggle />
         </div>
       </div>
       <div class="ds-component-demo">
-        <h4>SocialLinks</h4>
+        <h4 id="sociallinks">SocialLinks</h4>
         <p class="ds-source">src/components/SocialLinks.astro</p>
         <div class="demo-row">
           <SocialLinks />
@@ -453,7 +453,7 @@ const knownGaps = [
     <h3>Integrations</h3>
     <div class="ds-component-group">
       <div class="ds-component-demo">
-        <h4>ShareStrip</h4>
+        <h4 id="sharestrip">ShareStrip</h4>
         <p class="ds-source">src/components/ShareStrip.astro</p>
         <ShareStrip title={title} {pageUrl} />
       </div>

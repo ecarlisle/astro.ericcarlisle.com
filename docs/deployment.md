@@ -1,64 +1,594 @@
-# Deployment
+# Deployment and Operations
 
-## Astro Static Build
+A complete reference for deploying, configuring, and maintaining ericcarlisle.com.
 
-The site builds to a static `./dist/` directory:
+## Deployment Architecture
 
-```sh
-pnpm build       # astro build → ./dist/
-pnpm preview     # astro preview → serve ./dist/ locally
+The site has two independent deployment surfaces:
+
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│  Static Site (GitHub Pages)                                         │
+│                                                                     │
+│  Source → GitHub Actions → Astro build → GitHub Pages               │
+│  HTML, CSS, JS, images, RSS, sitemap, Pagefind index                │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  Contact Form Worker (Cloudflare Workers)                           │
+│                                                                     │
+│  Form → Worker → Turnstile verification → Resend email API          │
+│  Separate deployment, separate secrets                              │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-The build output includes:
+**Key points:**
+- The static site and the Worker deploy independently
+- Changes to the static site do not affect the Worker
+- Changes to the Worker do not require a static site rebuild
+- The static site is served from GitHub Pages via Cloudflare DNS
+- The Worker runs on Cloudflare's edge network
 
-- Static HTML pages
-- Pagefind search index
-- RSS feed
-- Sitemap
-- Optimized images (WebP via Sharp / @playform/compress)
+## Local Environment Setup
 
-## Cloudflare Worker (Contact Form)
-
-The contact form is handled by a separate Cloudflare Worker in `contact-worker/`.
-
-Deployment is manual:
+### Quick Start
 
 ```sh
-cd contact-worker && wrangler deploy --env production
+git clone <repo>
+cd ericcarlisle.com
+pnpm install
+cp .env.example .env.local
+# Edit .env.local with your values (see below)
+pnpm dev
 ```
 
-The worker validates input, checks Turnstile CAPTCHA, rate-limits, and sends
-email via Resend API. It uses environments defined in `wrangler.toml`:
+### Environment Files
 
-- `development` — `ericcarlisle-contact-dev`
-- `production` — `ericcarlisle-contact`
+| File | Purpose | Committed? |
+|------|---------|------------|
+| `.env.example` | Template with safe placeholders | Yes |
+| `.env.local` | Local development overrides | No (gitignored) |
+| `.env.development` | Dev-specific values | No (gitignored) |
+| `.env.production` | Production-specific values | No (gitignored) |
 
-## Environment Variables and Secrets
+Astro loads environment variables in this order:
+1. `.env` (all modes)
+2. `.env.local` (all modes)
+3. `.env.[mode]` (`.env.development` or `.env.production`)
+4. `.env.[mode].local` (`.env.development.local` or `.env.production.local`)
 
-### Frontend (Astro)
+### What to Put in `.env.local`
 
-| Variable | File | Required | Purpose |
-|---|---|---|---|
-| `PUBLIC_CONTACT_API_URL` | `.env.development` / `.env.production` | Yes | Points to the deployed worker URL |
+For basic local development, you need:
 
-### Worker Secrets
+```sh
+# Required for contact form to work
+PUBLIC_CONTACT_API_URL=https://your-worker.workers.dev
+PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA  # Test key
 
-These are set via `wrangler secret put`, not in committed files:
+# Optional: enables live webmentions
+WEBMENTION_IO_TOKEN=your-token
+```
 
-- `TURNSTILE_SECRET_KEY` — Cloudflare Turnstile verification
-- `RESEND_API_KEY` — Resend email API key
-- `RESEND_FROM_EMAIL` — Verified sender address
+### What's Safe to Expose
 
-## What Not to Commit
+Variables prefixed with `PUBLIC_` are embedded in the built HTML and visible to browsers. Only put non-sensitive values in these:
 
-- `.env.local` — Local overrides, may contain real keys
-- `dist/` — Build output (generated)
-- `node_modules/` — Dependencies (generated)
-- `contact-worker/node_modules/` — Worker dependencies (generated)
-- `lh-reports/` — Lighthouse report output (generated)
+- `PUBLIC_CONTACT_API_URL` — The Worker endpoint URL (not a secret)
+- `PUBLIC_TURNSTILE_SITE_KEY` — The Turnstile site key (designed to be public)
 
-## CI/CD
+**Never put secrets in `PUBLIC_` variables.**
 
-This deployment documentation does not assume CI/CD. No GitHub Actions
-workflows or automated deploy pipelines are currently configured.
-Deployment steps described above are manual.
+### Fallback Behavior
+
+| Variable | Missing Behavior |
+|----------|-----------------|
+| `PUBLIC_CONTACT_API_URL` | Contact form shows "not configured" error |
+| `PUBLIC_TURNSTILE_SITE_KEY` | Turnstile widget hidden; dev warning shown |
+| `WEBMENTION_IO_TOKEN` | Mock data in dev, omitted in production |
+| `SITE` | Defaults to `https://ericcarlisle.com` |
+
+## Environment Variables Reference
+
+### Astro and Frontend Variables
+
+| Variable | Scope | Required | Public | Purpose |
+|----------|-------|----------|--------|---------|
+| `PUBLIC_CONTACT_API_URL` | Build + Runtime | Yes | Yes | Cloudflare Worker endpoint URL |
+| `PUBLIC_TURNSTILE_SITE_KEY` | Build + Runtime | Yes* | Yes | Turnstile CAPTCHA site key |
+| `WEBMENTION_IO_TOKEN` | Build-time | No | No | webmention.io API token |
+| `SITE` | Build-time | No | No | Site URL (set automatically in CI) |
+
+*Required for contact form functionality; contact page works without it but shows a warning.
+
+### GitHub Actions Configuration
+
+The workflow (`.github/workflows/astro.yml`) uses **repository variables** (not secrets) for:
+
+| Variable | Type | Purpose |
+|----------|------|---------|
+| `PUBLIC_TURNSTILE_SITE_KEY` | Repository variable | Passed to Astro build |
+| `PUBLIC_CONTACT_API_URL` | Repository variable | Passed to Astro build |
+
+These are set in: **GitHub repo → Settings → Secrets and variables → Actions → Variables**
+
+### Cloudflare Worker Configuration
+
+The Worker (`contact-worker/`) uses **secrets** (not environment variables):
+
+| Secret | Purpose | Set via |
+|--------|---------|---------|
+| `TURNSTILE_SECRET_KEY` | Turnstile verification | `wrangler secret put` |
+| `RESEND_API_KEY` | Resend email API | `wrangler secret put` |
+| `RESEND_FROM_EMAIL` | Sender address | `wrangler secret put` |
+| `RESEND_TO_EMAIL` | Recipient address | `wrangler secret put` |
+
+The Worker also has environment-specific names configured in `wrangler.toml`:
+- `development` → `ericcarlisle-contact-dev`
+- `production` → `ericcarlisle-contact`
+
+## GitHub Pages Deployment
+
+### Workflow File
+
+`.github/workflows/astro.yml`
+
+### Triggers
+
+- **Push to `main`** — Automatic deployment
+- **Manual** — `workflow_dispatch` from GitHub UI
+
+### Build Process
+
+1. **Checkout** — `actions/checkout@v4`
+2. **Setup pnpm** — `pnpm/action-setup@v4` (version 10.34.4)
+3. **Setup Node** — `actions/setup-node@v4` (Node 24)
+4. **Configure Pages** — `actions/configure-pages@v5`
+5. **Install dependencies** — `pnpm install --frozen-lockfile`
+6. **Typecheck** — `pnpm typecheck`
+7. **Verify env vars** — Checks `PUBLIC_TURNSTILE_SITE_KEY` and `PUBLIC_CONTACT_API_URL` exist
+8. **Build** — `pnpm build` with environment variables injected
+9. **Verify contact endpoint** — Confirms Worker URL appears in built HTML
+10. **Upload artifact** — `actions/upload-pages-artifact@v4`
+11. **Deploy** — `actions/deploy-pages@v4`
+
+### Required Repository Settings
+
+1. **GitHub Pages** enabled:
+   - Source: GitHub Actions
+   - Custom domain: `ericcarlisle.com` (if configured in Cloudflare DNS)
+
+2. **Repository variables** set:
+   - `PUBLIC_TURNSTILE_SITE_KEY`
+   - `PUBLIC_CONTACT_API_URL`
+
+### Post-Deployment Verification
+
+After each deployment, verify:
+- Homepage loads at `https://ericcarlisle.com`
+- Blog articles render correctly
+- Contact form endpoint is configured (check page source for `data-contact-api-url`)
+- RSS feed at `/rss.xml`
+- Sitemap at `/sitemap-index.xml`
+- Search works at `/search`
+
+### Rollback
+
+**Revert a commit and push:**
+
+This is the most reliable recovery path:
+
+```sh
+# Revert a specific commit
+git revert <commit-hash>
+git push origin main
+```
+
+The workflow triggers automatically and deploys the previous state.
+
+**Alternative: Rerun previous workflow**
+
+GitHub Actions retains workflow run history. You can re-run a previous successful build:
+
+1. Go to **Actions** → **Deploy Astro site to Pages**
+2. Find a working deployment run from before the issue
+3. Click **Re-run all jobs**
+
+This re-executes the build and deploy steps using the code from that commit. This can work for recovery, but reverting a commit is more predictable and auditable.
+
+## Contact Worker Deployment
+
+### Worker Purpose
+
+The Cloudflare Worker handles contact form submissions:
+1. Validates form input
+2. Checks honeypot field (anti-bot)
+3. Rate limits by IP (5 requests/minute)
+4. Verifies Turnstile CAPTCHA token
+5. Sends email via Resend API
+
+### Local Development
+
+```sh
+cd contact-worker
+pnpm install
+pnpm dev        # Starts Wrangler dev server
+```
+
+The Worker runs locally at `http://localhost:8787`.
+
+### Type Checking
+
+```sh
+cd contact-worker
+pnpm typecheck
+```
+
+### Deployment Commands
+
+```sh
+cd contact-worker
+
+# Deploy to development
+pnpm deploy:dev
+
+# Deploy to production
+pnpm deploy:prod
+
+# Or use Wrangler directly
+wrangler deploy --env production
+```
+
+### Setting Secrets
+
+First time or when rotating keys:
+
+```sh
+cd contact-worker
+wrangler secret put TURNSTILE_SECRET_KEY --env production
+wrangler secret put RESEND_API_KEY --env production
+wrangler secret put RESEND_FROM_EMAIL --env production
+wrangler secret put RESEND_TO_EMAIL --env production
+```
+
+### Request Flow
+
+```text
+Browser → POST JSON to Worker
+  ↓
+Parse and validate input
+  ↓
+Check honeypot field (reject if filled)
+  ↓
+Check timestamp (reject if < 3 seconds — too fast)
+  ↓
+Rate limit check (5 requests/minute per IP)
+  ↓
+Verify Turnstile token with Cloudflare
+  ↓
+Send email via Resend API
+  ↓
+Return success or error JSON
+```
+
+### Rate Limiting
+
+- **Limit:** 5 requests per minute per IP
+- **Window:** 60 seconds, sliding
+- **Response:** HTTP 429 with error message
+- **Storage:** In-memory (resets on Worker restart)
+
+### CORS
+
+The Worker currently accepts cross-origin requests from any origin (`Access-Control-Allow-Origin: *`). It handles OPTIONS preflight requests and allows the `POST` method with `Content-Type` headers.
+
+Abuse resistance relies on:
+- Turnstile CAPTCHA verification (must pass before email is sent)
+- Rate limiting (5 requests per minute per IP)
+- Input validation (required fields, honeypot, timing check)
+- No credentials are sent or accepted
+
+This configuration is intentional for the contact form use case. The Worker does not return sensitive data — only a success or error status.
+
+## Turnstile Behavior
+
+### Keys
+
+| Key Type | Public? | Purpose |
+|----------|---------|---------|
+| Site Key | Yes | Embedded in HTML, shown to users |
+| Secret Key | No | Server-side verification only |
+
+### Test Keys for Local Development
+
+Cloudflare provides official test keys that always pass verification. For end-to-end local testing, you must use the matching pair:
+
+```text
+Frontend site key:    1x00000000000000000000AA
+Worker secret key:    1x0000000000000000000000000000000AA
+```
+
+- The **site key** is public and belongs in your frontend `.env.local` as `PUBLIC_TURNSTILE_SITE_KEY`.
+- The **secret key** belongs only in the Worker's Wrangler secret (`TURNSTILE_SECRET_KEY`), never in the frontend environment.
+- These keys are for development and testing only and must not be used in production.
+- This pair is configured to always pass verification, so local form submissions will succeed regardless of CAPTCHA state.
+
+### Production Keys
+
+Production keys are created in the **Cloudflare Dashboard → Turnstile → Create Site Key**. They are distinct from the test keys above and perform real verification.
+
+### How It Works
+
+1. **Frontend** loads Turnstile script when `PUBLIC_TURNSTILE_SITE_KEY` is set
+2. **User** sees CAPTCHA challenge (or invisible verification)
+3. **Turnstile** generates a token, placed in `cf-turnstile-response` field
+4. **Frontend** sends token with form data to Worker
+5. **Worker** verifies token with `https://challenges.cloudflare.com/turnstile/v0/siteverify`
+6. **Worker** sends `secret`, `response` (token), and `remoteip`
+
+### Common Failures
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| "CAPTCHA verification failed" | Expired or invalid token | User should retry |
+| Widget doesn't appear | Missing `PUBLIC_TURNSTILE_SITE_KEY` | Set the variable |
+| Widget appears but can't verify | Wrong secret key | Check Worker secrets |
+| Works locally, fails in production | Test keys in production | Use real keys |
+
+### Where Keys Belong
+
+| Key | Location |
+|-----|----------|
+| Site Key | `PUBLIC_TURNSTILE_SITE_KEY` in `.env.local` or GitHub Actions vars |
+| Secret Key | Worker secret: `TURNSTILE_SECRET_KEY` |
+
+## Resend Behavior
+
+### Configuration
+
+| Setting | Source | Purpose |
+|---------|--------|---------|
+| API Key | Worker secret: `RESEND_API_KEY` | Authenticates with Resend |
+| From Address | Worker secret: `RESEND_FROM_EMAIL` | Sender address |
+| To Address | Worker secret: `RESEND_TO_EMAIL` | Recipient address |
+
+### Domain Verification
+
+Resend requires domain verification:
+1. Add your domain in Resend dashboard
+2. Add DNS records (SPF, DKIM)
+3. Use a verified sender address
+
+The `RESEND_FROM_EMAIL` must be from a verified domain.
+
+### Email Format
+
+Emails are sent as HTML with:
+- Subject: `[Contact] {user's subject}`
+- Reply-To: User's email address
+- Body: Name, email, and message (HTML-escaped)
+
+### Failure Handling
+
+| Scenario | Worker Response |
+|----------|-----------------|
+| Resend API error | HTTP 500, "Failed to send message" |
+| Invalid API key | HTTP 500, logged to console |
+| Invalid sender address | HTTP 500, logged to console |
+| Network error | HTTP 500, logged to console |
+
+## Analytics and Monitoring
+
+### Google Analytics (GA4)
+
+**Configuration:**
+- Measurement ID: `G-70E1BWCFJ3` (in `src/consts.ts`)
+- Implementation: `src/components/GoogleAnalytics.astro`
+- Offloaded to web worker via Partytown
+
+**Behavior:**
+- Loads on all pages
+- Scripts run in Partytown web worker (not main thread)
+- No impact on Core Web Vitals
+
+### Sentry Error Tracking
+
+Sentry is included as an integration (`@sentry/astro`) but is **not configured with a DSN**. The integration is present in `astro.config.mjs` with only `telemetry: false` set.
+
+**Current behavior:**
+- No DSN is passed to the integration
+- No browser or server SDK is initialized
+- No errors are captured or reported
+- Build warnings appear about missing `authToken` for source map uploads
+
+**To enable Sentry in the future:**
+1. Create a Sentry project and obtain a DSN
+2. Update `astro.config.mjs` to pass the DSN to the integration (e.g., `sentry({ dsn: '...' })`)
+3. Set `SENTRY_AUTH_TOKEN` for source map uploads
+4. Set `SENTRY_ORG` and `SENTRY_PROJECT` to identify the Sentry project
+
+Without these steps, Sentry is inert — it does not capture errors or affect runtime behavior.
+
+### Spotlight (Development)
+
+**Configuration:**
+- Automatically enabled in development via `@spotlightjs/astro`
+
+**Behavior:**
+- Shows error overlay in development
+- No production impact
+- Works with or without Sentry
+
+### Webmentions
+
+**Configuration:**
+- `WEBMENTION_IO_TOKEN` — API token for webmention.io
+
+**Behavior:**
+- With token: fetches real webmentions at build time
+- Without token in dev: returns mock data
+- Without token in production: webmention section omitted
+
+## Deployment Verification Checklist
+
+After deploying, verify these items:
+
+### Static Site
+
+- [ ] Homepage loads at `https://ericcarlisle.com`
+- [ ] Representative blog article renders (`/blog/[slug]/`)
+- [ ] Previously drafted article returns 404 (`/blog/good-agent-context-is-carved-not-copied/`)
+- [ ] RSS feed valid at `/rss.xml`
+- [ ] Sitemap present at `/sitemap-index.xml`
+- [ ] `robots.txt` present (if configured)
+- [ ] Pagefind search works at `/search`
+- [ ] Structured data present in page source
+- [ ] No console errors in browser
+
+### Contact Form
+
+- [ ] Contact page loads at `/contact`
+- [ ] Turnstile widget appears
+- [ ] Form submits successfully
+- [ ] Confirmation email received
+- [ ] Error handling works (try submitting empty form)
+
+### Analytics
+
+- [ ] GA4 events firing (check with GA DebugView)
+- [ ] No analytics errors in console
+
+### Performance
+
+- [ ] Lighthouse performance ≥ 95
+- [ ] Lighthouse accessibility ≥ 95
+- [ ] Lighthouse SEO ≥ 100
+- [ ] Lighthouse best practices ≥ 95
+
+Run full audit: `pnpm lighthouse:all`
+
+## Rollback and Recovery
+
+### Static Site (GitHub Pages)
+
+**Recommended: Revert commit**
+
+This is the most reliable recovery path:
+
+1. Identify the commit that introduced the issue
+2. Revert it:
+
+```sh
+git revert <commit-hash>
+git push origin main
+```
+
+3. The workflow triggers automatically and deploys the corrected state
+4. Verify the deployment at the live URL
+
+**Alternative: Rerun previous workflow**
+
+GitHub Actions retains workflow run history. You can re-run a previous successful build:
+
+1. Go to **Actions** → **Deploy Astro site to Pages**
+2. Find a working deployment run from before the issue
+3. Click **Re-run all jobs**
+
+This re-executes the build and deploy steps using the code from that commit. This works for recovery, but commit revert is more predictable and creates an auditable history.
+
+### Cloudflare Worker
+
+The Worker deploys independently from the static site. There is no automated rollback mechanism.
+
+**Recovery procedure using a temporary worktree:**
+
+```sh
+# Create a temporary worktree at a known-good commit (does not disturb main)
+git worktree add ../astroblog-worker-rollback <known-good-commit>
+
+# Install and deploy from the clean worktree
+cd ../astroblog-worker-rollback/contact-worker
+pnpm install --frozen-lockfile
+pnpm exec wrangler deploy --env production
+
+# Verify the deployed Worker before cleanup
+cd ../astro.ericcarlisle.com
+git worktree remove ../astroblog-worker-rollback
+```
+
+**Important:**
+- The deployment must be run from a known-good commit.
+- Worker secrets, bindings, routes, and environment configuration are not restored by Git and must be checked separately after rollback (`wrangler secret list --env production`).
+- Verify the deployed Worker behaves correctly before removing the temporary worktree.
+- No rollback is performed as part of this documentation task.
+
+### Environment Configuration
+
+If secrets are compromised or lost:
+1. Rotate keys in respective services (Turnstile dashboard, Resend dashboard)
+2. Update Worker secrets: `wrangler secret put <SECRET_NAME> --env production`
+3. Update GitHub Actions variables if changed
+4. Redeploy if necessary
+
+### Verification After Recovery
+
+1. Test homepage loads
+2. Test contact form submits
+3. Check email delivery
+4. Verify analytics events
+
+## Troubleshooting
+
+### Contact Form Issues
+
+**"The contact form is not configured"**
+- Cause: `PUBLIC_CONTACT_API_URL` is missing
+- Fix: Set the variable in `.env.local` or GitHub Actions vars
+
+**"Please complete the verification challenge"**
+- Cause: Turnstile token missing or empty
+- Fix: Ensure `PUBLIC_TURNSTILE_SITE_KEY` is set and widget loads
+
+**"CAPTCHA verification failed"**
+- Cause: Invalid or expired Turnstile token
+- Fix: Check Worker has correct `TURNSTILE_SECRET_KEY`
+
+**"Failed to send message"**
+- Cause: Resend API error
+- Fix: Check Worker logs (`wrangler tail`), verify `RESEND_API_KEY`
+
+### Build Issues
+
+**Missing environment variable in CI**
+- Cause: GitHub Actions variable not set
+- Fix: Go to repo Settings → Secrets and variables → Actions → Variables
+
+**Typecheck fails**
+- Cause: TypeScript error in source
+- Fix: Run `pnpm typecheck` locally and fix errors
+
+### Analytics Issues
+
+**GA4 not tracking**
+- Cause: Ad blocker or missing measurement ID
+- Fix: Verify `GA_MEASUREMENT_ID` in `src/consts.ts`
+
+**Sentry not capturing errors**
+- Cause: Sentry integration is included but not configured with a DSN
+- Note: This is expected — Sentry is inert until configured. See "Sentry Error Tracking" section.
+
+### Deployment Issues
+
+**GitHub Pages deployment fails**
+- Cause: Workflow error or permissions
+- Fix: Check Actions logs, verify Pages is enabled in repo settings
+
+**Custom domain not working**
+- Cause: DNS not configured or SSL pending
+- fix: Verify DNS records in Cloudflare, wait for SSL propagation
+
+## Related Documentation
+
+- [Architecture](architecture.md) — Overall project structure
+- [Testing](testing.md) — Validation commands and when to run them
+- [Performance, SEO, Accessibility](performance-seo-accessibility.md) — Quality standards

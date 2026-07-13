@@ -3,6 +3,8 @@
 The blog should sound like an experienced software developer reflecting clearly on practical
 engineering work.
 
+For the content creation workflow, see [content-authoring.md](content-authoring.md). For the frontmatter schema, see [content-model.md](content-model.md).
+
 ## Preferred Voice
 
 - Grounded

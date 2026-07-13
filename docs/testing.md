@@ -31,3 +31,8 @@ but may be run to confirm no unintended side effects.
 Playwright (`^1.60.0`) is available in `devDependencies` but is not currently
 wired into a test suite or CI pipeline. If browser-based tests are added in
 the future, they should use Playwright and be documented here.
+
+## Other Notes
+
+- **Vitest** — Installed but not used. No active test runner.
+- **Generated directories** — `dist/`, `node_modules/`, `.astro/`, `lh-reports/`, `docs/context/`, `.playwright-mcp/` are regenerated on each build and should not be edited directly.

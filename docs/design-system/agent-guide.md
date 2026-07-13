@@ -3,10 +3,13 @@
 This directory contains a machine-readable inventory of the reusable design patterns
 implemented across `ericcarlisle.com`.
 
+For human-facing design-system documentation, see [README.md](README.md).
+
 ## Files
 
 | File | Purpose |
 |------|---------|
+| `README.md` | Human-facing design-system documentation (entry point for developers and maintainers). |
 | `inventory.json` | Structured JSON inventory of every reusable component, layout, content pattern, form pattern, typography pattern, and metadata pattern. |
 | `figma-agent-brief.md` | Detailed brief for generating a Figma companion file that mirrors the Astro implementation. |
 
@@ -80,6 +83,8 @@ The inventory intentionally excludes:
 Patterns with `"canonicalExample": null` lack a dedicated demonstration on the
 design-system reference page. When implementing or significantly changing one of
 these patterns, consider adding an example to `/portfolio/design-system/`.
+
+Many canonical examples use anchors (e.g., `/portfolio/design-system/#card`) to point to specific component demonstrations. These anchors correspond to explicit `id` attributes on component demo headings in the design-system page.
 
 ## Quick reference table
 

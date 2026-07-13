@@ -1,13 +1,16 @@
-# Project Organization
+# Project Organization and Development Workflow
 
-This document explains how the AstroBlog repository is organized.
+This document explains how the AstroBlog repository is organized and provides a development workflow reference for human contributors.
+
+For coding-agent behavioral rules, see [AGENTS.md](../AGENTS.md).
 
 ## Top-level files
 
-- `AGENTS.md` — Coding-agent behavioral rules, validation, and safe-change workflow.
+- `AGENTS.md` — Coding-agent behavioral rules, validation, and safe-change workflow (agent-specific).
 - `package.json` — Project scripts, dependencies, and package manager configuration.
 - `biome.json` — Biome formatter and linter configuration.
 - `astro.config.mjs` — Astro site configuration.
+- `.env.example` — Environment variable template for local development.
 
 ## Directory structure
 
@@ -24,6 +27,8 @@ Human-readable project documentation.
 - `docs/development/` — Development workflow, testing, architecture, and project organization.
 - `docs/design-system/` — Design-system documentation, including the Figma agent brief.
 - Other docs cover content conventions, change policy, deployment, SEO/accessibility, and project status.
+
+See the [documentation index](../README.md#documentation) for a complete map.
 
 ### `specs/`
 
@@ -54,6 +59,12 @@ Project-specific tool settings, extensions, commands, and prompt templates.
 - `.pi/settings.json` — Extension and skill paths.
 - `.pi/extensions/` — Project-local extensions.
 - `.pi/prompts/` — Reusable prompt templates.
+
+### `contact-worker/`
+
+Cloudflare Worker for handling contact form submissions. Deploys independently from the main site.
+
+See [deployment.md](../deployment.md#contact-worker-deployment) for details.
 
 ## Development Steps
 

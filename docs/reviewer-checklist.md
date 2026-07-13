@@ -215,6 +215,23 @@ Request changes if:
 - Workflow or guardrails changed but `AGENTS.md` or docs were not updated.
 - Scripts or validation commands changed without docs updates.
 
+### Which Documentation to Review by Change Type
+
+| Change type | Documentation to review |
+|-------------|------------------------|
+| New or changed package command | README, testing docs, AGENTS.md |
+| Content schema change | content-model.md, content-authoring.md |
+| Draft/publication behavior | content-authoring.md |
+| New route | architecture.md, SEO-related docs |
+| New reusable visual pattern | design-system inventory and reference page |
+| New environment variable | `.env.local` / deployment docs |
+| Deployment or CI change | deployment.md |
+| Structured-data change | structured-data.md |
+| Accessibility or performance convention | performance-seo-accessibility.md |
+| Editorial or voice change | editorial-guidelines.md |
+
+Keep this table in sync with the documentation index in README.md.
+
 ## Reviewer Verdict Guidance
 
 Use `approve` when:

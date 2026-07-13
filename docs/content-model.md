@@ -1,12 +1,14 @@
 # Content Model
 
+A human-readable reference for the blog frontmatter schema. For the authoring workflow, see [content-authoring.md](content-authoring.md). For voice and editorial standards, see [editorial-guidelines.md](editorial-guidelines.md).
+
 Blog posts live in:
 
 `src/content/blog/**/*.{md,mdx}`
 
 The authoritative schema is defined in:
 
-`src/content.config.ts`
+[`src/content.config.ts`](../src/content.config.ts)
 
 ## Blog Frontmatter
 
