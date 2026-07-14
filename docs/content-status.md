@@ -23,11 +23,7 @@ src/pages/about.astro
 src/pages/contact.astro
 src/pages/portfolio.astro
 docs/author_profile.md
-src/content/blog/working-with-id-without-losing-ourselves.mdx
 ```
-
-Verify whether `working-with-id-without-losing-ourselves.mdx` should be renamed to
-`working-with-ai-without-losing-ourselves.mdx`.
 
 ## Placeholder/Test Content
 

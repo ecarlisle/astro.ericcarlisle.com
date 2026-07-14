@@ -9,6 +9,7 @@ This project uses `pnpm` as its package manager. All commands assume `pnpm`.
 - `pnpm build` — Runs `astro build` to produce the static output in `./dist/`.
 - `pnpm lighthouse:all` — Runs Lighthouse audits across project routes via
   `node scripts/lighthouse-all.mjs`.
+  Lighthouse score requirements are defined in `lighthouserc.js`. See that file for the current thresholds.
 
 ## When to Run Each Check
 

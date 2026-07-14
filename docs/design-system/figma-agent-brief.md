@@ -1,5 +1,7 @@
 # Figma Design-System Companion Brief
 
+> **Figma file:** [KISS Design System](https://www.figma.com/design/fWzDrhAPBnnpGRVyKSMp1Q/KISS-Design-System?node-id=0-1&t=oeon7nje8gUrMHyP-1)
+>
 > Paste this brief into a Figma agent to generate a companion design-system file for the Astro implementation of ericcarlisle.com.
 > The Astro implementation is the source of truth. Do not redesign — mirror what is implemented.
 
