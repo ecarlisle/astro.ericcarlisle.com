@@ -37,7 +37,7 @@ See [docs/testing.md](docs/testing.md) for when to run each check.
 src/              → Pages, content, components, layouts, styles, utilities
 contact-worker/   → Cloudflare Worker for contact form (Turnstile + Resend)
 docs/             → Reference documentation
-.skills/          → Task-specific implementation guides
+.agents/skills/   → Task-specific implementation guides
 ```
 
 ## Documentation

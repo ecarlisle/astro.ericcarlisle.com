@@ -6,7 +6,7 @@ This file governs coding-agent behavior in this repository. It is the primary au
 
 - `README.md` and `docs/` are **human-facing documentation**. Treat them as technical context, not as an instruction hierarchy. Do not reproduce their content here.
 - `AGENTS.md` (this file) contains **repository-wide coding-agent instructions**.
-- Tool-specific agent behavior belongs in the relevant tool directory: `.skills/`, `.pi/`, `.opencode/`, or the tool's own configuration files.
+- Tool-specific agent behavior belongs in the relevant tool directory: `.agents/skills/`, `.pi/`, `.opencode/`, or the tool's own configuration files.
 - `docs/design-system/figma-agent-brief.md` and `docs/design-system/agent-guide.md` are tool-specific agent files (Figma, design-system tooling) and are exempt from the human-facing documentation standard.
 
 ## Documentation Authority
@@ -17,7 +17,7 @@ This file governs coding-agent behavior in this repository. It is the primary au
 | `AGENTS.md` (this file) | Coding agent authority. Workflow, validation, protected files, skills. |
 | `docs/` | Canonical explanatory references (architecture, deployment, content, testing, etc.). |
 | `package.json`, `src/`, config files | Source of truth for exact scripts, schemas, variables, routes, and behavior. |
-| `.skills/` | Procedural agent playbooks for specific task types. |
+| `.agents/skills/` | Procedural agent playbooks for specific task types. |
 | `public/llms.txt` | Describes the *published site* for LLM consumption. Not repository navigation. |
 
 ## Commands
@@ -117,19 +117,19 @@ If a task appears to require changes to a protected file, stop and ask first.
 ## Skills
 
 For implementation work, always consult:
-- [.skills/agent-safe-change/SKILL.md](.skills/agent-safe-change/SKILL.md)
-- [.skills/astro-static-implementation/SKILL.md](.skills/astro-static-implementation/SKILL.md)
-- [.skills/performance-budget/SKILL.md](.skills/performance-budget/SKILL.md)
+- [.agents/skills/agent-safe-change/SKILL.md](.agents/skills/agent-safe-change/SKILL.md)
+- [.agents/skills/astro-static-implementation/SKILL.md](.agents/skills/astro-static-implementation/SKILL.md)
+- [.agents/skills/performance-budget/SKILL.md](.agents/skills/performance-budget/SKILL.md)
 
 For UI work, also consult:
-- [.skills/accessibility/SKILL.md](.skills/accessibility/SKILL.md)
-- [.skills/design-system-css/SKILL.md](.skills/design-system-css/SKILL.md)
+- [.agents/skills/accessibility/SKILL.md](.agents/skills/accessibility/SKILL.md)
+- [.agents/skills/design-system-css/SKILL.md](.agents/skills/design-system-css/SKILL.md)
 
 For search work, also consult:
-- [.skills/pagefind-search/SKILL.md](.skills/pagefind-search/SKILL.md)
+- [.agents/skills/pagefind-search/SKILL.md](.agents/skills/pagefind-search/SKILL.md)
 
 For metadata/content routes, also consult:
-- [.skills/seo-review/SKILL.md](.skills/seo-review/SKILL.md)
+- [.agents/skills/seo-review/SKILL.md](.agents/skills/seo-review/SKILL.md)
 
 ## graphify
 

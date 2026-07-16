@@ -22,9 +22,9 @@ Use a spec when:
 - The work should be reviewable as a unit.
 - You want to separate planning from execution.
 
-## How specs differ from `.skills/`
+## How specs differ from `.agents/skills/`
 
-| `.skills/` | `specs/` |
+| `.agents/skills/` | `specs/` |
 |------------|----------|
 | Reusable task instructions | One-time change plans |
 | Frontmatter for matching and discovery | Sections for planning and review |

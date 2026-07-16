@@ -14,9 +14,9 @@ For coding-agent behavioral rules, see [AGENTS.md](../AGENTS.md).
 
 ## Directory structure
 
-### `.skills/`
+### `.agents/skills/`
 
-Reusable task-specific implementation guides. Each skill lives in its own directory (`.skills/<name>/SKILL.md`) and includes YAML frontmatter so tools can load relevant skills based on context.
+Reusable task-specific implementation guides. Each skill lives in its own directory (`.agents/skills/<name>/SKILL.md`) and includes YAML frontmatter so tools can load relevant skills based on context.
 
 Examples: accessibility review, performance budget, design-system work, portfolio review, Figma handoff.
 
