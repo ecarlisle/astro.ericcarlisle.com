@@ -389,7 +389,6 @@ const knownGaps = [
         <h4 id="card">Card</h4>
         <p class="ds-source">src/components/Card.astro</p>
         <Card
-          headingLevel="h4"
           title="Designing with tokens"
           href="/blog"
           author={AUTHOR_NAME}
@@ -404,7 +403,7 @@ const knownGaps = [
         </Card>
       </div>
       <div class="ds-component-demo">
-        <h4 id="tag-chip">Tag / Chip</h4>
+        <h3 id="tag-chip">Tag / Chip</h3>
         <p class="ds-source">src/styles/components.css</p>
         <div class="demo-row">
           <a href="/tags/astro/" class="tag">Astro</a>
@@ -412,12 +411,12 @@ const knownGaps = [
         </div>
       </div>
       <div class="ds-component-demo">
-        <h4 id="tagfilterbar">TagFilterBar</h4>
+        <h3 id="tagfilterbar">TagFilterBar</h3>
         <p class="ds-source">src/components/TagFilterBar.astro</p>
         <TagFilterBar tags={sampleTags} {tagData} />
       </div>
       <div class="ds-component-demo">
-        <h4 id="callout">Callout</h4>
+        <h3 id="callout">Callout</h3>
         <p class="ds-source">src/styles/components.css</p>
         <div class="callout">
           <strong>Callout title</strong> — highlighted information or notes.
@@ -926,5 +925,11 @@ const knownGaps = [
     .ds-form-row {
       grid-template-columns: 1fr;
     }
+  }
+
+  .ds-component-demo h3 {
+    font-size: var(--type-size-h4);
+    line-height: var(--line-height-h4);
+    margin: 0 0 calc(var(--rhythm) * 0.5);
   }
 </style>
