@@ -415,7 +415,7 @@ div.expressive-code {
 }
 
 blockquote {
-  border-left: 4px solid var(--color-link);
+  border-left: 3px solid var(--color-link);
   padding: 0 var(--space-component);
   margin: var(--space-section) 0;
   font-size: var(--type-size-blockquote);
