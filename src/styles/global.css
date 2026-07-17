@@ -1,11 +1,12 @@
-@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource-variable/source-sans-3/wght.css";
+@import "@fontsource-variable/source-sans-3/wght-italic.css";
 @import "@fontsource-variable/plus-jakarta-sans/wght.css";
 @import "@fontsource-variable/fira-code/wght.css";
 @import "./components.css";
 
 :root {
   /* Fonts */
-  --font-copy: "Inter Variable", system-ui, sans-serif;
+  --font-copy: "Source Sans 3 Variable", system-ui, sans-serif;
   --font-headers: "Plus Jakarta Sans Variable", system-ui, sans-serif;
   --font-mono: "Fira Code Variable", ui-monospace, monospace;
 

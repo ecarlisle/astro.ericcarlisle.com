@@ -50,7 +50,7 @@ Create these pages in order:
 
 | Token | Value | Figma font |
 |-------|-------|------------|
-| `--font-copy` | `"Inter Variable", system-ui, sans-serif` | Inter |
+| `--font-copy` | `"Source Sans 3 Variable", system-ui, sans-serif` | Source Sans 3 |
 | `--font-headers` | `"Plus Jakarta Sans Variable", system-ui, sans-serif` | Plus Jakarta Sans |
 | `--font-mono` | `"Fira Code Variable", ui-monospace, monospace` | Fira Code |
 
