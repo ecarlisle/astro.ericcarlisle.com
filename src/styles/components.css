@@ -257,7 +257,7 @@
   font-size: var(--type-size-small);
 }
 
-.toc h3 {
+.toc h2 {
   margin-bottom: var(--space-inline);
   color: var(--color-text-muted);
   font-size: inherit;
