@@ -37,6 +37,14 @@ Every indexable page should have:
 Preserve structured data, RSS output, sitemap generation, and stable route URLs when changing page
 or content architecture.
 
+## Validation
+
+| Area | Command |
+|------|--------|
+| Performance, accessibility, SEO | `pnpm lighthouse:all` |
+| Structured data | `pnpm structured-data:report` |
+| TypeScript and Astro | `pnpm typecheck` |
+
 ## Accessibility Rules
 
 Preserve:

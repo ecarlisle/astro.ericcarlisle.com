@@ -7,6 +7,7 @@ This project uses `pnpm` as its package manager. All commands assume `pnpm`.
 - `pnpm typecheck` — Runs `astro check` for TypeScript and Astro compilation errors.
 - `pnpm lint` — Runs `biome check .` for code style and formatting issues.
 - `pnpm build` — Runs `astro build` to produce the static output in `./dist/`.
+- `pnpm validate:content` — Scans blog MDX/MD files for top-level h1 headings (layout already renders the title).
 - `pnpm lighthouse:all` — Runs Lighthouse audits across project routes via
   `node scripts/lighthouse-all.mjs`.
   Lighthouse score requirements are defined in `lighthouserc.js`. See that file for the current thresholds.

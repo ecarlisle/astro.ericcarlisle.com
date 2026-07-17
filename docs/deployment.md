@@ -59,7 +59,7 @@ Astro loads environment variables in this order:
 
 ### What to Put in `.env.local`
 
-For basic local development, you need:
+For local development, you need:
 
 ```sh
 # Required for contact form to work
@@ -471,9 +471,7 @@ Run full audit: `pnpm lighthouse:all`
 
 ### Static Site (GitHub Pages)
 
-**Recommended: Revert commit**
-
-This is the most reliable recovery path:
+**Recommended: Revert a commit**
 
 1. Identify the commit that introduced the issue
 2. Revert it:
@@ -486,7 +484,7 @@ git push origin main
 3. The workflow triggers automatically and deploys the corrected state
 4. Verify the deployment at the live URL
 
-**Alternative: Rerun previous workflow**
+**Alternative: Rerun a previous workflow**
 
 GitHub Actions retains workflow run history. You can re-run a previous successful build:
 
@@ -494,7 +492,7 @@ GitHub Actions retains workflow run history. You can re-run a previous successfu
 2. Find a working deployment run from before the issue
 3. Click **Re-run all jobs**
 
-This re-executes the build and deploy steps using the code from that commit. This works for recovery, but commit revert is more predictable and creates an auditable history.
+This re-executes the build and deploy steps using that commit's code. Rerunning a workflow is faster than reverting, but reverting creates a more predictable and auditable history.
 
 ### Cloudflare Worker
 
@@ -585,7 +583,7 @@ If secrets are compromised or lost:
 
 **Custom domain not working**
 - Cause: DNS not configured or SSL pending
-- fix: Verify DNS records in Cloudflare, wait for SSL propagation
+- Fix: Verify DNS records in Cloudflare, wait for SSL propagation
 
 ## Related Documentation
 

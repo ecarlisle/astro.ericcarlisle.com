@@ -1,6 +1,6 @@
 # Development Workflow
 
-> For the full project organization guide, see [docs/development/agent-workflow.md](development/agent-workflow.md).
+> For the full project structure and organization, see [architecture.md](architecture.md).
 
 ## Quick Reference
 
@@ -30,7 +30,7 @@ See [testing.md](testing.md) for when to run each check.
 
 ## Related Documentation
 
-- [Project Organization](development/agent-workflow.md) — Detailed directory structure and development guide
+- [Architecture](architecture.md) — System design and technical overview
 - [Architecture](architecture.md) — System design and technical overview
 - [Change Policy](change-policy.md) — How changes are evaluated
 - [Reviewer Checklist](reviewer-checklist.md) — Code review criteria
