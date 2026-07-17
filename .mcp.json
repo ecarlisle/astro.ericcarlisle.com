@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "figma-desktop": {
+      "url": "http://127.0.0.1:3845/mcp"
+    },
+    "figma": {
+      "url": "https://mcp.figma.com/mcp",
+      "auth": "oauth",
+      "lifecycle": "lazy",
+      "exposeResources": true,
+      "directTools": false
+    }
+  }
+}
