@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
 import { AxeBuilder } from '@axe-core/playwright';
+import { expect, test } from '@playwright/test';
 
 const stories = [
   { name: 'Card - Default', url: 'components-card--default' },
@@ -9,10 +9,10 @@ const stories = [
   { name: 'Card - ArticleElement', url: 'components-card--article-element' },
   { name: 'Card - H3Heading', url: 'components-card--h-3-heading' },
   { name: 'ThemeToggle - Default', url: 'components-themetoggle--default' },
-  { name: 'ThemeToggle - InHeader', url: 'components-themetoggle--in-header' },
+  { name: 'ThemeToggle - InHeader', url: 'components-themetoggle-in-header--in-header' },
   { name: 'SocialLinks - Default', url: 'components-sociallinks--default' },
-  { name: 'SocialLinks - InFooter', url: 'components-sociallinks--in-footer' },
-  { name: 'SocialLinks - InHeader', url: 'components-sociallinks--in-header' },
+  { name: 'SocialLinks - InFooter', url: 'components-sociallinks-in-footer--in-footer' },
+  { name: 'SocialLinks - InHeader', url: 'components-sociallinks-in-header--in-header' },
 ];
 
 for (const story of stories) {
@@ -32,32 +32,18 @@ for (const story of stories) {
 
     console.log(`\n${'='.repeat(60)}`);
     console.log(`Story: ${story.name}`);
-    console.log(`${'='.repeat(60)}`);
     console.log(`Violations: ${violations.length}`);
-    console.log(`Incomplete (manual review): ${incomplete.length}`);
+    console.log(`Incomplete: ${incomplete.length}`);
 
     if (violations.length > 0) {
-      console.log('\nViolations:');
       violations.forEach((v, i) => {
         console.log(`\n${i + 1}. ${v.id}: ${v.description}`);
         console.log(`   Impact: ${v.impact}`);
-        console.log(`   Help: ${v.help}`);
-        console.log(`   Nodes affected: ${v.nodes.length}`);
+        console.log(`   Nodes: ${v.nodes.length}`);
       });
     }
 
-    if (incomplete.length > 0) {
-      console.log('\nIncomplete checks:');
-      incomplete.forEach((item, i) => {
-        console.log(`\n${i + 1}. ${item.id}: ${item.description}`);
-        console.log(`   Impact: ${item.impact}`);
-      });
-    }
-
-    if (violations.length === 0) {
-      console.log('\n✅ No accessibility violations detected');
-    }
-
+    if (violations.length === 0) console.log('✅ No violations');
     expect(violations).toEqual([]);
   });
 }

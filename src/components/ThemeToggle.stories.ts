@@ -1,4 +1,3 @@
-import ThemeToggleInHeaderFixture from './story-fixtures/ThemeToggleInHeaderFixture.astro';
 import ThemeToggle from './ThemeToggle.astro';
 
 const meta = {
@@ -17,10 +16,5 @@ const meta = {
 export default meta;
 
 export const Default = {
-  args: {},
-};
-
-export const InHeader = {
-  component: ThemeToggleInHeaderFixture,
   args: {},
 };
