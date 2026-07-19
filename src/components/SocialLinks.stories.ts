@@ -1,4 +1,6 @@
 import SocialLinks from './SocialLinks.astro';
+import SocialLinksInFooterFixture from './story-fixtures/SocialLinksInFooterFixture.astro';
+import SocialLinksInHeaderFixture from './story-fixtures/SocialLinksInHeaderFixture.astro';
 
 const meta = {
   title: 'Components/SocialLinks',
@@ -7,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Social media link icons with inline SVG graphics. Includes GitHub, LinkedIn, Twitter/X, and Mastodon links with accessible labels.',
+          'Social media link icons with inline SVG graphics. Includes GitHub, LinkedIn, Bluesky, and Mastodon links with accessible labels.',
       },
     },
   },
@@ -20,25 +22,11 @@ export const Default = {
 };
 
 export const InFooter = {
+  component: SocialLinksInFooterFixture,
   args: {},
-  decorators: [
-    (Story: () => string) => `
-      <footer style="padding: 2rem 1rem; background: var(--bg-surface); border-top: 1px solid var(--border-main); text-align: center;">
-        <p style="color: var(--text-secondary); margin-bottom: 1rem;">© 2024 Eric Carlisle</p>
-        <div style="display: flex; justify-content: center;">${Story()}</div>
-      </footer>
-    `,
-  ],
 };
 
 export const InHeader = {
+  component: SocialLinksInHeaderFixture,
   args: {},
-  decorators: [
-    (Story: () => string) => `
-      <header style="display: flex; align-items: center; padding: 1rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-main);">
-        <span style="color: var(--text-primary); font-weight: var(--font-weight-bold); font-size: var(--type-size-h4);">Site Title</span>
-        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">${Story()}</div>
-      </header>
-    `,
-  ],
 };
