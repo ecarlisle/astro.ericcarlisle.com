@@ -68,3 +68,4 @@ graphify-out/
 
 # Generated structured-data reports
 data/structured-data/
+storybook-static/

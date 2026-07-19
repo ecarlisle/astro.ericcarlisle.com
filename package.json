@@ -23,7 +23,9 @@
     "test:validate-content": "node scripts/test-validate-no-blog-h1.mjs",
     "jsonld:report": "pnpm structured-data:report",
     "test:e2e": "playwright test",
-    "test:a11y": "playwright test tests/accessibility.spec.ts"
+    "test:a11y": "playwright test tests/accessibility.spec.ts",
+    "storybook": "storybook dev -p 6006",
+    "build:storybook": "storybook build"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
@@ -43,12 +45,18 @@
     "@fontsource-variable/fira-code": "^5.2.7",
     "@playform/compress": "^0.2.3",
     "@playwright/test": "^1.61.1",
+    "@storybook-astro/framework": "1.9.0",
+    "@storybook-astro/renderer": "1.9.0",
+    "@storybook/addon-a11y": "10.5.2",
+    "@storybook/addon-docs": "10.5.2",
+    "@storybook/builder-vite": "10.5.2",
     "astro-expressive-code": "^0.43.1",
     "astro-pagefind": "^2.0.0",
     "fallow": "^2.91.0",
     "lighthouse": "^13.4.0",
     "playwright": "^1.60.0",
     "sharp": "^0.34.3",
+    "storybook": "10.5.2",
     "typescript": "^6.0.3",
     "vitest": "^4.1.8"
   },

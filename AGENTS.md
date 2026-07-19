@@ -34,6 +34,8 @@ This file governs coding-agent behavior in this repository. It is the primary au
 | `pnpm structured-data:report` | Build + validate JSON-LD output |
 | `pnpm fallow:dead-code` | Dead code analysis (unused files, deps) |
 | `pnpm test:e2e` / `pnpm test:a11y` | Playwright tests |
+| `pnpm storybook` | Storybook dev server at `localhost:6006` |
+| `pnpm build:storybook` | Static Storybook build → `storybook-static/` |
 
 See [docs/testing.md](docs/testing.md) for when to run each check.
 
@@ -86,7 +88,7 @@ See [docs/testing.md](docs/testing.md) for detailed guidance.
 
 These directories are produced during builds and automated processes. Never edit them directly:
 
-`dist/` · `node_modules/` · `.astro/` · `lh-reports/` · `docs/context/` · `.playwright-mcp/`
+`dist/` · `node_modules/` · `.astro/` · `storybook-static/` · `lh-reports/` · `docs/context/` · `.playwright-mcp/`
 
 ## Safe Change Workflow
 
@@ -130,6 +132,24 @@ For search work, also consult:
 
 For metadata/content routes, also consult:
 - [.agents/skills/seo-review/SKILL.md](.agents/skills/seo-review/SKILL.md)
+
+## Storybook
+
+Storybook is the internal component-development lab. It renders native `.astro` components using the same global CSS, design tokens, fonts, and themes as the production site.
+
+- **Framework**: `@storybook-astro/framework` v1.9.0 (supports Astro 5–7) with Storybook 10.5.
+- **Config**: `.storybook/main.ts` and `.storybook/preview.ts`.
+- **Stories**: colocated (`src/components/Card.stories.ts`) or in `src/stories/foundations/`.
+- **Theme**: toolbar toggle sets `data-theme` on the document element (light/dark).
+- **Styles**: imports `src/styles/global.css` directly — no duplication.
+- **Static dirs**: serves `public/` for fonts and images.
+- **Production isolation**: Storybook packages are devDependencies only; `pnpm build` does not include any Storybook runtime code.
+- **TypeScript**: `Meta` and `StoryObj` are not re-exported by `@storybook-astro/framework`. Use plain object exports with `export default meta` and `export const StoryName = { args: {...} }`.
+- **Deployment**: Storybook is built and deployed as part of the main site at `/design-system/lab/`. The GitHub Actions workflow builds both Astro and Storybook, then copies `storybook-static/` to `dist/design-system/lab/`.
+- **Base path**: configured via `viteFinal` in `.storybook/main.ts` to use `/design-system/lab/`.
+- **Sitemap**: the component lab URL is included in the sitemap via `customPages` in `astro.config.mjs`.
+
+The public design-system page (`/portfolio/design-system`) remains the curated portfolio presentation. Storybook is the working development tool.
 
 ## graphify
 

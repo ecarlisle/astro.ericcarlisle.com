@@ -66,6 +66,14 @@ jobs:
           PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
           PUBLIC_CONTACT_API_URL: ${{ vars.PUBLIC_CONTACT_API_URL }}
 
+      - name: Build Storybook
+        run: pnpm build:storybook
+
+      - name: Copy Storybook to dist
+        run: |
+          mkdir -p dist/design-system/lab
+          cp -r storybook-static/* dist/design-system/lab/
+
       - name: Verify contact endpoint in built output
         run: |
           echo "Checking contact form endpoint..."
