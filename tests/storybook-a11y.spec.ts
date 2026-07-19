@@ -10,6 +10,9 @@ const stories = [
   { name: 'Card - ArticleElement', url: 'components-card--article-element' },
   { name: 'Card - H3Heading', url: 'components-card--h-3-heading' },
   // ThemeToggle
+  { name: 'Header - Default', url: 'navigation-header--default' },
+  { name: 'Header - NarrowViewport', url: 'navigation-header--narrow-viewport' },
+  // ThemeToggle
   { name: 'ThemeToggle - Default', url: 'components-themetoggle--default' },
   { name: 'ThemeToggle - InHeader', url: 'components-themetoggle-in-header--in-header' },
   // SocialLinks
@@ -24,7 +27,7 @@ const stories = [
   { name: 'PaginationNav - NarrowContainer', url: 'components-paginationnav--narrow-container' },
   // TagFilterBar
   { name: 'TagFilterBar - Default', url: 'components-tagfilterbar--default' },
-  { name: 'TagFilterBar - OneActiveTag', url: 'components-tagfilterbar--one-active-tag' },
+  { name: 'TagFilterBar - SingleTag', url: 'components-tagfilterbar--single-tag' },
   { name: 'TagFilterBar - ManyTags', url: 'components-tagfilterbar--many-tags' },
   { name: 'TagFilterBar - LongTagLabels', url: 'components-tagfilterbar--long-tag-labels' },
   { name: 'TagFilterBar - NarrowViewport', url: 'components-tagfilterbar--narrow-viewport' },

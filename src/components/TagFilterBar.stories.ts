@@ -53,7 +53,7 @@ export const Default = {
   },
 };
 
-export const OneActiveTag = {
+export const SingleTag = {
   args: {
     tagData: {
       allTags: ['Astro'],
