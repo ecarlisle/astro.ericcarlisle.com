@@ -13,7 +13,7 @@
 .card .card-title {
   margin: 0;
   font-size: var(--type-size-card-title);
-  line-height: var(--line-height-h2);
+  line-height: var(--line-height-body);
 }
 
 .card .card-body > p:not(.meta) {
