@@ -1,5 +1,4 @@
 import HeaderDefaultFixture from './story-fixtures/HeaderDefaultFixture.astro';
-import HeaderNarrowFixture from './story-fixtures/HeaderNarrowFixture.astro';
 
 const meta = {
   title: 'Navigation/Header',
@@ -21,7 +20,6 @@ export const Default = {
 };
 
 export const NarrowViewport = {
-  component: HeaderNarrowFixture,
   args: {},
   parameters: {
     viewport: {
