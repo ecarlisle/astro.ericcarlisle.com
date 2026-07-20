@@ -41,7 +41,7 @@ const stories = [
 for (const story of stories) {
   test(`Storybook a11y: ${story.name}`, async ({ page }) => {
     test.setTimeout(60000);
-    await page.goto(`http://localhost:6006/iframe.html?id=${story.url}&viewMode=story`);
+    await page.goto(`/design-system/lab/iframe.html?id=${story.url}&viewMode=story`);
     await page.waitForLoadState('load');
     await page.waitForSelector('#storybook-root', { state: 'attached' });
     await page.waitForTimeout(2000);
