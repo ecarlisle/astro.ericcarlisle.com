@@ -1,0 +1,194 @@
+{
+  "generatedAt": "2026-07-20T04:00:06.028Z",
+  "commit": "71fa95f",
+  "environment": {
+    "node": "v24.15.0",
+    "platform": "darwin",
+    "astroBuild": "static",
+    "description": "Lab measurements from local or CI build. Not real-user Core Web Vitals."
+  },
+  "routes": {
+    "totalGenerated": 19,
+    "representativeRoutes": [
+      "/",
+      "/blog/",
+      "/portfolio/",
+      "/portfolio/design-system/",
+      "/blog/good-agent-context-is-carved-not-copied/"
+    ]
+  },
+  "lighthouse": null,
+  "bundles": {
+    "productionSite": {
+      "totalJavaScriptBytes": 810866,
+      "totalJavaScriptGzipBytes": 231470,
+      "totalCssBytes": 135208,
+      "largestJavaScriptAsset": {
+        "name": "/_astro/page.DGY5I_Vn.js",
+        "bytes": 270675
+      },
+      "astroScriptsBytes": 273198,
+      "pagefindScriptsBytes": 441271,
+      "partytownScriptsBytes": 96397,
+      "fileCount": 21,
+      "routeJavaScript": {
+        "/": {
+          "assets": [
+            "/_astro/page.DGY5I_Vn.js"
+          ],
+          "totalBytes": 270675
+        },
+        "/blog/": {
+          "assets": [
+            "/_astro/page.DGY5I_Vn.js"
+          ],
+          "totalBytes": 270675
+        },
+        "/portfolio/": {
+          "assets": [
+            "/_astro/page.DGY5I_Vn.js"
+          ],
+          "totalBytes": 270675
+        },
+        "/portfolio/design-system/": {
+          "assets": [
+            "/_astro/page.DGY5I_Vn.js"
+          ],
+          "totalBytes": 270675
+        },
+        "/blog/good-agent-context-is-carved-not-copied/": {
+          "assets": [
+            "/_astro/page.DGY5I_Vn.js"
+          ],
+          "totalBytes": 270675
+        }
+      }
+    },
+    "componentLab": {
+      "totalJavaScriptBytes": 8191188,
+      "totalJavaScriptGzipBytes": 2096284,
+      "totalBytes": 8232211,
+      "fileCount": 45,
+      "largestChunks": [
+        {
+          "name": "/sb-manager/globals-runtime.js",
+          "bytes": 3294135,
+          "label": "manager UI"
+        },
+        {
+          "name": "/sb-manager/runtime.js",
+          "bytes": 1240574,
+          "label": "manager UI"
+        },
+        {
+          "name": "/_astro/iframe-isxy3BiV.js",
+          "bytes": 826660,
+          "label": "iframe bundle"
+        },
+        {
+          "name": "/_astro/components-CndwxbzQ.js",
+          "bytes": 618759,
+          "label": "other"
+        },
+        {
+          "name": "/_astro/axe-C_A2Uzay.js",
+          "bytes": 579916,
+          "label": "a11y addon (axe-core)"
+        },
+        {
+          "name": "/sb-addons/storybook-core-server-presets-0/common-manager-bundle.js",
+          "bytes": 473032,
+          "label": "other"
+        },
+        {
+          "name": "/_astro/DocsRenderer-JROSPFPF-BOI_8bEO.js",
+          "bytes": 371522,
+          "label": "docs addon"
+        },
+        {
+          "name": "/_astro/page-BWIeWm7o.js",
+          "bytes": 277970,
+          "label": "page script"
+        },
+        {
+          "name": "/_astro/syntaxhighlighter-YFXUGROL-mEWXt1HX.js",
+          "bytes": 76291,
+          "label": "syntax highlighter"
+        },
+        {
+          "name": "/sb-addons/a11y-1/manager-bundle.js",
+          "bytes": 66572,
+          "label": "other"
+        }
+      ]
+    }
+  },
+  "stories": {
+    "total": 30,
+    "componentStories": 27,
+    "foundationStories": 3,
+    "accessibilityTests": 27
+  },
+  "accessibility": {
+    "storybookA11yTests": 27,
+    "storybookA11yPassed": 27,
+    "routeA11yTests": 7,
+    "routeA11yPassed": 7,
+    "tools": [
+      "axe-core (via @axe-core/playwright)"
+    ],
+    "coverageNote": "Automated checks only. Keyboard flow, screen-reader behavior, content clarity, zoom/reflow, motion behavior, and visual focus remain manual review."
+  },
+  "validation": {
+    "commands": [
+      {
+        "command": "pnpm typecheck",
+        "purpose": "Astro and TypeScript type checking"
+      },
+      {
+        "command": "pnpm lint",
+        "purpose": "Biome linting and formatting"
+      },
+      {
+        "command": "pnpm build",
+        "purpose": "Production Astro build"
+      },
+      {
+        "command": "pnpm test:e2e",
+        "purpose": "Playwright route, accessibility, and Storybook tests"
+      },
+      {
+        "command": "pnpm build:storybook",
+        "purpose": "Storybook static build"
+      },
+      {
+        "command": "pnpm verify:storybook-isolation",
+        "purpose": "Verify Storybook assets do not leak into production site"
+      }
+    ],
+    "ci": "GitHub Actions on push to main. See .github/workflows/astro.yml."
+  },
+  "isolation": {
+    "isolated": true,
+    "contaminatedFiles": 0,
+    "checkType": "static scan of JS/CSS files excluding dist/design-system/lab/",
+    "note": "Ordinary Astro pages should not load /design-system/lab/ assets. Verified by static scan and Playwright network tests."
+  },
+  "limitations": [
+    "Lighthouse is a lab measurement. Results vary by environment, device, and network conditions.",
+    "Automated accessibility tools detect only a subset of WCAG criteria. They do not replace manual review.",
+    "Storybook accessibility tests check isolated components, not complete user journeys or page layouts.",
+    "A passing build pipeline does not measure usability, content quality, or design consistency.",
+    "Production Core Web Vitals require real-user monitoring (RUM) data, which this site does not currently collect.",
+    "Bundle measurements are raw file sizes from the build output. Actual transfer size depends on hosting compression, cache state, and HTTP version.",
+    "Storybook bundle weight is measured separately and is not loaded by ordinary blog pages.",
+    "Route-level JavaScript is determined by inspecting generated HTML for <script> references. Dynamic or lazy-loaded scripts are not captured."
+  ],
+  "provenance": {
+    "bundleMeasurements": "Generated by scripts/generate-site-quality.mjs from dist/ and storybook-static/ build output.",
+    "storyCounts": "Read from storybook-static/index.json at build time.",
+    "lighthouse": "From lh-reports/ JSON output of pnpm lighthouse:all when available. Null when no recent report exists.",
+    "accessibilityTests": "Expected counts from test file definitions.",
+    "storybookIsolation": "Static scan of production JS/CSS files. Confirmed by Playwright network-level tests."
+  }
+}
