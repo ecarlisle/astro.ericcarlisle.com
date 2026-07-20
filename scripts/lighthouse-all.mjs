@@ -119,10 +119,10 @@ for (const { url } of pages) {
   console.log(`  🔍 ${url}`);
   try {
     execSync(
-      `pnpm exec lighthouse "${fullUrl}" --output=html --output-path="${reportPath}" --quiet --chrome-flags="--headless=new --no-sandbox"`,
+      `pnpm exec lighthouse "${fullUrl}" --output=html --output=json --output-path="${reportPath}" --quiet --chrome-flags="--headless=new --no-sandbox"`,
       { cwd: join(import.meta.dirname, '..'), stdio: 'pipe', timeout: 120_000 },
     );
-    console.log(`     ✅ Report → lh-reports/${slug}.html`);
+    console.log(`     ✅ Report → lh-reports/${slug}.html & .json`);
     passed++;
   } catch (err) {
     console.error(`     ❌ Failed: ${err.stderr?.toString().slice(0, 200) || err.message}`);
@@ -138,7 +138,7 @@ try {
 
 console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
 console.log(`  ${passed} passed, ${failed} failed`);
-console.log(`  Reports: lh-reports/*.html`);
+console.log(`  Reports: lh-reports/*.html & lh-reports/*.json`);
 console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
 
 process.exit(failed > 0 ? 1 : 0);

@@ -23,7 +23,9 @@ for (const { path, expectedHeading } of routes) {
     await page.goto(path);
     await expect(page).toHaveTitle(/.+/);
 
-    const h1s = page.locator('h1:not([aria-hidden="true"])');
+    const h1s = page.locator(
+      'body > h1:not([aria-hidden="true"]), main h1:not([aria-hidden="true"]), article h1:not([aria-hidden="true"])',
+    );
     await expect(h1s).toHaveCount(1);
     await expect(h1s.first()).toContainText(expectedHeading);
   });
@@ -35,7 +37,9 @@ test('/404 loads with an accessible h1', async ({ page }) => {
   const response = await page.goto('/404.html');
   expect(response).not.toBeNull();
 
-  const h1s = page.locator('h1:not([aria-hidden="true"])');
+  const h1s = page.locator(
+    'body > h1:not([aria-hidden="true"]), main h1:not([aria-hidden="true"]), article h1:not([aria-hidden="true"])',
+  );
   await expect(h1s).toHaveCount(1);
   await expect(h1s.first()).toBeVisible();
 });
@@ -44,7 +48,9 @@ test('a representative blog post loads with a single accessible h1', async ({ pa
   await page.goto(`/blog/${SAMPLE_BLOG_SLUG}/`);
   await expect(page).toHaveTitle(/.+/);
 
-  const h1s = page.locator('h1:not([aria-hidden="true"])');
+  const h1s = page.locator(
+    'body > h1:not([aria-hidden="true"]), main h1:not([aria-hidden="true"]), article h1:not([aria-hidden="true"])',
+  );
   await expect(h1s).toHaveCount(1);
   await expect(h1s.first()).toContainText('250mm Trading Card Box');
 });

@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * Playwright configuration for AstroBlog smoke, accessibility, and SEO tests.
  *
- * Tests run against the production build served by `astro preview`.
+ * Tests run against the production build served by a static file server.
  * The webServer command builds the site first to ensure dist/ is current.
  */
 export default defineConfig({
@@ -12,7 +12,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'list',
+  reporter: [['list'], ['json', { outputFile: 'test-results/test-results.json' }]],
 
   use: {
     baseURL: 'http://localhost:4321',
@@ -27,7 +27,8 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'pnpm build && pnpm preview',
+    command:
+      'pnpm build && mkdir -p dist/design-system/lab && cp -r storybook-static/* dist/design-system/lab/ && node scripts/static-server.mjs dist 4321',
     url: 'http://localhost:4321',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

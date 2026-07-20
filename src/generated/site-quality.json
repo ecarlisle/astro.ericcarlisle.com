@@ -1,143 +1,668 @@
 {
-  "generatedAt": "2026-07-20T04:00:06.028Z",
-  "commit": "71fa95f",
+  "generatedAt": "2026-07-20T05:28:29.827Z",
+  "commit": "6e24ab9",
   "environment": {
     "node": "v24.15.0",
     "platform": "darwin",
-    "astroBuild": "static",
-    "description": "Lab measurements from local or CI build. Not real-user Core Web Vitals."
+    "build": "astro static",
+    "measurementType": "Static analysis of build output, HTML inspection, and test-result parsing. Not real-user monitoring."
   },
   "routes": {
-    "totalGenerated": 19,
+    "totalGenerated": 21,
     "representativeRoutes": [
       "/",
       "/blog/",
       "/portfolio/",
       "/portfolio/design-system/",
-      "/blog/good-agent-context-is-carved-not-copied/"
+      "/portfolio/site-quality/",
+      "/blog/good-agent-context-is-carved-not-copied/",
+      "/search/",
+      "/contact/"
     ]
   },
-  "lighthouse": null,
-  "bundles": {
-    "productionSite": {
-      "totalJavaScriptBytes": 810866,
-      "totalJavaScriptGzipBytes": 231470,
-      "totalCssBytes": 135208,
-      "largestJavaScriptAsset": {
-        "name": "/_astro/page.DGY5I_Vn.js",
-        "bytes": 270675
+  "lighthouse": [
+    {
+      "url": "http://localhost:4321/404.html/",
+      "fetchedAt": "2026-07-20T04:29:49.773Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 87,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 66
       },
-      "astroScriptsBytes": 273198,
-      "pagefindScriptsBytes": 441271,
-      "partytownScriptsBytes": 96397,
-      "fileCount": 21,
-      "routeJavaScript": {
-        "/": {
-          "assets": [
-            "/_astro/page.DGY5I_Vn.js"
-          ],
-          "totalBytes": 270675
-        },
-        "/blog/": {
-          "assets": [
-            "/_astro/page.DGY5I_Vn.js"
-          ],
-          "totalBytes": 270675
-        },
-        "/portfolio/": {
-          "assets": [
-            "/_astro/page.DGY5I_Vn.js"
-          ],
-          "totalBytes": 270675
-        },
-        "/portfolio/design-system/": {
-          "assets": [
-            "/_astro/page.DGY5I_Vn.js"
-          ],
-          "totalBytes": 270675
-        },
-        "/blog/good-agent-context-is-carved-not-copied/": {
-          "assets": [
-            "/_astro/page.DGY5I_Vn.js"
-          ],
-          "totalBytes": 270675
-        }
-      }
+      "metrics": {
+        "lcp": 3155.7581,
+        "cls": 0.01287283314885897,
+        "tbt": 106,
+        "fcp": 3155.7581
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/404.html.report.json"
     },
-    "componentLab": {
-      "totalJavaScriptBytes": 8191188,
-      "totalJavaScriptGzipBytes": 2096284,
-      "totalBytes": 8232211,
-      "fileCount": 45,
-      "largestChunks": [
+    {
+      "url": "http://localhost:4321/about/",
+      "fetchedAt": "2026-07-20T04:30:02.074Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 88,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3004.4379,
+        "cls": 0.0724136856087791,
+        "tbt": 56,
+        "fcp": 3004.4379
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/about.report.json"
+    },
+    {
+      "url": "http://localhost:4321/blog/",
+      "fetchedAt": "2026-07-20T04:30:39.308Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 85,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3396.3307999999997,
+        "cls": 0.01039120152233601,
+        "tbt": 3.5,
+        "fcp": 3154.8308
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/blog.report.json"
+    },
+    {
+      "url": "http://localhost:4321/blog/250mm-trading-card-box/",
+      "fetchedAt": "2026-07-20T04:30:14.770Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 85,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3400.0266999999994,
+        "cls": 0.01039120152233601,
+        "tbt": null,
+        "fcp": 3304.0266999999994
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/blog_250mm-trading-card-box.report.json"
+    },
+    {
+      "url": "http://localhost:4321/blog/good-agent-context-is-carved-not-copied/",
+      "fetchedAt": "2026-07-20T04:30:27.007Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 85,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3399.5273,
+        "cls": 0.01039120152233601,
+        "tbt": 0.5,
+        "fcp": 3303.0273
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/blog_good-agent-context-is-carved-not-copied.report.json"
+    },
+    {
+      "url": "http://localhost:4321/blog/why-do-i-need-all-this-usb-and-sd-media-holder/",
+      "fetchedAt": "2026-07-20T04:30:51.834Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 85,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3377.2641000000003,
+        "cls": 0.01039120152233601,
+        "tbt": 27,
+        "fcp": 3302.2641000000003
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/blog_why-do-i-need-all-this-usb-and-sd-media-holder.report.json"
+    },
+    {
+      "url": "http://localhost:4321/contact/",
+      "fetchedAt": "2026-07-20T04:31:04.424Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 89,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3019.5739000000003,
+        "cls": 0.01039120152233601,
+        "tbt": 2.5,
+        "fcp": 3002.5739000000003
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/contact.report.json"
+    },
+    {
+      "url": "http://localhost:4321/",
+      "fetchedAt": "2026-07-20T04:31:16.791Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 84,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3622.5214000000005,
+        "cls": 0.01039120152233601,
+        "tbt": 10.5,
+        "fcp": 3153.5214000000005
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/index.report.json"
+    },
+    {
+      "url": "http://localhost:4321/portfolio/",
+      "fetchedAt": "2026-07-20T04:31:41.893Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 82,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3402.3614000000002,
+        "cls": 0.09788656156283891,
+        "tbt": null,
+        "fcp": 3302.8614000000002
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/portfolio.report.json"
+    },
+    {
+      "url": "http://localhost:4321/portfolio/design-system/",
+      "fetchedAt": "2026-07-20T04:31:29.046Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 82,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 66
+      },
+      "metrics": {
+        "lcp": 3633.8589999999995,
+        "cls": 0.04140244356555756,
+        "tbt": 38,
+        "fcp": 3603.3589999999995
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/portfolio_design-system.report.json"
+    },
+    {
+      "url": "http://localhost:4321/portfolio/site-quality/",
+      "fetchedAt": "2026-07-20T04:31:54.343Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 71,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3638.2249999999995,
+        "cls": 0.2243973663463398,
+        "tbt": 44,
+        "fcp": 3603.7249999999995
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/portfolio_site-quality.report.json"
+    },
+    {
+      "url": "http://localhost:4321/posts/3d-printing/250mm-trading-card-box/",
+      "fetchedAt": "2026-07-20T04:32:07.075Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 89,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3776.6766,
+        "cls": 0.01039120152233601,
+        "tbt": 2,
+        "fcp": 903.7844
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/posts_3d-printing_250mm-trading-card-box.report.json"
+    },
+    {
+      "url": "http://localhost:4321/posts/3d-printing/why-do-i-need-all-this-usb-and-sd-media-holder/",
+      "fetchedAt": "2026-07-20T04:32:19.608Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 89,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3848.62965,
+        "cls": 0.01039120152233601,
+        "tbt": 5,
+        "fcp": 903.7530999999999
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/posts_3d-printing_why-do-i-need-all-this-usb-and-sd-media-holder.report.json"
+    },
+    {
+      "url": "http://localhost:4321/search/",
+      "fetchedAt": "2026-07-20T04:32:31.740Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 82,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3918.7434999999996,
+        "cls": 0.008371503561669928,
+        "tbt": 7,
+        "fcp": 3076.7434999999996
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/search.report.json"
+    },
+    {
+      "url": "http://localhost:4321/tags/",
+      "fetchedAt": "2026-07-20T04:33:18.372Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 87,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3167.4188000000004,
+        "cls": 0.008533275485703862,
+        "tbt": 15,
+        "fcp": 3151.9188000000004
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/tags.report.json"
+    },
+    {
+      "url": "http://localhost:4321/tags/3d-printing/",
+      "fetchedAt": "2026-07-20T04:32:43.345Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 85,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3394.8417999999997,
+        "cls": 0.01039120152233601,
+        "tbt": 1.5,
+        "fcp": 3152.3417999999997
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/tags_3d-printing.report.json"
+    },
+    {
+      "url": "http://localhost:4321/tags/ai/",
+      "fetchedAt": "2026-07-20T04:32:55.038Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 86,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3318.012,
+        "cls": 0.01039120152233601,
+        "tbt": null,
+        "fcp": 3152.012
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/tags_ai.report.json"
+    },
+    {
+      "url": "http://localhost:4321/tags/documentation/",
+      "fetchedAt": "2026-07-20T04:33:06.705Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 86,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3317.8964000000005,
+        "cls": 0.01039120152233601,
+        "tbt": null,
+        "fcp": 3151.8964000000005
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/tags_documentation.report.json"
+    },
+    {
+      "url": "http://localhost:4321/tags/software-development/",
+      "fetchedAt": "2026-07-20T04:33:29.952Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 86,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3318.8743999999997,
+        "cls": 0.01039120152233601,
+        "tbt": null,
+        "fcp": 3152.3743999999997
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/tags_software-development.report.json"
+    }
+  ],
+  "staticDeployment": {
+    "totalJavaScript": {
+      "bytes": 9002054,
+      "gzipBytes": 2327814,
+      "fileCount": 55
+    },
+    "totalCss": {
+      "bytes": 180995,
+      "fileCount": 12
+    },
+    "largestJavaScriptAsset": {
+      "name": "/design-system/lab/sb-manager/globals-runtime.js",
+      "bytes": 3294135
+    },
+    "categories": [
+      {
+        "name": "Astro page scripts",
+        "bytes": 8464386,
+        "files": 45
+      },
+      {
+        "name": "Pagefind search index and UI",
+        "bytes": 441271,
+        "files": 6
+      },
+      {
+        "name": "Partytown analytics offloading",
+        "bytes": 96397,
+        "files": 4
+      }
+    ],
+    "note": "All JavaScript files present in the Astro-only dist/ directory (source maps excluded). Not all files are loaded by every route. See routeMeasurements below for per-page loading behavior."
+  },
+  "routeMeasurements": {
+    "/": {
+      "assets": [
         {
-          "name": "/sb-manager/globals-runtime.js",
-          "bytes": 3294135,
-          "label": "manager UI"
+          "url": "https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3",
+          "bytes": 0,
+          "category": "core"
         },
         {
-          "name": "/sb-manager/runtime.js",
-          "bytes": 1240574,
-          "label": "manager UI"
-        },
-        {
-          "name": "/_astro/iframe-isxy3BiV.js",
-          "bytes": 826660,
-          "label": "iframe bundle"
-        },
-        {
-          "name": "/_astro/components-CndwxbzQ.js",
-          "bytes": 618759,
-          "label": "other"
-        },
-        {
-          "name": "/_astro/axe-C_A2Uzay.js",
-          "bytes": 579916,
-          "label": "a11y addon (axe-core)"
-        },
-        {
-          "name": "/sb-addons/storybook-core-server-presets-0/common-manager-bundle.js",
-          "bytes": 473032,
-          "label": "other"
-        },
-        {
-          "name": "/_astro/DocsRenderer-JROSPFPF-BOI_8bEO.js",
-          "bytes": 371522,
-          "label": "docs addon"
-        },
-        {
-          "name": "/_astro/page-BWIeWm7o.js",
-          "bytes": 277970,
-          "label": "page script"
-        },
-        {
-          "name": "/_astro/syntaxhighlighter-YFXUGROL-mEWXt1HX.js",
-          "bytes": 76291,
-          "label": "syntax highlighter"
-        },
-        {
-          "name": "/sb-addons/a11y-1/manager-bundle.js",
-          "bytes": 66572,
-          "label": "other"
+          "url": "/_astro/page.E_TAu5vm.js",
+          "bytes": 270675,
+          "category": "core"
         }
+      ],
+      "totalBytes": 270675,
+      "inlineBytes": 6743,
+      "features": []
+    },
+    "/blog/": {
+      "assets": [
+        {
+          "url": "https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3",
+          "bytes": 0,
+          "category": "core"
+        },
+        {
+          "url": "/_astro/page.E_TAu5vm.js",
+          "bytes": 270675,
+          "category": "core"
+        }
+      ],
+      "totalBytes": 270675,
+      "inlineBytes": 6913,
+      "features": []
+    },
+    "/portfolio/": {
+      "assets": [
+        {
+          "url": "https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3",
+          "bytes": 0,
+          "category": "core"
+        },
+        {
+          "url": "/_astro/page.E_TAu5vm.js",
+          "bytes": 270675,
+          "category": "core"
+        }
+      ],
+      "totalBytes": 270675,
+      "inlineBytes": 8641,
+      "features": []
+    },
+    "/portfolio/design-system/": {
+      "assets": [
+        {
+          "url": "https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3",
+          "bytes": 0,
+          "category": "core"
+        },
+        {
+          "url": "/_astro/page.E_TAu5vm.js",
+          "bytes": 270675,
+          "category": "core"
+        }
+      ],
+      "totalBytes": 270675,
+      "inlineBytes": 8891,
+      "features": []
+    },
+    "/portfolio/site-quality/": {
+      "assets": [
+        {
+          "url": "https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3",
+          "bytes": 0,
+          "category": "core"
+        },
+        {
+          "url": "/_astro/page.E_TAu5vm.js",
+          "bytes": 270675,
+          "category": "core"
+        }
+      ],
+      "totalBytes": 270675,
+      "inlineBytes": 8874,
+      "features": []
+    },
+    "/blog/good-agent-context-is-carved-not-copied/": {
+      "assets": [
+        {
+          "url": "https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3",
+          "bytes": 0,
+          "category": "core"
+        },
+        {
+          "url": "/_astro/page.E_TAu5vm.js",
+          "bytes": 270675,
+          "category": "core"
+        }
+      ],
+      "totalBytes": 270675,
+      "inlineBytes": 10413,
+      "features": []
+    },
+    "/search/": {
+      "assets": [
+        {
+          "url": "https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3",
+          "bytes": 0,
+          "category": "core"
+        },
+        {
+          "url": "/_astro/page.E_TAu5vm.js",
+          "bytes": 270675,
+          "category": "core"
+        }
+      ],
+      "totalBytes": 270675,
+      "inlineBytes": 8674,
+      "features": []
+    },
+    "/contact/": {
+      "assets": [
+        {
+          "url": "https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3",
+          "bytes": 0,
+          "category": "core"
+        },
+        {
+          "url": "/_astro/page.E_TAu5vm.js",
+          "bytes": 270675,
+          "category": "core"
+        },
+        {
+          "url": "https://challenges.cloudflare.com/turnstile/v0/api.js",
+          "bytes": 0,
+          "category": "turnstile"
+        }
+      ],
+      "totalBytes": 270675,
+      "inlineBytes": 11037,
+      "features": [
+        "turnstile"
       ]
     }
+  },
+  "featureLoading": {
+    "pagefind": {
+      "totalDeployBytes": 441271,
+      "routesRequesting": [],
+      "loadingBehavior": "Loaded only on /search/. Not requested by other routes."
+    },
+    "partytown": {
+      "totalDeployBytes": 96397,
+      "routesRequesting": [],
+      "loadingBehavior": "Script loader present in HTML head on most pages. Worker scripts load lazily on user interaction."
+    },
+    "turnstile": {
+      "routesRequesting": [
+        "/contact/"
+      ],
+      "loadingBehavior": "Loaded only on /contact/. Cloudflare external asset."
+    },
+    "storybookLab": {
+      "routesRequesting": [],
+      "loadingBehavior": "Not requested by any normal page. Only available at /design-system/lab/."
+    }
+  },
+  "componentLab": {
+    "totalJavaScriptBytes": 8191188,
+    "totalJavaScriptGzipBytes": 2096342,
+    "totalBytes": 8232211,
+    "fileCount": 45,
+    "largestChunks": [
+      {
+        "name": "/sb-manager/globals-runtime.js",
+        "bytes": 3294135,
+        "label": "manager UI"
+      },
+      {
+        "name": "/sb-manager/runtime.js",
+        "bytes": 1240574,
+        "label": "manager UI"
+      },
+      {
+        "name": "/_astro/iframe-DlauUKwZ.js",
+        "bytes": 826660,
+        "label": "iframe bundle"
+      },
+      {
+        "name": "/_astro/components-BjMOIicu.js",
+        "bytes": 618759,
+        "label": "other"
+      },
+      {
+        "name": "/_astro/axe-DcqmkbmI.js",
+        "bytes": 579916,
+        "label": "a11y addon (axe-core)"
+      },
+      {
+        "name": "/sb-addons/storybook-core-server-presets-0/common-manager-bundle.js",
+        "bytes": 473032,
+        "label": "other"
+      },
+      {
+        "name": "/_astro/DocsRenderer-JROSPFPF-CJus0p9j.js",
+        "bytes": 371522,
+        "label": "docs addon"
+      },
+      {
+        "name": "/_astro/page-B0bqjnX9.js",
+        "bytes": 277970,
+        "label": "page script"
+      },
+      {
+        "name": "/_astro/syntaxhighlighter-YFXUGROL-aQGnfoOr.js",
+        "bytes": 76291,
+        "label": "syntax highlighter"
+      },
+      {
+        "name": "/sb-addons/a11y-1/manager-bundle.js",
+        "bytes": 66572,
+        "label": "other"
+      }
+    ],
+    "source": "storybook-static/ directory analysis"
   },
   "stories": {
     "total": 30,
     "componentStories": 27,
     "foundationStories": 3,
-    "accessibilityTests": 27
+    "source": "/Users/eric/repos/astro.ericcarlisle.com/storybook-static/index.json"
   },
   "accessibility": {
-    "storybookA11yTests": 27,
-    "storybookA11yPassed": 27,
-    "routeA11yTests": 7,
-    "routeA11yPassed": 7,
+    "totalTests": 55,
+    "passedTests": 55,
+    "failedTests": 0,
+    "skippedTests": 0,
+    "storybookTests": 27,
+    "storybookPassed": 27,
+    "routeTests": 7,
+    "routePassed": 7,
     "tools": [
       "axe-core (via @axe-core/playwright)"
     ],
-    "coverageNote": "Automated checks only. Keyboard flow, screen-reader behavior, content clarity, zoom/reflow, motion behavior, and visual focus remain manual review."
+    "dataSource": "/Users/eric/repos/astro.ericcarlisle.com/test-results/test-results.json",
+    "status": "parsed from Playwright JSON report",
+    "note": "Automated checks only. Keyboard flow, screen-reader behavior, content clarity, zoom/reflow, motion behavior, and visual focus remain manual review."
   },
   "validation": {
     "commands": [
@@ -155,7 +680,7 @@
       },
       {
         "command": "pnpm test:e2e",
-        "purpose": "Playwright route, accessibility, and Storybook tests"
+        "purpose": "Playwright route, accessibility, and Storybook tests (produces test-results/test-results.json)"
       },
       {
         "command": "pnpm build:storybook",
@@ -164,6 +689,10 @@
       {
         "command": "pnpm verify:storybook-isolation",
         "purpose": "Verify Storybook assets do not leak into production site"
+      },
+      {
+        "command": "pnpm quality:generate",
+        "purpose": "Generate site-quality.json from current build output and test results"
       }
     ],
     "ci": "GitHub Actions on push to main. See .github/workflows/astro.yml."
@@ -180,15 +709,60 @@
     "Storybook accessibility tests check isolated components, not complete user journeys or page layouts.",
     "A passing build pipeline does not measure usability, content quality, or design consistency.",
     "Production Core Web Vitals require real-user monitoring (RUM) data, which this site does not currently collect.",
-    "Bundle measurements are raw file sizes from the build output. Actual transfer size depends on hosting compression, cache state, and HTTP version.",
+    "Static file sizes are raw bytes from the build output. Actual transfer size depends on hosting compression, cache state, and HTTP version.",
+    "Browser-measured transfer sizes require running Playwright network-capture tests against a local preview.",
     "Storybook bundle weight is measured separately and is not loaded by ordinary blog pages.",
-    "Route-level JavaScript is determined by inspecting generated HTML for <script> references. Dynamic or lazy-loaded scripts are not captured."
+    "Route-level JavaScript is determined by inspecting generated HTML for <script> references. Dynamic or lazy-loaded scripts are not captured.",
+    "Pagefind assets are present in the deployment but only requested by /search/.",
+    "Partytown worker scripts are present in the deployment but loaded lazily by the Partytown library.",
+    "Inline script bytes are estimated from HTML content. They exclude server-rendered JSON-LD and inline styles."
   ],
   "provenance": {
-    "bundleMeasurements": "Generated by scripts/generate-site-quality.mjs from dist/ and storybook-static/ build output.",
-    "storyCounts": "Read from storybook-static/index.json at build time.",
-    "lighthouse": "From lh-reports/ JSON output of pnpm lighthouse:all when available. Null when no recent report exists.",
-    "accessibilityTests": "Expected counts from test file definitions.",
-    "storybookIsolation": "Static scan of production JS/CSS files. Confirmed by Playwright network-level tests."
+    "generatedAt": "2026-07-20T05:28:29.827Z",
+    "commit": "6e24ab9",
+    "measurements": [
+      {
+        "group": "staticDeployment",
+        "type": "static analysis",
+        "source": "dist/ directory (Astro-only build)",
+        "description": "File sizes and counts from build output. Source maps excluded."
+      },
+      {
+        "group": "routeMeasurements",
+        "type": "static analysis",
+        "source": "Generated HTML files in dist/",
+        "description": "Extracted <script src> references and inline script byte estimates from generated HTML."
+      },
+      {
+        "group": "componentLab",
+        "type": "static analysis",
+        "source": "storybook-static/ directory",
+        "description": "File sizes and chunk labels from Storybook build output."
+      },
+      {
+        "group": "stories",
+        "type": "static analysis",
+        "source": "/Users/eric/repos/astro.ericcarlisle.com/storybook-static/index.json",
+        "description": "Story counts from Storybook index.json metadata."
+      },
+      {
+        "group": "accessibility",
+        "type": "test results",
+        "source": "/Users/eric/repos/astro.ericcarlisle.com/test-results/test-results.json",
+        "description": "Parsed from Playwright JSON reporter output. Counts and pass/fail from last test run."
+      },
+      {
+        "group": "lighthouse",
+        "type": "lab measurement",
+        "source": "lh-reports/ directory",
+        "description": "Parsed from Lighthouse JSON reports. Requires running pnpm lighthouse:all."
+      },
+      {
+        "group": "isolation",
+        "type": "static analysis",
+        "source": "dist/ directory",
+        "description": "Regex scan of production JS/CSS files for Storybook identifiers."
+      }
+    ]
   }
 }

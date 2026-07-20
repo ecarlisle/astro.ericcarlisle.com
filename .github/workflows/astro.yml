@@ -74,6 +74,24 @@ jobs:
           mkdir -p dist/design-system/lab
           cp -r storybook-static/* dist/design-system/lab/
 
+      - name: Run E2E tests
+        run: pnpm test:e2e
+
+      - name: Generate Site Quality JSON
+        run: pnpm quality:generate
+
+      - name: Rebuild Astro with Site Quality data
+        run: pnpm build
+        env:
+          SITE: ${{ steps.pages.outputs.origin }}
+          PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
+          PUBLIC_CONTACT_API_URL: ${{ vars.PUBLIC_CONTACT_API_URL }}
+
+      - name: Copy Storybook to dist (final)
+        run: |
+          mkdir -p dist/design-system/lab
+          cp -r storybook-static/* dist/design-system/lab/
+
       - name: Verify contact endpoint in built output
         run: |
           echo "Checking contact form endpoint..."

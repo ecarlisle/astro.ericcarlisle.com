@@ -4,6 +4,7 @@
   "exclude": ["dist", "storybook-static"],
   "compilerOptions": {
     "strictNullChecks": true,
+    "types": ["node"],
     "paths": {
       "@styles/*": ["./src/styles/*"],
       "@images/*": ["./src/assets/images/*"],

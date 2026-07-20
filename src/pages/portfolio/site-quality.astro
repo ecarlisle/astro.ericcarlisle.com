@@ -7,16 +7,16 @@ const {
   commit,
   environment,
   routes,
-  bundles,
+  staticDeployment,
+  routeMeasurements,
+  componentLab,
   stories,
   accessibility,
   validation,
   isolation,
+  featureLoading,
   limitations,
 } = siteQuality;
-
-const prod = bundles.productionSite;
-const lab = bundles.componentLab;
 
 const measurementDate = new Date(generatedAt);
 const dateStr = measurementDate.toLocaleDateString('en-US', {
@@ -48,16 +48,6 @@ function formatMs(val: number | null | undefined) {
   if (!val) return '—';
   return `${(val / 1000).toFixed(1)} s`;
 }
-const lh = siteQuality.lighthouse as {
-  performance: number;
-  accessibility: number;
-  'best-practices': number;
-  seo: number;
-  lcp: number | null;
-  cls: number | null;
-  tbt: number | null;
-  url: string;
-} | null;
 ---
 
 <Layout
@@ -74,13 +64,15 @@ const lh = siteQuality.lighthouse as {
   <header class="page-intro">
     <p class="lede">
       This page reports reproducible measurements for the live site and its
-      component development system. Every number comes from a current
-      reproducible source — build output, generated metadata, or test results.
+      component development system. Every number comes from generated build
+      output, test results, or metadata — not fabricated values or historical
+      reports.
     </p>
     <dl class="measurement-meta">
       <div><dt>Measurement date</dt><dd>{dateStr} at {timeStr}</dd></div>
       <div><dt>Source commit</dt><dd><code>{commit}</code></dd></div>
-      <div><dt>Environment</dt><dd>Node {environment.node} on {environment.platform}, Astro static build</dd></div>
+      <div><dt>Environment</dt><dd>Node {environment.node}, {environment.build}</dd></div>
+      <div><dt>Type</dt><dd>{environment.measurementType}</dd></div>
     </dl>
   </header>
 
@@ -98,44 +90,52 @@ const lh = siteQuality.lighthouse as {
 
       <div class="metric-card">
         <h3>Storybook stories</h3>
-        <span class="metric-value">{stories.total}</span>
-        <span class="metric-label">{stories.componentStories} component + {stories.foundationStories} foundation</span>
+        <span class="metric-value">{stories.total || '—'}</span>
+        <span class="metric-label">{stories.componentStories || 0} component + {stories.foundationStories || 0} foundation</span>
+      </div>
+
+      {accessibility && (
+        <>
+          <div class="metric-card">
+            <h3>A11y tests</h3>
+            <span class="metric-value">{accessibility.totalTests}</span>
+            <span class="metric-label">{accessibility.passedTests} passed · {accessibility.failedTests} failed · {accessibility.skippedTests} skipped</span>
+          </div>
+          <div class="metric-card">
+            <h3>Route a11y tests</h3>
+            <span class="metric-value">{accessibility.routeTests}</span>
+            <span class="metric-label">{accessibility.routePassed} passing</span>
+          </div>
+          <div class="metric-card">
+            <h3>Storybook a11y tests</h3>
+            <span class="metric-value">{accessibility.storybookTests}</span>
+            <span class="metric-label">{accessibility.storybookPassed} passing</span>
+          </div>
+        </>
+      )}
+
+      <div class="metric-card">
+        <h3>Production JS (static)</h3>
+        <span class="metric-value">{formatBytes(staticDeployment.totalJavaScript.bytes)}</span>
+        <span class="metric-label">{formatBytes(staticDeployment.totalJavaScript.gzipBytes)} gzip · {staticDeployment.totalJavaScript.fileCount} files</span>
       </div>
 
       <div class="metric-card">
-        <h3>A11y tests</h3>
-        <span class="metric-value">{accessibility.storybookA11yTests + accessibility.routeA11yTests}</span>
-        <span class="metric-label">{accessibility.storybookA11yTests} Storybook + {accessibility.routeA11yTests} route — all passing</span>
-      </div>
-
-      <div class="metric-card">
-        <h3>Production JS</h3>
-        <span class="metric-value">{formatBytes(prod.totalJavaScriptBytes)}</span>
-        <span class="metric-label">total; {formatBytes(prod.totalJavaScriptGzipBytes)} gzipped</span>
-      </div>
-
-      <div class="metric-card">
-        <h3>Per-route JS</h3>
-        <span class="metric-value">{formatBytes(Object.values(prod.routeJavaScript).find(r => r.assets.length > 0)?.totalBytes || 0)}</span>
-        <span class="metric-label">loaded by each normal page</span>
+        <h3>Per-route JS (from HTML)</h3>
+        <span class="metric-value">{formatBytes(Object.values(routeMeasurements).find((r: any) => r.totalBytes > 0)?.totalBytes || 0)}</span>
+        <span class="metric-label">referenced by each normal page (single shared bundle)</span>
       </div>
 
       <div class="metric-card">
         <h3>Production CSS</h3>
-        <span class="metric-value">{formatBytes(prod.totalCssBytes)}</span>
-        <span class="metric-label">total stylesheets</span>
-      </div>
-
-      <div class="metric-card">
-        <h3>Route a11y tests</h3>
-        <span class="metric-value">{accessibility.routeA11yTests}</span>
-        <span class="metric-label">all passing</span>
+        <span class="metric-value">{formatBytes(staticDeployment.totalCss.bytes)}</span>
+        <span class="metric-label">{staticDeployment.totalCss.fileCount} stylesheets</span>
       </div>
 
       <div class="metric-card">
         <h3>Storybook isolated</h3>
         <span class="metric-value">{isolation.isolated ? 'Yes' : 'No'}</span>
-        <span class="metric-label">no Storybook assets on normal pages</span>
+        <span class="metric-label">{isolation.contaminatedFiles} Storybook references in production JS/CSS</span>
       </div>
     </div>
   </section>
@@ -145,66 +145,79 @@ const lh = siteQuality.lighthouse as {
   <section id="performance">
     <h2>Performance</h2>
 
-    {lh ? (
+    {siteQuality.lighthouse !== null && (siteQuality.lighthouse as unknown as any[]).length > 0 ? (
       <>
         <p>
           Lighthouse measurements taken locally against the built static output
-          served by a plain HTTP server. Device: desktop. Throttling: provided
-          by Lighthouse default. These are lab measurements, not production
-          Core Web Vitals.
+          served by a plain HTTP server. These are lab measurements, not
+          production Core Web Vitals.
         </p>
 
-        <div class="metric-grid">
-          <div class="metric-card">
-            <h3>Performance</h3>
-            <span class="metric-value">{lh.performance}</span>
-            <span class="metric-label">/ 100</span>
+        {(siteQuality.lighthouse as unknown as any[]).map((lh: any) => (
+          <div class="lh-route-block">
+            <h3><code>{lh.url}</code></h3>
+            <p class="methodology-note">
+              Measured: {lh.fetchedAt ? new Date(lh.fetchedAt).toLocaleString() : 'unknown'}
+              · Device: {lh.device} · Throttling: {lh.throttling}
+            </p>
+            <div class="metric-grid">
+              <div class="metric-card">
+                <h3>Performance</h3>
+                <span class="metric-value">{lh.scores.performance}</span>
+                <span class="metric-label">/ 100</span>
+              </div>
+              <div class="metric-card">
+                <h3>Accessibility</h3>
+                <span class="metric-value">{lh.scores.accessibility}</span>
+                <span class="metric-label">/ 100</span>
+              </div>
+              <div class="metric-card">
+                <h3>Best Practices</h3>
+                <span class="metric-value">{lh.scores['best-practices']}</span>
+                <span class="metric-label">/ 100</span>
+              </div>
+              <div class="metric-card">
+                <h3>SEO</h3>
+                <span class="metric-value">{lh.scores.seo}</span>
+                <span class="metric-label">/ 100</span>
+              </div>
+              <div class="metric-card">
+                <h3>LCP</h3>
+                <span class="metric-value">{formatMs(lh.metrics.lcp)}</span>
+                <span class="metric-label">Largest Contentful Paint</span>
+              </div>
+              <div class="metric-card">
+                <h3>CLS</h3>
+                <span class="metric-value">{formatCls(lh.metrics.cls)}</span>
+                <span class="metric-label">Cumulative Layout Shift</span>
+              </div>
+              <div class="metric-card">
+                <h3>TBT</h3>
+                <span class="metric-value">{formatMs(lh.metrics.tbt)}</span>
+                <span class="metric-label">Total Blocking Time</span>
+              </div>
+              <div class="metric-card">
+                <h3>FCP</h3>
+                <span class="metric-value">{formatMs(lh.metrics.fcp)}</span>
+                <span class="metric-label">First Contentful Paint</span>
+              </div>
+            </div>
           </div>
-          <div class="metric-card">
-            <h3>Accessibility</h3>
-            <span class="metric-value">{lh.accessibility}</span>
-            <span class="metric-label">/ 100</span>
-          </div>
-          <div class="metric-card">
-            <h3>Best Practices</h3>
-            <span class="metric-value">{lh['best-practices']}</span>
-            <span class="metric-label">/ 100</span>
-          </div>
-          <div class="metric-card">
-            <h3>SEO</h3>
-            <span class="metric-value">{lh.seo}</span>
-            <span class="metric-label">/ 100</span>
-          </div>
-          <div class="metric-card">
-            <h3>LCP</h3>
-            <span class="metric-value">{formatMs(lh.lcp)}</span>
-            <span class="metric-label">Largest Contentful Paint</span>
-          </div>
-          <div class="metric-card">
-            <h3>CLS</h3>
-            <span class="metric-value">{formatCls(lh.cls)}</span>
-            <span class="metric-label">Cumulative Layout Shift</span>
-          </div>
-          <div class="metric-card">
-            <h3>TBT</h3>
-            <span class="metric-value">{formatMs(lh.tbt)}</span>
-            <span class="metric-label">Total Blocking Time</span>
-          </div>
-        </div>
+        ))}
+
+        <p class="note">
+          The CI pipeline enforces a Lighthouse performance budget:
+          performance ≥ 95, accessibility ≥ 95, SEO ≥ 100,
+          best-practices ≥ 95. See <code>lighthouserc.js</code>.
+        </p>
       </>
     ) : (
       <p>
-        No Lighthouse report is currently available. Run
-        {' '}<code>pnpm lighthouse:all</code> to generate one, then
-        {' '}<code>pnpm quality:generate</code> to include it here.
+        No Lighthouse report is currently available. Run {' '}
+        <code>pnpm lighthouse:all</code> to generate one, then {' '}
+        <code>pnpm quality:generate</code> to include it here.
       </p>
     )}
-
-    <p class="note">
-      The CI pipeline enforces a Lighthouse performance budget:
-      performance ≥ 95, accessibility ≥ 95, SEO ≥ 100,
-      best-practices ≥ 95. See <code>lighthouserc.js</code>.
-    </p>
   </section>
 
   <hr />
@@ -213,128 +226,183 @@ const lh = siteQuality.lighthouse as {
     <h2>Production bundle</h2>
 
     <p class="methodology-note">
-      Bundle figures are generated from the Astro-only production build.
+      Bundle figures are from the Astro-only production build in <code>dist/</code>.
       Storybook assets under <code>/design-system/lab/</code> are measured
-      separately and excluded from ordinary site-route totals.
+      separately and are never loaded by ordinary site pages.
     </p>
 
-    <h3>Production site</h3>
+    <h3>JavaScript files present in the deployment</h3>
+    <p>
+      These are all JavaScript files present in <code>dist/</code> (source maps
+      excluded). Not every file is loaded by every route. See the
+      route-measurement tables below for per-page behavior.
+    </p>
+
     <table class="measurement-table">
       <thead>
-        <tr>
-          <th>Metric</th>
-          <th>Value</th>
-        </tr>
+        <tr><th>Category</th><th>Total bytes</th><th>Files</th></tr>
       </thead>
       <tbody>
-        <tr>
-          <td>Total JavaScript</td>
-          <td>{formatBytes(prod.totalJavaScriptBytes)}</td>
-        </tr>
-        <tr>
-          <td>Total JavaScript (gzip)</td>
-          <td>{formatBytes(prod.totalJavaScriptGzipBytes)}</td>
-        </tr>
-        <tr>
-          <td>Total CSS</td>
-          <td>{formatBytes(prod.totalCssBytes)}</td>
-        </tr>
-        <tr>
-          <td>Largest JavaScript asset</td>
-          <td><code>{prod.largestJavaScriptAsset?.name}</code> ({formatBytes(prod.largestJavaScriptAsset?.bytes || 0)})</td>
-        </tr>
-        <tr>
-          <td>Astro page scripts</td>
-          <td>{formatBytes(prod.astroScriptsBytes)}</td>
-        </tr>
-        <tr>
-          <td>Search (Pagefind)</td>
-          <td>{formatBytes(prod.pagefindScriptsBytes)}</td>
-        </tr>
-        <tr>
-          <td>Analytics (Partytown)</td>
-          <td>{formatBytes(prod.partytownScriptsBytes)}</td>
+        {staticDeployment.categories.map((cat: any) => (
+          <tr>
+            <td>{cat.name}</td>
+            <td>{formatBytes(cat.bytes)}</td>
+            <td>{cat.files}</td>
+          </tr>
+        ))}
+        <tr class="total-row">
+          <td><strong>Total</strong></td>
+          <td><strong>{formatBytes(staticDeployment.totalJavaScript.bytes)}</strong></td>
+          <td><strong>{staticDeployment.totalJavaScript.fileCount}</strong></td>
         </tr>
       </tbody>
     </table>
 
-    <h3>Route-level JavaScript</h3>
+    <p class="methodology-note">{staticDeployment.note}</p>
+
+    <h3>Route-level JavaScript references</h3>
     <p>
-      Every normal Astro page loads a single shared JavaScript bundle.
-      The table below shows which assets each route references and their
-      total size.
+      Each row shows which JavaScript assets a route’s generated HTML
+      references, their total size, and estimated inline script bytes.
     </p>
 
     <table class="measurement-table">
       <thead>
         <tr>
           <th>Route</th>
-          <th>JS assets</th>
+          <th>Referenced JS</th>
           <th>Total bytes</th>
+          <th>Inline script bytes</th>
+          <th>Features</th>
         </tr>
       </thead>
       <tbody>
-        {Object.entries(prod.routeJavaScript).map(([route, info]) => (
+        {Object.entries(routeMeasurements).map(([route, info]: [string, any]) => (
           <tr>
             <td><code>{route}</code></td>
-            <td>{info.assets.length > 0 ? info.assets.join(', ') : 'none'}</td>
+            <td>{info.assets.length > 0
+              ? info.assets.map((a: any) => `<code>${a.url.split('/').pop()}</code>`).join(', ')
+              : 'none'
+            }</td>
             <td>{formatBytes(info.totalBytes)}</td>
+            <td>{formatBytes(info.inlineBytes)}</td>
+            <td>{info.features.length > 0 ? info.features.join(', ') : 'core'}</td>
           </tr>
         ))}
       </tbody>
     </table>
 
-    <h3>Component lab (Storybook)</h3>
-    <p>
-      The Storybook application at <code>/design-system/lab/</code> is a
-      separate application. Its JavaScript is not loaded by ordinary blog
-      pages. The isolation verification below confirms this.
-    </p>
+    <details>
+      <summary>Full asset details by route</summary>
+      {Object.entries(routeMeasurements).map(([route, info]: [string, any]) => (
+        <div class="route-detail">
+          <h4><code>{route}</code></h4>
+          {info.assets.length > 0 ? (
+            <table class="measurement-table">
+              <thead>
+                <tr><th>Asset</th><th>Bytes</th><th>Category</th></tr>
+              </thead>
+              <tbody>
+                {info.assets.map((a: any) => (
+                  <tr>
+                    <td><code>{a.url}</code></td>
+                    <td>{formatBytes(a.bytes)}</td>
+                    <td>{a.category}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p class="methodology-note">No external JavaScript referenced.</p>
+          )}
+          <p class="methodology-note">Inline script bytes: {formatBytes(info.inlineBytes)}</p>
+        </div>
+      ))}
+    </details>
+
+    <h3>Feature-specific assets</h3>
 
     <table class="measurement-table">
       <thead>
-        <tr>
-          <th>Metric</th>
-          <th>Value</th>
-        </tr>
+        <tr><th>Feature</th><th>Deployment bytes</th><th>Routes requesting</th><th>Loading behavior</th></tr>
       </thead>
       <tbody>
         <tr>
-          <td>Total JavaScript</td>
-          <td>{formatBytes(lab.totalJavaScriptBytes)}</td>
+          <td>Pagefind (search)</td>
+          <td>{formatBytes(featureLoading.pagefind.totalDeployBytes)}</td>
+          <td>{featureLoading.pagefind.routesRequesting.length > 0
+            ? featureLoading.pagefind.routesRequesting.map((r: string) => `<code>${r}</code>`).join(', ')
+            : 'none'}</td>
+          <td>{featureLoading.pagefind.loadingBehavior}</td>
         </tr>
         <tr>
-          <td>Total JavaScript (gzip)</td>
-          <td>{formatBytes(lab.totalJavaScriptGzipBytes)}</td>
+          <td>Partytown (analytics)</td>
+          <td>{formatBytes(featureLoading.partytown.totalDeployBytes)}</td>
+          <td>{featureLoading.partytown.routesRequesting.length > 0
+            ? featureLoading.partytown.routesRequesting.map((r: string) => `<code>${r}</code>`).join(', ')
+            : 'none'}</td>
+          <td>{featureLoading.partytown.loadingBehavior}</td>
         </tr>
         <tr>
-          <td>Files</td>
-          <td>{lab.fileCount}</td>
+          <td>Turnstile (contact form)</td>
+          <td>External</td>
+          <td>{featureLoading.turnstile.routesRequesting.length > 0
+            ? featureLoading.turnstile.routesRequesting.map((r: string) => `<code>${r}</code>`).join(', ')
+            : 'none'}</td>
+          <td>{featureLoading.turnstile.loadingBehavior}</td>
+        </tr>
+        <tr>
+          <td>Storybook lab</td>
+          <td>{componentLab ? formatBytes(componentLab.totalJavaScriptBytes) : '—'}</td>
+          <td>{featureLoading.storybookLab.routesRequesting.length > 0
+            ? featureLoading.storybookLab.routesRequesting.map((r: string) => `<code>${r}</code>`).join(', ')
+            : 'none'}</td>
+          <td>{featureLoading.storybookLab.loadingBehavior}</td>
         </tr>
       </tbody>
     </table>
 
-    <details>
-      <summary>Largest Storybook chunks</summary>
-      <table class="measurement-table">
-        <thead>
-          <tr>
-            <th>Chunk</th>
-            <th>Size</th>
-            <th>Category</th>
-          </tr>
-        </thead>
-        <tbody>
-          {lab.largestChunks.slice(0, 5).map((chunk) => (
-            <tr>
-              <td><code>{chunk.name}</code></td>
-              <td>{formatBytes(chunk.bytes)}</td>
-              <td>{chunk.label}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </details>
+    <h3>Component lab (Storybook)</h3>
+    {componentLab ? (
+      <>
+        <p>
+          The Storybook application at <code>/design-system/lab/</code> is a
+          separate application. Its JavaScript is not loaded by ordinary blog
+          pages. The isolation verification below confirms this.
+        </p>
+
+        <table class="measurement-table">
+          <thead>
+            <tr><th>Metric</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Total JavaScript</td><td>{formatBytes(componentLab.totalJavaScriptBytes)}</td></tr>
+            <tr><td>Total JavaScript (gzip)</td><td>{formatBytes(componentLab.totalJavaScriptGzipBytes)}</td></tr>
+            <tr><td>Files</td><td>{componentLab.fileCount}</td></tr>
+          </tbody>
+        </table>
+
+        <details>
+          <summary>Largest Storybook chunks</summary>
+          <table class="measurement-table">
+            <thead>
+              <tr><th>Chunk</th><th>Size</th><th>Category</th></tr>
+            </thead>
+            <tbody>
+              {componentLab.largestChunks.slice(0, 5).map((chunk: any) => (
+                <tr>
+                  <td><code>{chunk.name}</code></td>
+                  <td>{formatBytes(chunk.bytes)}</td>
+                  <td>{chunk.label}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
+      </>
+    ) : (
+      <p>Storybook build output not available. Run <code>pnpm build:storybook</code> first.</p>
+    )}
   </section>
 
   <hr />
@@ -351,10 +419,7 @@ const lh = siteQuality.lighthouse as {
 
     <table class="measurement-table">
       <thead>
-        <tr>
-          <th>Check</th>
-          <th>Result</th>
-        </tr>
+        <tr><th>Check</th><th>Result</th></tr>
       </thead>
       <tbody>
         <tr>
@@ -377,12 +442,14 @@ const lh = siteQuality.lighthouse as {
       tests in <code>tests/storybook-isolation.spec.ts</code>.
     </p>
 
-    <p class="note">
-      The Storybook bundle is approximately {formatBytes(lab.totalJavaScriptBytes)}
-      (uncompressed). This is the weight of a design-system development tool,
-      not the blog. It is served only to users who explicitly visit
-      <code>/design-system/lab/</code>.
-    </p>
+    {componentLab && (
+      <p class="note">
+        The Storybook bundle is approximately {formatBytes(componentLab.totalJavaScriptBytes)}
+        (uncompressed). This is the weight of a design-system development tool,
+        not the blog. It is served only to users who explicitly visit
+        <code>/design-system/lab/</code>.
+      </p>
+    )}
   </section>
 
   <hr />
@@ -390,38 +457,54 @@ const lh = siteQuality.lighthouse as {
   <section id="accessibility">
     <h2>Accessibility verification</h2>
 
-    <p>
-      Automated accessibility checks run against every Storybook component
-      story and every primary site route. The tests use axe-core through
-      Playwright.
-    </p>
+    {accessibility ? (
+      <>
+        <p>
+          Automated accessibility checks run against every Storybook component
+          story and every primary site route. The tests use axe-core through
+          Playwright. Results come from the last <code>pnpm test:e2e</code> run.
+        </p>
 
-    <table class="measurement-table">
-      <thead>
-        <tr>
-          <th>Scope</th>
-          <th>Tests</th>
-          <th>Passing</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Storybook component stories</td>
-          <td>{accessibility.storybookA11yTests}</td>
-          <td>{accessibility.storybookA11yPassed} / {accessibility.storybookA11yTests}</td>
-        </tr>
-        <tr>
-          <td>Site routes</td>
-          <td>{accessibility.routeA11yTests}</td>
-          <td>{accessibility.routeA11yPassed} / {accessibility.routeA11yTests}</td>
-        </tr>
-      </tbody>
-    </table>
+        <table class="measurement-table">
+          <thead>
+            <tr><th>Scope</th><th>Tests</th><th>Passed</th><th>Failed</th><th>Skipped</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>All a11y tests</td>
+              <td>{accessibility.totalTests}</td>
+              <td>{accessibility.passedTests}</td>
+              <td>{accessibility.failedTests}</td>
+              <td>{accessibility.skippedTests}</td>
+            </tr>
+            <tr>
+              <td>Storybook component stories</td>
+              <td>{accessibility.storybookTests}</td>
+              <td>{accessibility.storybookPassed}</td>
+              <td>{accessibility.storybookTests - accessibility.storybookPassed}</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Site routes</td>
+              <td>{accessibility.routeTests}</td>
+              <td>{accessibility.routePassed}</td>
+              <td>{accessibility.routeTests - accessibility.routePassed}</td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
 
-    <div class="callout">
-      <h3>What remains manual</h3>
-      <p>{accessibility.coverageNote}</p>
-    </div>
+        <div class="callout">
+          <h3>What remains manual</h3>
+          <p>{accessibility.note}</p>
+        </div>
+      </>
+    ) : (
+      <p>
+        No accessibility test results available. Run <code>pnpm test:e2e</code> then{' '}
+        <code>pnpm quality:generate</code> to populate this section.
+      </p>
+    )}
   </section>
 
   <hr />
@@ -438,28 +521,15 @@ const lh = siteQuality.lighthouse as {
 
     <table class="measurement-table">
       <thead>
-        <tr>
-          <th>Metric</th>
-          <th>Value</th>
-        </tr>
+        <tr><th>Metric</th><th>Value</th></tr>
       </thead>
       <tbody>
-        <tr>
-          <td>Total stories</td>
-          <td>{stories.total}</td>
-        </tr>
-        <tr>
-          <td>Component stories</td>
-          <td>{stories.componentStories}</td>
-        </tr>
-        <tr>
-          <td>Foundation stories</td>
-          <td>{stories.foundationStories}</td>
-        </tr>
-        <tr>
-          <td>Storybook accessibility tests</td>
-          <td>{accessibility.storybookA11yTests}</td>
-        </tr>
+        <tr><td>Total stories</td><td>{stories.total || '—'}</td></tr>
+        <tr><td>Component stories</td><td>{stories.componentStories || '—'}</td></tr>
+        <tr><td>Foundation stories</td><td>{stories.foundationStories || '—'}</td></tr>
+        {accessibility && (
+          <tr><td>Storybook accessibility tests</td><td>{accessibility.storybookTests}</td></tr>
+        )}
       </tbody>
     </table>
 
@@ -481,13 +551,10 @@ const lh = siteQuality.lighthouse as {
 
     <table class="measurement-table">
       <thead>
-        <tr>
-          <th>Command</th>
-          <th>Purpose</th>
-        </tr>
+        <tr><th>Command</th><th>Purpose</th></tr>
       </thead>
       <tbody>
-        {validation.commands.map((cmd) => (
+        {validation.commands.map((cmd: any) => (
           <tr>
             <td><code>{cmd.command}</code></td>
             <td>{cmd.purpose}</td>
@@ -496,9 +563,7 @@ const lh = siteQuality.lighthouse as {
       </tbody>
     </table>
 
-    <p class="methodology-note">
-      {validation.ci}
-    </p>
+    <p class="methodology-note">{validation.ci}</p>
   </section>
 
   <hr />
@@ -506,7 +571,7 @@ const lh = siteQuality.lighthouse as {
   <section id="measurement-limitations">
     <h2>Measurement limitations</h2>
     <ul class="limitation-list">
-      {limitations.map((limitation) => (
+      {limitations.map((limitation: string) => (
         <li>{limitation}</li>
       ))}
     </ul>
@@ -519,32 +584,16 @@ const lh = siteQuality.lighthouse as {
 
     <table class="measurement-table">
       <thead>
-        <tr>
-          <th>Measurement</th>
-          <th>Source</th>
-        </tr>
+        <tr><th>Measurement group</th><th>Type</th><th>Source</th></tr>
       </thead>
       <tbody>
-        <tr>
-          <td>Bundle measurements</td>
-          <td>{siteQuality.provenance.bundleMeasurements}</td>
-        </tr>
-        <tr>
-          <td>Story counts</td>
-          <td>{siteQuality.provenance.storyCounts}</td>
-        </tr>
-        <tr>
-          <td>Lighthouse</td>
-          <td>{siteQuality.provenance.lighthouse}</td>
-        </tr>
-        <tr>
-          <td>Accessibility tests</td>
-          <td>{siteQuality.provenance.accessibilityTests}</td>
-        </tr>
-        <tr>
-          <td>Storybook isolation</td>
-          <td>{siteQuality.provenance.storybookIsolation}</td>
-        </tr>
+        {siteQuality.provenance.measurements.map((m: any) => (
+          <tr>
+            <td><code>{m.group}</code></td>
+            <td>{m.type}</td>
+            <td>{m.source}</td>
+          </tr>
+        ))}
       </tbody>
     </table>
   </section>
@@ -570,25 +619,10 @@ const lh = siteQuality.lighthouse as {
     border-radius: var(--radius-md);
     font-size: var(--type-size-small);
   }
-
-  .measurement-meta div {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-  }
-
-  .measurement-meta dt {
-    color: var(--text-muted);
-    font-size: var(--type-size-small);
-  }
-
-  .measurement-meta dd {
-    margin: 0;
-  }
-
-  .measurement-meta code {
-    font-size: var(--type-size-small);
-  }
+  .measurement-meta div { display: flex; flex-direction: column; gap: var(--space-xs); }
+  .measurement-meta dt { color: var(--text-muted); font-size: var(--type-size-small); }
+  .measurement-meta dd { margin: 0; }
+  .measurement-meta code { font-size: var(--type-size-small); }
 
   .metric-grid {
     display: grid;
@@ -606,7 +640,6 @@ const lh = siteQuality.lighthouse as {
     flex-direction: column;
     gap: var(--space-xs);
   }
-
   .metric-card h3 {
     margin: 0;
     font-size: var(--type-size-small);
@@ -614,7 +647,6 @@ const lh = siteQuality.lighthouse as {
     letter-spacing: var(--letter-spacing-label);
     color: var(--text-muted);
   }
-
   .metric-value {
     font-size: var(--type-size-h3);
     font-weight: var(--font-weight-bold);
@@ -622,7 +654,6 @@ const lh = siteQuality.lighthouse as {
     color: var(--text-primary);
     line-height: 1.1;
   }
-
   .metric-label {
     font-size: var(--type-size-small);
     color: var(--text-secondary);
@@ -634,7 +665,6 @@ const lh = siteQuality.lighthouse as {
     margin-block: var(--space-component);
     font-size: var(--type-size-small);
   }
-
   .measurement-table th,
   .measurement-table td {
     text-align: left;
@@ -642,20 +672,30 @@ const lh = siteQuality.lighthouse as {
     border-bottom: var(--size-border-pixel) solid var(--border-main);
     vertical-align: top;
   }
-
   .measurement-table th {
     font-weight: var(--font-weight-bold);
     color: var(--text-primary);
     white-space: nowrap;
   }
-
   .measurement-table code {
     font-size: var(--type-size-small);
     word-break: break-all;
   }
+  .measurement-table .total-row td {
+    border-top: 2px solid var(--border-main);
+    border-bottom: none;
+  }
 
-  .note,
-  .callout {
+  .lh-route-block {
+    margin-block: var(--space-component-lg);
+    padding: var(--space-component);
+    background: var(--bg-surface);
+    border: var(--size-border-pixel) solid var(--border-main);
+    border-radius: var(--radius-md);
+  }
+  .lh-route-block h3 { margin-top: 0; }
+
+  .note, .callout {
     padding: var(--space-component);
     background: var(--bg-surface);
     border-inline-start: 3px solid var(--brand-accent);
@@ -663,11 +703,7 @@ const lh = siteQuality.lighthouse as {
     margin-block: var(--space-component);
     font-size: var(--type-size-small);
   }
-
-  .callout h3 {
-    margin-top: 0;
-    font-size: var(--type-size-base);
-  }
+  .callout h3 { margin-top: 0; font-size: var(--type-size-base); }
 
   .methodology-note {
     font-size: var(--type-size-small);
@@ -679,25 +715,26 @@ const lh = siteQuality.lighthouse as {
     list-style: disc;
     padding-inline-start: 1.25em;
   }
-
   .limitation-list li {
     margin-bottom: var(--space-sm);
     color: var(--text-secondary);
   }
 
-  details {
-    margin-block: var(--space-component);
-  }
-
+  details { margin-block: var(--space-component); }
   details summary {
     cursor: pointer;
     font-weight: var(--font-weight-bold);
     color: var(--color-link);
   }
+  details summary:hover { color: var(--color-link-hover); }
 
-  details summary:hover {
-    color: var(--color-link-hover);
+  .route-detail {
+    margin-block: var(--space-component);
+    padding: var(--space-component);
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
   }
+  .route-detail h4 { margin-top: 0; }
 
   hr {
     margin-block: var(--space-section);
@@ -706,13 +743,8 @@ const lh = siteQuality.lighthouse as {
   }
 
   @media (max-width: 720px) {
-    .metric-grid {
-      grid-template-columns: 1fr;
-    }
-
+    .metric-grid { grid-template-columns: 1fr; }
     .measurement-table th,
-    .measurement-table td {
-      padding: var(--space-xs) var(--space-inline);
-    }
+    .measurement-table td { padding: var(--space-xs) var(--space-inline); }
   }
 </style>
