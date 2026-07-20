@@ -556,9 +556,7 @@
       ],
       "totalBytes": 270675,
       "inlineBytes": 11037,
-      "features": [
-        "turnstile"
-      ]
+      "features": ["turnstile"]
     }
   },
   "featureLoading": {
@@ -573,9 +571,7 @@
       "loadingBehavior": "Script loader present in HTML head on most pages. Worker scripts load lazily on user interaction."
     },
     "turnstile": {
-      "routesRequesting": [
-        "/contact/"
-      ],
+      "routesRequesting": ["/contact/"],
       "loadingBehavior": "Loaded only on /contact/. Cloudflare external asset."
     },
     "storybookLab": {
@@ -657,9 +653,7 @@
     "storybookPassed": 27,
     "routeTests": 7,
     "routePassed": 7,
-    "tools": [
-      "axe-core (via @axe-core/playwright)"
-    ],
+    "tools": ["axe-core (via @axe-core/playwright)"],
     "dataSource": "/Users/eric/repos/astro.ericcarlisle.com/test-results/test-results.json",
     "status": "parsed from Playwright JSON report",
     "note": "Automated checks only. Keyboard flow, screen-reader behavior, content clarity, zoom/reflow, motion behavior, and visual focus remain manual review."
