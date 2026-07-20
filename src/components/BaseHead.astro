@@ -32,6 +32,7 @@ interface Props {
   wordCount?: number;
   twitterHandle?: string;
   robots?: string;
+  breadcrumbs?: Array<{ name: string; item: string }>;
 }
 
 // Normalize canonical URLs to trailing-slash style for consistency.
@@ -61,6 +62,7 @@ const {
   wordCount,
   twitterHandle,
   robots = 'index, follow',
+  breadcrumbs,
 } = Astro.props;
 
 // Format title: homepage keeps custom title; all other pages use "Page Title | Eric Carlisle".
@@ -159,5 +161,6 @@ const pageTitle =
     updatedDate={updatedDate}
     tags={tags}
     wordCount={wordCount}
+    breadcrumbs={breadcrumbs}
   />
 )}

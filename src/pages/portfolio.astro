@@ -6,6 +6,10 @@ import Layout from '../layouts/BlogPost.astro';
   title="Portfolio"
   description="Selected projects and work by Principal Frontend Engineer Eric Carlisle."
   pageType="portfolio"
+  breadcrumbs={[
+    { name: 'Home', item: 'https://ericcarlisle.com/' },
+    { name: 'Portfolio', item: 'https://ericcarlisle.com/portfolio/' },
+  ]}
 >
   <header class="portfolio-hero">
     <p class="lede">

@@ -30,6 +30,7 @@ interface Props {
   wordCount?: number;
   prevPost?: { title: string; slug: string };
   nextPost?: { title: string; slug: string };
+  breadcrumbs?: Array<{ name: string; item: string }>;
   tagData?: TagData;
   webmentions?: Webmention[];
 }
@@ -54,6 +55,7 @@ const {
   share,
   tagData,
   webmentions,
+  breadcrumbs,
 } = Astro.props;
 
 const readingTimeMin = Math.ceil(wordCount / 200);
@@ -75,6 +77,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
       {tags}
       {wordCount}
       {twitterHandle}
+      breadcrumbs={breadcrumbs}
     />
 	<style>
 		main {

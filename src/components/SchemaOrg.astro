@@ -39,6 +39,7 @@ type Props = {
   updatedDate?: Date;
   tags?: string[];
   wordCount?: number;
+  breadcrumbs?: Array<{ name: string; item: string }>;
 };
 
 const {
@@ -56,6 +57,7 @@ const {
   updatedDate,
   tags,
   wordCount,
+  breadcrumbs,
 } = Astro.props;
 
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? 'https://ericcarlisle.com';
@@ -97,51 +99,62 @@ const blogEntity = {
 
 const graphArray: object[] = [personEntity, websiteEntity, blogEntity];
 
+// Build a BreadcrumbList from a breadcrumbs array
+function buildBreadcrumb(urlPath: string, crumbs: Array<{ name: string; item: string }>) {
+  return {
+    '@type': 'BreadcrumbList',
+    '@id': `${urlPath}/#breadcrumb`,
+    itemListElement: crumbs.map((crumb, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: crumb.name,
+      item: crumb.item,
+    })),
+  };
+}
+
 switch (type) {
-  case 'homepage':
+  case 'homepage': {
+    graphArray.push({
+      '@type': 'ProfilePage',
+      '@id': `${pageUrl}/#webpage`,
+      url,
+      name: title,
+      description,
+      isPartOf: { '@id': `${siteUrl}/#website` },
+      mainEntity: { '@id': `${siteUrl}/#person` },
+    });
+    break;
+  }
+
   case 'collection': {
     const collectionPageEntity: Record<string, unknown> = {
       '@type': 'CollectionPage',
       '@id': `${pageUrl}/#webpage`,
       url,
-      name:
-        type === 'homepage'
-          ? title
-          : collectionType === 'tag-filter'
-            ? `Articles tagged with "${tagName}"`
-            : title,
+      name: collectionType === 'tag-filter' ? `Articles tagged with "${tagName}"` : title,
       description,
       isPartOf: { '@id': `${siteUrl}/#website` },
     };
 
-    if (collectionType === 'tag-filter' && tagName) {
-      collectionPageEntity.breadcrumb = {
-        '@type': 'BreadcrumbList',
-        '@id': `${pageUrl}/#breadcrumb`,
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
-          { '@type': 'ListItem', position: 2, name: 'Tags', item: `${siteUrl}/tags` },
-          { '@type': 'ListItem', position: 3, name: tagName, item: url },
-        ],
-      };
+    if (breadcrumbs) {
+      collectionPageEntity.breadcrumb = buildBreadcrumb(pageUrl, breadcrumbs);
+    } else if (collectionType === 'tag-filter' && tagName) {
+      collectionPageEntity.breadcrumb = buildBreadcrumb(pageUrl, [
+        { name: 'Home', item: siteUrl },
+        { name: 'Tags', item: `${siteUrl}/tags` },
+        { name: tagName, item: url },
+      ]);
     } else if (collectionType === 'tags-index') {
-      collectionPageEntity.breadcrumb = {
-        '@type': 'BreadcrumbList',
-        '@id': `${pageUrl}/#breadcrumb`,
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
-          { '@type': 'ListItem', position: 2, name: 'Tags', item: `${siteUrl}/tags` },
-        ],
-      };
-    } else if (type === 'collection' && collectionType === 'main-feed') {
-      collectionPageEntity.breadcrumb = {
-        '@type': 'BreadcrumbList',
-        '@id': `${pageUrl}/#breadcrumb`,
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
-          { '@type': 'ListItem', position: 2, name: 'Blog', item: url },
-        ],
-      };
+      collectionPageEntity.breadcrumb = buildBreadcrumb(pageUrl, [
+        { name: 'Home', item: siteUrl },
+        { name: 'Tags', item: `${siteUrl}/tags` },
+      ]);
+    } else if (collectionType === 'main-feed') {
+      collectionPageEntity.breadcrumb = buildBreadcrumb(pageUrl, [
+        { name: 'Home', item: siteUrl },
+        { name: 'Blog', item: url },
+      ]);
     }
 
     if (posts.length > 0) {
@@ -166,15 +179,17 @@ switch (type) {
     const articleId = `${pageUrl}/#article`;
     const breadcrumbId = `${pageUrl}/#breadcrumb`;
     const primaryImageId = `${pageUrl}/#primaryimage`;
-    const articleBreadcrumb = {
-      '@type': 'BreadcrumbList',
-      '@id': breadcrumbId,
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
-        { '@type': 'ListItem', position: 2, name: 'Blog', item: `${siteUrl}/blog/` },
-        { '@type': 'ListItem', position: 3, name: title, item: url },
-      ],
-    };
+    const articleBreadcrumb = breadcrumbs
+      ? buildBreadcrumb(pageUrl, breadcrumbs)
+      : {
+          '@type': 'BreadcrumbList',
+          '@id': breadcrumbId,
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+            { '@type': 'ListItem', position: 2, name: 'Blog', item: `${siteUrl}/blog/` },
+            { '@type': 'ListItem', position: 3, name: title, item: url },
+          ],
+        };
 
     graphArray.push(
       {
@@ -236,8 +251,8 @@ switch (type) {
     });
     break;
 
-  case 'portfolio':
-    graphArray.push({
+  case 'portfolio': {
+    const portfolioEntity: Record<string, unknown> = {
       '@type': 'CollectionPage',
       '@id': `${pageUrl}/#webpage`,
       url,
@@ -245,8 +260,15 @@ switch (type) {
       description,
       isPartOf: { '@id': `${siteUrl}/#website` },
       author: { '@id': `${siteUrl}/#person` },
-    });
+    };
+
+    if (breadcrumbs) {
+      portfolioEntity.breadcrumb = buildBreadcrumb(pageUrl, breadcrumbs);
+    }
+
+    graphArray.push(portfolioEntity);
     break;
+  }
 
   case 'search':
     graphArray.push({
