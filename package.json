@@ -24,6 +24,7 @@
     "jsonld:report": "pnpm structured-data:report",
     "test:e2e": "playwright test",
     "test:a11y": "playwright test tests/accessibility.spec.ts",
+    "verify:storybook-isolation": "node scripts/verify-storybook-isolation.mjs",
     "storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build"
   },
