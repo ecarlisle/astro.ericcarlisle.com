@@ -245,6 +245,7 @@ body {
   background: var(--bg-main);
   color: var(--text-primary);
   font-family: var(--font-copy);
+  font-weight: var(--font-weight-normal);
   font-size: var(--type-size-body);
   line-height: var(--line-height-body);
   text-align: left;
