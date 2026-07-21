@@ -20,6 +20,8 @@ It was a familiar moment. The agent's response was coherent, confident, and seem
 
 If you've worked with generative AI long enough, the situation may also feel familiar to you. For me the more interesting question became not why the tool had failed, but what I had given it to work with.
 
+## From Better Prompts to Better Context
+
 My journey with generative AI started with a lot of browser-based chat. Interacting with an agent was not unlike playing a slot machine in Vegas: insert a prompt, pull the lever, and hope a little wisdom drops out. That tended to work well for smaller questions. But as my prompts grew to include more complex concerns, that “wisdom” began drifting somewhere between helpful and hallucinated.
 
 From browser-based chat, I started working with AI-assisted coding tools inside the IDE. The feedback became more immediate. Suggestions appeared directly in the editor: complete this line, rename that variable, generate a small function. Hit Tab to accept and see where the story goes. Again, the approach worked well for simple, contained changes. But as the work expanded across files, components, and architectural decisions, the suggestions began to drift. The agent could predict the next few lines without necessarily understanding where I was trying to take the code.
@@ -37,6 +39,9 @@ As an engineer, I'd gotten used to prescriptive configuration doing the heavy li
 I began to realize I had brought that same expectation to AI. A better prompt, I assumed, would produce more consistent, predictable results. Instead, the same prompt could behave differently depending on the model, the agent, or which "thinking mode" it woke up with that morning. The instructions still mattered, but they just weren't treated as rules anymore. They were more like suggestions with a mood.
 
 So I did what any reasonable engineer does when facing an ambiguous problem: I went looking for someone else's homework. Except this time, I wasn't hunting for better prompts. For me that was a dead end. I was after something more durable: context that gives an agent a stable place to stand.
+
+## Giving the Agent a Place to Stand
+
 I started by looking through other repositories, documentation, social feeds, and technical blogs to see how other developers were approaching the problem. One of the first practical patterns I adopted was having a project instruction file.
 
 Depending on the tool, that file might be named `AGENTS.md`, `CLAUDE.md` for Claude Code, or `GEMINI.md` for Gemini. In general, it tells an agent how to work inside a repository: the role or perspective it should adopt, how the project is organized, which commands to run, what conventions to follow, and what kinds of changes to avoid. Mine began as practical collections of the details I found myself repeating in prompts.
@@ -65,6 +70,8 @@ My actual files became more specific over time, covering architecture, testing, 
 
 I also began linking the `AGENTS.md` file to a carefully selected set of agent-relevant documentation. Some of it already existed. Some of it was documentation I had intended to write anyway. Once the agent could draw from those sources, I kept watching for patterns in how it worked. Over time, I would decide what to keep, what to trim, and what to pull back out entirely.
 
+## Documentation for Two Audiences
+
 At that point, I realized I was writing documentation for a dual audience. Some of it was meant primarily for developers, some for agents, and much of it served both. The distinction mattered less than whether the documentation clearly explained how the system worked, which decisions shaped it, and how that vision should carry forward.
 
 Writing for both audiences improved the documentation itself. For agents, I wanted to keep the working context lean enough to conserve tokens and focused enough to produce stronger responses. For developers, I wanted the same material to be concise, useful, and easy to absorb. Both needs pushed me toward documentation that said more with less.
@@ -72,6 +79,8 @@ Writing for both audiences improved the documentation itself. For agents, I want
 The mix is still evolving, but I have found a few kinds of documentation consistently useful: architecture overviews, design-system guidance, testing and accessibility expectations, deployment notes, coding conventions, and records of important technical decisions. I do not treat that as a fixed checklist. I am still learning which documents sharpen the agent's understanding and which only add noise.
 
 I also began experimenting with skills: reusable instructions for work I wanted handled in a particular way. That might include preserving my editorial voice, following my preferred Git workflow, or approaching code reviews with a particular set of priorities. Skills can be shared through large repositories, but I found the most useful ones were often the opinionated, personal ones shaped around how I already worked.
+
+## A Pattern Bigger Than One Repository
 
 As I worked through this, I began recognizing that I was arriving at patterns the broader community had already been exploring. That was reassuring. In June 2026, Google Cloud introduced the Open Knowledge Format, an open specification for organizing curated knowledge as directories of Markdown files with lightweight YAML metadata. The same material can be written or consumed by people, agents, or automated systems without requiring a separate version for each audience. It is still an early proposal, and Google describes version 0.1 as a starting point rather than a finished standard. Even so, I was glad to see a larger organization exploring the same general direction: deliberately designing context for a dual audience.
 
