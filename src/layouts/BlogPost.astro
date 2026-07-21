@@ -123,6 +123,28 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
 			border-bottom: var(--size-border-pixel) solid var(--border-main);
 		}
 
+		/* ── Right-rail contrast bump ── */
+		:global(.post-sidebar .share-label),
+		:global(.post-sidebar .toc h2) {
+			color: var(--text-secondary);
+		}
+
+		:global(.post-sidebar .sidebar-share .share-links a),
+		:global(.post-sidebar .toc nav a) {
+			color: color-mix(in srgb, var(--text-primary) 80%, var(--text-secondary) 20%);
+		}
+
+		:global(.post-sidebar .toc nav a:hover),
+		:global(.post-sidebar .toc nav a.active) {
+			color: var(--color-action);
+			border-left-color: var(--color-action);
+		}
+
+		:global(.post-sidebar .sidebar-share .share-links a:hover) {
+			color: var(--color-link-hover);
+			background: var(--bg-surface);
+		}
+
     .page-header {
       max-width: var(--layout-rail-prose);
       margin-bottom: var(--space-component-lg);
