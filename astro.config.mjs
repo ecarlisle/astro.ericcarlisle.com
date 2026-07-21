@@ -3,7 +3,6 @@
 import mdx from '@astrojs/mdx';
 import partytown from '@astrojs/partytown';
 import sitemap from '@astrojs/sitemap';
-import sentry from '@sentry/astro';
 import spotlightjs from '@spotlightjs/astro';
 import { defineConfig } from 'astro/config';
 import expressiveCode from 'astro-expressive-code';
@@ -45,7 +44,6 @@ export default defineConfig({
     sitemap({
       customPages: ['https://ericcarlisle.com/design-system/lab/'],
     }),
-    sentry({ telemetry: false }),
     spotlightjs(),
   ],
   vite: {

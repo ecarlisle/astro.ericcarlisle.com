@@ -32,7 +32,6 @@
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
     "@fontsource-variable/source-sans-3": "^5.2.9",
-    "@sentry/astro": "^10.65.0",
     "@spotlightjs/astro": "^3.2.6",
     "astro": "^7.0.2"
   },
