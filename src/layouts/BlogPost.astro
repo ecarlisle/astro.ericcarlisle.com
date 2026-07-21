@@ -176,11 +176,6 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
       font-family: var(--font-mono);
 		}
 
-		.last-updated-on {
-			font-style: italic;
-      width: 100%;
-		}
-
     .article-tags {
       margin-top: var(--space-sm);
       text-align: center;
@@ -210,11 +205,6 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
             <div class="date">
               <FormattedDate date={pubDate} />
               {readingTimeMin > 0 && <span class="reading-time">{readingTimeMin} min read</span>}
-              {updatedDate && (
-                <div class="last-updated-on">
-                  Last updated on <FormattedDate date={updatedDate} />
-                </div>
-              )}
             </div>
           )}
           <h1>{title}</h1>
