@@ -461,6 +461,22 @@ test('preset change updates document count', async ({ page }) => {
   expect(checked).toBe(10);
 });
 
+test('toggling a document clears the preset selection', async ({ page }) => {
+  await page.goto(LAB_PATH);
+  // Default preset is curated (index 1)
+  const presetRadios = page.locator('input[name="preset"]');
+  await expect(presetRadios.nth(1)).toBeChecked();
+
+  // Toggle a document checkbox to create a custom config
+  await page.locator(FIRST_CHECKBOX).first().uncheck();
+
+  // No preset radio should be checked after manual change
+  const checkedPreset = await presetRadios.evaluateAll((radios) =>
+    radios.some((r) => (r as HTMLInputElement).checked),
+  );
+  expect(checkedPreset).toBe(false);
+});
+
 // ─── Metric cards ───────────────────────────────────────────────────────────
 
 test('all five metric cards are rendered when documents are selected', async ({ page }) => {
@@ -606,18 +622,83 @@ test('the lab page has no critical axe violations', async ({ page }) => {
 
 // ─── JS isolation ───────────────────────────────────────────────────────────
 
-test('homepage does not load lab-generated JavaScript', async ({ page }) => {
+test('lab page does not reference /src/styles/global.css in production output', async ({
+  page,
+}) => {
+  await page.goto(LAB_PATH);
+  const html = await page.content();
+  // The source-path global.css should be replaced by Astro's bundled CSS
+  expect(html).not.toContain('/src/styles/global.css');
+  // But global styles should still apply — check that a token-dependent element exists
+  await expect(page.locator('h1')).toBeVisible();
+});
+
+test('lab page loads at least one lab-specific JavaScript asset', async ({ page }) => {
+  await page.goto(LAB_PATH);
+  // Get all script src URLs from the lab page
+  const labScripts = await page
+    .locator('script[src]')
+    .evaluateAll((scripts) => scripts.map((s) => s.getAttribute('src')).filter(Boolean));
+  // At least one script should reference the lab's controller/engine bundle
+  const labSpecific = labScripts.filter((s) => s?.includes('/_astro/'));
+  expect(labSpecific.length).toBeGreaterThanOrEqual(1);
+});
+
+test('lab-specific JavaScript assets are absent from the homepage', async ({ page }) => {
+  // First, get lab asset URLs from the lab page
+  await page.goto(LAB_PATH);
+  const labScripts = await page
+    .locator('script[src]')
+    .evaluateAll((scripts) => scripts.map((s) => s.getAttribute('src')).filter(Boolean));
+  const labAstroScripts = labScripts.filter((s) => s?.includes('/_astro/'));
+  expect(labAstroScripts.length).toBeGreaterThanOrEqual(1);
+
+  // Now check the homepage for the exact same URLs
   await page.goto('/');
-  await expect(page.locator('script[src*="context"]')).toHaveCount(0);
-  expect(await page.content()).not.toContain('lab/context');
+  const homeScripts = await page
+    .locator('script[src]')
+    .evaluateAll((scripts) => scripts.map((s) => s.getAttribute('src')).filter(Boolean));
+  for (const url of labAstroScripts) {
+    expect(homeScripts).not.toContain(url);
+  }
 });
 
-test('a blog article does not load lab-generated JavaScript', async ({ page }) => {
+test('lab-specific JavaScript assets are absent from a blog article', async ({ page }) => {
+  await page.goto(LAB_PATH);
+  const labScripts = await page
+    .locator('script[src]')
+    .evaluateAll((scripts) => scripts.map((s) => s.getAttribute('src')).filter(Boolean));
+  const labAstroScripts = labScripts.filter((s) => s?.includes('/_astro/'));
+  expect(labAstroScripts.length).toBeGreaterThanOrEqual(1);
+
   await page.goto('/blog/250mm-trading-card-box/');
-  await expect(page.locator('script[src*="context"]')).toHaveCount(0);
+  const articleScripts = await page
+    .locator('script[src]')
+    .evaluateAll((scripts) => scripts.map((s) => s.getAttribute('src')).filter(Boolean));
+  for (const url of labAstroScripts) {
+    expect(articleScripts).not.toContain(url);
+  }
 });
 
-test('the search page does not load lab-generated JavaScript', async ({ page }) => {
+test('lab-specific JavaScript assets are absent from the search page', async ({ page }) => {
+  await page.goto(LAB_PATH);
+  const labScripts = await page
+    .locator('script[src]')
+    .evaluateAll((scripts) => scripts.map((s) => s.getAttribute('src')).filter(Boolean));
+  const labAstroScripts = labScripts.filter((s) => s?.includes('/_astro/'));
+  expect(labAstroScripts.length).toBeGreaterThanOrEqual(1);
+
   await page.goto('/search/');
-  await expect(page.locator('script[src*="context"]')).toHaveCount(0);
+  const searchScripts = await page
+    .locator('script[src]')
+    .evaluateAll((scripts) => scripts.map((s) => s.getAttribute('src')).filter(Boolean));
+  for (const url of labAstroScripts) {
+    expect(searchScripts).not.toContain(url);
+  }
+});
+
+test('no lab module import in homepage HTML', async ({ page }) => {
+  await page.goto('/');
+  const html = await page.content();
+  expect(html).not.toContain('lab/context');
 });

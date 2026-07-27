@@ -209,6 +209,7 @@ function renderDocList(): void {
         state.includedDocIds.delete(docId);
       }
       state.selectedPresetId = '';
+      renderPresetSelector();
       renderDocList();
       renderMetrics();
     });
