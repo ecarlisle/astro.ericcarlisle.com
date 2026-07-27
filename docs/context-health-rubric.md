@@ -10,7 +10,7 @@ The rubric does not measure actual LLM behavior or output quality. It also does 
 
 Context Health separates five concepts:
 
-- **Deterministic measurement** is derived by repository tooling from declared inputs. The current implementation calculates contributions, metric scores, score statuses, effective-context character counts, approximate token counts, size status, and the size interpretation.
+- **Deterministic measurement** is derived by repository tooling from declared inputs. The current implementation calculates contributions, metric scores, score statuses, effective-context JavaScript string lengths, approximate token counts, size status, and the size interpretation.
 - **Agent-assessed judgment** classifies a defined check as Pass, Partial, or Fail and records its positive or negative impact.
 - **Evidence** states what is observable and cites where it can be verified.
 - **Interpretation** explains why the observation matters to the declared task and metric.
@@ -42,7 +42,7 @@ There is no universal effective-context set for the repository. Combining every 
 
 ## 3. Declare the scope
 
-Record the following before classifying findings or adjusting weights:
+Declare the following before the preliminary context inventory:
 
 - **Audit type:** task-specific or repository-wide.
 - **Task or task category:** the concrete work being evaluated.
@@ -53,13 +53,13 @@ Record the following before classifying findings or adjusting weights:
 - **Explicit exclusions:** irrelevant routes, files, and checks.
 - **Audit revision:** the Git revision whose repository context is being assessed.
 
-Establish the scope before findings are classified or weights are adjusted. If the scope changes materially, restart the check-definition step and record the change rather than adapting the weights around results already observed.
+Establish the task and scope before inventory work. Use a preliminary inventory to discover the applicable context and derive the final checks and weights. Lock those checks and weights before classifying evidence or assigning results.
 
 ## 4. Use the smallest useful unit of evaluation
 
-Prefer evidence about a requirement, section, claim, instruction, or routing relationship. A whole file is rarely either relevant or irrelevant. One section may provide a necessary constraint while another is outside the task.
+Prefer evidence about a requirement, section, claim, instruction, or routing relationship. Identify the smallest practical section, heading, rule, or claim. File-level routing relevance and within-file content precision are related but distinct assessments.
 
-For example, the performance skill contains directly relevant bundle-isolation guidance for a page-specific JavaScript task and unrelated media guidance for a text-only change. Precision should reflect the portions intentionally routed and needed for the declared task, not a blanket judgment about the file.
+Assess every portion actually loaded into the agent’s context. A useful section does not excuse unrelated material elsewhere in the same loaded file; irrelevant loaded sections reduce Context Precision. For example, the performance skill contains directly relevant bundle-isolation guidance for a page-specific JavaScript task and unrelated media guidance for a text-only change. The audit should record both rather than treating the file as uniformly relevant.
 
 ## 5. Apply the core scoring rule
 
@@ -101,7 +101,7 @@ Valid report weights total 1, so no additional normalization is needed. The curr
 
 ## 7. Set weights before results
 
-Define stable check IDs and weights before assigning Pass, Partial, or Fail. This prevents the desired score from shaping the scoring model after evidence is known.
+After declaring the task and completing a preliminary context inventory, derive stable check IDs and weights from the task requirements and inventory. Lock them before classifying evidence or assigning Pass, Partial, or Fail. This prevents the desired score from shaping the scoring model after evidence is known.
 
 - Weights must total 1 within each scored metric.
 - Weight reflects a check’s importance to the declared task.
@@ -110,7 +110,9 @@ Define stable check IDs and weights before assigning Pass, Partial, or Fail. Thi
 - Do not adjust weights merely to produce a preferred score.
 - Compare scores only when scope and weighting profiles are compatible.
 
-This repository does not yet define canonical machine-readable task profiles or universal weights. Treat profile standardization as future work. Until profiles exist, the scope declaration and audit notes are the record of why a set of checks and weights was chosen.
+If the rubric, checks, or weights change materially after they are locked, stop the comparison and increment the relevant rubric or task-profile version. Do not compare the result directly with older reports unless those reports are regenerated under the same methodology.
+
+This repository does not yet define canonical machine-readable task profiles, version fields, or universal weights. Treat profile standardization as future work. Until profiles exist, record the methodology version and the reason for each change in the audit notes rather than adding unsupported fields to the report.
 
 ## 8. Assess each metric
 
@@ -118,9 +120,9 @@ This repository does not yet define canonical machine-readable task profiles or 
 
 Context Precision asks whether the context actually loaded for the declared task is relevant.
 
-Positive evidence may include task-specific routing, relevant constraints, necessary validation guidance, and concise authoritative references. Negative evidence may include unrelated routed material, redundant instructions, stale sections, and mandatory guidance whose breadth is not justified by the task.
+Evaluate both whether each file was appropriately routed and whether each loaded portion of that file is relevant. Positive evidence may include task-specific routing, relevant constraints, necessary validation guidance, and concise authoritative references. Negative evidence may include unrelated loaded sections, redundant instructions, stale sections, and mandatory guidance whose breadth is not justified by the task.
 
-Do not penalize performance, accessibility, or testing guidance merely because it is lengthy. If the declared task includes page performance, bundle isolation, semantic behavior, or verification, that guidance is relevant.
+Do not penalize performance, accessibility, or testing guidance merely because it is lengthy. If the declared task includes page performance, bundle isolation, semantic behavior, or verification, that guidance is relevant. Length becomes a Precision concern when loaded content is unrelated to the task, including unrelated material inside an otherwise useful file.
 
 ### Context Recall
 
@@ -160,8 +162,8 @@ Look for named sources of truth, documentation boundaries, supersession rules, c
 Active Context Size is deterministic:
 
 - Measure only the declared `effectiveContext.files`.
-- Report the UTF-8 text character count produced by the current Node implementation.
-- Estimate tokens as `ceil(total characters / 4)`.
+- Report the JavaScript string length (UTF-16 code units) produced after UTF-8 decoding. This is not a byte count or Unicode-code-point count.
+- Estimate tokens as `ceil(total JavaScript string length / 4)`.
 - Identify that estimate as an approximation, not a tokenizer result.
 - Do not substitute repository-wide file volume for active context.
 - Do not present the size status bands as model context-window limits.
@@ -258,14 +260,14 @@ These examples illustrate the anchors; they do not establish universal checks or
 
 ## 12. Follow the audit procedure
 
-1. Read `AGENTS.md` and the documentation it routes for the task.
-2. Declare the audit scope.
-3. List the task requirements.
-4. Build the effective-context inventory.
-5. Record exclusions.
-6. Lock check IDs and weights.
-7. Gather observable evidence and stable citations.
-8. Assign Pass, Partial, or Fail results.
+1. Declare the task, audit type, scope, expected outcome, known requirements, and explicit exclusions.
+2. Read `AGENTS.md` and the documentation it routes for the task, then build a preliminary effective-context inventory.
+3. Derive check IDs and weights from the task requirements and preliminary inventory.
+4. Lock the checks and weights before classifying evidence or assigning scores.
+5. Assess every loaded portion, recording observable evidence at the smallest practical section, heading, rule, or claim.
+6. Assign Pass, Partial, or Fail results.
+7. If the rubric, checks, or weights change materially, increment the relevant methodology version and establish a new comparison baseline.
+8. Finalize the effective-context inventory and exclusions.
 9. Run `pnpm context:health`.
 10. Run `pnpm context:health:validate`.
 11. Review generated changes and confirm that only intended deterministic fields changed.
@@ -293,7 +295,7 @@ Do not fill these gaps with assumed scope, invented evidence, or adjusted weight
 
 Record both the report `schemaVersion` and the audited `repositoryRevision`. The schema version describes the report structure; the repository revision identifies the baseline being assessed.
 
-Document scoring-method changes, including changes to the rubric, task profile, check definitions, result anchors, or weights. Compare scores only when all of the following are compatible:
+Document scoring-method changes, including changes to the rubric, task profile, check definitions, result anchors, or weights. Increment the relevant methodology version when any of these changes materially. Compare scores only when all of the following are compatible:
 
 - audit type and declared task scope;
 - task profile;
@@ -301,7 +303,7 @@ Document scoring-method changes, including changes to the rubric, task profile, 
 - checks and weights;
 - scoring rubric and report schema.
 
-A changed rubric or profile may require a new baseline. Do not label a score difference as improvement or regression when the underlying measurement changed.
+A changed rubric or profile requires a new baseline unless earlier reports are regenerated under the same methodology. Do not label a score difference as improvement or regression when the underlying measurement changed.
 
 ## 15. Use the audit summary format
 
