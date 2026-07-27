@@ -1,14 +1,56 @@
 ---
-/**
- * Context Lab — an interactive workbench for exploring context-quality metrics.
- *
- * This page is scoped to /lab/context/ and does not share modules, styles,
- * or scripts with the main blog layout.
- *
- * The analysis is an educational model. It does not measure actual agent
- * behavior or use any LLM, external API, or backend service.
- */
 import '../../styles/global.css';
+
+interface ContextHealthReport {
+  schemaVersion: string;
+  generatedAt: string;
+  repositoryRevision: string;
+  overallSummary: string;
+  strengths: string[];
+  priorities: Array<{ priority: number; finding: string; recommendation: string }>;
+  metrics: Array<{
+    id: string;
+    label: string;
+    score: number | null;
+    status: string;
+    interpretation: string;
+    assessmentType: string;
+    checks?: Array<{
+      id: string;
+      label: string;
+      weight: number;
+      result: string;
+      score: number;
+      evidence: string;
+    }>;
+    details?: {
+      characters: number;
+      estimatedTokens: number;
+      estimationMethod: string;
+      measuredFiles: Array<{ path: string; bytes: number }>;
+    };
+  }>;
+  methodology: Record<string, unknown>;
+  limitations: string[];
+}
+
+const report: ContextHealthReport = (await import('../../data/context-health.json')).default;
+const d = new Date(report.generatedAt);
+const generatedDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+function statusClass(s: string) {
+  if (s === 'healthy') return 'ch-status--healthy';
+  if (s === 'needs-attention') return 'ch-status--attention';
+  return 'ch-status--risk';
+}
+function statusLabel(s: string) {
+  if (s === 'healthy') return 'Healthy';
+  if (s === 'needs-attention') return 'Needs Attention';
+  return 'At Risk';
+}
+function pct(n: number | null): string {
+  return n !== null ? `${(n * 100).toFixed(0)}%` : 'N/A';
+}
 ---
 
 <!doctype html>
@@ -16,566 +58,170 @@ import '../../styles/global.css';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Context Lab — Eric Carlisle</title>
-    <meta
-      name="description"
-      content="An interactive educational model for exploring how context quality affects coding-agent behavior."
-    />
+    <title>Context Health — Eric Carlisle</title>
+    <meta name="description" content="Repository agent-context health report." />
     <meta name="robots" content="noindex, follow" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-
     <style is:global>
-      /* ── Lab page layout ───────────────────────────────────────────── */
-      .lab-page {
-        max-width: var(--layout-rail-page);
-        margin-inline: auto;
-        padding: var(--space-layout) var(--space-component);
-        font-family: var(--font-copy);
-        color: var(--text-primary);
-        line-height: var(--line-height-body);
-      }
-
-      .lab-page__heading {
-        font-family: var(--font-headers);
-        font-weight: var(--font-weight-bold);
-        font-size: var(--type-size-h2);
-        line-height: var(--line-height-h2);
-        margin: 0 0 var(--space-xs);
-        text-wrap: balance;
-      }
-
-      .lab-page__subtitle {
-        color: var(--text-secondary);
-        font-size: var(--type-size-body);
-        max-width: var(--layout-rail-prose);
-        margin: 0 0 var(--space-xl);
-      }
-
-      .lab-page__disclaimer {
-        background: var(--bg-surface);
-        border-left: var(--size-border-thick) solid var(--brand-highlight);
-        padding: var(--space-component);
-        border-radius: var(--radius-md);
-        margin-bottom: var(--space-xl);
-        font-size: var(--type-size-small);
-        color: var(--text-secondary);
-      }
-
-      /* ── All runtime-generated content is scoped under .lab-page ────── */
-      .lab-page .step {
-        margin-bottom: var(--space-xl);
-      }
-
-      .lab-page .step__heading {
-        font-family: var(--font-headers);
-        font-weight: var(--font-weight-bold);
-        font-size: var(--type-size-h4);
-        line-height: var(--line-height-h4);
-        margin: 0 0 var(--space-sm);
-      }
-
-      .lab-page .step__hint {
-        font-size: var(--type-size-small);
-        color: var(--text-muted);
-        margin: 0 0 var(--space-sm);
-      }
-
-      .lab-page .step__note {
-        font-size: var(--type-size-small);
-        color: var(--text-muted);
-        margin: var(--space-sm) 0 0;
-        line-height: 1.5;
-      }
-
-      /* ── Task list (native radio) ────────────────────────────────────── */
-      .lab-page .task-list {
-        border: none;
-        padding: 0;
-        margin: 0 0 var(--space-sm);
-      }
-
-      .lab-page .task-list .step__heading {
-        margin-bottom: var(--space-sm);
-      }
-
-      .lab-page .task-list__item {
-        display: flex;
-        align-items: flex-start;
-        gap: var(--space-sm);
-        padding: var(--space-component);
-        background: var(--color-card-bg);
-        border: var(--size-border-pixel) solid var(--color-card-border);
-        border-radius: var(--radius-md);
-        cursor: pointer;
-        transition: border-color var(--transition-fast),
-                    box-shadow var(--transition-fast);
-        margin-bottom: var(--space-sm);
-      }
-
-      .lab-page .task-list__item:hover {
-        border-color: var(--color-link);
-      }
-
-      .lab-page .task-list:has(:checked) .task-list__item:has(:not(:checked)) {
-        opacity: 0.7;
-      }
-
-      .lab-page .task-list__item:has(:checked) {
-        border-color: var(--color-link);
-        box-shadow: 0 0 0 1px var(--color-link);
-      }
-
-      .lab-page .task-list__radio {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-
-      .lab-page .task-list__radio:focus-visible + .task-list__content {
-        outline: var(--focus-outline-width) var(--focus-outline-style) var(--color-focus);
-        outline-offset: var(--focus-outline-offset);
-      }
-
-      .lab-page .task-list__content {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-xs);
-        flex: 1;
-      }
-
-      .lab-page .task-list__item-title {
-        font-family: var(--font-headers);
-        font-weight: var(--font-weight-bold);
-        font-size: var(--type-size-body);
-      }
-
-      .lab-page .task-list__item-desc {
-        font-size: var(--type-size-small);
-        color: var(--text-secondary);
-      }
-
-      /* ── Preset list (native radio) ─────────────────────────────────── */
-      .lab-page .preset-list {
-        border: none;
-        padding: 0;
-        margin: 0 0 var(--space-sm);
-      }
-
-      .lab-page .preset-list .step__heading {
-        margin-bottom: var(--space-sm);
-      }
-
-      .lab-page .preset-list__item {
-        flex: 1;
-        min-width: 200px;
-        display: flex;
-        align-items: flex-start;
-        gap: var(--space-sm);
-        padding: var(--space-component);
-        background: var(--color-card-bg);
-        border: var(--size-border-pixel) solid var(--color-card-border);
-        border-radius: var(--radius-md);
-        cursor: pointer;
-        transition: border-color var(--transition-fast),
-                    box-shadow var(--transition-fast);
-        margin-bottom: var(--space-sm);
-      }
-
-      .lab-page .preset-list__item:hover {
-        border-color: var(--color-link);
-      }
-
-      .lab-page .preset-list:has(:checked) .preset-list__item:has(:not(:checked)) {
-        opacity: 0.7;
-      }
-
-      .lab-page .preset-list__item:has(:checked) {
-        border-color: var(--color-link);
-        box-shadow: 0 0 0 1px var(--color-link);
-      }
-
-      .lab-page .preset-list__radio {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-
-      .lab-page .preset-list__radio:focus-visible + .preset-list__content {
-        outline: var(--focus-outline-width) var(--focus-outline-style) var(--color-focus);
-        outline-offset: var(--focus-outline-offset);
-      }
-
-      .lab-page .preset-list__content {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-xs);
-        flex: 1;
-      }
-
-      .lab-page .preset-list__item-count {
-        font-size: var(--type-size-small);
-        color: var(--text-muted);
-        font-family: var(--font-mono);
-      }
-
-      @supports not selector(:has(*)) {
-        .lab-page .task-list__item--selected {
-          border-color: var(--color-link);
-          box-shadow: 0 0 0 1px var(--color-link);
-        }
-        .lab-page .preset-list__item--selected {
-          border-color: var(--color-link);
-          box-shadow: 0 0 0 1px var(--color-link);
-        }
-      }
-
-      /* ── Document list ──────────────────────────────────────────────── */
-      .lab-page .doc-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-sm);
-      }
-
-      .lab-page .doc-list__item {
-        margin: 0;
-      }
-
-      .lab-page .doc-list__item--included {
-        border-left: var(--size-border-thick) solid var(--color-link);
-      }
-
-      .lab-page .doc-list__label {
-        display: flex;
-        align-items: flex-start;
-        gap: var(--space-sm);
-        padding: var(--space-component);
-        background: var(--color-card-bg);
-        border: var(--size-border-pixel) solid var(--color-card-border);
-        border-radius: var(--radius-md);
-        cursor: pointer;
-        transition: border-color var(--transition-fast);
-      }
-
-      .lab-page .doc-list__label:hover {
-        border-color: var(--color-link);
-      }
-
-      .lab-page .doc-list__checkbox {
-        margin-top: 0.2em;
-        min-width: 18px;
-        min-height: 18px;
-        accent-color: var(--color-action);
-      }
-
-      .lab-page .doc-list__info {
-        display: flex;
-        flex-direction: column;
-        gap: 0.2em;
-        flex: 1;
-      }
-
-      .lab-page .doc-list__title {
-        font-family: var(--font-headers);
-        font-weight: var(--font-weight-bold);
-        font-size: var(--type-size-body);
-        color: var(--text-primary);
-      }
-
-      .lab-page .doc-list__meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-inline);
-        align-items: center;
-        font-size: var(--type-size-small);
-        color: var(--text-secondary);
-      }
-
-      .lab-page .doc-list__badge {
-        display: inline-block;
-        padding: 0.1em 0.5em;
-        border-radius: 999px;
-        font-family: var(--font-mono);
-        font-size: 0.85em;
-        text-transform: uppercase;
-      }
-
-      .lab-page .doc-list__badge--high {
-        background: oklch(0.45 0.1 250);
-        color: #fff;
-      }
-
-      .lab-page .doc-list__badge--medium {
-        background: oklch(0.5 0.06 260);
-        color: #fff;
-      }
-
-      .lab-page .doc-list__badge--low {
-        background: oklch(0.4 0.02 260);
-        color: var(--text-muted);
-      }
-
-      .lab-page .doc-list__relevance {
-        font-family: var(--font-mono);
-        font-size: 0.85em;
-        color: var(--text-muted);
-      }
-
-      .lab-page .doc-list__relevance--relevant {
-        color: var(--color-success);
-      }
-
-      .lab-page .doc-list__size {
-        font-family: var(--font-mono);
-        font-size: 0.85em;
-        color: var(--text-muted);
-      }
-
-      /* ── Metrics grid ───────────────────────────────────────────────── */
-      .lab-page .metrics-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: var(--space-component);
-      }
-
-      .lab-page .metric-card {
-        background: var(--color-card-bg);
-        border: var(--size-border-pixel) solid var(--color-card-border);
-        border-radius: var(--radius-md);
-        padding: var(--space-component);
-      }
-
-      .lab-page .metric-card__header {
-        margin-bottom: var(--space-sm);
-      }
-
-      .lab-page .metric-card__value {
-        display: flex;
-        align-items: baseline;
-        gap: var(--space-sm);
-        margin-bottom: var(--space-xs);
-      }
-
-      .lab-page .metric-card__value--size {
-        flex-wrap: wrap;
-      }
-
-      .lab-page .metric-card__number {
-        font-family: var(--font-headers);
-        font-weight: var(--font-weight-bold);
-        font-size: var(--type-size-h3);
-        line-height: 1;
-        color: var(--color-link);
-      }
-
-      .lab-page .metric-card__number--size {
-        font-size: var(--type-size-body);
-        font-family: var(--font-mono);
-      }
-
-      .lab-page .metric-card__label--sub {
-        font-size: var(--type-size-small);
-        color: var(--text-muted);
-      }
-
-      .lab-page .metric-card__bar {
-        display: block;
-        width: 100%;
-        height: 8px;
-        background: var(--bg-surface-elevated);
-        border-radius: 4px;
-        overflow: hidden;
-        margin-top: var(--space-xs);
-      }
-
-      .lab-page .metric-card__bar-fill {
-        display: block;
-        height: 100%;
-        background: var(--color-link);
-        border-radius: 4px;
-        transition: width var(--transition-normal);
-      }
-
-      .lab-page .metric-card__label {
-        font-family: var(--font-headers);
-        font-weight: var(--font-weight-medium);
-        font-size: var(--type-size-body);
-        margin: 0;
-        color: var(--text-primary);
-      }
-
-      .lab-page .metric-card__toggle {
-        display: inline-block;
-        background: none;
-        border: none;
-        color: var(--color-link);
-        font-family: inherit;
-        font-size: var(--type-size-small);
-        cursor: pointer;
-        padding: var(--space-xs) 0;
-        text-decoration: underline;
-        text-underline-offset: 2px;
-      }
-
-      .lab-page .metric-card__toggle:hover {
-        color: var(--color-link-hover);
-      }
-
-      .lab-page .metric-card__toggle:focus-visible {
-        outline: var(--focus-outline-width) var(--focus-outline-style) var(--color-focus);
-        outline-offset: var(--focus-outline-offset);
-      }
-
-      .lab-page .metric-card__detail {
-        margin-top: var(--space-sm);
-        padding-top: var(--space-sm);
-        border-top: var(--size-border-pixel) solid var(--border-muted);
-      }
-
-      .lab-page .metric-card__explanation {
-        font-size: var(--type-size-small);
-        color: var(--text-secondary);
-        line-height: 1.6;
-        margin: 0 0 var(--space-xs);
-      }
-
-      .lab-page .metric-card__direction {
-        font-size: var(--type-size-small);
-        color: var(--text-muted);
-        font-family: var(--font-mono);
-        margin: 0;
-      }
-
-      .lab-page .metric-card__number--na {
-        color: var(--text-muted);
-        font-size: var(--type-size-h4);
-      }
-
-      .lab-page .metric-card__na-note {
-        font-size: var(--type-size-small);
-        color: var(--text-muted);
-        font-style: italic;
-        margin: 0 0 var(--space-xs);
-      }
-
-      .lab-page .metric-card__docs {
-        font-size: var(--type-size-small);
-        color: var(--text-secondary);
-        line-height: 1.5;
-        margin: 0 0 var(--space-xs);
-      }
-
-      .lab-page .metric-card__improve {
-        font-size: var(--type-size-small);
-        color: var(--brand-accent);
-        line-height: 1.5;
-        margin: var(--space-xs) 0 0;
-        padding-top: var(--space-xs);
-        border-top: var(--size-border-pixel) solid var(--border-muted);
-      }
-
-      /* ── Empty state (no-JS message) ────────────────────────────────── */
-      .lab-page .empty-state {
-        text-align: center;
-        padding: var(--space-xl);
-        color: var(--text-muted);
-      }
-
-      /* ── Responsive ─────────────────────────────────────────────────── */
-      @media (max-width: 720px) {
-        .lab-page {
-          padding: var(--space-component);
-        }
-
-        .lab-page .preset-list {
-          flex-direction: column;
-        }
-
-        .lab-page .preset-list__item {
-          min-width: unset;
-        }
-
-        .lab-page .metrics-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .lab-page .doc-list__meta {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-      }
+      .ch-page { max-width: var(--layout-rail-page); margin-inline: auto; padding: var(--space-layout) var(--space-component); font-family: var(--font-copy); color: var(--text-primary); line-height: var(--line-height-body); }
+      .ch-page__heading { font-family: var(--font-headers); font-weight: var(--font-weight-bold); font-size: var(--type-size-h2); line-height: var(--line-height-h2); margin: 0 0 var(--space-xs); text-wrap: balance; }
+      .ch-page__meta { font-size: var(--type-size-small); color: var(--text-muted); margin: 0 0 var(--space-xl); }
+      .ch-page__disclaimer { background: var(--bg-surface); border-left: var(--size-border-thick) solid var(--brand-highlight); padding: var(--space-component); border-radius: var(--radius-md); margin-bottom: var(--space-section); font-size: var(--type-size-small); color: var(--text-secondary); }
+      .ch-overview { margin-bottom: var(--space-section); }
+      .ch-overview__summary { font-size: var(--type-size-body); max-width: var(--layout-rail-prose); line-height: 1.6; margin: 0 0 var(--space-lg); }
+      .ch-overview__columns { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-component-lg); }
+      @media (max-width: 720px) { .ch-overview__columns { grid-template-columns: 1fr; } }
+      .ch-overview__block h2 { font-family: var(--font-headers); font-weight: var(--font-weight-bold); font-size: var(--type-size-h5); margin: 0 0 var(--space-sm); }
+      .ch-overview__block ul { list-style: none; padding: 0; margin: 0; }
+      .ch-overview__block li { padding: var(--space-xs) 0; border-bottom: var(--size-border-pixel) solid var(--border-muted); font-size: var(--type-size-small); line-height: 1.5; }
+      .ch-overview__block li:last-child { border-bottom: none; }
+      .ch-overview__block li strong { display: block; color: var(--text-primary); }
+      .ch-overview__block li em { font-style: normal; color: var(--brand-accent); }
+      .ch-scores { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-component); margin-bottom: var(--space-section); }
+      .ch-score { background: var(--color-card-bg); border: var(--size-border-pixel) solid var(--color-card-border); border-radius: var(--radius-md); padding: var(--space-component); }
+      .ch-score__value { font-family: var(--font-headers); font-weight: var(--font-weight-bold); font-size: var(--type-size-h3); line-height: 1; color: var(--color-link); margin-bottom: var(--space-xs); }
+      .ch-score__value--size { font-size: var(--type-size-body); font-family: var(--font-mono); color: var(--text-primary); }
+      .ch-score__label { font-family: var(--font-headers); font-weight: var(--font-weight-medium); font-size: var(--type-size-body); margin: 0 0 var(--space-xs); }
+      .ch-status { display: inline-block; padding: 0.1em 0.5em; border-radius: 4px; font-size: var(--type-size-small); font-family: var(--font-mono); font-weight: var(--font-weight-medium); margin-bottom: var(--space-xs); }
+      .ch-status--healthy { background: oklch(0.4 0.08 160); color: #fff; }
+      .ch-status--attention { background: oklch(0.5 0.1 80); color: #1a1a1a; }
+      .ch-status--risk { background: oklch(0.45 0.15 30); color: #fff; }
+      .ch-score__interp { font-size: var(--type-size-small); color: var(--text-secondary); line-height: 1.5; margin: 0; }
+      .ch-score__type { font-size: var(--type-size-small); color: var(--text-muted); font-family: var(--font-mono); margin-top: var(--space-xs); }
+      .ch-details { margin-bottom: var(--space-section); }
+      .ch-details details { background: var(--color-card-bg); border: var(--size-border-pixel) solid var(--color-card-border); border-radius: var(--radius-md); margin-bottom: var(--space-component); padding: var(--space-component); }
+      .ch-details summary { font-family: var(--font-headers); font-weight: var(--font-weight-bold); font-size: var(--type-size-h5); cursor: pointer; outline-offset: 4px; }
+      .ch-details summary:focus-visible { outline: var(--focus-outline-width) var(--focus-outline-style) var(--color-focus); }
+      .ch-details details[open] summary { margin-bottom: var(--space-component); padding-bottom: var(--space-component); border-bottom: var(--size-border-pixel) solid var(--border-muted); }
+      .ch-details__interp { font-size: var(--type-size-small); color: var(--text-secondary); line-height: 1.6; margin: 0 0 var(--space-component); }
+      .ch-details__checks { display: flex; flex-direction: column; gap: var(--space-sm); }
+      .ch-check { padding: var(--space-sm); background: var(--bg-surface-elevated); border-radius: var(--radius-md); }
+      .ch-check__header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-xs); font-size: var(--type-size-small); }
+      .ch-check__label { font-weight: var(--font-weight-bold); color: var(--text-primary); }
+      .ch-check__result { font-family: var(--font-mono); }
+      .ch-check__result--pass { color: var(--color-success); }
+      .ch-check__result--partial { color: var(--brand-highlight); }
+      .ch-check__result--fail { color: oklch(0.55 0.15 30); }
+      .ch-check__evidence { font-size: var(--type-size-small); color: var(--text-secondary); line-height: 1.5; margin: 0; }
+      .ch-check__weight { font-size: var(--type-size-small); color: var(--text-muted); font-family: var(--font-mono); margin-top: var(--space-xs); }
+      .ch-size-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-component); margin-bottom: var(--space-component); }
+      @media (max-width: 720px) { .ch-size-grid { grid-template-columns: 1fr; } }
+      .ch-size-stat { text-align: center; padding: var(--space-component); background: var(--bg-surface-elevated); border-radius: var(--radius-md); }
+      .ch-size-stat__value { font-family: var(--font-headers); font-weight: var(--font-weight-bold); font-size: var(--type-size-h3); color: var(--color-link); line-height: 1; }
+      .ch-size-stat__label { font-size: var(--type-size-small); color: var(--text-muted); margin-top: var(--space-xs); }
+      .ch-file-table { width: 100%; border-collapse: collapse; font-size: var(--type-size-small); }
+      .ch-file-table th, .ch-file-table td { text-align: left; padding: var(--space-xs) var(--space-inline); border-bottom: var(--size-border-pixel) solid var(--border-muted); }
+      .ch-file-table th { font-family: var(--font-headers); font-weight: var(--font-weight-bold); color: var(--text-primary); }
+      .ch-file-table td { font-family: var(--font-mono); color: var(--text-secondary); }
+      .ch-file-table td:last-child { text-align: right; }
+      .ch-methodology { margin-top: var(--space-section); padding-top: var(--space-section); border-top: var(--size-border-pixel) solid var(--border-main); }
+      .ch-methodology h2 { font-family: var(--font-headers); font-weight: var(--font-weight-bold); font-size: var(--type-size-h4); margin: 0 0 var(--space-component); }
+      .ch-methodology h3 { font-family: var(--font-headers); font-weight: var(--font-weight-medium); font-size: var(--type-size-body); margin: var(--space-component) 0 var(--space-sm); }
+      .ch-methodology p, .ch-methodology li { font-size: var(--type-size-small); color: var(--text-secondary); line-height: 1.6; max-width: var(--layout-rail-prose); }
+      .ch-methodology ul { padding-left: var(--space-component); }
     </style>
   </head>
   <body>
-    <main class="lab-page" data-pagefind-ignore="all">
-      <h1 class="lab-page__heading">Context Lab</h1>
-      <p class="lab-page__subtitle">
-        An interactive workbench for exploring how context quality metrics behave.
-        Select a task, choose a document preset, and toggle individual documents
-        to see how each metric responds.
-      </p>
+    <main class="ch-page" data-pagefind-ignore="all">
+      <h1 class="ch-page__heading">Context Health</h1>
+      <p class="ch-page__meta">Report generated {generatedDate} · Revision {report.repositoryRevision} · Schema v{report.schemaVersion}</p>
 
-      <aside class="lab-page__disclaimer" role="note">
-        <strong>Educational model.</strong> These metrics approximate how well a
-        set of context documents serves a task. They do not measure actual agent
-        behavior, LLM output, or real-world context effectiveness. All calculations
-        are deterministic and based on manually defined fixture data.
+      <aside class="ch-page__disclaimer" role="note">
+        <strong>Context structure audit, not LLM evaluation.</strong> This report assesses the repository's agent-context documentation structure. It does not measure actual LLM behavior, output quality, or runtime performance. Deterministic measurements are exact; semantic assessments reflect a coding agent's judgment.
       </aside>
 
-      <div class="experiment" id="app">
-        <noscript>
-          <div class="step">
-            <p class="step__heading">Interactive experiment requires JavaScript</p>
-            <p class="step__hint">
-              The Context Lab is an interactive tool that evaluates context-quality
-              metrics based on your document selections. Enable JavaScript to use
-              the experiment controls, select tasks, toggle documents, and inspect
-              metric explanations.
-            </p>
+      <!-- Overview -->
+      <section class="ch-overview" aria-label="Health overview">
+        <p class="ch-overview__summary">{report.overallSummary}</p>
+        <div class="ch-overview__columns">
+          <div class="ch-overview__block">
+            <h2 style="font-family:var(--font-headers);font-weight:var(--font-weight-bold);font-size:var(--type-size-h5);margin:0 0 var(--space-sm)">Key Strengths</h2>
+            <ul>
+              {report.strengths.map((s) => <li>{s}</li>)}
+            </ul>
           </div>
-        </noscript>
-
-        <div class="step" id="step-task" role="region" aria-label="Task selection">
-          <!-- Rendered by controller -->
+          <div class="ch-overview__block">
+            <h2 style="font-family:var(--font-headers);font-weight:var(--font-weight-bold);font-size:var(--type-size-h5);margin:0 0 var(--space-sm)">Prioritized Improvements</h2>
+            <ul>
+              {report.priorities.map((p) => <li><strong>{p.finding}</strong><em>{p.recommendation}</em></li>)}
+            </ul>
+          </div>
         </div>
+      </section>
 
-        <div class="step" id="step-preset" role="region" aria-label="Preset selection">
-          <!-- Rendered by controller -->
-        </div>
-
-        <div class="step" id="step-docs" role="region" aria-label="Document review">
-          <!-- Rendered by controller -->
-        </div>
-
-        <div class="step" id="step-results" role="region" aria-label="Context quality metrics">
-          <!-- Rendered by controller -->
-        </div>
+      <!-- Score cards -->
+      <div class="ch-scores">
+        {report.metrics.map((m) => (
+          <div class="ch-score">
+            <div class:list={['ch-score__value', m.id === 'active-context-size' && 'ch-score__value--size']}>
+              {m.id === 'active-context-size' ? `${(m.details?.characters ?? 0).toLocaleString()} chars` : pct(m.score)}
+            </div>
+            <div class="ch-score__label">{m.label}</div>
+            <div class:list={['ch-status', statusClass(m.status)]}>{statusLabel(m.status)}</div>
+            <p class="ch-score__interp">{m.interpretation}</p>
+            <div class="ch-score__type">{m.assessmentType === 'deterministic' ? 'Deterministic' : 'Agent-assessed'}</div>
+          </div>
+        ))}
       </div>
+
+      <!-- Metric details -->
+      <section class="ch-details" aria-label="Metric details">
+        <h2 style="font-family:var(--font-headers);font-weight:var(--font-weight-bold);font-size:var(--type-size-h4);margin:0 0 var(--space-component)">Detailed Findings</h2>
+        {report.metrics.map((m) => (
+          <details>
+            <summary>{m.label}: {pct(m.score)}</summary>
+            <p class="ch-details__interp">{m.interpretation}</p>
+
+            {m.checks && (
+              <div class="ch-details__checks">
+                {m.checks.map((c) => (
+                  <div class="ch-check">
+                    <div class="ch-check__header">
+                      <span class="ch-check__label">{c.label}</span>
+                      <span class:list={['ch-check__result', `ch-check__result--${c.result}`]}>{c.result === 'pass' ? '✓ Pass' : c.result === 'partial' ? '◐ Partial' : '✗ Fail'}</span>
+                    </div>
+                    <p class="ch-check__evidence">{c.evidence}</p>
+                    <div class="ch-check__weight">Weight: {(c.weight * 100).toFixed(0)}% · Score contribution: {(c.score * c.weight * 100).toFixed(0)}%</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {m.details && (
+              <div>
+                <div class="ch-size-grid">
+                  <div class="ch-size-stat">
+                    <div class="ch-size-stat__value">{m.details.characters.toLocaleString()}</div>
+                    <div class="ch-size-stat__label">Characters</div>
+                  </div>
+                  <div class="ch-size-stat">
+                    <div class="ch-size-stat__value">~{m.details.estimatedTokens.toLocaleString()}</div>
+                    <div class="ch-size-stat__label">Estimated Tokens</div>
+                  </div>
+                </div>
+                <p style="font-size:var(--type-size-small);color:var(--text-muted);margin:0 0 var(--space-component)">Estimation: {m.details.estimationMethod}</p>
+                <table class="ch-file-table">
+                  <thead><tr><th>File</th><th>Bytes</th></tr></thead>
+                  <tbody>
+                    {m.details.measuredFiles.map((f) => <tr><td>{f.path}</td><td>{f.bytes.toLocaleString()}</td></tr>)}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </details>
+        ))}
+      </section>
+
+      <!-- Methodology -->
+      <section class="ch-methodology" aria-label="Methodology and limitations">
+        <h2>Methodology</h2>
+        <p>{report.methodology.scoring as string}</p>
+        <p>Token estimation: {report.methodology.tokenEstimation as string}</p>
+        <h2 style="font-family:var(--font-headers);font-weight:var(--font-weight-medium);font-size:var(--type-size-body);margin:var(--space-component) 0 var(--space-sm)">Limitations</h2>
+        <ul>
+          {report.limitations.map((l) => <li>{l}</li>)}
+        </ul>
+      </section>
     </main>
-
-    <script>
-      // --- Theme: apply stored preference before first paint ---
-      // Matches the pattern used in BaseHead.astro's inline script.
-      (function () {
-        const stored = localStorage.getItem('theme');
-        if (stored) {
-          document.documentElement.setAttribute('data-theme', stored);
-        }
-      })();
-    </script>
-
-    <script>
-      import { initialize } from '../../lab/context/controller';
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initialize);
-      } else {
-        initialize();
-      }
-    </script>
   </body>
 </html>
