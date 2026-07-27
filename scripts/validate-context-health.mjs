@@ -1,174 +1,223 @@
 #!/usr/bin/env node
-// Context Health Report — validation script.
-// Reads the report JSON, validates its structure, and exits nonzero on failure.
 import { existsSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import {
+  calculateMetric,
+  measureEffectiveContext,
+  RESULT_SCORES,
+  sizeStatus,
+  TOKEN_ESTIMATE_CHARACTERS,
+} from './context-health-core.mjs';
 
-const REPORT_PATH = resolve(import.meta.dirname, '../src/data/context-health.json');
-const VALID_STATUSES = new Set(['healthy', 'needs-attention', 'at-risk']);
-const KNOWN_METRIC_IDS = new Set([
+const scriptDirectory = dirname(fileURLToPath(import.meta.url));
+const repositoryRoot = resolve(scriptDirectory, '..');
+const reportPath = process.env.CONTEXT_HEALTH_REPORT_PATH
+  ? resolve(process.env.CONTEXT_HEALTH_REPORT_PATH)
+  : resolve(repositoryRoot, 'src/data/context-health.json');
+const metricIds = new Set([
   'context-precision',
   'context-recall',
   'sufficiency',
   'authority-clarity',
   'active-context-size',
 ]);
-
-/** @type {string[]} */
 const errors = [];
-/** @type {string[]} */
-const warnings = [];
 
-function error(msg) {
-  errors.push(msg);
-}
-function warn(msg) {
-  warnings.push(msg);
-}
-
-// Load
-if (!existsSync(REPORT_PATH)) {
-  error(`Report not found at ${REPORT_PATH}`);
-  process.exit(1);
-}
-
-/** @type {any} */
 let report;
 try {
-  report = JSON.parse(readFileSync(REPORT_PATH, 'utf-8'));
-} catch (e) {
-  error(`Invalid JSON: ${e.message}`);
-  process.exit(1);
+  report = JSON.parse(readFileSync(reportPath, 'utf8'));
+} catch (error) {
+  fail(`Cannot read report: ${error.message}`);
 }
 
-// Schema fields
-const requiredFields = [
+for (const field of [
   'schemaVersion',
-  'generatedAt',
+  'auditedAt',
   'repositoryRevision',
+  'effectiveContext',
   'overallSummary',
   'strengths',
   'priorities',
   'metrics',
   'methodology',
   'limitations',
-];
-for (const field of requiredFields) {
-  if (!(field in report)) error(`Missing required field: ${field}`);
-}
-if (typeof report.schemaVersion !== 'string' || !report.schemaVersion)
-  error('schemaVersion must be a non-empty string');
-if (typeof report.overallSummary !== 'string' || report.overallSummary.length < 10)
-  error('overallSummary too short or missing');
-
-// Strengths
-if (!Array.isArray(report.strengths) || report.strengths.length < 1)
-  error('Must have at least 1 strength');
-for (const s of report.strengths) {
-  if (typeof s !== 'string' || s.length < 5) error(`Strength too short: "${s}"`);
+]) {
+  if (!(field in report)) errors.push(`missing required field: ${field}`);
 }
 
-// Priorities
-if (!Array.isArray(report.priorities) || report.priorities.length < 1)
-  error('Must have at least 1 priority');
-/** @type {Set<number>} */
-const seenPriorityNums = new Set();
-for (const p of report.priorities) {
-  if (typeof p.priority !== 'number') error('Each priority needs a numeric priority field');
-  if (seenPriorityNums.has(p.priority)) error(`Duplicate priority number: ${p.priority}`);
-  seenPriorityNums.add(p.priority);
-  if (!p.finding || typeof p.finding !== 'string') error('Each priority needs a finding string');
-  if (!p.recommendation || typeof p.recommendation !== 'string')
-    error('Each priority needs a recommendation string');
+if (!/^\d{4}-\d{2}-\d{2}$/.test(report.auditedAt ?? '')) {
+  errors.push('auditedAt must use YYYY-MM-DD');
+}
+if (!/^[0-9a-f]{7,40}$/.test(report.repositoryRevision ?? '')) {
+  errors.push('repositoryRevision must identify the audited Git revision');
+}
+if (!report.overallSummary || report.overallSummary.length < 20) {
+  errors.push('overallSummary is too short');
+}
+if (!Array.isArray(report.strengths) || report.strengths.length === 0) {
+  errors.push('strengths must contain at least one item');
+}
+if (!Array.isArray(report.priorities) || report.priorities.length === 0) {
+  errors.push('priorities must contain at least one item');
+} else if (report.priorities.length > 3) {
+  errors.push('priorities must contain no more than three items');
 }
 
-// Metrics
-if (!Array.isArray(report.metrics) || report.metrics.length < 1)
-  error('Must have at least 1 metric');
-/** @type {Set<string>} */
-const seenMetricIds = new Set();
-for (const m of report.metrics) {
-  if (!m.id || typeof m.id !== 'string') error('Metric missing id');
-  if (seenMetricIds.has(m.id)) error(`Duplicate metric id: ${m.id}`);
-  seenMetricIds.add(m.id);
-  if (!KNOWN_METRIC_IDS.has(m.id)) warn(`Unknown metric id: ${m.id}`);
-
-  if (m.score !== null && (typeof m.score !== 'number' || m.score < 0 || m.score > 1)) {
-    error(`Metric ${m.id} score out of range (0-1): ${m.score}`);
+const priorityNumbers = new Set();
+for (const priority of report.priorities ?? []) {
+  if (!Number.isInteger(priority.priority) || priority.priority < 1) {
+    errors.push('each priority needs a positive integer priority');
   }
-  if (!VALID_STATUSES.has(m.status)) error(`Metric ${m.id} has invalid status: ${m.status}`);
-  if (!m.interpretation || typeof m.interpretation !== 'string')
-    error(`Metric ${m.id} missing interpretation`);
-  if (!m.assessmentType || !['deterministic', 'agent-assessed'].includes(m.assessmentType)) {
-    error(`Metric ${m.id} has invalid assessmentType: ${m.assessmentType}`);
+  if (priorityNumbers.has(priority.priority)) {
+    errors.push(`duplicate priority number: ${priority.priority}`);
   }
+  priorityNumbers.add(priority.priority);
+  if (!priority.finding || !priority.recommendation) {
+    errors.push(`priority ${priority.priority} needs a finding and recommendation`);
+  }
+}
 
-  if (m.id === 'active-context-size') {
-    if (!m.details || typeof m.details.characters !== 'number' || m.details.characters < 0) {
-      error('active-context-size missing valid details.characters');
-    }
-    if (typeof m.details.estimatedTokens !== 'number' || m.details.estimatedTokens < 0) {
-      error('active-context-size missing valid details.estimatedTokens');
-    }
-    if (!m.details.estimationMethod) error('active-context-size missing estimationMethod');
-    if (!Array.isArray(m.details.measuredFiles))
-      error('active-context-size missing measuredFiles array');
-    for (const f of m.details.measuredFiles) {
-      if (!f.path || typeof f.bytes !== 'number')
-        error(`Invalid measuredFile entry: ${JSON.stringify(f)}`);
-    }
+try {
+  const paths = report.effectiveContext.files;
+  if (new Set(paths).size !== paths.length)
+    errors.push('effectiveContext.files contains duplicates');
+  const expected = measureEffectiveContext(report, repositoryRoot);
+  const sizeMetric = report.metrics?.find((metric) => metric.id === 'active-context-size');
+  if (!sizeMetric) {
+    errors.push('active-context-size metric is missing');
   } else {
-    if (!Array.isArray(m.checks) || m.checks.length < 1)
-      error(`Metric ${m.id} missing checks array`);
-    /** @type {Set<string>} */
-    const seenCheckIds = new Set();
-    let totalWeight = 0;
-    for (const c of m.checks) {
-      if (seenCheckIds.has(c.id)) error(`Duplicate check id ${c.id} in metric ${m.id}`);
-      seenCheckIds.add(c.id);
-      if (!['pass', 'partial', 'fail'].includes(c.result))
-        error(`Check ${c.id} invalid result: ${c.result}`);
-      if (typeof c.weight !== 'number' || c.weight <= 0)
-        error(`Check ${c.id} missing or invalid weight`);
-      totalWeight += c.weight;
-      if (!c.evidence || typeof c.evidence !== 'string') error(`Check ${c.id} missing evidence`);
+    if (
+      JSON.stringify(sizeMetric.details?.measuredFiles) !== JSON.stringify(expected.measuredFiles)
+    ) {
+      errors.push('active-context-size measuredFiles are stale; run pnpm context:health');
     }
-    if (Math.abs(totalWeight - 1.0) > 0.01)
-      warn(`Metric ${m.id} check weights sum to ${totalWeight} (should be ~1.0)`);
+    if (sizeMetric.details?.characters !== expected.characters) {
+      errors.push('active-context-size characters are stale; run pnpm context:health');
+    }
+    if (sizeMetric.details?.estimatedTokens !== expected.estimatedTokens) {
+      errors.push('active-context-size estimatedTokens are stale; run pnpm context:health');
+    }
+    if (sizeMetric.status !== sizeStatus(expected.estimatedTokens)) {
+      errors.push('active-context-size status is stale; run pnpm context:health');
+    }
+    const expectedInterpretation =
+      `The declared effective context contains ${expected.characters.toLocaleString('en-US')} ` +
+      `characters (~${expected.estimatedTokens.toLocaleString('en-US')} estimated tokens).`;
+    if (sizeMetric.interpretation !== expectedInterpretation) {
+      errors.push('active-context-size interpretation is stale; run pnpm context:health');
+    }
+  }
+} catch (error) {
+  errors.push(error.message);
+}
+
+if (!Array.isArray(report.metrics) || report.metrics.length !== metricIds.size) {
+  errors.push(`metrics must contain exactly ${metricIds.size} entries`);
+}
+const seenMetricIds = new Set();
+for (const metric of report.metrics ?? []) {
+  if (!metricIds.has(metric.id)) errors.push(`unknown metric: ${metric.id}`);
+  if (seenMetricIds.has(metric.id)) errors.push(`duplicate metric: ${metric.id}`);
+  seenMetricIds.add(metric.id);
+  if (!['deterministic', 'agent-assessed'].includes(metric.assessmentType)) {
+    errors.push(`invalid assessmentType for ${metric.id}`);
+  }
+
+  if (metric.assessmentType !== 'agent-assessed') continue;
+  if (!Array.isArray(metric.checks) || metric.checks.length === 0) {
+    errors.push(`${metric.id} needs structured checks`);
+    continue;
+  }
+  const totalWeight = metric.checks.reduce((sum, check) => sum + check.weight, 0);
+  if (Math.abs(totalWeight - 1) > 0.0001) {
+    errors.push(`${metric.id} weights must total 1 (found ${totalWeight})`);
+  }
+
+  const checkIds = new Set();
+  for (const check of metric.checks) {
+    if (!check.id || checkIds.has(check.id))
+      errors.push(`${metric.id} has a missing or duplicate check id`);
+    checkIds.add(check.id);
+    if (!(check.result in RESULT_SCORES))
+      errors.push(`${check.id} has invalid result ${check.result}`);
+    if (!['positive', 'negative'].includes(check.impact)) {
+      errors.push(`${check.id} must classify impact as positive or negative`);
+    }
+    if (check.result === 'pass' && check.impact !== 'positive') {
+      errors.push(`${check.id} pass results must be positive contributors`);
+    }
+    if (check.result !== 'pass' && check.impact !== 'negative') {
+      errors.push(`${check.id} partial/fail results must be negative contributors`);
+    }
+    if (!(check.weight > 0 && check.weight <= 1)) errors.push(`${check.id} has invalid weight`);
+    if (!check.interpretation || !check.evidence?.observation) {
+      errors.push(`${check.id} must separate interpretation from observable evidence`);
+    }
+    if (!Array.isArray(check.evidence?.citations) || check.evidence.citations.length === 0) {
+      errors.push(`${check.id} needs at least one evidence citation`);
+    }
+    for (const citation of check.evidence?.citations ?? []) validateCitation(citation, check.id);
+  }
+
+  try {
+    const expected = calculateMetric(metric.checks);
+    if (metric.score !== expected.score || metric.status !== expected.status) {
+      errors.push(`${metric.id} score or status is stale; run pnpm context:health`);
+    }
+    if (
+      metric.checks.some(
+        (check, index) => check.contribution !== expected.checks[index].contribution,
+      )
+    ) {
+      errors.push(`${metric.id} contributions are stale; run pnpm context:health`);
+    }
+  } catch (error) {
+    errors.push(`${metric.id}: ${error.message}`);
   }
 }
 
-// Methodology
-if (!report.methodology || typeof report.methodology !== 'object')
-  error('Missing methodology section');
-if (!Array.isArray(report.methodology.deterministicMetrics))
-  error('methodology missing deterministicMetrics');
-if (!Array.isArray(report.methodology.agentAssessedMetrics))
-  error('methodology missing agentAssessedMetrics');
-
-// Limitations
-if (!Array.isArray(report.limitations) || report.limitations.length < 1)
-  error('Must have at least 1 limitation');
-
-// Summary
-console.log(`\nContext Health Report — Validation`);
-console.log(`Schema: ${report.schemaVersion}`);
-console.log(`Metrics: ${report.metrics.length}`);
-console.log(`Priorities: ${report.priorities.length}`);
-console.log(`\nScores:`);
-for (const m of report.metrics) {
-  const scoreStr = m.score !== null ? `${(m.score * 100).toFixed(0)}%` : 'N/A';
-  console.log(`  ${m.label}: ${scoreStr} (${m.status}, ${m.assessmentType})`);
+if (
+  Object.entries(RESULT_SCORES).some(
+    ([result, score]) => report.methodology?.resultScores?.[result] !== score,
+  )
+) {
+  errors.push('methodology.resultScores does not match generator rules');
+}
+if (report.methodology?.tokenEstimation?.charactersPerToken !== TOKEN_ESTIMATE_CHARACTERS) {
+  errors.push('methodology.tokenEstimation does not match generator rules');
+}
+if (!Array.isArray(report.limitations) || report.limitations.length === 0) {
+  errors.push('limitations must contain at least one item');
 }
 
 if (errors.length > 0) {
-  console.log(`\n❌ ${errors.length} error(s):`);
-  for (const e of errors) console.log(`  - ${e}`);
-}
-if (warnings.length > 0) {
-  console.log(`\n⚠️  ${warnings.length} warning(s):`);
-  for (const w of warnings) console.log(`  - ${w}`);
+  console.error(`Context Health validation failed (${errors.length})`);
+  for (const message of errors) console.error(`- ${message}`);
+  process.exit(1);
 }
 
-console.log(`\n${errors.length > 0 ? 'FAILED' : 'PASSED'}`);
-process.exit(errors.length > 0 ? 1 : 0);
+console.log('Context Health report valid');
+console.log(`Audit revision: ${report.repositoryRevision}`);
+console.log(`Metrics: ${report.metrics.length}; priorities: ${report.priorities.length}`);
+
+function validateCitation(citation, checkId) {
+  if (!citation?.path || !citation?.section) {
+    errors.push(`${checkId} citation needs path and section`);
+    return;
+  }
+  const path = resolve(repositoryRoot, citation.path);
+  if (!existsSync(path)) {
+    errors.push(`${checkId} evidence path does not exist: ${citation.path}`);
+    return;
+  }
+  const source = readFileSync(path, 'utf8');
+  if (!source.includes(citation.section)) {
+    errors.push(`${checkId} evidence section not found in ${citation.path}: ${citation.section}`);
+  }
+}
+
+function fail(message) {
+  console.error(`Context Health validation failed: ${message}`);
+  process.exit(1);
+}

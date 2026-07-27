@@ -29,7 +29,7 @@
     "storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
     "context:health:validate": "node scripts/validate-context-health.mjs",
-    "context:health": "node scripts/validate-context-health.mjs && echo \"Report valid. To update findings, edit src/data/context-health.json directly.\""
+    "context:health": "node scripts/generate-context-health.mjs"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
@@ -54,7 +54,6 @@
     "@storybook/addon-a11y": "10.5.2",
     "@storybook/addon-docs": "10.5.2",
     "@storybook/builder-vite": "10.5.2",
-    "@types/node": "^26.1.2",
     "astro-expressive-code": "^0.43.1",
     "astro-pagefind": "^2.0.0",
     "fallow": "^2.91.0",

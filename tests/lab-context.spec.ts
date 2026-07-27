@@ -1,203 +1,366 @@
-/** Context Health report tests. */
-import { existsSync, readFileSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-const HEALTH_PATH = '/lab/context/';
+const healthPath = '/lab/context/';
+const reportPath = 'src/data/context-health.json';
+const generatorPath = 'scripts/generate-context-health.mjs';
+const validatorPath = 'scripts/validate-context-health.mjs';
+const resultScores = { pass: 1, partial: 0.5, fail: 0 } as const;
 
-// ─── Report schema validation ───────────────────────────────────────────────
-
-test('report JSON exists and is valid', () => {
-  const path = 'src/data/context-health.json';
-  expect(existsSync(path)).toBe(true);
-  const raw = readFileSync(path, 'utf-8');
-  const report = JSON.parse(raw);
-  expect(report.schemaVersion).toBeTruthy();
-  expect(report.overallSummary).toBeTruthy();
-  expect(Array.isArray(report.metrics)).toBe(true);
-  expect(report.metrics.length).toBeGreaterThanOrEqual(1);
-});
-
-test('all metric IDs are unique', () => {
-  const report = JSON.parse(readFileSync('src/data/context-health.json', 'utf-8'));
-  const ids = report.metrics.map((m) => m.id);
-  expect(new Set(ids).size).toBe(ids.length);
-});
-
-test('all metric scores are within range or null', () => {
-  const report = JSON.parse(readFileSync('src/data/context-health.json', 'utf-8'));
-  for (const m of report.metrics) {
-    if (m.score !== null) {
-      expect(m.score).toBeGreaterThanOrEqual(0);
-      expect(m.score).toBeLessThanOrEqual(1);
-    }
+type Result = keyof typeof resultScores;
+interface TestCheck {
+  weight: number;
+  result: Result;
+  contribution: number;
+  interpretation: string;
+  evidence: {
+    observation: string;
+    citations: Array<{ path: string; section: string }>;
+  };
+}
+interface TestMetric {
+  id: string;
+  label: string;
+  assessmentType: 'agent-assessed' | 'deterministic';
+  score: number | null;
+  checks?: TestCheck[];
+  details?: {
+    characters: number;
+    estimatedTokens: number;
+    measuredFiles: Array<{ path: string; characters: number }>;
+  };
+}
+interface TestReport {
+  schemaVersion: string;
+  overallSummary: string;
+  priorities: unknown[];
+  effectiveContext: { files: string[] };
+  metrics: TestMetric[];
+}
+type ContrastMeasurements = Record<
+  string,
+  {
+    body: number;
+    metricValue: number;
+    status: number;
+    positive: number;
+    negative: number;
+    priority: number;
+    summary: number;
+    focus: number;
   }
-});
+>;
 
-test('evidence file paths exist in the repository', () => {
-  const report = JSON.parse(readFileSync('src/data/context-health.json', 'utf-8'));
-  for (const m of report.metrics) {
-    if (m.details?.measuredFiles) {
-      for (const f of m.details.measuredFiles) {
-        expect(existsSync(f.path)).toBe(true);
+function readReport(): TestReport {
+  return JSON.parse(readFileSync(reportPath, 'utf8')) as TestReport;
+}
+
+function withTemporaryReport(run: (path: string) => void) {
+  const directory = mkdtempSync(join(tmpdir(), 'context-health-'));
+  const path = join(directory, 'report.json');
+  try {
+    writeFileSync(path, readFileSync(reportPath));
+    run(path);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
+
+test('report schema, score calculations, and evidence citations are valid', () => {
+  const report = readReport();
+  expect(report.schemaVersion).toBe('2.0.0');
+  expect(report.metrics.map((metric) => metric.id)).toEqual([
+    'context-precision',
+    'context-recall',
+    'sufficiency',
+    'authority-clarity',
+    'active-context-size',
+  ]);
+  expect(report.priorities.length).toBeGreaterThan(0);
+  expect(report.priorities.length).toBeLessThanOrEqual(3);
+
+  for (const metric of report.metrics.filter((item) => item.assessmentType === 'agent-assessed')) {
+    const checks = metric.checks ?? [];
+    const expectedScore = checks.reduce(
+      (sum, check) => sum + check.weight * resultScores[check.result],
+      0,
+    );
+    expect(checks.reduce((sum, check) => sum + check.weight, 0)).toBeCloseTo(1, 8);
+    expect(metric.score).not.toBeNull();
+    if (metric.score === null) throw new Error(`${metric.id} score missing`);
+    expect(metric.score).toBeCloseTo(expectedScore, 3);
+    for (const check of checks) {
+      expect(check.contribution).toBeCloseTo(check.weight * resultScores[check.result], 3);
+      expect(check.evidence.observation).toBeTruthy();
+      expect(check.interpretation).toBeTruthy();
+      expect(check.evidence.citations.length).toBeGreaterThan(0);
+      for (const citation of check.evidence.citations) {
+        expect(existsSync(citation.path), citation.path).toBe(true);
+        expect(
+          readFileSync(citation.path, 'utf8'),
+          `${citation.path}: ${citation.section}`,
+        ).toContain(citation.section);
       }
     }
   }
 });
 
-test('context-size values are finite and nonnegative', () => {
-  const report = JSON.parse(readFileSync('src/data/context-health.json', 'utf-8'));
-  const sizeMetric = report.metrics.find((m) => m.id === 'active-context-size');
-  expect(sizeMetric).toBeTruthy();
-  expect(sizeMetric.details.characters).toBeGreaterThan(0);
-  expect(sizeMetric.details.estimatedTokens).toBeGreaterThan(0);
+test('generator measures characters, derives scores, and is idempotent', () => {
+  withTemporaryReport((path) => {
+    const stale = JSON.parse(readFileSync(path, 'utf8')) as TestReport;
+    const staleSize = stale.metrics.find((metric) => metric.id === 'active-context-size');
+    const stalePrecision = stale.metrics.find((metric) => metric.id === 'context-precision');
+    expect(staleSize?.details).toBeTruthy();
+    expect(stalePrecision).toBeTruthy();
+    if (!staleSize?.details || !stalePrecision) throw new Error('required metrics missing');
+    staleSize.details.characters = 1;
+    stalePrecision.score = 0;
+    writeFileSync(path, `${JSON.stringify(stale, null, 2)}\n`);
+
+    const env = { ...process.env, CONTEXT_HEALTH_REPORT_PATH: path };
+    execFileSync(process.execPath, [generatorPath], { env });
+    const first = readFileSync(path, 'utf8');
+    execFileSync(process.execPath, [generatorPath], { env });
+    const second = readFileSync(path, 'utf8');
+    expect(second).toBe(first);
+
+    const generated = JSON.parse(second) as TestReport;
+    const expectedCharacters = generated.effectiveContext.files.reduce(
+      (sum, file) => sum + readFileSync(file, 'utf8').length,
+      0,
+    );
+    const size = generated.metrics.find((metric) => metric.id === 'active-context-size');
+    expect(size?.details?.characters).toBe(expectedCharacters);
+    expect(size?.details?.estimatedTokens).toBe(Math.ceil(expectedCharacters / 4));
+    expect(generated.metrics.find((metric) => metric.id === 'context-precision')?.score).toBe(
+      0.775,
+    );
+  });
 });
 
-// ─── Route availability ─────────────────────────────────────────────────────
+test('validator rejects stale deterministic measurements', () => {
+  withTemporaryReport((path) => {
+    const stale = JSON.parse(readFileSync(path, 'utf8')) as TestReport;
+    const size = stale.metrics.find((metric) => metric.id === 'active-context-size');
+    expect(size?.details).toBeTruthy();
+    if (!size?.details) throw new Error('active-context-size details missing');
+    size.details.measuredFiles[0].characters += 1;
+    writeFileSync(path, `${JSON.stringify(stale, null, 2)}\n`);
 
-test('the /lab/context/ route loads with correct heading', async ({ page }) => {
-  await page.goto(HEALTH_PATH);
-  await expect(page.locator('h1')).toContainText('Context Health');
+    const result = spawnSync(process.execPath, [validatorPath], {
+      encoding: 'utf8',
+      env: { ...process.env, CONTEXT_HEALTH_REPORT_PATH: path },
+    });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('measuredFiles are stale');
+  });
+});
+
+test('report renders the overview, priorities, metrics, and contributor groups', async ({
+  page,
+}) => {
+  const report = readReport();
+  await page.goto(healthPath);
+
   await expect(page).toHaveTitle(/Context Health/);
-});
+  await expect(page.locator('h1')).toHaveText('Context Health');
+  await expect(page.locator('.ch-overview__summary')).toHaveText(report.overallSummary);
+  await expect(page.locator('.ch-priority__recommendation')).toHaveCount(report.priorities.length);
+  await expect(page.locator('.ch-score')).toHaveCount(report.metrics.length);
+  for (const metric of report.metrics) {
+    await expect(page.locator('.ch-score__label', { hasText: metric.label })).toHaveCount(1);
+  }
 
-test('the page has robots noindex metadata', async ({ page }) => {
-  await page.goto(HEALTH_PATH);
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, follow');
-});
-
-// ─── Required sections ──────────────────────────────────────────────────────
-
-test('page displays health overview summary', async ({ page }) => {
-  await page.goto(HEALTH_PATH);
-  const report = JSON.parse(readFileSync('src/data/context-health.json', 'utf-8'));
-  await expect(page.locator('.ch-overview__summary')).toContainText(
-    report.overallSummary.slice(0, 40),
-  );
-});
-
-test('page displays metric score cards', async ({ page }) => {
-  await page.goto(HEALTH_PATH);
-  const cards = page.locator('.ch-score');
-  const count = await cards.count();
-  expect(count).toBeGreaterThanOrEqual(1);
-});
-
-test('page displays strengths list', async ({ page }) => {
-  await page.goto(HEALTH_PATH);
-  const report = JSON.parse(readFileSync('src/data/context-health.json', 'utf-8'));
-  for (const s of report.strengths) {
-    await expect(page.locator('.ch-overview__block').first()).toContainText(s.slice(0, 30));
+  const assessedDetails = page
+    .locator('.ch-details details')
+    .filter({ has: page.locator('.ch-contributors') });
+  expect(await assessedDetails.count()).toBe(4);
+  for (const detail of await assessedDetails.all()) {
+    await detail.locator('summary').click();
+    await expect(detail.getByRole('heading', { name: 'Positive contributors' })).toBeVisible();
+    await expect(detail.getByRole('heading', { name: 'Negative contributors' })).toBeVisible();
+    expect(await detail.locator('.ch-check--positive').count()).toBeGreaterThan(0);
+    expect(await detail.locator('.ch-check--negative').count()).toBeGreaterThan(0);
   }
 });
 
-test('page displays prioritized improvements', async ({ page }) => {
-  await page.goto(HEALTH_PATH);
-  const report = JSON.parse(readFileSync('src/data/context-health.json', 'utf-8'));
-  for (const p of report.priorities) {
-    await expect(page.locator('.ch-overview__block').nth(1)).toContainText(p.finding.slice(0, 30));
-  }
+test('native details controls work with JavaScript disabled', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto(healthPath);
+  const details = page.locator('.ch-details details').first();
+  await expect(details).not.toHaveAttribute('open', '');
+  await details.locator('summary').click();
+  await expect(details).toHaveAttribute('open', '');
+  await context.close();
 });
 
-// ─── Native details/summary ─────────────────────────────────────────────────
-
-test('metric details use native details/summary elements', async ({ page }) => {
-  await page.goto(HEALTH_PATH);
-  const details = page.locator('.ch-details details');
-  const count = await details.count();
-  expect(count).toBeGreaterThanOrEqual(1);
-
-  // Open the first one and verify content appears
-  await details.first().locator('summary').click();
-  await expect(details.first()).toHaveAttribute('open', '');
-});
-
-// ─── Positive and negative contributors ─────────────────────────────────────
-
-test('checks render with result labels', async ({ page }) => {
-  await page.goto(HEALTH_PATH);
-  // Open a metric detail to reveal checks
-  await page.locator('.ch-details details').first().locator('summary').click();
-  const checks = page.locator('.ch-check');
-  const count = await checks.count();
-  if (count > 0) {
-    // At least one check should have a result
-    await expect(checks.first().locator('.ch-check__result')).toBeVisible();
-  }
-});
-
-// ─── No old simulator controls ──────────────────────────────────────────────
-
-test('no task radio buttons are present', async ({ page }) => {
-  await page.goto(HEALTH_PATH);
-  const radios = page.locator('input[type="radio"]');
-  await expect(radios).toHaveCount(0);
-});
-
-test('no document checkboxes are present', async ({ page }) => {
-  await page.goto(HEALTH_PATH);
-  const checkboxes = page.locator('input[type="checkbox"]');
-  await expect(checkboxes).toHaveCount(0);
-});
-
-test('no preset selector is present', async ({ page }) => {
-  await page.goto(HEALTH_PATH);
-  await expect(page.locator('.preset-list')).toHaveCount(0);
-});
-
-// ─── No client JavaScript on the report page ────────────────────────────────
-
-test('report page does not load lab-specific JavaScript', async ({ page }) => {
-  await page.goto(HEALTH_PATH);
-  const scripts = await page
+test('obsolete simulator controls and client JavaScript are absent', async ({ page }) => {
+  await page.goto(healthPath);
+  await expect(page.locator('input, button, select')).toHaveCount(0);
+  await expect(page.locator('.preset-list, .experiment, #app')).toHaveCount(0);
+  const scriptSources = await page
     .locator('script[src]')
-    .evaluateAll((s) => s.map((el) => el?.getAttribute('src')));
-  const labScripts = scripts.filter((src) => src?.includes('context'));
-  expect(labScripts).toEqual([]);
-});
-
-test('report page has no inline lab controller code', async ({ page }) => {
-  await page.goto(HEALTH_PATH);
+    .evaluateAll((scripts) => scripts.map((script) => script.getAttribute('src')));
+  expect(scriptSources.filter((source) => /context|lab-context/i.test(source ?? ''))).toEqual([]);
+  const loadedScripts = await page.evaluate(() =>
+    performance
+      .getEntriesByType('resource')
+      .filter((entry) => (entry as PerformanceResourceTiming).initiatorType === 'script')
+      .map((entry) => entry.name),
+  );
+  expect(loadedScripts.filter((source) => /context|lab-context/i.test(source))).toEqual([]);
   const html = await page.content();
   expect(html).not.toContain('runFixtureAnalysis');
-  expect(html).not.toContain('renderTaskSelector');
-  expect(html).not.toContain('renderPresetSelector');
+  expect(html).not.toContain('controller');
+  expect(html).not.toContain('ch-page__script');
 });
 
-// ─── Asset isolation from ordinary pages ────────────────────────────────────
-
-test('homepage does not load context-health CSS', async ({ page }) => {
-  await page.goto('/');
-  const links = await page
+test('Context Health CSS is a guarded page-only asset', async ({ page }) => {
+  await page.goto(healthPath);
+  const stylesheets = await page
     .locator('link[rel="stylesheet"]')
-    .evaluateAll((els) => els.map((el) => el?.getAttribute('href')));
-  const healthCss = links.filter((h) => h?.includes('context'));
-  expect(healthCss).toEqual([]);
+    .evaluateAll((links) => links.map((link) => (link as HTMLLinkElement).href));
+  expect(stylesheets.length).toBeGreaterThan(0);
+  const contents = await Promise.all(
+    stylesheets.map(async (href) => ({ href, css: await (await fetch(href)).text() })),
+  );
+  const contextAssets = contents.filter(({ css }) => css.includes('.ch-page'));
+  expect(
+    contextAssets,
+    'expected one generated stylesheet containing Context Health rules',
+  ).toHaveLength(1);
+  const contextHref = contextAssets[0].href;
+
+  for (const path of ['/', '/blog/250mm-trading-card-box/', '/search/']) {
+    await page.goto(path);
+    const linked = await page
+      .locator('link[rel="stylesheet"]')
+      .evaluateAll((links) => links.map((link) => (link as HTMLLinkElement).href));
+    expect(linked, `${path} must not load Context Health CSS`).not.toContain(contextHref);
+  }
 });
 
-test('blog article does not load context-health assets', async ({ page }) => {
-  await page.goto('/blog/250mm-trading-card-box/');
-  const html = await page.content();
-  expect(html).not.toContain('Context Health');
+test('ordinary production pages do not load Sentry resources', async ({ page }) => {
+  for (const path of ['/', '/blog/250mm-trading-card-box/', '/search/']) {
+    await page.goto(path);
+    const resources = await page.evaluate(() =>
+      performance.getEntriesByType('resource').map((entry) => entry.name),
+    );
+    expect(resources.filter((url) => /sentry|spotlight/i.test(url))).toEqual([]);
+  }
 });
 
-// ─── Accessibility ─────────────────────────────────────────────────────────
-
-test('no critical axe violations', async ({ page }) => {
-  const AxeBuilder = await import('@axe-core/playwright').then((m) => m.default);
-  await page.goto(HEALTH_PATH);
-  // color-contrast disabled: the site uses OKLCH tokens that axe's sRGB-based
-  // contrast checker flags incorrectly in some cases. The project validates
-  // contrast separately via Lighthouse and manual WCAG 2 AA checks.
-  // See tests/accessibility.spec.ts for the same exclusion on all other pages.
-  const results = await new AxeBuilder({ page }).disableRules(['color-contrast']).analyze();
+test('axe passes with color contrast enabled', async ({ page }) => {
+  await page.goto(healthPath);
+  const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
 });
 
-// ─── Responsive ─────────────────────────────────────────────────────────────
+test('representative text and focus indicators meet contrast thresholds', async ({ page }) => {
+  await page.goto(healthPath);
+  const measurements: ContrastMeasurements = {};
 
-test('no horizontal overflow at narrow viewport', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto(HEALTH_PATH);
-  const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
-  expect(scrollWidth).toBeLessThanOrEqual(390);
+  for (const theme of ['light', 'dark']) {
+    await page
+      .locator('html')
+      .evaluate((html, value) => html.setAttribute('data-theme', value), theme);
+    await page.locator('.ch-details summary').first().focus();
+    measurements[theme] = await page.evaluate(() => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      if (!context) throw new Error('2D canvas unavailable');
+
+      const rgba = (value: string): number[] => {
+        context.clearRect(0, 0, 1, 1);
+        context.fillStyle = '#000';
+        context.fillStyle = value;
+        context.fillRect(0, 0, 1, 1);
+        return [...context.getImageData(0, 0, 1, 1).data];
+      };
+      const luminance = ([r, g, b]: number[]) => {
+        const channels = [r, g, b].map((channel) => {
+          const value = channel / 255;
+          return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+      };
+      const ratio = (foreground: string, background: string) => {
+        const first = luminance(rgba(foreground));
+        const second = luminance(rgba(background));
+        return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+      };
+      const opaqueBackground = (element: Element | null): string => {
+        let current = element;
+        while (current) {
+          const background = getComputedStyle(current).backgroundColor;
+          if (rgba(background)[3] === 255) return background;
+          current = current.parentElement;
+        }
+        return getComputedStyle(document.body).backgroundColor;
+      };
+      const textRatio = (selector: string) => {
+        const element = document.querySelector(selector);
+        if (!element) throw new Error(`Missing contrast target: ${selector}`);
+        return ratio(getComputedStyle(element).color, opaqueBackground(element));
+      };
+
+      const summary = document.querySelector('.ch-details summary');
+      if (!summary) throw new Error('Missing summary');
+      return {
+        body: textRatio('.ch-overview__summary'),
+        metricValue: textRatio('.ch-score__value'),
+        status: textRatio('.ch-status'),
+        positive: textRatio('.ch-check--positive .ch-check__result'),
+        negative: textRatio('.ch-check--negative .ch-check__result'),
+        priority: textRatio('.ch-priority__recommendation'),
+        summary: textRatio('.ch-details summary'),
+        focus: ratio(
+          getComputedStyle(summary).outlineColor,
+          opaqueBackground(summary.parentElement),
+        ),
+      };
+    });
+  }
+
+  console.log(`Context Health contrast ratios: ${JSON.stringify(measurements)}`);
+  for (const theme of Object.values(measurements)) {
+    expect(theme.metricValue).toBeGreaterThanOrEqual(3);
+    expect(theme.focus).toBeGreaterThanOrEqual(3);
+    const normalTextKeys = [
+      'body',
+      'status',
+      'positive',
+      'negative',
+      'priority',
+      'summary',
+    ] as const;
+    for (const key of normalTextKeys) {
+      expect(theme[key], key).toBeGreaterThanOrEqual(4.5);
+    }
+  }
 });
+
+for (const viewport of [
+  { name: 'mobile', width: 390, height: 844 },
+  { name: 'tablet', width: 768, height: 1024 },
+  { name: 'desktop', width: 1280, height: 900 },
+]) {
+  test(`${viewport.name} layout is readable without page overflow`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto(healthPath);
+    const dimensions = await page.evaluate(() => ({
+      client: document.documentElement.clientWidth,
+      scroll: document.documentElement.scrollWidth,
+    }));
+    expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.client);
+    await expect(page.locator('.ch-score').first()).toBeVisible();
+    await expect(page.locator('.ch-details summary').first()).toBeVisible();
+  });
+}

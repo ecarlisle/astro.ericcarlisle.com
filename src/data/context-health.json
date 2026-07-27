@@ -1,78 +1,148 @@
 {
-  "schemaVersion": "1.0.0",
-  "generatedAt": "2026-07-27T14:00:00.000Z",
-  "repositoryRevision": "main",
-  "overallSummary": "The repository provides a well-organized multi-layer agent context. Core routing is strong, and most key areas have dedicated documentation. Primary risks are context size, limited duplication, and a few coverage gaps in peripheral areas.",
+  "schemaVersion": "2.0.0",
+  "auditedAt": "2026-07-27",
+  "repositoryRevision": "77093ed",
+  "effectiveContext": {
+    "name": "Context Health implementation audit",
+    "selectionRule": "Files explicitly required by AGENTS.md for a significant Astro UI implementation: repository authority, routed workflow and quality documentation, and the mandatory implementation/UI skills.",
+    "files": [
+      "AGENTS.md",
+      "docs/architecture.md",
+      "docs/performance-seo-accessibility.md",
+      "docs/testing.md",
+      "docs/agent-workflow.md",
+      "docs/change-policy.md",
+      "docs/reviewer-checklist.md",
+      ".agents/skills/agent-safe-change/SKILL.md",
+      ".agents/skills/astro-static-implementation/SKILL.md",
+      ".agents/skills/performance-budget/SKILL.md",
+      ".agents/skills/accessibility/SKILL.md",
+      ".agents/skills/design-system-css/SKILL.md"
+    ]
+  },
+  "overallSummary": "The audited repository context has strong authority and task routing, and it covers the work needed for a static Astro UI change. Its main weaknesses are avoidable breadth in skills required for every implementation, indirect discovery for a few workflows, and repeated command summaries that require manual synchronization.",
   "strengths": [
-    "AGENTS.md provides a clear authority hierarchy and explicit routing to skills, docs, and configuration.",
-    "Skills are well-scoped, task-specific, and include verification steps.",
-    "Documentation is organized by purpose (architecture, content, deployment, testing, decisions, design system)."
+    "AGENTS.md explicitly distinguishes coding-agent authority from human-facing documentation and names source-of-truth files.",
+    "Change-type routing and task-specific skills make most architecture, UI, accessibility, and validation guidance discoverable.",
+    "The implementation guidance consistently favors static Astro output, semantic HTML, minimal JavaScript, and proportionate validation."
   ],
   "priorities": [
     {
       "priority": 1,
-      "finding": "Reduce duplicated guidance across AGENTS.md, README.md, and testing.md — command tables and notes appear in all three files with minor variations.",
-      "recommendation": "Establish AGENTS.md as the sole source for agent-facing commands and threshold references. Replace tables in other files with links to AGENTS.md."
+      "finding": "Every implementation task is told to consult the full performance skill, even when the change does not affect dependencies, scripts, media, or interactive UI.",
+      "recommendation": "Keep the safe-change and Astro skills mandatory, but route the performance skill only for the change types listed in its own trigger scope."
     },
     {
       "priority": 2,
-      "finding": "Active context size is high (~41K estimated tokens) for the standard agent context path. The Figma agent brief alone is ~26KB and rarely relevant.",
-      "recommendation": "Move the Figma brief out of the default agent context path into a task-specific reference. Consider splitting or summarizing other large docs."
+      "finding": "The contact-worker route points to a directory with no local README, while the actual workflow is in deployment documentation.",
+      "recommendation": "Add a small contact-worker README that links to the canonical deployment sections, then route AGENTS.md to that entry point."
     },
     {
       "priority": 3,
-      "finding": "Finding: Contact-worker documentation lives in docs/deployment.md but is not independently discoverable from the context path.",
-      "recommendation": "Add an explicit routing entry in AGENTS.md for contact-worker changes, or create a separate contact-worker docs file linked from deployment.md and AGENTS.md."
+      "finding": "Command summaries are repeated in AGENTS.md, README.md, and docs/testing.md even though package.json is authoritative.",
+      "recommendation": "Add a lightweight consistency check or generate the summaries from package.json so audience-specific copies cannot drift."
     }
   ],
   "metrics": [
     {
       "id": "context-precision",
       "label": "Context Precision",
-      "score": 0.72,
+      "score": 0.775,
       "status": "needs-attention",
-      "interpretation": "Most context documents are relevant, but several files (figma brief, todo list, project overview) add marginal value for common tasks.",
+      "interpretation": "Most loaded guidance is directly useful for this work, with some breadth and repetition that are not necessary for every implementation.",
       "assessmentType": "agent-assessed",
       "checks": [
         {
           "id": "cp-1",
-          "label": "Core routing files are directly relevant to agent tasks",
+          "label": "Change types route to focused documentation",
           "weight": 0.3,
           "result": "pass",
-          "score": 1.0,
-          "evidence": "AGENTS.md, README.md, and all skills serve clear agent-task purposes."
+          "impact": "positive",
+          "interpretation": "The routing table limits most documentation loading to the kind of change being made.",
+          "evidence": {
+            "observation": "The table maps content, architecture, styling, schema, deployment, contact-worker, and workflow changes to different references.",
+            "citations": [
+              {
+                "path": "AGENTS.md",
+                "section": "## Before making significant changes"
+              }
+            ]
+          },
+          "contribution": 0.3
         },
         {
           "id": "cp-2",
-          "label": "Documentation maps to specific change types without excessive scope",
+          "label": "Static UI guidance is scoped to the requested implementation",
           "weight": 0.25,
           "result": "pass",
-          "score": 1.0,
-          "evidence": "AGENTS.md 'Before making significant changes' table routes each change type to the correct doc."
+          "impact": "positive",
+          "interpretation": "The Astro, accessibility, and CSS skills all provide directly applicable constraints for this report page.",
+          "evidence": {
+            "observation": "The selected skills separately cover static rendering, native semantics, focus and contrast, and token-based styles.",
+            "citations": [
+              {
+                "path": ".agents/skills/astro-static-implementation/SKILL.md",
+                "section": "# Astro Static Implementation Skill"
+              },
+              {
+                "path": ".agents/skills/accessibility/SKILL.md",
+                "section": "Accessibility Review Skill"
+              },
+              {
+                "path": ".agents/skills/design-system-css/SKILL.md",
+                "section": "# Design System CSS Skill"
+              }
+            ]
+          },
+          "contribution": 0.25
         },
         {
           "id": "cp-3",
-          "label": "Design-system files are relevant without unnecessary breadth",
-          "weight": 0.2,
+          "label": "Always-required skills stay narrow for all implementation tasks",
+          "weight": 0.25,
           "result": "partial",
-          "score": 0.5,
-          "evidence": "docs/design-system/agent-guide.md and README.md are directly relevant. figma-agent-brief.md (26KB) is Figma-generation specific and adds context weight without proportional value."
+          "impact": "negative",
+          "interpretation": "The full performance playbook is relevant here but would add substantial unrelated context to many small implementation changes.",
+          "evidence": {
+            "observation": "AGENTS.md requires three skills for every implementation; the performance skill also covers dependencies, media, fonts, third-party resources, analytics, and animation.",
+            "citations": [
+              {
+                "path": "AGENTS.md",
+                "section": "## Skills"
+              },
+              {
+                "path": ".agents/skills/performance-budget/SKILL.md",
+                "section": "## Rules"
+              }
+            ]
+          },
+          "contribution": 0.125
         },
         {
           "id": "cp-4",
-          "label": "Context is free of off-topic or archived content",
-          "weight": 0.15,
+          "label": "Repeated command summaries avoid redundant context",
+          "weight": 0.2,
           "result": "partial",
-          "score": 0.5,
-          "evidence": "docs/todo.md and docs/project-overview.md are low-signal files for the agent context path. todo.md contains an unchecked pre-launch checklist; project-overview.md largely duplicates README.md."
-        },
-        {
-          "id": "cp-5",
-          "label": "Command tables do not inflate the relevant context",
-          "weight": 0.1,
-          "result": "partial",
-          "score": 0.3,
-          "evidence": "Command tables in AGENTS.md, README.md, and testing.md repeat similar content across three files, adding ~500 bytes of duplicated text."
+          "impact": "negative",
+          "interpretation": "The copies serve different audiences, but loading more than one repeats information without adding much task value.",
+          "evidence": {
+            "observation": "Three files contain overlapping command lists for typecheck, lint, build, Lighthouse, and related checks.",
+            "citations": [
+              {
+                "path": "AGENTS.md",
+                "section": "## Commands"
+              },
+              {
+                "path": "README.md",
+                "section": "## Primary Commands"
+              },
+              {
+                "path": "docs/testing.md",
+                "section": "## Available Checks"
+              }
+            ]
+          },
+          "contribution": 0.1
         }
       ]
     },
@@ -81,172 +151,364 @@
       "label": "Context Recall",
       "score": 0.85,
       "status": "healthy",
-      "interpretation": "Most context sources are reachable through AGENTS.md routing. A few areas lack direct routing.",
+      "interpretation": "Major guidance is reachable, but specifications and contact-worker operations require an extra discovery step.",
       "assessmentType": "agent-assessed",
       "checks": [
         {
           "id": "cr-1",
-          "label": "AGENTS.md routes to all major documentation areas",
+          "label": "Major change areas are routed from the authority file",
           "weight": 0.35,
           "result": "pass",
-          "score": 1.0,
-          "evidence": "The 'Before making significant changes' table and 'Skills' section cover architecture, content, styling, deployment, testing, content schema, and contact-worker areas."
+          "impact": "positive",
+          "interpretation": "The authority file exposes the principal documentation entry points needed for repository changes.",
+          "evidence": {
+            "observation": "AGENTS.md directly lists references for seven change areas and includes separate validation routing.",
+            "citations": [
+              {
+                "path": "AGENTS.md",
+                "section": "## Before making significant changes"
+              },
+              {
+                "path": "AGENTS.md",
+                "section": "## Validation"
+              }
+            ]
+          },
+          "contribution": 0.35
         },
         {
           "id": "cr-2",
-          "label": "Skills cover the declared task types",
-          "weight": 0.25,
-          "result": "pass",
-          "score": 1.0,
-          "evidence": "Nine skills (safe-change, astro-implementation, performance-budget, a11y, design-system-css, pagefind, seo-review, code-quality, copy-edit) match the listed categories."
+          "label": "Feature specifications are directly discoverable",
+          "weight": 0.15,
+          "result": "partial",
+          "impact": "negative",
+          "interpretation": "Specifications are covered, but only after following the workflow-document route.",
+          "evidence": {
+            "observation": "AGENTS.md routes agent workflow generally; docs/agent-workflow.md then instructs agents to check specs.",
+            "citations": [
+              {
+                "path": "AGENTS.md",
+                "section": "## Before making significant changes"
+              },
+              {
+                "path": "docs/agent-workflow.md",
+                "section": "### Standard Development Steps"
+              }
+            ]
+          },
+          "contribution": 0.075
         },
         {
           "id": "cr-3",
-          "label": "Design-system documentation is discoverable from the context path",
+          "label": "Contact-worker operations have a direct local entry point",
           "weight": 0.15,
-          "result": "pass",
-          "score": 1.0,
-          "evidence": "AGENTS.md routes to docs/architecture.md which lists design-system entry points. design-system/ directory has README.md, agent-guide.md, and inventory.json."
+          "result": "partial",
+          "impact": "negative",
+          "interpretation": "The worker is named in routing, but the target directory does not explain where its operational workflow lives.",
+          "evidence": {
+            "observation": "AGENTS.md points contact-worker changes to contact-worker/, while deployment commands and secrets are documented under Deployment and Operations.",
+            "citations": [
+              {
+                "path": "AGENTS.md",
+                "section": "| Contact worker | `contact-worker/` |"
+              },
+              {
+                "path": "docs/deployment.md",
+                "section": "## Contact Worker Deployment"
+              }
+            ]
+          },
+          "contribution": 0.075
         },
         {
           "id": "cr-4",
-          "label": "Contact-worker guidance is independently discoverable",
+          "label": "Design-system guidance is discoverable",
           "weight": 0.15,
-          "result": "partial",
-          "score": 0.4,
-          "evidence": "Contact worker guidance is embedded in docs/deployment.md without a dedicated routing entry from AGENTS.md. An agent must already know to look in deployment docs."
+          "result": "pass",
+          "impact": "positive",
+          "interpretation": "Architecture documentation names both the inventory and the agent guide as entry points.",
+          "evidence": {
+            "observation": "The sources-of-truth table links reusable components, shared styles, and design-system inventory to their canonical files.",
+            "citations": [
+              {
+                "path": "docs/architecture.md",
+                "section": "## Documentation and Sources of Truth"
+              }
+            ]
+          },
+          "contribution": 0.15
         },
         {
           "id": "cr-5",
-          "label": "Specifications are reachable",
-          "weight": 0.1,
-          "result": "partial",
-          "score": 0.5,
-          "evidence": "specs/ directory has a README.md explaining usage, but AGENTS.md does not reference specs/. Agents following only AGENTS.md may miss existing specifications."
+          "label": "Task-specific skills are exposed by change type",
+          "weight": 0.2,
+          "result": "pass",
+          "impact": "positive",
+          "interpretation": "The authority file distinguishes baseline implementation, UI, search, and metadata skill sets.",
+          "evidence": {
+            "observation": "AGENTS.md groups required skills under implementation, UI, search, and metadata/content route headings.",
+            "citations": [
+              {
+                "path": "AGENTS.md",
+                "section": "## Skills"
+              }
+            ]
+          },
+          "contribution": 0.2
         }
       ]
     },
     {
       "id": "sufficiency",
       "label": "Sufficiency",
-      "score": 0.88,
+      "score": 0.95,
       "status": "healthy",
-      "interpretation": "Repository guidance covers most common tasks well. Gaps exist in peripheral areas.",
+      "interpretation": "The selected context supports implementation and review end to end; contact-worker guidance is the clearest local documentation gap.",
       "assessmentType": "agent-assessed",
       "checks": [
         {
           "id": "sf-1",
-          "label": "Architecture and routes are documented",
+          "label": "Architecture and static-rendering constraints are documented",
           "weight": 0.2,
           "result": "pass",
-          "score": 1.0,
-          "evidence": "docs/architecture.md covers core areas, generated areas, integrations, and sources of truth."
+          "impact": "positive",
+          "interpretation": "The context explains the page, component, style, script, and generated-output boundaries.",
+          "evidence": {
+            "observation": "Architecture lists the core source areas and generated directories; the Astro skill requires static output and minimal client JavaScript.",
+            "citations": [
+              {
+                "path": "docs/architecture.md",
+                "section": "## Core Areas"
+              },
+              {
+                "path": ".agents/skills/astro-static-implementation/SKILL.md",
+                "section": "## Priorities"
+              }
+            ]
+          },
+          "contribution": 0.2
         },
         {
           "id": "sf-2",
-          "label": "Content authoring has complete workflow documentation",
+          "label": "Validation and browser-test workflows are documented",
           "weight": 0.2,
           "result": "pass",
-          "score": 1.0,
-          "evidence": "docs/content-authoring.md covers creating, drafting, previewing, publishing, unpublishing, and updating articles."
+          "impact": "positive",
+          "interpretation": "The context identifies the relevant type, lint, build, Lighthouse, and Playwright checks.",
+          "evidence": {
+            "observation": "Testing documentation describes available checks, when to run them, and how Playwright serves production output.",
+            "citations": [
+              {
+                "path": "docs/testing.md",
+                "section": "## Available Checks"
+              },
+              {
+                "path": "docs/testing.md",
+                "section": "## Playwright"
+              }
+            ]
+          },
+          "contribution": 0.2
         },
         {
           "id": "sf-3",
-          "label": "Testing and validation commands are documented",
+          "label": "Accessibility and contrast review have actionable guidance",
           "weight": 0.2,
           "result": "pass",
-          "score": 1.0,
-          "evidence": "docs/testing.md, AGENTS.md commands table, and validation table all cover the available checks."
+          "impact": "positive",
+          "interpretation": "Semantic controls, keyboard behavior, visible focus, contrast, and automated/manual verification are all addressed.",
+          "evidence": {
+            "observation": "The accessibility skill specifies native semantics, focus checks, color contrast, keyboard verification, and automated checks.",
+            "citations": [
+              {
+                "path": ".agents/skills/accessibility/SKILL.md",
+                "section": "Core Requirements"
+              },
+              {
+                "path": ".agents/skills/accessibility/SKILL.md",
+                "section": "Verification"
+              }
+            ]
+          },
+          "contribution": 0.2
         },
         {
           "id": "sf-4",
-          "label": "Design-system documentation covers component inventory",
+          "label": "Performance and asset-isolation review are covered",
           "weight": 0.15,
           "result": "pass",
-          "score": 1.0,
-          "evidence": "Inventory.json catalogs all reusable patterns. Agent-guide.md explains how to use it."
+          "impact": "positive",
+          "interpretation": "The performance skill provides the checks needed to prove page-specific CSS and zero feature JavaScript.",
+          "evidence": {
+            "observation": "The skill requires static rendering, page-scoped scripts, production bundle checks, and mobile verification.",
+            "citations": [
+              {
+                "path": ".agents/skills/performance-budget/SKILL.md",
+                "section": "## JavaScript Checks"
+              },
+              {
+                "path": ".agents/skills/performance-budget/SKILL.md",
+                "section": "## Verification"
+              }
+            ]
+          },
+          "contribution": 0.15
         },
         {
           "id": "sf-5",
-          "label": "Structured data and metadata are documented",
-          "weight": 0.1,
+          "label": "Review scope and stop conditions are explicit",
+          "weight": 0.15,
           "result": "pass",
-          "score": 1.0,
-          "evidence": "docs/structured-data.md covers schema location, report generation, and validation."
+          "impact": "positive",
+          "interpretation": "The workflow can distinguish required fixes from scope expansion and unrelated changes.",
+          "evidence": {
+            "observation": "The safe-change skill defines boundaries and stop conditions, while the reviewer checklist defines request-fit criteria.",
+            "citations": [
+              {
+                "path": ".agents/skills/agent-safe-change/SKILL.md",
+                "section": "## Boundaries"
+              },
+              {
+                "path": "docs/reviewer-checklist.md",
+                "section": "## 1. Request Fit"
+              }
+            ]
+          },
+          "contribution": 0.15
         },
         {
           "id": "sf-6",
-          "label": "Performance, SEO, and accessibility have documented quality standards",
+          "label": "Contact-worker changes are documented beside the worker source",
           "weight": 0.1,
           "result": "partial",
-          "score": 0.6,
-          "evidence": "docs/performance-seo-accessibility.md is brief (1243 bytes). The detailed guidance lives in skills (performance-budget, accessibility, seo-review). This split requires loading skills to get the complete picture."
-        },
-        {
-          "id": "sf-7",
-          "label": "Contact-worker changes have a dedicated documented workflow",
-          "weight": 0.05,
-          "result": "partial",
-          "score": 0.3,
-          "evidence": "Contact-worker changes are mentioned in change-policy.md and deployment.md but there is no dedicated contact-worker documentation entry in AGENTS.md."
+          "impact": "negative",
+          "interpretation": "Operational guidance is sufficient once found, but the worker directory itself lacks a documentation entry point.",
+          "evidence": {
+            "observation": "Deployment documentation covers local development, type checking, deploys, secrets, request flow, and rollback for the worker.",
+            "citations": [
+              {
+                "path": "docs/deployment.md",
+                "section": "## Contact Worker Deployment"
+              },
+              {
+                "path": "docs/deployment.md",
+                "section": "### Cloudflare Worker"
+              }
+            ]
+          },
+          "contribution": 0.05
         }
       ]
     },
     {
       "id": "authority-clarity",
       "label": "Authority Clarity",
-      "score": 0.78,
-      "status": "needs-attention",
-      "interpretation": "Most guidance has a clear canonical source, but several topics have duplicated instructions across files.",
+      "score": 0.925,
+      "status": "healthy",
+      "interpretation": "Authority is explicit for agent behavior, exact commands, and design-system sources; duplicated command summaries still create synchronization risk.",
       "assessmentType": "agent-assessed",
       "checks": [
         {
           "id": "ac-1",
-          "label": "Command definitions have a single authoritative source",
-          "weight": 0.25,
-          "result": "partial",
-          "score": 0.3,
-          "evidence": "Commands appear in AGENTS.md, README.md, and docs/testing.md. While each serves a different audience, agents encounter all three and must reconcile minor variations."
+          "label": "Agent instructions and human documentation have explicit roles",
+          "weight": 0.35,
+          "result": "pass",
+          "impact": "positive",
+          "interpretation": "The repository clearly names AGENTS.md as coding-agent authority and source files as exact behavior.",
+          "evidence": {
+            "observation": "Documentation boundaries and authority are stated in two dedicated sections at the top of AGENTS.md.",
+            "citations": [
+              {
+                "path": "AGENTS.md",
+                "section": "## Documentation Boundaries"
+              },
+              {
+                "path": "AGENTS.md",
+                "section": "## Documentation Authority"
+              }
+            ]
+          },
+          "contribution": 0.35
         },
         {
           "id": "ac-2",
-          "label": "Discipline checklists are not duplicated across files",
+          "label": "Exact package commands have a named source of truth",
           "weight": 0.2,
-          "result": "partial",
-          "score": 0.5,
-          "evidence": "Accessibility guidance appears in .agents/skills/accessibility/SKILL.md, docs/performance-seo-accessibility.md, and the design-system documentation. These are broadly consistent but use different language."
+          "result": "pass",
+          "impact": "positive",
+          "interpretation": "Readers can resolve command-summary differences against package.json.",
+          "evidence": {
+            "observation": "The authority table assigns exact scripts, schemas, routes, and behavior to package.json, source, and configuration files.",
+            "citations": [
+              {
+                "path": "AGENTS.md",
+                "section": "| `package.json`, `src/`, config files | Source of truth for exact scripts, schemas, variables, routes, and behavior. |"
+              }
+            ]
+          },
+          "contribution": 0.2
         },
         {
           "id": "ac-3",
-          "label": "Skills do not conflict with each other",
-          "weight": 0.2,
+          "label": "Protected-file authority is explicit",
+          "weight": 0.15,
           "result": "pass",
-          "score": 1.0,
-          "evidence": "Each skill is scoped to a specific task type. Design-system-css and accessibility skills cover distinct concerns. No contradictory guidance found."
+          "impact": "positive",
+          "interpretation": "The repository identifies files whose edits require explicit approval.",
+          "evidence": {
+            "observation": "AGENTS.md lists protected root configuration and documentation files and states the stop condition.",
+            "citations": [
+              {
+                "path": "AGENTS.md",
+                "section": "## Protected Files"
+              }
+            ]
+          },
+          "contribution": 0.15
         },
         {
           "id": "ac-4",
-          "label": "Documentation decisions have recorded rationale",
+          "label": "Command guidance has no synchronization ambiguity",
           "weight": 0.15,
-          "result": "pass",
-          "score": 1.0,
-          "evidence": "docs/decisions/ contains four ADRs covering architecture, contact-worker separation, Pagefind search, and structured data."
+          "result": "partial",
+          "impact": "negative",
+          "interpretation": "Authority is resolvable, but three manually maintained summaries can drift before a reader checks package.json.",
+          "evidence": {
+            "observation": "AGENTS.md, README.md, and testing documentation each maintain a command list with different coverage.",
+            "citations": [
+              {
+                "path": "AGENTS.md",
+                "section": "## Commands"
+              },
+              {
+                "path": "README.md",
+                "section": "## Primary Commands"
+              },
+              {
+                "path": "docs/testing.md",
+                "section": "## Available Checks"
+              }
+            ]
+          },
+          "contribution": 0.075
         },
         {
           "id": "ac-5",
-          "label": "Environment configuration has a single authoritative file",
-          "weight": 0.1,
+          "label": "Design-system sources of truth are explicit",
+          "weight": 0.15,
           "result": "pass",
-          "score": 1.0,
-          "evidence": ".env.example is the canonical template. No duplicated env documentation outside docs/deployment.md."
-        },
-        {
-          "id": "ac-6",
-          "label": "Content schema has clear, non-duplicated documentation",
-          "weight": 0.1,
-          "result": "pass",
-          "score": 1.0,
-          "evidence": "src/content.config.ts is authoritative. docs/content-model.md is a human-readable reference. No other schema documentation exists."
+          "impact": "positive",
+          "interpretation": "The context distinguishes implementation files, inventory, and human guidance.",
+          "evidence": {
+            "observation": "Architecture maps reusable components, shared styles, and the inventory to separate canonical files.",
+            "citations": [
+              {
+                "path": "docs/architecture.md",
+                "section": "## Documentation and Sources of Truth"
+              }
+            ]
+          },
+          "contribution": 0.15
         }
       ]
     },
@@ -254,73 +516,85 @@
       "id": "active-context-size",
       "label": "Active Context Size",
       "score": null,
-      "status": "needs-attention",
-      "interpretation": "The default agent context path is approximately 163,381 characters (~40,845 estimated tokens at 4 chars/token). This is large for a personal blog repository.",
+      "status": "healthy",
+      "interpretation": "The declared effective context contains 46,269 characters (~11,568 estimated tokens).",
       "assessmentType": "deterministic",
       "details": {
-        "characters": 163381,
-        "estimatedTokens": 40845,
-        "estimationMethod": "Approximately 4 characters per token for English prose. Not a real tokenizer.",
+        "characters": 46269,
+        "estimatedTokens": 11568,
         "measuredFiles": [
-          { "path": "AGENTS.md", "bytes": 9362 },
-          { "path": "README.md", "bytes": 3392 },
-          { "path": "docs/architecture.md", "bytes": 4516 },
-          { "path": "docs/testing.md", "bytes": 2101 },
-          { "path": "docs/content-model.md", "bytes": 1642 },
-          { "path": "docs/content-authoring.md", "bytes": 9711 },
-          { "path": "docs/editorial-guidelines.md", "bytes": 858 },
-          { "path": "docs/performance-seo-accessibility.md", "bytes": 1243 },
-          { "path": "docs/change-policy.md", "bytes": 4320 },
-          { "path": "docs/reviewer-checklist.md", "bytes": 6285 },
-          { "path": "docs/deployment.md", "bytes": 19618 },
-          { "path": "docs/structured-data.md", "bytes": 3107 },
-          { "path": "docs/agent-workflow.md", "bytes": 1358 },
-          { "path": "docs/author_profile.md", "bytes": 1706 },
-          { "path": "docs/content-status.md", "bytes": 1236 },
-          { "path": "docs/project-overview.md", "bytes": 735 },
-          { "path": "docs/todo.md", "bytes": 1510 },
-          { "path": "docs/design-system/README.md", "bytes": 5788 },
-          { "path": "docs/design-system/agent-guide.md", "bytes": 4398 },
-          { "path": "docs/design-system/figma-agent-brief.md", "bytes": 25969 },
-          { "path": "docs/decisions/001-static-first-astro-architecture.md", "bytes": 2172 },
           {
-            "path": "docs/decisions/002-separate-cloudflare-worker-for-contact-form.md",
-            "bytes": 2162
+            "path": "AGENTS.md",
+            "characters": 9312
           },
-          { "path": "docs/decisions/003-pagefind-for-static-site-search.md", "bytes": 1904 },
           {
-            "path": "docs/decisions/004-connected-schema-org-graph-for-structured-data.md",
-            "bytes": 1995
+            "path": "docs/architecture.md",
+            "characters": 4500
           },
-          { "path": ".agents/skills/agent-safe-change/SKILL.md", "bytes": 1345 },
-          { "path": ".agents/skills/astro-static-implementation/SKILL.md", "bytes": 1293 },
-          { "path": ".agents/skills/performance-budget/SKILL.md", "bytes": 8358 },
-          { "path": ".agents/skills/accessibility/SKILL.md", "bytes": 4923 },
-          { "path": ".agents/skills/design-system-css/SKILL.md", "bytes": 1265 },
-          { "path": ".agents/skills/pagefind-search/SKILL.md", "bytes": 1342 },
-          { "path": ".agents/skills/seo-review/SKILL.md", "bytes": 6918 },
-          { "path": ".agents/skills/code-quality/SKILL.md", "bytes": 4176 },
-          { "path": ".agents/skills/copy-edit/SKILL.md", "bytes": 21729 }
-        ]
+          {
+            "path": "docs/performance-seo-accessibility.md",
+            "characters": 1243
+          },
+          {
+            "path": "docs/testing.md",
+            "characters": 2083
+          },
+          {
+            "path": "docs/agent-workflow.md",
+            "characters": 1350
+          },
+          {
+            "path": "docs/change-policy.md",
+            "characters": 4314
+          },
+          {
+            "path": "docs/reviewer-checklist.md",
+            "characters": 6285
+          },
+          {
+            "path": ".agents/skills/agent-safe-change/SKILL.md",
+            "characters": 1345
+          },
+          {
+            "path": ".agents/skills/astro-static-implementation/SKILL.md",
+            "characters": 1291
+          },
+          {
+            "path": ".agents/skills/performance-budget/SKILL.md",
+            "characters": 8358
+          },
+          {
+            "path": ".agents/skills/accessibility/SKILL.md",
+            "characters": 4923
+          },
+          {
+            "path": ".agents/skills/design-system-css/SKILL.md",
+            "characters": 1265
+          }
+        ],
+        "estimationMethod": "Estimated tokens = ceil(characters / 4). This is an approximation, not a tokenizer result."
       }
     }
   ],
   "methodology": {
-    "deterministicMetrics": ["active-context-size"],
-    "agentAssessedMetrics": [
-      "context-precision",
-      "context-recall",
-      "sufficiency",
-      "authority-clarity"
-    ],
-    "scoring": "Each agent-assessed metric uses weighted checks (pass=1.0, partial=0.5, fail=0.0). The metric score is the weighted average of its checks. Assessments are based on repository inspection by a coding agent and reflect the agent's judgment. They are not authoritative measurements of context quality for all tasks or agents.",
-    "tokenEstimation": "Estimated tokens = total characters / 4. This approximates English prose tokenization (approximately 4 characters per token). It is not a real tokenizer and may vary significantly for code, markup, or non-English content."
+    "resultScores": {
+      "pass": 1,
+      "partial": 0.5,
+      "fail": 0
+    },
+    "scoreCalculation": "For each agent-assessed metric, contribution = check weight × result score. Weights total 1. The displayed score is the sum of contributions. Status thresholds are healthy at 85% or higher, needs attention at 70–84.9%, and at risk below 70%.",
+    "assessmentBoundary": "Check result, impact classification, interpretation, and evidence observations are agent-assessed. pnpm context:health deterministically derives contributions, metric scores, score statuses, file character counts, token estimates, size status, and the size interpretation.",
+    "tokenEstimation": {
+      "formula": "ceil(total characters / charactersPerToken)",
+      "charactersPerToken": 4,
+      "note": "This approximation is not a tokenizer result."
+    },
+    "activeContextThresholds": "Healthy at 24,000 estimated tokens or fewer, needs attention from 24,001 through 48,000, and at risk above 48,000. These are review bands for this report, not model context-window limits."
   },
   "limitations": [
-    "Semantic checks (precision, recall, sufficiency, authority) are assessed by a coding agent and reflect its judgment. Different agents or humans may reach different conclusions.",
-    "Token estimation uses a fixed 4-characters-per-token approximation. Real tokenizer output may differ by 20-30%.",
-    "The active context path is defined as the set of files a standard agent session would typically load. Actual context paths vary by task and agent configuration.",
-    "The report does not measure LLM output quality, factual accuracy, security posture, or production runtime behavior.",
-    "Findings are based on a single audit pass and may not catch all issues."
+    "Semantic findings are an agent assessment of repository guidance, not a measurement of model behavior or output quality.",
+    "The declared effective-context set is specific to this significant Astro UI audit; other tasks load different routed files and skills.",
+    "The four-characters-per-token estimate is deliberately simple and can differ materially from a real tokenizer.",
+    "The repository revision identifies the audited baseline commit. It does not claim to identify the later commit that contains this report."
   ]
 }
