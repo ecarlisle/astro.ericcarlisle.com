@@ -1,6 +1,6 @@
 # AstroBlog — Agent Guidance
 
-AGENTS.md is agent guidance. Context Health audits use [the rubric](docs/context-health-rubric.md).
+AGENTS.md is agent guidance.
 
 ## Documentation Boundaries
 
@@ -93,6 +93,7 @@ For implementation, diagnosis, planning, and code or documentation review, ident
 | Change static-site deployment or CI | [GitHub Pages Deployment](docs/deployment.md#github-pages-deployment) and `.github/workflows/astro.yml` |
 | Change environment variables | [Environment Variables Reference](docs/deployment.md#environment-variables-reference) and `.env.example` |
 | Change Contact Worker implementation, deployment, or secrets | `contact-worker/`, [Cloudflare Worker Configuration](docs/deployment.md#cloudflare-worker-configuration), and [Contact Worker Deployment](docs/deployment.md#contact-worker-deployment) |
+| Audit, score, update evidence for, or refresh Context Health | [Context Health refresh](.agents/skills/context-health-refresh/SKILL.md) and [Context Health scoring rubric](docs/context-health-rubric.md) |
 | Follow implementation or diagnosis workflow | [Standard Development Steps](docs/agent-workflow.md#standard-development-steps) |
 | Plan or evaluate change scope | [Change Policy](docs/change-policy.md) |
 | Review code or documentation | [Reviewer Checklist](docs/reviewer-checklist.md) |
@@ -141,6 +142,7 @@ For implementation work, always consult [agent-safe-change](.agents/skills/agent
 | Change CSS, tokens, spacing, typography, layout, themes, or component appearance | [design-system-css](.agents/skills/design-system-css/SKILL.md) |
 | Implement or modify site search | [pagefind-search](.agents/skills/pagefind-search/SKILL.md) |
 | Create or edit pages, posts, images, links, structured data, or page metadata | [seo-review](.agents/skills/seo-review/SKILL.md) |
+| Audit Context Health, change scores or evidence, or refresh the report | [context-health-refresh](.agents/skills/context-health-refresh/SKILL.md) |
 
 ## Storybook
 

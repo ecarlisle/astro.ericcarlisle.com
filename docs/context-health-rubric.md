@@ -6,6 +6,8 @@ This rubric governs how coding agents evaluate repository context and record Con
 
 The rubric does not measure actual LLM behavior or output quality. It also does not make semantic judgment objective. Context relevance, sufficiency, and authority still require an agent to interpret the declared task. The report makes that judgment visible instead of presenting it as deterministic.
 
+Use the [Context Health refresh skill](../.agents/skills/context-health-refresh/SKILL.md) for the operational refresh procedure. This rubric remains authoritative for scope, scoring, evidence, calibration, versioning, and comparison.
+
 ### Assessment boundaries
 
 Context Health separates five concepts:

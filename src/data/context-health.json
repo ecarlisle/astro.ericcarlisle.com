@@ -588,15 +588,15 @@
       "label": "Active Context Size",
       "score": null,
       "status": "healthy",
-      "interpretation": "The declared effective context contains 48,989 characters (~12,248 estimated tokens).",
+      "interpretation": "The declared effective context contains 49,275 characters (~12,319 estimated tokens).",
       "assessmentType": "deterministic",
       "details": {
-        "characters": 48989,
-        "estimatedTokens": 12248,
+        "characters": 49275,
+        "estimatedTokens": 12319,
         "measuredFiles": [
           {
             "path": "AGENTS.md",
-            "characters": 12032
+            "characters": 12318
           },
           {
             "path": "docs/architecture.md",

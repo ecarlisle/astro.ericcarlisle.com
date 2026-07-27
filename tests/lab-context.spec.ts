@@ -1,7 +1,7 @@
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { buildEvidenceUrl } from '../src/lib/context-health-evidence.mjs';
@@ -10,6 +10,7 @@ const healthPath = '/lab/context/';
 const reportPath = 'src/data/context-health.json';
 const generatorPath = 'scripts/generate-context-health.mjs';
 const validatorPath = 'scripts/validate-context-health.mjs';
+const refreshSkillPath = '.agents/skills/context-health-refresh/SKILL.md';
 const resultScores = { pass: 1, partial: 0.5, fail: 0 } as const;
 
 type Result = keyof typeof resultScores;
@@ -78,6 +79,85 @@ function withTemporaryReport(run: (path: string) => void) {
     rmSync(directory, { recursive: true, force: true });
   }
 }
+
+test('Context Health refresh skill is valid, linked, and conditionally routed', () => {
+  const skill = readFileSync(refreshSkillPath, 'utf8');
+  const frontmatter = skill.match(/^---\n([\s\S]+?)\n---/);
+  expect(frontmatter).toBeTruthy();
+  expect(frontmatter?.[1]).toContain('name: context-health-refresh');
+  expect(frontmatter?.[1]).toContain(
+    'description: Refreshes and validates the EricCarlisle.com Context Health report',
+  );
+  expect(frontmatter?.[1].split('\n')).toHaveLength(2);
+
+  for (const heading of [
+    '## Establish the audit',
+    '## Collect surgical evidence',
+    '## Record structured source references',
+    '## Generate and inspect the report',
+    '## Validate the page',
+    '## Report completion',
+    '## Permissions',
+  ]) {
+    expect(skill).toContain(heading);
+  }
+
+  const localLinks = [...skill.matchAll(/\]\(([^)]+)\)/g)].map((match) => match[1]);
+  expect(localLinks.length).toBeGreaterThan(0);
+  for (const link of localLinks) {
+    expect(
+      existsSync(resolve(dirname(refreshSkillPath), link.split('#')[0])),
+      `${refreshSkillPath}: ${link}`,
+    ).toBe(true);
+  }
+
+  const agents = readFileSync('AGENTS.md', 'utf8');
+  expect(agents).toContain(
+    '[Context Health refresh](.agents/skills/context-health-refresh/SKILL.md) and [Context Health scoring rubric](docs/context-health-rubric.md)',
+  );
+  expect(agents).toContain(
+    '[context-health-refresh](.agents/skills/context-health-refresh/SKILL.md)',
+  );
+  const rubric = readFileSync('docs/context-health-rubric.md', 'utf8');
+  expect(rubric).toContain(
+    '[Context Health refresh skill](../.agents/skills/context-health-refresh/SKILL.md)',
+  );
+  expect(
+    existsSync(
+      resolve(
+        dirname('docs/context-health-rubric.md'),
+        '../.agents/skills/context-health-refresh/SKILL.md',
+      ),
+    ),
+  ).toBe(true);
+
+  for (const field of ['`path`', '`startLine`', '`endLine`', '`section`', '`repositoryRevision`']) {
+    expect(skill).toContain(field);
+  }
+  expect(skill).toContain('?plain=1#L{startLine}-L{endLine}');
+  expect(skill).toContain('?plain=1#L{line}');
+  expect(skill).not.toContain('https://github.com');
+  expect(skill).toContain('Lock them before classifying evidence or assigning results');
+  expect(skill).toContain('increment the relevant methodology version');
+  expect(skill).toContain('do not compare with older reports');
+  expect(skill).toContain('does not replace the rubric’s scoring rules');
+
+  const scripts = JSON.parse(readFileSync('package.json', 'utf8')).scripts as Record<
+    string,
+    string
+  >;
+  for (const script of [
+    'context:health',
+    'context:health:validate',
+    'typecheck',
+    'lint',
+    'build',
+    'test:e2e',
+  ]) {
+    expect(scripts[script], `package script ${script}`).toBeTruthy();
+    expect(skill).toContain(`pnpm ${script}`);
+  }
+});
 
 test('report schema, score calculations, and evidence citations are valid', () => {
   const report = readReport();
@@ -172,6 +252,11 @@ test('evidence URL builder selects GitHub file, heading, and Markdown source vie
 test('generator measures characters, derives scores, and is idempotent', () => {
   withTemporaryReport((path) => {
     const stale = JSON.parse(readFileSync(path, 'utf8')) as TestReport;
+    const originalScores = Object.fromEntries(
+      stale.metrics
+        .filter((metric) => metric.assessmentType === 'agent-assessed')
+        .map((metric) => [metric.id, metric.score]),
+    );
     const staleSize = stale.metrics.find((metric) => metric.id === 'active-context-size');
     const stalePrecision = stale.metrics.find((metric) => metric.id === 'context-precision');
     expect(staleSize?.details).toBeTruthy();
@@ -202,6 +287,13 @@ test('generator measures characters, derives scores, and is idempotent', () => {
       0,
     );
     expect(precision?.score).toBeCloseTo(expectedPrecision, 3);
+    expect(
+      Object.fromEntries(
+        generated.metrics
+          .filter((metric) => metric.assessmentType === 'agent-assessed')
+          .map((metric) => [metric.id, metric.score]),
+      ),
+    ).toEqual(originalScores);
   });
 });
 
