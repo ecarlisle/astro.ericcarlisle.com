@@ -15,7 +15,7 @@ This file governs coding-agent behavior in this repository. It is the primary au
 |--------|------|
 | `README.md` | Human-facing repository gateway. Quick start, project overview, documentation map. |
 | `AGENTS.md` (this file) | Coding agent authority. Workflow, validation, protected files, skills. |
-| `docs/` | Canonical explanatory references (architecture, deployment, content, testing, etc.). |
+| `docs/` | Canonical guides; audits use [Context Health rubric](docs/context-health-rubric.md). |
 | `package.json`, `src/`, config files | Source of truth for exact scripts, schemas, variables, routes, and behavior. |
 | `.agents/skills/` | Procedural agent playbooks for specific task types. |
 | `public/llms.txt` | Describes the *published site* for LLM consumption. Not repository navigation. |
