@@ -1,6 +1,6 @@
 # AstroBlog — Agent Guidance
 
-This file governs coding-agent behavior in this repository. It is the primary authority for agents.
+AGENTS.md is agent guidance. Context Health audits use [the rubric](docs/context-health-rubric.md).
 
 ## Documentation Boundaries
 
