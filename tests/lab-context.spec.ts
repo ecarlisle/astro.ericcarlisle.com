@@ -1,780 +1,461 @@
+import { execFileSync, spawnSync } from 'node:child_process';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { analyzeContext } from '../src/lab/context/engine';
-import { runFixtureAnalysis } from '../src/lab/context/fixture-analysis';
-import { DOCUMENTS, PRESETS, TASKS } from '../src/lab/context/fixtures';
-import type { LabDocument } from '../src/lab/context/types';
 
-const LAB_PATH = '/lab/context/';
-const FIRST_CHECKBOX = '.doc-list__checkbox';
-const METRIC_CARD = '.metric-card';
+const healthPath = '/lab/context/';
+const reportPath = 'src/data/context-health.json';
+const generatorPath = 'scripts/generate-context-health.mjs';
+const validatorPath = 'scripts/validate-context-health.mjs';
+const resultScores = { pass: 1, partial: 0.5, fail: 0 } as const;
 
-// ─── Engine: fixture-independent API ────────────────────────────────────────
-
-test('analyzeContext with artificial task and docs produces exact precision', () => {
-  const task = { id: 'test', title: 'Test', description: '', requirements: ['req-a'] };
-  const docs = [
-    {
-      id: 'd1',
-      title: 'Doc A',
-      description: '',
-      authority: 'high' as const,
-      length: 1000,
-      relevanceByTask: { test: 1.0 },
-      covers: ['req-a'],
-      authoritativeFor: [],
-      conflictsWith: [],
-    },
-  ];
-  const result = analyzeContext({ task, includedDocs: docs, availableDocs: docs });
-  expect(result.precision.value).toBeCloseTo(1.0, 4);
-  expect(result.sufficiency.value).toBeCloseTo(1.0, 4);
-});
-
-test('analyzeContext with zero-relevance docs gives zero precision', () => {
-  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
-  const docs = [
-    {
-      id: 'd1',
-      title: 'Doc A',
-      description: '',
-      authority: 'high' as const,
-      length: 500,
-      relevanceByTask: { test: 0.0 },
-      covers: [],
-      authoritativeFor: [],
-      conflictsWith: [],
-    },
-  ];
-  const result = analyzeContext({ task, includedDocs: docs, availableDocs: docs });
-  expect(result.precision.value).toBeCloseTo(0, 4);
-});
-
-test('analyzeContext with null recall returns null with reason', () => {
-  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
-  const docs: LabDocument[] = [];
-  const result = analyzeContext({ task, includedDocs: [], availableDocs: docs });
-  expect(result.recall.value).toBeNull();
-  expect(result.recall.notApplicableReason).toBeTruthy();
-});
-
-// ─── Input validation ───────────────────────────────────────────────────────
-
-test('included doc absent from availableDocs is rejected', () => {
-  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
-  const included = [
-    {
-      id: 'd1',
-      title: '',
-      description: '',
-      authority: 'high' as const,
-      length: 100,
-      relevanceByTask: {},
-      covers: [],
-      authoritativeFor: [],
-      conflictsWith: [],
-    },
-  ];
-  expect(() => analyzeContext({ task, includedDocs: included, availableDocs: [] })).toThrow(
-    /not present in availableDocs/,
-  );
-});
-
-test('duplicate doc IDs are rejected', () => {
-  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
-  const d = {
-    id: 'd1',
-    title: '',
-    description: '',
-    authority: 'high' as const,
-    length: 100,
-    relevanceByTask: {},
-    covers: [],
-    authoritativeFor: [],
-    conflictsWith: [],
+type Result = keyof typeof resultScores;
+interface TestCheck {
+  weight: number;
+  result: Result;
+  contribution: number;
+  interpretation: string;
+  evidence: {
+    observation: string;
+    citations: Array<{ path: string; section: string }>;
   };
-  expect(() => analyzeContext({ task, includedDocs: [d, d], availableDocs: [d] })).toThrow(
-    /duplicate/,
-  );
-});
-
-test('charsPerToken zero or negative is rejected', () => {
-  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
-  const d = {
-    id: 'd1',
-    title: '',
-    description: '',
-    authority: 'high' as const,
-    length: 100,
-    relevanceByTask: {},
-    covers: [],
-    authoritativeFor: [],
-    conflictsWith: [],
+}
+interface TestMetric {
+  id: string;
+  label: string;
+  assessmentType: 'agent-assessed' | 'deterministic';
+  score: number | null;
+  checks?: TestCheck[];
+  details?: {
+    characters: number;
+    estimatedTokens: number;
+    measuredFiles: Array<{ path: string; characters: number }>;
   };
-  expect(() =>
-    analyzeContext({ task, includedDocs: [], availableDocs: [d], charsPerToken: 0 }),
-  ).toThrow(/positive finite/);
-  expect(() =>
-    analyzeContext({ task, includedDocs: [], availableDocs: [d], charsPerToken: -1 }),
-  ).toThrow(/positive finite/);
+}
+interface TestReport {
+  schemaVersion: string;
+  overallSummary: string;
+  priorities: unknown[];
+  effectiveContext: { files: string[] };
+  metrics: TestMetric[];
+}
+type ContrastMeasurements = Record<
+  string,
+  {
+    body: number;
+    metricValue: number;
+    status: number;
+    positive: number;
+    negative: number;
+    priority: number;
+    summary: number;
+    focus: number;
+  }
+>;
+
+function readReport(): TestReport {
+  return JSON.parse(readFileSync(reportPath, 'utf8')) as TestReport;
+}
+
+function withTemporaryReport(run: (path: string) => void) {
+  const directory = mkdtempSync(join(tmpdir(), 'context-health-'));
+  const path = join(directory, 'report.json');
+  try {
+    writeFileSync(path, readFileSync(reportPath));
+    run(path);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
+
+test('report schema, score calculations, and evidence citations are valid', () => {
+  const report = readReport();
+  expect(report.schemaVersion).toBe('2.0.0');
+  expect(report.metrics.map((metric) => metric.id)).toEqual([
+    'context-precision',
+    'context-recall',
+    'sufficiency',
+    'authority-clarity',
+    'active-context-size',
+  ]);
+  expect(report.priorities.length).toBeGreaterThan(0);
+  expect(report.priorities.length).toBeLessThanOrEqual(3);
+
+  for (const metric of report.metrics.filter((item) => item.assessmentType === 'agent-assessed')) {
+    const checks = metric.checks ?? [];
+    const expectedScore = checks.reduce(
+      (sum, check) => sum + check.weight * resultScores[check.result],
+      0,
+    );
+    expect(checks.reduce((sum, check) => sum + check.weight, 0)).toBeCloseTo(1, 8);
+    expect(metric.score).not.toBeNull();
+    if (metric.score === null) throw new Error(`${metric.id} score missing`);
+    expect(metric.score).toBeCloseTo(expectedScore, 3);
+    for (const check of checks) {
+      expect(check.contribution).toBeCloseTo(check.weight * resultScores[check.result], 3);
+      expect(check.evidence.observation).toBeTruthy();
+      expect(check.interpretation).toBeTruthy();
+      expect(check.evidence.citations.length).toBeGreaterThan(0);
+      for (const citation of check.evidence.citations) {
+        expect(existsSync(citation.path), citation.path).toBe(true);
+        expect(
+          readFileSync(citation.path, 'utf8'),
+          `${citation.path}: ${citation.section}`,
+        ).toContain(citation.section);
+      }
+    }
+  }
 });
 
-test('relevance outside 0-1 is rejected', () => {
-  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
-  const d = {
-    id: 'd1',
-    title: '',
-    description: '',
-    authority: 'high' as const,
-    length: 100,
-    relevanceByTask: { test: 1.5 },
-    covers: [],
-    authoritativeFor: [],
-    conflictsWith: [],
-  };
-  expect(() => analyzeContext({ task, includedDocs: [d], availableDocs: [d] })).toThrow(
-    /invalid relevance/,
+test('generator measures characters, derives scores, and is idempotent', () => {
+  withTemporaryReport((path) => {
+    const stale = JSON.parse(readFileSync(path, 'utf8')) as TestReport;
+    const staleSize = stale.metrics.find((metric) => metric.id === 'active-context-size');
+    const stalePrecision = stale.metrics.find((metric) => metric.id === 'context-precision');
+    expect(staleSize?.details).toBeTruthy();
+    expect(stalePrecision).toBeTruthy();
+    if (!staleSize?.details || !stalePrecision) throw new Error('required metrics missing');
+    staleSize.details.characters = 1;
+    stalePrecision.score = 0;
+    writeFileSync(path, `${JSON.stringify(stale, null, 2)}\n`);
+
+    const env = { ...process.env, CONTEXT_HEALTH_REPORT_PATH: path };
+    execFileSync(process.execPath, [generatorPath], { env });
+    const first = readFileSync(path, 'utf8');
+    execFileSync(process.execPath, [generatorPath], { env });
+    const second = readFileSync(path, 'utf8');
+    expect(second).toBe(first);
+
+    const generated = JSON.parse(second) as TestReport;
+    const expectedCharacters = generated.effectiveContext.files.reduce(
+      (sum, file) => sum + readFileSync(file, 'utf8').length,
+      0,
+    );
+    const size = generated.metrics.find((metric) => metric.id === 'active-context-size');
+    expect(size?.details?.characters).toBe(expectedCharacters);
+    expect(size?.details?.estimatedTokens).toBe(Math.ceil(expectedCharacters / 4));
+    const precision = generated.metrics.find((metric) => metric.id === 'context-precision');
+    const expectedPrecision = (precision?.checks ?? []).reduce(
+      (sum, check) => sum + check.weight * resultScores[check.result],
+      0,
+    );
+    expect(precision?.score).toBeCloseTo(expectedPrecision, 3);
+  });
+});
+
+test('generator reports validator process-launch failures', () => {
+  withTemporaryReport((path) => {
+    const result = spawnSync(process.execPath, [generatorPath], {
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        CONTEXT_HEALTH_REPORT_PATH: path,
+        CONTEXT_HEALTH_VALIDATOR_EXECUTABLE: '/definitely/missing/context-health-node',
+      },
+    });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('cannot run validator');
+    expect(result.stderr).not.toContain('TypeError');
+  });
+});
+
+test('prototype result names are rejected by scoring and validation', () => {
+  withTemporaryReport((path) => {
+    const report = JSON.parse(readFileSync(path, 'utf8')) as TestReport;
+    const assessed = report.metrics.find((metric) => metric.assessmentType === 'agent-assessed');
+    const firstCheck = assessed?.checks?.[0];
+    expect(firstCheck).toBeTruthy();
+    if (!firstCheck) throw new Error('agent-assessed check missing');
+    firstCheck.result = 'toString' as Result;
+    writeFileSync(path, `${JSON.stringify(report, null, 2)}\n`);
+
+    const generator = spawnSync(process.execPath, [generatorPath], {
+      encoding: 'utf8',
+      env: { ...process.env, CONTEXT_HEALTH_REPORT_PATH: path },
+    });
+    expect(generator.status).not.toBe(0);
+    expect(generator.stderr).toContain('unknown result "toString"');
+
+    const validator = spawnSync(process.execPath, [validatorPath], {
+      encoding: 'utf8',
+      env: { ...process.env, CONTEXT_HEALTH_REPORT_PATH: path },
+    });
+    expect(validator.status).not.toBe(0);
+    expect(validator.stderr).toContain('invalid result toString');
+  });
+});
+
+test('validator rejects stale deterministic measurements', () => {
+  withTemporaryReport((path) => {
+    const stale = JSON.parse(readFileSync(path, 'utf8')) as TestReport;
+    const size = stale.metrics.find((metric) => metric.id === 'active-context-size');
+    expect(size?.details).toBeTruthy();
+    if (!size?.details) throw new Error('active-context-size details missing');
+    size.details.measuredFiles[0].characters += 1;
+    writeFileSync(path, `${JSON.stringify(stale, null, 2)}\n`);
+
+    const result = spawnSync(process.execPath, [validatorPath], {
+      encoding: 'utf8',
+      env: { ...process.env, CONTEXT_HEALTH_REPORT_PATH: path },
+    });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('measuredFiles are stale');
+  });
+});
+
+test('report renders the overview, priorities, metrics, and contributor groups', async ({
+  page,
+}) => {
+  const report = readReport();
+  await page.goto(healthPath);
+
+  await expect(page).toHaveTitle(/Context Health/);
+  await expect(page.locator('h1')).toHaveText('Context Health');
+  await expect(page.locator('.ch-overview__summary')).toHaveText(report.overallSummary);
+  await expect(page.locator('.ch-priority__recommendation')).toHaveCount(report.priorities.length);
+  await expect(page.locator('.ch-score')).toHaveCount(report.metrics.length);
+  for (const metric of report.metrics) {
+    await expect(page.locator('.ch-score__label', { hasText: metric.label })).toHaveCount(1);
+  }
+
+  const overview = page.locator('.ch-overview');
+  await expect(overview.locator(':scope > h2')).toHaveText('Overview');
+  await expect(overview.locator('.ch-overview__columns h3')).toHaveText([
+    'Key strengths',
+    'Prioritized improvements',
+  ]);
+  await expect(overview.locator('.ch-overview__columns h2')).toHaveCount(0);
+  const priorities = overview.locator('ol');
+  const priorityStyles = await priorities.evaluate((list) => {
+    const styles = getComputedStyle(list);
+    return {
+      listStyleType: styles.listStyleType,
+      paddingInlineStart: Number.parseFloat(styles.paddingInlineStart),
+    };
+  });
+  expect(priorityStyles.listStyleType).not.toBe('none');
+  expect(priorityStyles.paddingInlineStart).toBeGreaterThan(0);
+
+  const assessed = report.metrics.filter((metric) => metric.assessmentType === 'agent-assessed');
+  const assessedDetails = page.locator('.ch-details details').filter({
+    has: page.locator('.ch-contributors'),
+  });
+  expect(await assessedDetails.count()).toBe(assessed.length);
+  for (let index = 0; index < assessed.length; index += 1) {
+    const metric = assessed[index];
+    const detail = assessedDetails.nth(index);
+    await detail.locator('summary').click();
+    const positiveCount = metric.checks?.filter((check) => check.result === 'pass').length ?? 0;
+    const negativeCount = (metric.checks?.length ?? 0) - positiveCount;
+    expect(positiveCount + negativeCount).toBeGreaterThan(0);
+    await expect(detail.getByRole('heading', { name: 'Positive contributors' })).toHaveCount(
+      positiveCount > 0 ? 1 : 0,
+    );
+    await expect(detail.getByRole('heading', { name: 'Negative contributors' })).toHaveCount(
+      negativeCount > 0 ? 1 : 0,
+    );
+    await expect(detail.locator('.ch-check--positive')).toHaveCount(positiveCount);
+    await expect(detail.locator('.ch-check--negative')).toHaveCount(negativeCount);
+  }
+});
+
+test('active context uses the same formatted value in its card and disclosure', async ({
+  page,
+}) => {
+  await page.goto(healthPath);
+  const card = page.locator('.ch-score').filter({ hasText: 'Active Context Size' });
+  const value = (await card.locator('.ch-score__value').textContent())?.trim();
+  expect(value).toMatch(/^\d{1,3}(,\d{3})* chars$/);
+  await expect(
+    page.locator('.ch-details summary').filter({ hasText: 'Active Context Size' }),
+  ).toContainText(value ?? 'missing value');
+});
+
+test('native details controls work with JavaScript disabled', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto(healthPath);
+  const details = page.locator('.ch-details details').first();
+  await expect(details).not.toHaveAttribute('open', '');
+  await details.locator('summary').click();
+  await expect(details).toHaveAttribute('open', '');
+  await context.close();
+});
+
+test('obsolete simulator controls and client JavaScript are absent', async ({ page }) => {
+  await page.goto(healthPath);
+  const reportRegion = page.locator('.ch-page');
+  await expect(reportRegion.locator('input, button, select')).toHaveCount(0);
+  await expect(reportRegion.locator('.preset-list, .experiment, #app')).toHaveCount(0);
+  const scriptSources = await page
+    .locator('script[src]')
+    .evaluateAll((scripts) => scripts.map((script) => script.getAttribute('src')));
+  expect(scriptSources.filter((source) => /context|lab-context/i.test(source ?? ''))).toEqual([]);
+  const loadedScripts = await page.evaluate(() =>
+    performance
+      .getEntriesByType('resource')
+      .filter((entry) => (entry as PerformanceResourceTiming).initiatorType === 'script')
+      .map((entry) => entry.name),
   );
+  expect(loadedScripts.filter((source) => /context|lab-context/i.test(source))).toEqual([]);
+  const html = await page.content();
+  expect(html).not.toContain('runFixtureAnalysis');
+  expect(html).not.toContain('ch-page__script');
 });
 
-test('negative doc length is rejected', () => {
-  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
-  const d = {
-    id: 'd1',
-    title: '',
-    description: '',
-    authority: 'high' as const,
-    length: -100,
-    relevanceByTask: {},
-    covers: [],
-    authoritativeFor: [],
-    conflictsWith: [],
-  };
-  expect(() => analyzeContext({ task, includedDocs: [d], availableDocs: [d] })).toThrow(
-    /invalid length/,
-  );
+test('deployment workflow validates Context Health before building', () => {
+  const workflow = readFileSync('.github/workflows/astro.yml', 'utf8');
+  const validationStep = workflow.indexOf('run: pnpm context:health:validate');
+  const firstBuild = workflow.indexOf('run: pnpm build');
+  expect(validationStep).toBeGreaterThan(0);
+  expect(firstBuild).toBeGreaterThan(0);
+  expect(validationStep).toBeLessThan(firstBuild);
+  expect(workflow.match(/run: pnpm context:health:validate/g)).toHaveLength(1);
 });
 
-test('valid precision stays within 0-1', () => {
-  const result = runFixtureAnalysis('a11y', new Set(['doc-a11y-guidelines', 'doc-tokens']));
-  expect(result.precision.value).not.toBeNull();
-  const v = result.precision.value as number;
-  expect(v).toBeGreaterThanOrEqual(0);
-  expect(v).toBeLessThanOrEqual(1);
-});
-
-test('valid recall stays within 0-1', () => {
-  const result = runFixtureAnalysis('a11y', new Set(['doc-a11y-guidelines']));
-  expect(result.recall.value).not.toBeNull();
-  const v = result.recall.value as number;
-  expect(v).toBeGreaterThanOrEqual(0);
-  expect(v).toBeLessThanOrEqual(1);
-});
-
-// ─── Engine: continuous relevance (0.5 document contributes to numerator) ────
-
-test('document with 0.5 relevance contributes proportionally to precision', () => {
-  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
-  const docs = [
-    {
-      id: 'd1',
-      title: 'Doc Half',
-      description: '',
-      authority: 'medium' as const,
-      length: 1000,
-      relevanceByTask: { test: 0.5 },
-      covers: [],
-      authoritativeFor: [],
-      conflictsWith: [],
-    },
-  ];
-  const result = analyzeContext({ task, includedDocs: docs, availableDocs: docs });
-  // precision = (1000 * 0.5) / 1000 = 0.5
-  expect(result.precision.value).toBeCloseTo(0.5, 4);
-  // contributingDocs should include the doc
-  expect(result.precision.contributingDocs).toContain('Doc Half');
-  // explanation should describe the weighting
-  expect(result.precision.explanation).toContain('0.5');
-});
-
-// ─── Engine: size-weighted precision ────────────────────────────────────────
-
-test('size-weighted precision of relevant-only docs equals 1.0', () => {
-  const result = runFixtureAnalysis('a11y', new Set(['doc-a11y-guidelines']));
-  expect(result.precision.value).toBeCloseTo(1.0, 4);
-});
-
-test('size-weighted precision with irrelevant docs is below 1.0', () => {
-  // doc-a11y-guidelines (relevance 1.0, 3200) + doc-tokens (relevance 0.0, 1800)
-  // precision = (3200*1.0 + 1800*0.0) / (3200 + 1800) = 3200/5000 = 0.64
-  const result = runFixtureAnalysis('a11y', new Set(['doc-a11y-guidelines', 'doc-tokens']));
-  expect(result.precision.value).toBeCloseTo(0.64, 4);
-});
-
-test('size-weighted precision with no documents returns null', () => {
-  const result = runFixtureAnalysis('a11y', new Set());
-  expect(result.precision.value).toBeNull();
-  expect(result.precision.notApplicableReason).toBeTruthy();
-});
-
-// ─── Engine: size-weighted recall ───────────────────────────────────────────
-
-test('size-weighted recall of all available docs equals 1.0', () => {
-  const allDocIds = new Set(DOCUMENTS.map((d) => d.id));
-  const result = runFixtureAnalysis('tokens', allDocIds);
-  expect(result.recall.value).toBeCloseTo(1.0, 4);
-});
-
-test('recall with no included documents is 0', () => {
-  const result = runFixtureAnalysis('a11y', new Set());
-  expect(result.recall.value).toBeCloseTo(0, 4);
-});
-
-// ─── Engine: sufficiency ────────────────────────────────────────────────────
-
-test('sufficiency with all requirements covered equals 1.0', () => {
-  const docIds = new Set(PRESETS.find((p) => p.id === 'curated')?.docIdsByTask.a11y ?? []);
-  const result = runFixtureAnalysis('a11y', docIds);
-  expect(result.sufficiency.value).toBeCloseTo(1.0, 4);
-});
-
-test('sufficiency with no documents equals 0', () => {
-  const result = runFixtureAnalysis('a11y', new Set());
-  expect(result.sufficiency.value).toBeCloseTo(0, 4);
-});
-
-// ─── Engine: authority clarity ──────────────────────────────────────────────
-
-test('single authoritative doc with no conflict gives clear authority', () => {
-  const result = runFixtureAnalysis('tokens', new Set(['doc-tokens']));
-  expect(result.authorityClarity.value).toBeCloseTo(1.0, 4);
-});
-
-test('competing authoritative sources for same requirement reduce clarity', () => {
-  const result = runFixtureAnalysis(
-    'a11y',
-    new Set(['doc-a11y-guidelines', 'doc-html-semantics', 'doc-legacy-a11y-notes']),
-  );
-  expect(result.authorityClarity.value).toBeCloseTo(0.8, 4);
-});
-
-test('conflicting docs for different requirements does not reduce clarity for unrelated reqs', () => {
-  // doc-perf-budget and doc-legacy-perf-notes conflict on bundle-optimization only.
-  // Other requirements have clear authority.
-  const result = runFixtureAnalysis('perf', new Set(['doc-perf-budget', 'doc-legacy-perf-notes']));
-  // Covered: bundle-optimization (ambiguous), image-optimization (clear),
-  // font-loading (clear), css-minification (clear) = 3/4
-  expect(result.authorityClarity.value).toBeCloseTo(0.75, 4);
-});
-
-test('authority clarity with no covered requirements returns null', () => {
-  const result = runFixtureAnalysis('a11y', new Set(['doc-deploy']));
-  expect(result.authorityClarity.value).toBeNull();
-});
-
-// ─── Engine: no curated preset has unresolved conflict ──────────────────────
-
-test('no curated preset has an unresolved authoritative conflict', () => {
-  for (const task of TASKS) {
-    const curated = runFixtureAnalysis(
-      task.id,
-      new Set(PRESETS.find((p) => p.id === 'curated')?.docIdsByTask[task.id] ?? []),
-    );
-    expect(curated.sufficiency.value).toBeCloseTo(1.0, 4);
-    expect(curated.authorityClarity.value).toBeCloseTo(1.0, 4);
-  }
-});
-
-// ─── Engine: context size ───────────────────────────────────────────────────
-
-test('context size returns correct characters and estimated tokens', () => {
-  const result = runFixtureAnalysis('tokens', new Set(['doc-tokens', 'doc-components']));
-  expect(result.contextSize.chars).toBe(4400);
-  expect(result.contextSize.estimatedTokens).toBe(1100);
-});
-
-test('context size with no documents is 0', () => {
-  const result = runFixtureAnalysis('a11y', new Set());
-  expect(result.contextSize.chars).toBe(0);
-  expect(result.contextSize.estimatedTokens).toBe(0);
-});
-
-// ─── Engine: preset relationships ───────────────────────────────────────────
-
-test('curated sufficiency >= minimal sufficiency for all tasks', () => {
-  for (const task of TASKS) {
-    const curated = runFixtureAnalysis(
-      task.id,
-      new Set(PRESETS.find((p) => p.id === 'curated')?.docIdsByTask[task.id] ?? []),
-    );
-    const minimal = runFixtureAnalysis(
-      task.id,
-      new Set(PRESETS.find((p) => p.id === 'minimal')?.docIdsByTask[task.id] ?? []),
-    );
-    expect(curated.sufficiency.value ?? 0).toBeGreaterThanOrEqual(minimal.sufficiency.value ?? 0);
-  }
-});
-
-test('curated precision > overloaded precision for all tasks', () => {
-  for (const task of TASKS) {
-    const curated = runFixtureAnalysis(
-      task.id,
-      new Set(PRESETS.find((p) => p.id === 'curated')?.docIdsByTask[task.id] ?? []),
-    );
-    const overloaded = runFixtureAnalysis(
-      task.id,
-      new Set(PRESETS.find((p) => p.id === 'overloaded')?.docIdsByTask[task.id] ?? []),
-    );
-    expect(curated.precision.value ?? 0).toBeGreaterThan(overloaded.precision.value ?? 0);
-  }
-});
-
-test('curated authority >= overloaded authority for all tasks', () => {
-  for (const task of TASKS) {
-    const curated = runFixtureAnalysis(
-      task.id,
-      new Set(PRESETS.find((p) => p.id === 'curated')?.docIdsByTask[task.id] ?? []),
-    );
-    const overloaded = runFixtureAnalysis(
-      task.id,
-      new Set(PRESETS.find((p) => p.id === 'overloaded')?.docIdsByTask[task.id] ?? []),
-    );
-    expect(curated.authorityClarity.value ?? 0).toBeGreaterThanOrEqual(
-      overloaded.authorityClarity.value ?? 0,
-    );
-  }
-});
-
-test('curated authority clarity > overloaded for a11y and perf', () => {
-  for (const taskId of ['a11y', 'perf']) {
-    const curated = runFixtureAnalysis(
-      taskId,
-      new Set(PRESETS.find((p) => p.id === 'curated')?.docIdsByTask[taskId] ?? []),
-    );
-    const overloaded = runFixtureAnalysis(
-      taskId,
-      new Set(PRESETS.find((p) => p.id === 'overloaded')?.docIdsByTask[taskId] ?? []),
-    );
-    expect(curated.authorityClarity.value ?? 0).toBeGreaterThan(
-      overloaded.authorityClarity.value ?? 0,
-    );
-  }
-});
-
-test('overloaded context size > curated > minimal', () => {
-  for (const task of TASKS) {
-    const o = runFixtureAnalysis(
-      task.id,
-      new Set(PRESETS.find((p) => p.id === 'overloaded')?.docIdsByTask[task.id] ?? []),
-    );
-    const c = runFixtureAnalysis(
-      task.id,
-      new Set(PRESETS.find((p) => p.id === 'curated')?.docIdsByTask[task.id] ?? []),
-    );
-    const m = runFixtureAnalysis(
-      task.id,
-      new Set(PRESETS.find((p) => p.id === 'minimal')?.docIdsByTask[task.id] ?? []),
-    );
-    expect(o.contextSize.chars).toBeGreaterThan(c.contextSize.chars);
-    expect(c.contextSize.chars).toBeGreaterThanOrEqual(m.contextSize.chars);
-  }
-});
-
-// ─── Engine: determinism ────────────────────────────────────────────────────
-
-test('same inputs produce same results', () => {
-  const ids = new Set(['doc-a11y-guidelines', 'doc-html-semantics']);
-  const first = runFixtureAnalysis('a11y', ids);
-  const second = runFixtureAnalysis('a11y', ids);
-  expect(first.precision.value).toBe(second.precision.value);
-});
-
-test('conflict handling is order-independent', () => {
-  const r1 = runFixtureAnalysis('a11y', new Set(['doc-a11y-guidelines', 'doc-html-semantics']));
-  const r2 = runFixtureAnalysis('a11y', new Set(['doc-html-semantics', 'doc-a11y-guidelines']));
-  expect(r1.authorityClarity.value).toBe(r2.authorityClarity.value);
-});
-
-// ─── Route ──────────────────────────────────────────────────────────────────
-
-test('the /lab/context/ route loads with correct heading', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  await expect(page.locator('h1')).toContainText('Context Lab');
-  await expect(page).toHaveTitle(/Context Lab/);
-});
-
-test('the lab page has robots noindex metadata', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, follow');
-});
-
-// ─── Native radio: task selector ────────────────────────────────────────────
-
-test('task radio group uses native inputs', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const radios = page.locator('input[name="task"]');
-  await expect(radios).toHaveCount(3);
-  // First radio (a11y) should be checked by default
-  await expect(radios.nth(0)).toBeChecked();
-});
-
-test('clicking a task label switches the radio selection', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const radios = page.locator('input[name="task"]');
-  // Click the second task label
-  await page.locator('.task-list__item').nth(1).click();
-  await expect(radios.nth(1)).toBeChecked();
-  await expect(radios.nth(0)).not.toBeChecked();
-});
-
-test('arrow keys navigate the task radio group', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const radios = page.locator('input[name="task"]');
-  // Native radio groups handle arrow keys automatically.
-  // Click the first visible label to start.
-  const firstLabel = page.locator('.task-list__item').first();
-  await firstLabel.click();
-  // ArrowDown should move to the next value
-  await page.keyboard.press('ArrowDown');
-  await expect(radios.nth(1)).toBeChecked();
-});
-
-// ─── Native radio: preset selector ──────────────────────────────────────────
-
-test('preset radio group uses native inputs', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const radios = page.locator('input[name="preset"]');
-  await expect(radios).toHaveCount(3);
-  // Default preset is 'curated' (index 1)
-  await expect(radios.nth(1)).toBeChecked();
-});
-
-test('preset change updates document count', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  // Curated (default): 2 docs
-  let checked = await page.locator(`${FIRST_CHECKBOX}:checked`).count();
-  expect(checked).toBe(2);
-
-  // Switch to overloaded
-  await page.locator('.preset-list__item').nth(2).click();
-  checked = await page.locator(`${FIRST_CHECKBOX}:checked`).count();
-  expect(checked).toBe(10);
-});
-
-test('toggling a document clears the preset selection', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  // Default preset is curated (index 1)
-  const presetRadios = page.locator('input[name="preset"]');
-  await expect(presetRadios.nth(1)).toBeChecked();
-
-  // Toggle a document checkbox to create a custom config
-  await page.locator(FIRST_CHECKBOX).first().uncheck();
-
-  // No preset radio should be checked after manual change
-  const checkedPreset = await presetRadios.evaluateAll((radios) =>
-    radios.some((r) => (r as HTMLInputElement).checked),
-  );
-  expect(checkedPreset).toBe(false);
-});
-
-// ─── Metric cards ───────────────────────────────────────────────────────────
-
-test('all five metric cards are rendered when documents are selected', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  await expect(page.locator(METRIC_CARD)).toHaveCount(5);
-});
-
-test('each metric card has a toggleable explanation', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const toggles = page.locator('.metric-card__toggle');
-  const count = await toggles.count();
-  for (let i = 0; i < count; i++) {
-    const toggle = toggles.nth(i);
-    await expect(toggle).toContainText('Show explanation');
-    await toggle.click();
-    await expect(toggle).toContainText('Hide explanation');
-  }
-});
-
-test('metrics update when task changes', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const initial = await page
-    .locator('[data-metric-key="precision"]')
-    .getAttribute('data-metric-value');
-  await page.locator('.task-list__item').nth(1).click();
-  const updated = await page
-    .locator('[data-metric-key="precision"]')
-    .getAttribute('data-metric-value');
-  expect(updated).not.toBe(initial);
-});
-
-// ─── Authority clarity evidence ─────────────────────────────────────────────
-
-test('authority clarity card displays a percentage or N/A', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const value = await page
-    .locator('[data-metric-key="authority"]')
-    .getAttribute('data-metric-value');
-  expect(value).toMatch(/^\d+%$|^N\/A$/);
-});
-
-test('authority clarity shows key documents in explanation', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  await page.locator('[data-metric-key="authority"] .metric-card__toggle').click();
-  await expect(page.locator('[data-metric-key="authority"] .metric-card__detail')).toContainText(
-    'key documents',
-    { ignoreCase: true },
-  );
-});
-
-// ─── Context size ───────────────────────────────────────────────────────────
-
-test('context size displays chars and estimated tokens', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  await page.locator('[data-metric-key="contextSize"] .metric-card__toggle').click();
-  const detail = page.locator('[data-metric-key="contextSize"] .metric-card__detail');
-  await expect(detail).toContainText('characters');
-  await expect(detail).toContainText('tokens');
-});
-
-test('context size increases from curated to overloaded', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  await page.locator('.preset-list__item').nth(0).click();
-  const curatedVal = Number(
-    (
-      await page.locator('[data-metric-key="contextSize"]').getAttribute('data-metric-value')
-    )?.replace(/,/g, ''),
-  );
-  await page.locator('.preset-list__item').nth(2).click();
-  const overloadedVal = Number(
-    (
-      await page.locator('[data-metric-key="contextSize"]').getAttribute('data-metric-value')
-    )?.replace(/,/g, ''),
-  );
-  expect(overloadedVal).toBeGreaterThan(curatedVal);
-});
-
-// ─── Toggle document ────────────────────────────────────────────────────────
-
-test('toggling a document off updates metrics', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const initial = await page.locator(`${FIRST_CHECKBOX}:checked`).count();
-  await page.locator(FIRST_CHECKBOX).first().uncheck();
-  expect(await page.locator(`${FIRST_CHECKBOX}:checked`).count()).toBe(initial - 1);
-});
-
-// ─── Empty context ──────────────────────────────────────────────────────────
-
-test('unchecking all documents shows N/A for precision', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const count = await page.locator(FIRST_CHECKBOX).count();
-  for (let i = 0; i < count; i++) {
-    await page.locator(FIRST_CHECKBOX).nth(i).uncheck();
-  }
-  expect(
-    await page.locator('[data-metric-key="precision"]').getAttribute('data-metric-value'),
-  ).toBe('N/A');
-});
-
-// ─── Computed style (layout rendering) ────────────────────────────────────────
-
-test('task option has card layout with non-default border and padding', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const item = page.locator('.task-list__item').first();
-  await expect(item).toBeVisible();
-  const border = await item.evaluate((el) => getComputedStyle(el).borderTopWidth);
-  expect(parseFloat(border)).toBeGreaterThan(0);
-  const padding = await item.evaluate((el) => getComputedStyle(el).paddingTop);
-  expect(parseFloat(padding)).toBeGreaterThan(10);
-});
-
-test('preset option has card layout with non-default border and padding', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const item = page.locator('.preset-list__item').first();
-  await expect(item).toBeVisible();
-  const border = await item.evaluate((el) => getComputedStyle(el).borderTopWidth);
-  expect(parseFloat(border)).toBeGreaterThan(0);
-  const padding = await item.evaluate((el) => getComputedStyle(el).paddingTop);
-  expect(parseFloat(padding)).toBeGreaterThan(10);
-});
-
-test('native radio is visually hidden but present', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const radio = page.locator('.task-list__radio').first();
-  await expect(radio).toBeHidden();
-  const opacity = await radio.evaluate((el) => getComputedStyle(el).opacity);
-  expect(opacity).toBe('0');
-  const role = await radio.evaluate((el) => el?.getAttribute('type'));
-  expect(role).toBe('radio');
-});
-
-test('document item has card layout', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const item = page.locator('.doc-list__item').first();
-  await expect(item).toBeVisible();
-  const padding = await item
-    .locator('.doc-list__label')
-    .evaluate((el) => getComputedStyle(el).paddingTop);
-  expect(parseFloat(padding)).toBeGreaterThan(10);
-});
-
-test('metric uses card with responsive grid layout', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const grid = page.locator('.metrics-grid');
-  await expect(grid).toBeVisible();
-  const display = await grid.evaluate((el) => getComputedStyle(el).display);
-  expect(display).toBe('grid');
-  const card = page.locator('.metric-card').first();
-  const cardBorder = await card.evaluate((el) => getComputedStyle(el).borderTopWidth);
-  expect(parseFloat(cardBorder)).toBeGreaterThan(0);
-});
-
-test('selected task has visible non-color-only selected state', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const selected = page.locator('.task-list__item:has(:checked)');
-  await expect(selected).toBeVisible();
-  const shadow = await selected.evaluate((el) => getComputedStyle(el).boxShadow);
-  expect(shadow).not.toBe('none');
-});
-
-test('no horizontal overflow at narrow viewport', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto(LAB_PATH);
-  const width = await page.evaluate(() => document.documentElement.scrollWidth);
-  expect(width).toBeLessThanOrEqual(390);
-});
-
-test('lab CSS file is not referenced from homepage', async ({ page }) => {
-  await page.goto('/');
-  const cssLinks = await page
+test('Context Health CSS is a guarded page-only asset', async ({ page }) => {
+  await page.goto(healthPath);
+  const stylesheets = await page
     .locator('link[rel="stylesheet"]')
-    .evaluateAll((links) => links.map((l) => l?.getAttribute('href')));
-  const labCss = cssLinks.filter((h) => h?.includes('/_astro/context.'));
-  expect(labCss).toEqual([]);
-});
-
-// ─── Keyboard accessibility ─────────────────────────────────────────────────
-
-test('Tab reaches the task radio group and Arrow keys move selection', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const radios = page.locator('input[name="task"]');
-  // Click the first label to start
-  const firstLabel = page.locator('.task-list__item').first();
-  await firstLabel.click();
-  await page.keyboard.press('ArrowDown');
-  await expect(radios.nth(1)).toBeChecked();
-});
-
-test('Tab reaches the preset radio group', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const presetRadios = page.locator('input[name="preset"]');
-  // Tab through to presets
-  await page.keyboard.press('Tab');
-  await page.keyboard.press('Tab');
-  await page.keyboard.press('Tab');
-  // Arrow right or down should move through presets
-  await page.keyboard.press('ArrowDown');
-  // Should have moved selection
-  const checked = await presetRadios.evaluateAll((radios) =>
-    radios.findIndex((r) => (r as HTMLInputElement).checked),
+    .evaluateAll((links) => links.map((link) => (link as HTMLLinkElement).href));
+  expect(stylesheets.length).toBeGreaterThan(0);
+  const contents = await Promise.all(
+    stylesheets.map(async (href) => ({ href, css: await (await fetch(href)).text() })),
   );
-  expect(checked).toBeGreaterThanOrEqual(0);
+  const contextAssets = contents.filter(({ css }) => css.includes('.ch-page'));
+  expect(
+    contextAssets,
+    'expected one generated stylesheet containing Context Health rules',
+  ).toHaveLength(1);
+  const contextHref = contextAssets[0].href;
+
+  for (const path of ['/', '/blog/250mm-trading-card-box/', '/search/']) {
+    await page.goto(path);
+    const linked = await page
+      .locator('link[rel="stylesheet"]')
+      .evaluateAll((links) => links.map((link) => (link as HTMLLinkElement).href));
+    expect(linked, `${path} must not load Context Health CSS`).not.toContain(contextHref);
+  }
 });
 
-test('metric explanation toggle is keyboard accessible', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const toggle = page.locator('.metric-card__toggle').first();
-  await toggle.focus();
-  await expect(toggle).toBeFocused();
+test('ordinary production pages do not load Sentry resources', async ({ page }) => {
+  for (const path of ['/', '/blog/250mm-trading-card-box/', '/search/']) {
+    await page.goto(path);
+    const resources = await page.evaluate(() =>
+      performance.getEntriesByType('resource').map((entry) => entry.name),
+    );
+    expect(resources.filter((url) => /sentry|spotlight/i.test(url))).toEqual([]);
+  }
 });
 
-// ─── Axe ────────────────────────────────────────────────────────────────────
-
-test('the lab page has no critical axe violations', async ({ page }) => {
-  const AxeBuilder = await import('@axe-core/playwright').then((m) => m.default);
-  await page.goto(LAB_PATH);
-  const results = await new AxeBuilder({ page }).disableRules(['color-contrast']).analyze();
+test('axe passes with color contrast enabled', async ({ page }) => {
+  await page.goto(healthPath);
+  const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
 });
 
-// ─── JS isolation ───────────────────────────────────────────────────────────
+test('representative text and focus indicators meet contrast thresholds', async ({ page }) => {
+  await page.goto(healthPath);
+  const measurements: ContrastMeasurements = {};
 
-test('lab page does not reference /src/styles/global.css in production output', async ({
-  page,
-}) => {
-  await page.goto(LAB_PATH);
-  const html = await page.content();
-  // The source-path global.css should be replaced by Astro's bundled CSS
-  expect(html).not.toContain('/src/styles/global.css');
-  // But global styles should still apply — check that a token-dependent element exists
-  await expect(page.locator('h1')).toBeVisible();
-});
+  for (const theme of ['light', 'dark']) {
+    await page
+      .locator('html')
+      .evaluate((html, value) => html.setAttribute('data-theme', value), theme);
+    await page.locator('.ch-details summary').first().focus();
+    measurements[theme] = await page.evaluate(() => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      if (!context) throw new Error('2D canvas unavailable');
 
-test('lab page loads at least one lab-specific JavaScript asset', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  // Get all script src URLs from the lab page
-  const labScripts = await page
-    .locator('script[src]')
-    .evaluateAll((scripts) => scripts.map((s) => s.getAttribute('src')).filter(Boolean));
-  // At least one script should reference the lab's controller/engine bundle
-  const labSpecific = labScripts.filter((s) => s?.includes('/_astro/'));
-  expect(labSpecific.length).toBeGreaterThanOrEqual(1);
-});
+      const rgba = (value: string): number[] => {
+        context.clearRect(0, 0, 1, 1);
+        context.fillStyle = '#000';
+        context.fillStyle = value;
+        context.fillRect(0, 0, 1, 1);
+        return [...context.getImageData(0, 0, 1, 1).data];
+      };
+      const luminance = ([r, g, b]: number[]) => {
+        const channels = [r, g, b].map((channel) => {
+          const value = channel / 255;
+          return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+      };
+      const ratio = (foreground: string, background: string) => {
+        const first = luminance(rgba(foreground));
+        const second = luminance(rgba(background));
+        return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+      };
+      const opaqueBackground = (element: Element | null): string => {
+        let current = element;
+        while (current) {
+          const background = getComputedStyle(current).backgroundColor;
+          if (rgba(background)[3] === 255) return background;
+          current = current.parentElement;
+        }
+        return getComputedStyle(document.body).backgroundColor;
+      };
+      const textRatio = (selector: string) => {
+        const element = document.querySelector(selector);
+        if (!element) throw new Error(`Missing contrast target: ${selector}`);
+        return ratio(getComputedStyle(element).color, opaqueBackground(element));
+      };
 
-test('lab-specific JavaScript assets are absent from the homepage', async ({ page }) => {
-  // First, get lab asset URLs from the lab page
-  await page.goto(LAB_PATH);
-  const labScripts = await page
-    .locator('script[src]')
-    .evaluateAll((scripts) => scripts.map((s) => s.getAttribute('src')).filter(Boolean));
-  const labAstroScripts = labScripts.filter((s) => s?.includes('/_astro/'));
-  expect(labAstroScripts.length).toBeGreaterThanOrEqual(1);
+      const summary = document.querySelector('.ch-details summary');
+      if (!summary) throw new Error('Missing summary');
+      return {
+        body: textRatio('.ch-overview__summary'),
+        metricValue: textRatio('.ch-score__value'),
+        status: textRatio('.ch-status'),
+        positive: textRatio('.ch-check--positive .ch-check__result'),
+        negative: textRatio('.ch-check--negative .ch-check__result'),
+        priority: textRatio('.ch-priority__recommendation'),
+        summary: textRatio('.ch-details summary'),
+        focus: ratio(
+          getComputedStyle(summary).outlineColor,
+          opaqueBackground(summary.parentElement),
+        ),
+      };
+    });
+  }
 
-  // Now check the homepage for the exact same URLs
-  await page.goto('/');
-  const homeScripts = await page
-    .locator('script[src]')
-    .evaluateAll((scripts) => scripts.map((s) => s.getAttribute('src')).filter(Boolean));
-  for (const url of labAstroScripts) {
-    expect(homeScripts).not.toContain(url);
+  console.log(`Context Health contrast ratios: ${JSON.stringify(measurements)}`);
+  for (const theme of Object.values(measurements)) {
+    expect(theme.metricValue).toBeGreaterThanOrEqual(3);
+    expect(theme.focus).toBeGreaterThanOrEqual(3);
+    const normalTextKeys = [
+      'body',
+      'status',
+      'positive',
+      'negative',
+      'priority',
+      'summary',
+    ] as const;
+    for (const key of normalTextKeys) {
+      expect(theme[key], key).toBeGreaterThanOrEqual(4.5);
+    }
   }
 });
 
-test('lab-specific JavaScript assets are absent from a blog article', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const labScripts = await page
-    .locator('script[src]')
-    .evaluateAll((scripts) => scripts.map((s) => s.getAttribute('src')).filter(Boolean));
-  const labAstroScripts = labScripts.filter((s) => s?.includes('/_astro/'));
-  expect(labAstroScripts.length).toBeGreaterThanOrEqual(1);
-
-  await page.goto('/blog/250mm-trading-card-box/');
-  const articleScripts = await page
-    .locator('script[src]')
-    .evaluateAll((scripts) => scripts.map((s) => s.getAttribute('src')).filter(Boolean));
-  for (const url of labAstroScripts) {
-    expect(articleScripts).not.toContain(url);
-  }
-});
-
-test('lab-specific JavaScript assets are absent from the search page', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  const labScripts = await page
-    .locator('script[src]')
-    .evaluateAll((scripts) => scripts.map((s) => s.getAttribute('src')).filter(Boolean));
-  const labAstroScripts = labScripts.filter((s) => s?.includes('/_astro/'));
-  expect(labAstroScripts.length).toBeGreaterThanOrEqual(1);
-
-  await page.goto('/search/');
-  const searchScripts = await page
-    .locator('script[src]')
-    .evaluateAll((scripts) => scripts.map((s) => s.getAttribute('src')).filter(Boolean));
-  for (const url of labAstroScripts) {
-    expect(searchScripts).not.toContain(url);
-  }
-});
-
-test('no lab module import in homepage HTML', async ({ page }) => {
-  await page.goto('/');
-  const html = await page.content();
-  expect(html).not.toContain('lab/context');
-});
+for (const viewport of [
+  { name: 'mobile', width: 390, height: 844 },
+  { name: 'tablet', width: 768, height: 1024 },
+  { name: 'desktop', width: 1280, height: 900 },
+]) {
+  test(`${viewport.name} layout is readable without page overflow`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto(healthPath);
+    const dimensions = await page.evaluate(() => ({
+      client: document.documentElement.clientWidth,
+      scroll: document.documentElement.scrollWidth,
+    }));
+    expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.client);
+    await expect(page.locator('.ch-score').first()).toBeVisible();
+    await expect(page.locator('.ch-details summary').first()).toBeVisible();
+  });
+}

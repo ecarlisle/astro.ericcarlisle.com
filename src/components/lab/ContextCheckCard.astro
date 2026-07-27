@@ -1,0 +1,51 @@
+---
+interface Check {
+  label: string;
+  result: 'pass' | 'partial' | 'fail';
+  impact: 'positive' | 'negative';
+  weight: number;
+  contribution: number;
+  interpretation: string;
+  evidence: {
+    observation: string;
+    citations: Array<{ path: string; section: string }>;
+  };
+}
+
+interface Props {
+  check: Check;
+}
+
+const { check } = Astro.props;
+const resultLabel = {
+  pass: 'Pass',
+  partial: 'Partial',
+  fail: 'Fail',
+}[check.result];
+---
+
+<article class:list={['ch-check', `ch-check--${check.impact}`]}>
+  <div class="ch-check__header">
+    <span class="ch-check__label">{check.label}</span>
+    <span class="ch-check__result">{resultLabel}</span>
+  </div>
+  <p class="ch-check__evidence">
+    <strong>Observed:</strong> {check.evidence.observation}
+  </p>
+  <p class="ch-check__interpretation">
+    <strong>Assessment:</strong> {check.interpretation}
+  </p>
+  <ul class="ch-check__citations">
+    {
+      check.evidence.citations.map((citation) => (
+        <li>
+          {citation.path} — {citation.section}
+        </li>
+      ))
+    }
+  </ul>
+  <div class="ch-check__weight">
+    Weight {Math.round(check.weight * 100)}% · contribution{' '}
+    {(check.contribution * 100).toFixed(1)} points
+  </div>
+</article>

@@ -27,7 +27,9 @@
     "verify:storybook-isolation": "node scripts/verify-storybook-isolation.mjs",
     "quality:generate": "node scripts/generate-site-quality.mjs",
     "storybook": "storybook dev -p 6006",
-    "build:storybook": "storybook build"
+    "build:storybook": "storybook build",
+    "context:health:validate": "node scripts/validate-context-health.mjs",
+    "context:health": "node scripts/generate-context-health.mjs"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
