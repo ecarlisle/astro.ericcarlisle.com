@@ -1,25 +1,34 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { buildEvidenceUrl } from '../src/lib/context-health-evidence.mjs';
 
 const healthPath = '/lab/context/';
 const reportPath = 'src/data/context-health.json';
 const generatorPath = 'scripts/generate-context-health.mjs';
 const validatorPath = 'scripts/validate-context-health.mjs';
+const refreshSkillPath = '.agents/skills/context-health-refresh/SKILL.md';
 const resultScores = { pass: 1, partial: 0.5, fail: 0 } as const;
 
 type Result = keyof typeof resultScores;
 interface TestCheck {
+  id: string;
+  impact: 'positive' | 'negative';
   weight: number;
   result: Result;
   contribution: number;
   interpretation: string;
   evidence: {
     observation: string;
-    citations: Array<{ path: string; section: string }>;
+    citations: Array<{
+      path: string;
+      section?: string;
+      startLine?: number;
+      endLine?: number;
+    }>;
   };
 }
 interface TestMetric {
@@ -36,6 +45,7 @@ interface TestMetric {
 }
 interface TestReport {
   schemaVersion: string;
+  repositoryRevision: string;
   overallSummary: string;
   priorities: unknown[];
   effectiveContext: { files: string[] };
@@ -70,9 +80,88 @@ function withTemporaryReport(run: (path: string) => void) {
   }
 }
 
+test('Context Health refresh skill is valid, linked, and conditionally routed', () => {
+  const skill = readFileSync(refreshSkillPath, 'utf8');
+  const frontmatter = skill.match(/^---\n([\s\S]+?)\n---/);
+  expect(frontmatter).toBeTruthy();
+  expect(frontmatter?.[1]).toContain('name: context-health-refresh');
+  expect(frontmatter?.[1]).toContain(
+    'description: Refreshes and validates the EricCarlisle.com Context Health report',
+  );
+  expect(frontmatter?.[1].split('\n')).toHaveLength(2);
+
+  for (const heading of [
+    '## Establish the audit',
+    '## Collect surgical evidence',
+    '## Record structured source references',
+    '## Generate and inspect the report',
+    '## Validate the page',
+    '## Report completion',
+    '## Permissions',
+  ]) {
+    expect(skill).toContain(heading);
+  }
+
+  const localLinks = [...skill.matchAll(/\]\(([^)]+)\)/g)].map((match) => match[1]);
+  expect(localLinks.length).toBeGreaterThan(0);
+  for (const link of localLinks) {
+    expect(
+      existsSync(resolve(dirname(refreshSkillPath), link.split('#')[0])),
+      `${refreshSkillPath}: ${link}`,
+    ).toBe(true);
+  }
+
+  const agents = readFileSync('AGENTS.md', 'utf8');
+  expect(agents).toContain(
+    '[Context Health refresh](.agents/skills/context-health-refresh/SKILL.md) and [Context Health scoring rubric](docs/context-health-rubric.md)',
+  );
+  expect(agents).toContain(
+    '[context-health-refresh](.agents/skills/context-health-refresh/SKILL.md)',
+  );
+  const rubric = readFileSync('docs/context-health-rubric.md', 'utf8');
+  expect(rubric).toContain(
+    '[Context Health refresh skill](../.agents/skills/context-health-refresh/SKILL.md)',
+  );
+  expect(
+    existsSync(
+      resolve(
+        dirname('docs/context-health-rubric.md'),
+        '../.agents/skills/context-health-refresh/SKILL.md',
+      ),
+    ),
+  ).toBe(true);
+
+  for (const field of ['`path`', '`startLine`', '`endLine`', '`section`', '`repositoryRevision`']) {
+    expect(skill).toContain(field);
+  }
+  expect(skill).toContain('?plain=1#L{startLine}-L{endLine}');
+  expect(skill).toContain('?plain=1#L{line}');
+  expect(skill).not.toContain('https://github.com');
+  expect(skill).toContain('Lock them before classifying evidence or assigning results');
+  expect(skill).toContain('increment the relevant methodology version');
+  expect(skill).toContain('do not compare with older reports');
+  expect(skill).toContain('does not replace the rubric’s scoring rules');
+
+  const scripts = JSON.parse(readFileSync('package.json', 'utf8')).scripts as Record<
+    string,
+    string
+  >;
+  for (const script of [
+    'context:health',
+    'context:health:validate',
+    'typecheck',
+    'lint',
+    'build',
+    'test:e2e',
+  ]) {
+    expect(scripts[script], `package script ${script}`).toBeTruthy();
+    expect(skill).toContain(`pnpm ${script}`);
+  }
+});
+
 test('report schema, score calculations, and evidence citations are valid', () => {
   const report = readReport();
-  expect(report.schemaVersion).toBe('2.0.0');
+  expect(report.schemaVersion).toBe('2.1.0');
   expect(report.metrics.map((metric) => metric.id)).toEqual([
     'context-precision',
     'context-recall',
@@ -99,19 +188,75 @@ test('report schema, score calculations, and evidence citations are valid', () =
       expect(check.interpretation).toBeTruthy();
       expect(check.evidence.citations.length).toBeGreaterThan(0);
       for (const citation of check.evidence.citations) {
-        expect(existsSync(citation.path), citation.path).toBe(true);
-        expect(
-          readFileSync(citation.path, 'utf8'),
-          `${citation.path}: ${citation.section}`,
-        ).toContain(citation.section);
+        const source = execFileSync(
+          'git',
+          ['show', `${report.repositoryRevision}:${citation.path}`],
+          { encoding: 'utf8' },
+        );
+        if (citation.section !== undefined) {
+          if (citation.startLine === undefined) {
+            expect(source.split(/\r?\n/).map((line) => line.trim())).toContain(
+              citation.section.trim(),
+            );
+            continue;
+          }
+          const endLine = citation.endLine ?? citation.startLine;
+          expect(endLine).toBeGreaterThanOrEqual(citation.startLine);
+          expect(
+            source
+              .split(/\r?\n/)
+              .slice(citation.startLine - 1, endLine)
+              .join('\n'),
+            `${citation.path}: ${citation.section}`,
+          ).toContain(citation.section);
+        }
       }
     }
   }
 });
 
+test('evidence URL builder selects GitHub file, heading, and Markdown source views', () => {
+  const repositoryUrl = 'https://github.com/ecarlisle/astro.ericcarlisle.com';
+  const revision = '77093ed';
+  const rangeUrl = buildEvidenceUrl(revision, {
+    path: 'docs/testing.md',
+    startLine: 5,
+    endLine: 13,
+  });
+  const singleLineUrl = buildEvidenceUrl(revision, {
+    path: 'docs/testing.md',
+    startLine: 5,
+  });
+  const wholeFileUrl = buildEvidenceUrl(revision, { path: 'docs/testing.md' });
+  const headingUrl = buildEvidenceUrl(revision, {
+    path: 'docs/testing.md',
+    section: '## Available Checks',
+  });
+
+  expect(rangeUrl).toBe(`${repositoryUrl}/blob/${revision}/docs/testing.md?plain=1#L5-L13`);
+  expect(singleLineUrl).toBe(`${repositoryUrl}/blob/${revision}/docs/testing.md?plain=1#L5`);
+  expect(wholeFileUrl).toBe(`${repositoryUrl}/blob/${revision}/docs/testing.md`);
+  expect(wholeFileUrl).not.toContain('plain=1');
+  expect(headingUrl).toBe(`${repositoryUrl}/blob/${revision}/docs/testing.md#available-checks`);
+  expect(rangeUrl.indexOf('?plain=1')).toBeLessThan(rangeUrl.indexOf('#L5'));
+  expect(buildEvidenceUrl('not-a-revision', { path: 'AGENTS.md' })).toContain('/blob/main/');
+  expect(() =>
+    buildEvidenceUrl(revision, {
+      path: 'docs/testing.md',
+      startLine: 13,
+      endLine: 5,
+    }),
+  ).toThrow('citation line range must not be reversed');
+});
+
 test('generator measures characters, derives scores, and is idempotent', () => {
   withTemporaryReport((path) => {
     const stale = JSON.parse(readFileSync(path, 'utf8')) as TestReport;
+    const originalScores = Object.fromEntries(
+      stale.metrics
+        .filter((metric) => metric.assessmentType === 'agent-assessed')
+        .map((metric) => [metric.id, metric.score]),
+    );
     const staleSize = stale.metrics.find((metric) => metric.id === 'active-context-size');
     const stalePrecision = stale.metrics.find((metric) => metric.id === 'context-precision');
     expect(staleSize?.details).toBeTruthy();
@@ -142,6 +287,13 @@ test('generator measures characters, derives scores, and is idempotent', () => {
       0,
     );
     expect(precision?.score).toBeCloseTo(expectedPrecision, 3);
+    expect(
+      Object.fromEntries(
+        generated.metrics
+          .filter((metric) => metric.assessmentType === 'agent-assessed')
+          .map((metric) => [metric.id, metric.score]),
+      ),
+    ).toEqual(originalScores);
   });
 });
 
@@ -205,14 +357,93 @@ test('validator rejects stale deterministic measurements', () => {
   });
 });
 
+test('validator rejects invalid repository evidence metadata', () => {
+  const cases = [
+    {
+      mutate: (citation: TestCheck['evidence']['citations'][number]) => {
+        citation.path = 'docs/does-not-exist.md';
+        delete citation.section;
+        delete citation.startLine;
+        delete citation.endLine;
+      },
+      message: 'evidence path does not exist at audited revision',
+    },
+    {
+      mutate: (citation: TestCheck['evidence']['citations'][number]) => {
+        citation.section = '## Section That Does Not Exist';
+        delete citation.startLine;
+        delete citation.endLine;
+      },
+      message: 'evidence section heading not found',
+    },
+    {
+      mutate: (citation: TestCheck['evidence']['citations'][number]) => {
+        citation.startLine = 12;
+        citation.endLine = 11;
+      },
+      message: 'citation line range must not be reversed',
+    },
+    {
+      mutate: (citation: TestCheck['evidence']['citations'][number]) => {
+        citation.path = 'https://example.com/unsafe';
+      },
+      message: 'safe repository-relative path',
+    },
+  ];
+
+  for (const fixture of cases) {
+    withTemporaryReport((path) => {
+      const report = JSON.parse(readFileSync(path, 'utf8')) as TestReport;
+      const citation = report.metrics.find((metric) => metric.checks)?.checks?.[0].evidence
+        .citations[0];
+      expect(citation).toBeTruthy();
+      if (!citation) throw new Error('evidence citation missing');
+      fixture.mutate(citation);
+      writeFileSync(path, `${JSON.stringify(report, null, 2)}\n`);
+
+      const result = spawnSync(process.execPath, [validatorPath], {
+        encoding: 'utf8',
+        env: { ...process.env, CONTEXT_HEALTH_REPORT_PATH: path },
+      });
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toContain(fixture.message);
+    });
+  }
+});
+
+test('validator accepts stable Markdown heading evidence without a line range', () => {
+  withTemporaryReport((path) => {
+    const report = JSON.parse(readFileSync(path, 'utf8')) as TestReport;
+    const citation = report.metrics.find((metric) => metric.checks)?.checks?.[0].evidence
+      .citations[0];
+    expect(citation).toBeTruthy();
+    if (!citation) throw new Error('evidence citation missing');
+    citation.path = 'docs/testing.md';
+    citation.section = '## Available Checks';
+    delete citation.startLine;
+    delete citation.endLine;
+    writeFileSync(path, `${JSON.stringify(report, null, 2)}\n`);
+
+    const result = spawnSync(process.execPath, [validatorPath], {
+      encoding: 'utf8',
+      env: { ...process.env, CONTEXT_HEALTH_REPORT_PATH: path },
+    });
+    expect(result.status, result.stderr).toBe(0);
+  });
+});
+
 test('report renders the overview, priorities, metrics, and contributor groups', async ({
   page,
 }) => {
   const report = readReport();
   await page.goto(healthPath);
 
-  await expect(page).toHaveTitle(/Context Health/);
-  await expect(page.locator('h1')).toHaveText('Context Health');
+  await expect(page).toHaveTitle('Context Health: EricCarlisle.com');
+  await expect(page.locator('h1')).toHaveText('Context Health: EricCarlisle.com');
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    'content',
+    'A static, evidence-backed audit of the coding-agent context for EricCarlisle.com.',
+  );
   await expect(page.locator('.ch-overview__summary')).toHaveText(report.overallSummary);
   await expect(page.locator('.ch-priority__recommendation')).toHaveCount(report.priorities.length);
   await expect(page.locator('.ch-score')).toHaveCount(report.metrics.length);
@@ -259,6 +490,61 @@ test('report renders the overview, priorities, metrics, and contributor groups',
     await expect(detail.locator('.ch-check--positive')).toHaveCount(positiveCount);
     await expect(detail.locator('.ch-check--negative')).toHaveCount(negativeCount);
   }
+});
+
+test('repository evidence links target the audited revision with descriptive labels', async ({
+  page,
+}) => {
+  const report = readReport();
+  const repositoryUrl = 'https://github.com/ecarlisle/astro.ericcarlisle.com';
+  await page.goto(healthPath);
+
+  const wholeFile = report.metrics
+    .flatMap((metric) => metric.checks ?? [])
+    .flatMap((check) => check.evidence.citations)
+    .find((citation) => citation.startLine === undefined);
+  expect(wholeFile).toBeTruthy();
+  if (!wholeFile) throw new Error('whole-file citation missing');
+  const wholeFileUrl = `${repositoryUrl}/blob/${report.repositoryRevision}/${wholeFile.path}`;
+  await expect(page.locator(`a[href="${wholeFileUrl}"]`)).toHaveText(wholeFile.path);
+
+  for (const impact of ['positive', 'negative'] as const) {
+    const check = report.metrics
+      .flatMap((metric) => metric.checks ?? [])
+      .find(
+        (candidate) =>
+          candidate.impact === impact &&
+          candidate.evidence.citations.some((citation) => citation.startLine !== undefined),
+      );
+    const citation = check?.evidence.citations.find(
+      (candidate) => candidate.startLine !== undefined,
+    );
+    expect(citation).toBeTruthy();
+    if (!citation?.startLine) throw new Error(`${impact} line citation missing`);
+    const endLine = citation.endLine ?? citation.startLine;
+    const fragment =
+      endLine === citation.startLine
+        ? `#L${citation.startLine}`
+        : `#L${citation.startLine}-L${endLine}`;
+    const expectedUrl =
+      `${repositoryUrl}/blob/${report.repositoryRevision}/${citation.path}` + `?plain=1${fragment}`;
+    const expectedText =
+      endLine === citation.startLine
+        ? `${citation.path}, line ${citation.startLine}`
+        : `${citation.path}, lines ${citation.startLine}–${endLine}`;
+    await expect(page.locator(`.ch-check--${impact} a[href="${expectedUrl}"]`).first()).toHaveText(
+      expectedText,
+    );
+  }
+});
+
+test('narrative findings without repository evidence remain plain text', async ({ page }) => {
+  const report = readReport();
+  await page.goto(healthPath);
+
+  await expect(page.locator('.ch-priority__recommendation')).toHaveCount(report.priorities.length);
+  await expect(page.locator('.ch-overview a')).toHaveCount(0);
+  await expect(page.locator('.ch-check__evidence a, .ch-check__interpretation a')).toHaveCount(0);
 });
 
 test('active context uses the same formatted value in its card and disclosure', async ({

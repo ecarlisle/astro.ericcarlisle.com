@@ -1,4 +1,6 @@
 ---
+import { buildEvidenceUrl, evidenceLinkText } from '../../lib/context-health-evidence.mjs';
+
 interface Check {
   label: string;
   result: 'pass' | 'partial' | 'fail';
@@ -8,15 +10,21 @@ interface Check {
   interpretation: string;
   evidence: {
     observation: string;
-    citations: Array<{ path: string; section: string }>;
+    citations: Array<{
+      path: string;
+      section?: string;
+      startLine?: number;
+      endLine?: number;
+    }>;
   };
 }
 
 interface Props {
   check: Check;
+  repositoryRevision: string;
 }
 
-const { check } = Astro.props;
+const { check, repositoryRevision } = Astro.props;
 const resultLabel = {
   pass: 'Pass',
   partial: 'Partial',
@@ -35,15 +43,19 @@ const resultLabel = {
   <p class="ch-check__interpretation">
     <strong>Assessment:</strong> {check.interpretation}
   </p>
-  <ul class="ch-check__citations">
-    {
-      check.evidence.citations.map((citation) => (
-        <li>
-          {citation.path} — {citation.section}
-        </li>
-      ))
-    }
-  </ul>
+  {
+    check.evidence.citations.length > 0 && (
+      <ul class="ch-check__citations">
+        {check.evidence.citations.map((citation) => (
+          <li>
+            <a href={buildEvidenceUrl(repositoryRevision, citation)}>
+              {evidenceLinkText(citation)}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
   <div class="ch-check__weight">
     Weight {Math.round(check.weight * 100)}% · contribution{' '}
     {(check.contribution * 100).toFixed(1)} points

@@ -1,6 +1,6 @@
 # AstroBlog — Agent Guidance
 
-AGENTS.md is agent guidance. Context Health audits use [the rubric](docs/context-health-rubric.md).
+AGENTS.md is agent guidance.
 
 ## Documentation Boundaries
 
@@ -72,17 +72,31 @@ See [docs/architecture.md](docs/architecture.md) for full details.
 
 See [docs/testing.md](docs/testing.md) for detailed guidance.
 
-## Before making significant changes
+## Task-Specific Context Routing
 
-| If changing… | Read first |
+For implementation, diagnosis, planning, and code or documentation review, identify the relevant task rows before loading supporting documentation. Read only those rows by default. Load documentation from other rows when investigation reveals a concrete need, and record why when the additional context materially expands the initial scope.
+
+| Task | Read first |
 |---|---|
-| Content conventions | `docs/content-status.md`, `docs/editorial-guidelines.md` |
-| Architecture, routes, layout | `docs/architecture.md` |
-| Styling, tokens, a11y | `docs/performance-seo-accessibility.md` |
-| Content schema | `src/content.config.ts` + `docs/content-model.md` |
-| Deployment, build, integrations | `docs/deployment.md`, `astro.config.mjs` |
-| Contact worker | `contact-worker/` |
-| Agent workflow | `docs/agent-workflow.md`, `docs/change-policy.md`, `docs/reviewer-checklist.md` |
+| Write or edit article prose or voice | [Editorial Guidelines](docs/editorial-guidelines.md) |
+| Create, publish, unpublish, or rename a blog article | [Content Authoring](docs/content-authoring.md) |
+| Remove or replace placeholder/test content | [Placeholder/Test Content](docs/content-status.md#placeholdertest-content) and [Replacement Plan](docs/content-status.md#replacement-plan) |
+| Change content schema or frontmatter fields | `src/content.config.ts` and [Blog Frontmatter](docs/content-model.md#blog-frontmatter) |
+| Change Astro architecture, pages, routes, layouts, components, or rendering | [Architecture](docs/architecture.md) |
+| Change styling, tokens, themes, or reusable visual patterns | [Design System Inventory Usage](docs/design-system/agent-guide.md#how-agents-should-use-inventoryjson) and `docs/design-system/inventory.json` |
+| Change accessibility or semantic UI behavior | [Accessibility Rules](docs/performance-seo-accessibility.md#accessibility-rules) |
+| Change client-side JavaScript, assets, loading, or performance behavior | [Performance Rules](docs/performance-seo-accessibility.md#performance-rules) |
+| Change page or post metadata or SEO | [SEO Rules](docs/performance-seo-accessibility.md#seo-rules) |
+| Change RSS or sitemap behavior | [Documentation and Sources of Truth](docs/architecture.md#documentation-and-sources-of-truth) |
+| Change structured data | [JSON-LD Structured Data](docs/structured-data.md) |
+| Change build configuration or Astro integrations | `astro.config.mjs`, [Notable Integrations](docs/architecture.md#notable-integrations), and [Deployment and Build Behavior](docs/change-policy.md#deployment-and-build-behavior) |
+| Change static-site deployment or CI | [GitHub Pages Deployment](docs/deployment.md#github-pages-deployment) and `.github/workflows/astro.yml` |
+| Change environment variables | [Environment Variables Reference](docs/deployment.md#environment-variables-reference) and `.env.example` |
+| Change Contact Worker implementation, deployment, or secrets | `contact-worker/`, [Cloudflare Worker Configuration](docs/deployment.md#cloudflare-worker-configuration), and [Contact Worker Deployment](docs/deployment.md#contact-worker-deployment) |
+| Audit, score, update evidence for, or refresh Context Health | [Context Health refresh](.agents/skills/context-health-refresh/SKILL.md) and [Context Health scoring rubric](docs/context-health-rubric.md) |
+| Follow implementation or diagnosis workflow | [Standard Development Steps](docs/agent-workflow.md#standard-development-steps) |
+| Plan or evaluate change scope | [Change Policy](docs/change-policy.md) |
+| Review code or documentation | [Reviewer Checklist](docs/reviewer-checklist.md) |
 
 ## Generated Files
 
@@ -116,22 +130,19 @@ These files require explicit user approval before editing:
 
 If a task appears to require changes to a protected file, stop and ask first.
 
-## Skills
+## Skill Routing
 
-For implementation work, always consult:
-- [.agents/skills/agent-safe-change/SKILL.md](.agents/skills/agent-safe-change/SKILL.md)
-- [.agents/skills/astro-static-implementation/SKILL.md](.agents/skills/astro-static-implementation/SKILL.md)
-- [.agents/skills/performance-budget/SKILL.md](.agents/skills/performance-budget/SKILL.md)
+For implementation work, always consult [agent-safe-change](.agents/skills/agent-safe-change/SKILL.md). Load other skills only when the task matches their scope:
 
-For UI work, also consult:
-- [.agents/skills/accessibility/SKILL.md](.agents/skills/accessibility/SKILL.md)
-- [.agents/skills/design-system-css/SKILL.md](.agents/skills/design-system-css/SKILL.md)
-
-For search work, also consult:
-- [.agents/skills/pagefind-search/SKILL.md](.agents/skills/pagefind-search/SKILL.md)
-
-For metadata/content routes, also consult:
-- [.agents/skills/seo-review/SKILL.md](.agents/skills/seo-review/SKILL.md)
+| Task | Skill |
+|---|---|
+| Modify Astro pages, layouts, components, routes, or rendered static output | [astro-static-implementation](.agents/skills/astro-static-implementation/SKILL.md) |
+| Change dependencies, client JavaScript, images, fonts, embeds, search, analytics, animation, data fetching, interactive UI, resource loading, or bundle/build output | [performance-budget](.agents/skills/performance-budget/SKILL.md) |
+| Add, change, or review UI semantics, keyboard behavior, focus, contrast, motion, forms, or navigation | [accessibility](.agents/skills/accessibility/SKILL.md) |
+| Change CSS, tokens, spacing, typography, layout, themes, or component appearance | [design-system-css](.agents/skills/design-system-css/SKILL.md) |
+| Implement or modify site search | [pagefind-search](.agents/skills/pagefind-search/SKILL.md) |
+| Create or edit pages, posts, images, links, structured data, or page metadata | [seo-review](.agents/skills/seo-review/SKILL.md) |
+| Audit Context Health, change scores or evidence, or refresh the report | [context-health-refresh](.agents/skills/context-health-refresh/SKILL.md) |
 
 ## Storybook
 

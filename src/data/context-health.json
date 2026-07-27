@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2.0.0",
+  "schemaVersion": "2.1.0",
   "auditedAt": "2026-07-27",
   "repositoryRevision": "77093ed",
   "effectiveContext": {
@@ -64,7 +64,9 @@
             "citations": [
               {
                 "path": "AGENTS.md",
-                "section": "## Before making significant changes"
+                "section": "## Before making significant changes",
+                "startLine": 75,
+                "endLine": 85
               }
             ]
           },
@@ -81,16 +83,19 @@
             "observation": "The selected skills separately cover static rendering, native semantics, focus and contrast, and token-based styles.",
             "citations": [
               {
-                "path": ".agents/skills/astro-static-implementation/SKILL.md",
-                "section": "# Astro Static Implementation Skill"
+                "path": ".agents/skills/astro-static-implementation/SKILL.md"
               },
               {
                 "path": ".agents/skills/accessibility/SKILL.md",
-                "section": "Accessibility Review Skill"
+                "section": "Accessibility Review Skill",
+                "startLine": 25,
+                "endLine": 51
               },
               {
                 "path": ".agents/skills/design-system-css/SKILL.md",
-                "section": "# Design System CSS Skill"
+                "section": "# Design System CSS Skill",
+                "startLine": 23,
+                "endLine": 43
               }
             ]
           },
@@ -108,11 +113,15 @@
             "citations": [
               {
                 "path": "AGENTS.md",
-                "section": "## Skills"
+                "section": "## Skills",
+                "startLine": 119,
+                "endLine": 128
               },
               {
                 "path": ".agents/skills/performance-budget/SKILL.md",
-                "section": "## Rules"
+                "section": "## Rules",
+                "startLine": 51,
+                "endLine": 68
               }
             ]
           },
@@ -130,15 +139,21 @@
             "citations": [
               {
                 "path": "AGENTS.md",
-                "section": "## Commands"
+                "section": "## Commands",
+                "startLine": 23,
+                "endLine": 38
               },
               {
                 "path": "README.md",
-                "section": "## Primary Commands"
+                "section": "## Primary Commands",
+                "startLine": 17,
+                "endLine": 29
               },
               {
                 "path": "docs/testing.md",
-                "section": "## Available Checks"
+                "section": "## Available Checks",
+                "startLine": 5,
+                "endLine": 13
               }
             ]
           },
@@ -166,11 +181,15 @@
             "citations": [
               {
                 "path": "AGENTS.md",
-                "section": "## Before making significant changes"
+                "section": "## Before making significant changes",
+                "startLine": 75,
+                "endLine": 85
               },
               {
                 "path": "AGENTS.md",
-                "section": "## Validation"
+                "section": "## Validation",
+                "startLine": 62,
+                "endLine": 73
               }
             ]
           },
@@ -188,11 +207,15 @@
             "citations": [
               {
                 "path": "AGENTS.md",
-                "section": "## Before making significant changes"
+                "section": "## Before making significant changes",
+                "startLine": 75,
+                "endLine": 85
               },
               {
                 "path": "docs/agent-workflow.md",
-                "section": "### Standard Development Steps"
+                "section": "### Standard Development Steps",
+                "startLine": 7,
+                "endLine": 15
               }
             ]
           },
@@ -210,11 +233,15 @@
             "citations": [
               {
                 "path": "AGENTS.md",
-                "section": "## Before making significant changes"
+                "section": "## Before making significant changes",
+                "startLine": 75,
+                "endLine": 85
               },
               {
                 "path": "docs/deployment.md",
-                "section": "## Contact Worker Deployment"
+                "section": "## Contact Worker Deployment",
+                "startLine": 199,
+                "endLine": 266
               }
             ]
           },
@@ -232,7 +259,9 @@
             "citations": [
               {
                 "path": "docs/architecture.md",
-                "section": "## Documentation and Sources of Truth"
+                "section": "## Documentation and Sources of Truth",
+                "startLine": 44,
+                "endLine": 66
               }
             ]
           },
@@ -250,7 +279,9 @@
             "citations": [
               {
                 "path": "AGENTS.md",
-                "section": "## Skills"
+                "section": "## Skills",
+                "startLine": 119,
+                "endLine": 134
               }
             ]
           },
@@ -278,11 +309,15 @@
             "citations": [
               {
                 "path": "docs/architecture.md",
-                "section": "## Core Areas"
+                "section": "## Core Areas",
+                "startLine": 5,
+                "endLine": 17
               },
               {
                 "path": ".agents/skills/astro-static-implementation/SKILL.md",
-                "section": "## Priorities"
+                "section": "## Priorities",
+                "startLine": 25,
+                "endLine": 33
               }
             ]
           },
@@ -300,11 +335,15 @@
             "citations": [
               {
                 "path": "docs/testing.md",
-                "section": "## Available Checks"
+                "section": "## Available Checks",
+                "startLine": 5,
+                "endLine": 13
               },
               {
                 "path": "docs/testing.md",
-                "section": "## Playwright"
+                "section": "## Playwright",
+                "startLine": 31,
+                "endLine": 38
               }
             ]
           },
@@ -322,11 +361,15 @@
             "citations": [
               {
                 "path": ".agents/skills/accessibility/SKILL.md",
-                "section": "Core Requirements"
+                "section": "Core Requirements",
+                "startLine": 35,
+                "endLine": 51
               },
               {
                 "path": ".agents/skills/accessibility/SKILL.md",
-                "section": "Verification"
+                "section": "Verification",
+                "startLine": 81,
+                "endLine": 92
               }
             ]
           },
@@ -344,11 +387,15 @@
             "citations": [
               {
                 "path": ".agents/skills/performance-budget/SKILL.md",
-                "section": "## JavaScript Checks"
+                "section": "## JavaScript Checks",
+                "startLine": 87,
+                "endLine": 99
               },
               {
                 "path": ".agents/skills/performance-budget/SKILL.md",
-                "section": "## Verification"
+                "section": "## Verification",
+                "startLine": 153,
+                "endLine": 183
               }
             ]
           },
@@ -366,11 +413,15 @@
             "citations": [
               {
                 "path": ".agents/skills/agent-safe-change/SKILL.md",
-                "section": "## Boundaries"
+                "section": "## Boundaries",
+                "startLine": 25,
+                "endLine": 33
               },
               {
                 "path": "docs/reviewer-checklist.md",
-                "section": "## 1. Request Fit"
+                "section": "## 1. Request Fit",
+                "startLine": 25,
+                "endLine": 37
               }
             ]
           },
@@ -384,15 +435,19 @@
           "impact": "negative",
           "interpretation": "Operational guidance is sufficient once found, but the worker directory itself lacks a documentation entry point.",
           "evidence": {
-            "observation": "Deployment documentation covers local development, type checking, deploys, secrets, request flow, and rollback for the worker.",
+            "observation": "Deployment documentation covers local development, type checking, deploys, secrets, and request flow for the worker.",
             "citations": [
               {
                 "path": "docs/deployment.md",
-                "section": "## Contact Worker Deployment"
+                "section": "## Contact Worker Deployment",
+                "startLine": 199,
+                "endLine": 291
               },
               {
                 "path": "docs/deployment.md",
-                "section": "### Cloudflare Worker"
+                "section": "### Cloudflare Worker",
+                "startLine": 115,
+                "endLine": 127
               }
             ]
           },
@@ -420,11 +475,15 @@
             "citations": [
               {
                 "path": "AGENTS.md",
-                "section": "## Documentation Boundaries"
+                "section": "## Documentation Boundaries",
+                "startLine": 5,
+                "endLine": 10
               },
               {
                 "path": "AGENTS.md",
-                "section": "## Documentation Authority"
+                "section": "## Documentation Authority",
+                "startLine": 12,
+                "endLine": 21
               }
             ]
           },
@@ -442,7 +501,9 @@
             "citations": [
               {
                 "path": "AGENTS.md",
-                "section": "## Documentation Authority"
+                "section": "## Documentation Authority",
+                "startLine": 12,
+                "endLine": 21
               }
             ]
           },
@@ -460,7 +521,9 @@
             "citations": [
               {
                 "path": "AGENTS.md",
-                "section": "## Protected Files"
+                "section": "## Protected Files",
+                "startLine": 104,
+                "endLine": 117
               }
             ]
           },
@@ -478,15 +541,21 @@
             "citations": [
               {
                 "path": "AGENTS.md",
-                "section": "## Commands"
+                "section": "## Commands",
+                "startLine": 23,
+                "endLine": 38
               },
               {
                 "path": "README.md",
-                "section": "## Primary Commands"
+                "section": "## Primary Commands",
+                "startLine": 17,
+                "endLine": 29
               },
               {
                 "path": "docs/testing.md",
-                "section": "## Available Checks"
+                "section": "## Available Checks",
+                "startLine": 5,
+                "endLine": 13
               }
             ]
           },
@@ -504,7 +573,9 @@
             "citations": [
               {
                 "path": "docs/architecture.md",
-                "section": "## Documentation and Sources of Truth"
+                "section": "## Documentation and Sources of Truth",
+                "startLine": 44,
+                "endLine": 58
               }
             ]
           },
@@ -517,15 +588,15 @@
       "label": "Active Context Size",
       "score": null,
       "status": "healthy",
-      "interpretation": "The declared effective context contains 46,269 characters (~11,568 estimated tokens).",
+      "interpretation": "The declared effective context contains 49,275 characters (~12,319 estimated tokens).",
       "assessmentType": "deterministic",
       "details": {
-        "characters": 46269,
-        "estimatedTokens": 11568,
+        "characters": 49275,
+        "estimatedTokens": 12319,
         "measuredFiles": [
           {
             "path": "AGENTS.md",
-            "characters": 9312
+            "characters": 12318
           },
           {
             "path": "docs/architecture.md",

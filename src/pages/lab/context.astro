@@ -4,7 +4,9 @@ import ContextCheckCard from '../../components/lab/ContextCheckCard.astro';
 
 interface EvidenceCitation {
   path: string;
-  section: string;
+  section?: string;
+  startLine?: number;
+  endLine?: number;
 }
 
 interface ContextCheck {
@@ -93,10 +95,10 @@ function metricDisplayValue(metric: ContextMetric) {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Context Health — Eric Carlisle</title>
+    <title>Context Health: EricCarlisle.com</title>
     <meta
       name="description"
-      content="A static, evidence-backed audit of this repository's coding-agent context."
+      content="A static, evidence-backed audit of the coding-agent context for EricCarlisle.com."
     />
     <meta name="robots" content="noindex, follow" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -481,7 +483,7 @@ function metricDisplayValue(metric: ContextMetric) {
   </head>
   <body>
     <main class="ch-page" data-pagefind-ignore="all">
-      <h1 class="ch-page__heading">Context Health</h1>
+      <h1 class="ch-page__heading">Context Health: EricCarlisle.com</h1>
       <p class="ch-page__meta">
         Audited {report.auditedAt} · Audited repository revision {report.repositoryRevision} · Schema
         v{report.schemaVersion}
@@ -564,13 +566,23 @@ function metricDisplayValue(metric: ContextMetric) {
                     {positive.length > 0 && (
                       <section class="ch-contributor-group" aria-label={`${metric.label} positives`}>
                         <h3>Positive contributors</h3>
-                        {positive.map((check) => <ContextCheckCard check={check} />)}
+                        {positive.map((check) => (
+                          <ContextCheckCard
+                            check={check}
+                            repositoryRevision={report.repositoryRevision}
+                          />
+                        ))}
                       </section>
                     )}
                     {negative.length > 0 && (
                       <section class="ch-contributor-group" aria-label={`${metric.label} negatives`}>
                         <h3>Negative contributors</h3>
-                        {negative.map((check) => <ContextCheckCard check={check} />)}
+                        {negative.map((check) => (
+                          <ContextCheckCard
+                            check={check}
+                            repositoryRevision={report.repositoryRevision}
+                          />
+                        ))}
                       </section>
                     )}
                   </div>
