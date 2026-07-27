@@ -3,7 +3,11 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildEvidenceUrl, validateCitationShape } from '../src/lib/context-health-evidence.mjs';
+import {
+  buildEvidenceUrl,
+  githubHeadingAnchor,
+  validateCitationShape,
+} from '../src/lib/context-health-evidence.mjs';
 import {
   calculateMetric,
   measureEffectiveContext,
@@ -226,7 +230,31 @@ function validateCitation(citation, checkId, repositoryRevision) {
     return;
   }
 
-  if (citation.startLine === undefined) return;
+  if (citation.startLine === undefined) {
+    if (citation.section === undefined) return;
+    const expectedAnchor = githubHeadingAnchor(citation.section);
+    const matchingHeadings = source
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => /^#{1,6}\s+\S/.test(line))
+      .filter((line) => {
+        try {
+          return githubHeadingAnchor(line) === expectedAnchor;
+        } catch {
+          return false;
+        }
+      });
+    if (!matchingHeadings.includes(citation.section.trim())) {
+      errors.push(
+        `${checkId} evidence section heading not found in ${citation.path}: ${citation.section}`,
+      );
+    } else if (matchingHeadings.length > 1) {
+      errors.push(
+        `${checkId} evidence section heading does not have a stable unique anchor in ${citation.path}: ${citation.section}`,
+      );
+    }
+    return;
+  }
   const lines = source.split(/\r?\n/);
   const endLine = citation.endLine ?? citation.startLine;
   if (endLine > lines.length) {

@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { buildEvidenceUrl } from '../src/lib/context-health-evidence.mjs';
 
 const healthPath = '/lab/context/';
 const reportPath = 'src/data/context-health.json';
@@ -113,13 +114,18 @@ test('report schema, score calculations, and evidence citations are valid', () =
           { encoding: 'utf8' },
         );
         if (citation.section !== undefined) {
-          expect(citation.startLine).toBeGreaterThan(0);
+          if (citation.startLine === undefined) {
+            expect(source.split(/\r?\n/).map((line) => line.trim())).toContain(
+              citation.section.trim(),
+            );
+            continue;
+          }
           const endLine = citation.endLine ?? citation.startLine;
-          expect(endLine).toBeGreaterThanOrEqual(citation.startLine ?? 0);
+          expect(endLine).toBeGreaterThanOrEqual(citation.startLine);
           expect(
             source
               .split(/\r?\n/)
-              .slice((citation.startLine ?? 1) - 1, endLine)
+              .slice(citation.startLine - 1, endLine)
               .join('\n'),
             `${citation.path}: ${citation.section}`,
           ).toContain(citation.section);
@@ -127,6 +133,40 @@ test('report schema, score calculations, and evidence citations are valid', () =
       }
     }
   }
+});
+
+test('evidence URL builder selects GitHub file, heading, and Markdown source views', () => {
+  const repositoryUrl = 'https://github.com/ecarlisle/astro.ericcarlisle.com';
+  const revision = '77093ed';
+  const rangeUrl = buildEvidenceUrl(revision, {
+    path: 'docs/testing.md',
+    startLine: 5,
+    endLine: 13,
+  });
+  const singleLineUrl = buildEvidenceUrl(revision, {
+    path: 'docs/testing.md',
+    startLine: 5,
+  });
+  const wholeFileUrl = buildEvidenceUrl(revision, { path: 'docs/testing.md' });
+  const headingUrl = buildEvidenceUrl(revision, {
+    path: 'docs/testing.md',
+    section: '## Available Checks',
+  });
+
+  expect(rangeUrl).toBe(`${repositoryUrl}/blob/${revision}/docs/testing.md?plain=1#L5-L13`);
+  expect(singleLineUrl).toBe(`${repositoryUrl}/blob/${revision}/docs/testing.md?plain=1#L5`);
+  expect(wholeFileUrl).toBe(`${repositoryUrl}/blob/${revision}/docs/testing.md`);
+  expect(wholeFileUrl).not.toContain('plain=1');
+  expect(headingUrl).toBe(`${repositoryUrl}/blob/${revision}/docs/testing.md#available-checks`);
+  expect(rangeUrl.indexOf('?plain=1')).toBeLessThan(rangeUrl.indexOf('#L5'));
+  expect(buildEvidenceUrl('not-a-revision', { path: 'AGENTS.md' })).toContain('/blob/main/');
+  expect(() =>
+    buildEvidenceUrl(revision, {
+      path: 'docs/testing.md',
+      startLine: 13,
+      endLine: 5,
+    }),
+  ).toThrow('citation line range must not be reversed');
 });
 
 test('generator measures characters, derives scores, and is idempotent', () => {
@@ -238,10 +278,11 @@ test('validator rejects invalid repository evidence metadata', () => {
     },
     {
       mutate: (citation: TestCheck['evidence']['citations'][number]) => {
+        citation.section = '## Section That Does Not Exist';
         delete citation.startLine;
         delete citation.endLine;
       },
-      message: 'section citation needs line information',
+      message: 'evidence section heading not found',
     },
     {
       mutate: (citation: TestCheck['evidence']['citations'][number]) => {
@@ -276,6 +317,27 @@ test('validator rejects invalid repository evidence metadata', () => {
       expect(result.stderr).toContain(fixture.message);
     });
   }
+});
+
+test('validator accepts stable Markdown heading evidence without a line range', () => {
+  withTemporaryReport((path) => {
+    const report = JSON.parse(readFileSync(path, 'utf8')) as TestReport;
+    const citation = report.metrics.find((metric) => metric.checks)?.checks?.[0].evidence
+      .citations[0];
+    expect(citation).toBeTruthy();
+    if (!citation) throw new Error('evidence citation missing');
+    citation.path = 'docs/testing.md';
+    citation.section = '## Available Checks';
+    delete citation.startLine;
+    delete citation.endLine;
+    writeFileSync(path, `${JSON.stringify(report, null, 2)}\n`);
+
+    const result = spawnSync(process.execPath, [validatorPath], {
+      encoding: 'utf8',
+      env: { ...process.env, CONTEXT_HEALTH_REPORT_PATH: path },
+    });
+    expect(result.status, result.stderr).toBe(0);
+  });
 });
 
 test('report renders the overview, priorities, metrics, and contributor groups', async ({
@@ -372,7 +434,8 @@ test('repository evidence links target the audited revision with descriptive lab
       endLine === citation.startLine
         ? `#L${citation.startLine}`
         : `#L${citation.startLine}-L${endLine}`;
-    const expectedUrl = `${repositoryUrl}/blob/${report.repositoryRevision}/${citation.path}${fragment}`;
+    const expectedUrl =
+      `${repositoryUrl}/blob/${report.repositoryRevision}/${citation.path}` + `?plain=1${fragment}`;
     const expectedText =
       endLine === citation.startLine
         ? `${citation.path}, line ${citation.startLine}`

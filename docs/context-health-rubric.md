@@ -186,9 +186,9 @@ Every scored finding must include:
 - a positive or negative classification;
 - a recommendation for Partial or Fail findings where useful.
 
-Repository-backed findings must identify their source file. A genuinely file-level finding may link the whole file; section- or claim-level findings must link the narrowest practical line or line range. Target the audited commit revision when it is available so later repository changes do not invalidate the evidence; use the repository’s main branch only when no valid audited revision is available.
+Repository-backed findings must identify their source file. A genuinely file-level finding may link the whole file. For a named Markdown section where exact lines are unnecessary, prefer its stable rendered heading anchor. Section- or claim-level passages must link the narrowest practical line or line range; exact Markdown evidence uses GitHub source mode as `?plain=1#Lx` or `?plain=1#Lx-Ly`, with the query before the fragment. Do not use a PR diff as permanent audit evidence.
 
-The auditor must verify that every source link resolves and that the linked content supports the associated finding. Do not add a repository link to an unsupported narrative claim merely for appearance. The current validator checks repository paths, line ranges, section references, and generated GitHub URLs against the audited revision.
+Use a commit-specific permalink to the audited revision when available so later repository changes do not invalidate the evidence; use the repository’s main branch only when no valid audited revision is available. The auditor must verify that every link opens the intended source file, rendered section, or source passage and supports the associated finding. Do not add a repository link to an unsupported narrative claim merely for appearance. The current validator checks repository paths, line ranges, section references, and generated GitHub URLs against the audited revision.
 
 Keep the reasoning fields separate:
 
