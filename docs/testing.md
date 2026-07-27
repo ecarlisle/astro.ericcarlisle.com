@@ -30,9 +30,12 @@ but may be run to confirm no unintended side effects.
 
 ## Playwright
 
-Playwright (`^1.60.0`) is available in `devDependencies` but is not currently
-wired into a test suite or CI pipeline. If browser-based tests are added in
-the future, they should use Playwright and be documented here.
+Playwright is configured for end-to-end and accessibility testing:
+
+- `pnpm test:e2e` — Runs the full Playwright test suite (routes, a11y, SEO, Storybook checks).
+- `pnpm test:a11y` — Runs only the accessibility tests in `tests/accessibility.spec.ts`.
+
+Configuration lives in `playwright.config.ts`. Tests run against the production build served by a static file server. CI installs Chromium and runs `pnpm test:e2e` as part of the deployment workflow.
 
 ## Other Notes
 

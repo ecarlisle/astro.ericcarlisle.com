@@ -31,7 +31,6 @@ See [testing.md](testing.md) for when to run each check.
 ## Related Documentation
 
 - [Architecture](architecture.md) — System design and technical overview
-- [Architecture](architecture.md) — System design and technical overview
 - [Change Policy](change-policy.md) — How changes are evaluated
 - [Reviewer Checklist](reviewer-checklist.md) — Code review criteria
 - [Deployment](deployment.md) — Deployment and operations guide
