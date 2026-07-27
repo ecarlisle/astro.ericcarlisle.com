@@ -1,15 +1,9 @@
 /**
- * Context Lab analysis engine.
+ * Context Lab analysis engine — pure computation, no fixture imports.
  *
- * Pure computation — no DOM, no side effects.
- *
- * `analyzeContext` is fixture-independent — it accepts any task, included docs,
+ * `analyzeContext` is fixture-independent. It accepts any task, included docs,
  * and available docs. It does not import fixture data.
- *
- * `runFixtureAnalysis` is a small wrapper for the browser controller that loads
- * fixture data and calls analyzeContext.
  */
-import { DOCUMENTS, TASKS } from './fixtures';
 import type {
   AnalysisInput,
   AnalysisResult,
@@ -22,13 +16,69 @@ import type {
 /** Default chars-per-token approximation (English prose). */
 const DEFAULT_CHARS_PER_TOKEN = 4;
 
+// ─── Input validation ───────────────────────────────────────────────────────
+
+function validateInput(input: AnalysisInput): void {
+  const { task, includedDocs, availableDocs, charsPerToken } = input;
+
+  // charsPerToken must be positive and finite
+  if (charsPerToken !== undefined) {
+    if (
+      typeof charsPerToken !== 'number' ||
+      !Number.isFinite(charsPerToken) ||
+      charsPerToken <= 0
+    ) {
+      throw new Error(`charsPerToken must be a positive finite number, got ${charsPerToken}`);
+    }
+  }
+
+  // Document lengths must be finite and nonnegative
+  for (const doc of [...includedDocs, ...availableDocs]) {
+    if (typeof doc.length !== 'number' || !Number.isFinite(doc.length) || doc.length < 0) {
+      throw new Error(`Document "${doc.id}" has invalid length: ${doc.length}`);
+    }
+  }
+
+  // Available doc IDs must be unique
+  const availableIds = availableDocs.map((d) => d.id);
+  if (new Set(availableIds).size !== availableIds.length) {
+    throw new Error('availableDocs contains duplicate document IDs');
+  }
+
+  // Included doc IDs must be unique
+  const includedIds = includedDocs.map((d) => d.id);
+  if (new Set(includedIds).size !== includedIds.length) {
+    throw new Error('includedDocs contains duplicate document IDs');
+  }
+
+  // Every included doc must exist in available docs
+  const availableIdSet = new Set(availableIds);
+  for (const doc of includedDocs) {
+    if (!availableIdSet.has(doc.id)) {
+      throw new Error(`Included document "${doc.id}" is not present in availableDocs`);
+    }
+  }
+
+  // Relevance values must be finite and between 0 and 1
+  for (const doc of [...includedDocs, ...availableDocs]) {
+    const rel = doc.relevanceByTask[task.id];
+    if (rel !== undefined) {
+      if (typeof rel !== 'number' || !Number.isFinite(rel) || rel < 0 || rel > 1) {
+        throw new Error(`Document "${doc.id}" has invalid relevance for task "${task.id}": ${rel}`);
+      }
+    }
+  }
+}
+
 // ─── Public API ─────────────────────────────────────────────────────────────
 
 /**
  * Run a complete context-quality analysis from supplied input.
- * Does not import fixture data.
+ * Validates inputs before computing. Does not import fixture data.
  */
 export function analyzeContext(input: AnalysisInput): AnalysisResult {
+  validateInput(input);
+
   const { task, includedDocs, availableDocs, charsPerToken } = input;
   const cpt = charsPerToken ?? DEFAULT_CHARS_PER_TOKEN;
 
@@ -39,20 +89,6 @@ export function analyzeContext(input: AnalysisInput): AnalysisResult {
     authorityClarity: computeAuthorityClarity(task, includedDocs),
     contextSize: computeContextSize(includedDocs, cpt),
   };
-}
-
-/**
- * Fixture-backed analysis for the browser controller.
- * Loads tasks and documents from fixture data, then delegates to analyzeContext.
- */
-export function runFixtureAnalysis(taskId: string, includedDocIds: Set<string>): AnalysisResult {
-  const task = TASKS.find((t) => t.id === taskId);
-  if (!task) throw new Error(`Unknown task: ${taskId}`);
-
-  const includedDocs = DOCUMENTS.filter((d) => includedDocIds.has(d.id));
-  const availableDocs = DOCUMENTS;
-
-  return analyzeContext({ task, includedDocs, availableDocs });
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -75,13 +111,9 @@ function docNames(docs: LabDocument[]): string[] {
 // ─── Precision ──────────────────────────────────────────────────────────────
 
 /**
- * Size-weighted precision: fraction of the included-context size that
- * carries positive relevance for the task.
- *
- *   precision = Σ(included_size × relevance) / Σ(included_size)
- *
- * Every document with relevance > 0 contributes to the numerator.
+ * Size-weighted precision: Σ(included_size × relevance) / Σ(included_size)
  * Returns null when no documents are included.
+ * Guaranteed to be 0–1 when inputs are valid.
  */
 function computePrecision(task: LabTask, includedDocs: LabDocument[]): MetricResult {
   if (includedDocs.length === 0) {
@@ -100,37 +132,32 @@ function computePrecision(task: LabTask, includedDocs: LabDocument[]): MetricRes
   const value = denominator > 0 ? numerator / denominator : 0;
 
   const contributing = includedDocs.filter((d) => (d.relevanceByTask[task.id] ?? 0) > 0);
-  const zeroRelevance = includedDocs.filter((d) => (d.relevanceByTask[task.id] ?? 0) === 0);
+  const zero = includedDocs.filter((d) => (d.relevanceByTask[task.id] ?? 0) === 0);
 
-  let explanation: string;
-  if (contributing.length === 0) {
-    explanation = 'No selected documents carry relevance for this task. Precision is 0%.';
-  } else {
-    const lines: string[] = [
-      `What fraction of the selected context is relevant to "${task.title}"?`,
-      `Each document is weighted by its character size and continuous relevance (0–1).`,
-    ];
-    for (const d of contributing) {
-      const rel = d.relevanceByTask[task.id] ?? 0;
-      lines.push(
-        `  ${d.title}: ${d.length.toLocaleString()} chars × relevance ${rel.toFixed(1)} = ${(d.length * rel).toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
-      );
-    }
-    if (zeroRelevance.length > 0) {
-      lines.push(
-        `Zero-relevance documents: ${zeroRelevance.map((d) => d.title).join(', ')} (contribute 0 to numerator but still add to denominator).`,
-      );
-    }
+  const lines: string[] = [
+    `What fraction of the selected context is relevant to "${task.title}"?`,
+    `Each document is weighted by character size × continuous relevance (0–1).`,
+  ];
+  for (const d of contributing) {
+    const rel = d.relevanceByTask[task.id] ?? 0;
+    const weighted = (d.length * rel).toLocaleString(undefined, { maximumFractionDigits: 0 });
     lines.push(
-      `Precision = weighted relevance sum (${numerator.toLocaleString(undefined, { maximumFractionDigits: 0 })}) ÷ total chars (${denominator.toLocaleString()}) = ${(value * 100).toFixed(1)}%.`,
+      `  ${d.title}: ${d.length.toLocaleString()} chars × ${rel.toFixed(1)} = ${weighted}`,
     );
-    explanation = lines.join(' ');
   }
+  if (zero.length > 0) {
+    lines.push(
+      `Zero-relevance: ${zero.map((d) => d.title).join(', ')} (add 0 to numerator, add to denominator).`,
+    );
+  }
+  lines.push(
+    `Precision = ${numerator.toLocaleString(undefined, { maximumFractionDigits: 0 })} ÷ ${denominator.toLocaleString()} = ${(value * 100).toFixed(1)}%.`,
+  );
 
   return {
     value,
     label: 'Context Precision',
-    explanation,
+    explanation: lines.join(' '),
     higherIsBetter: true,
     contributingDocs: docNames(contributing),
   };
@@ -139,13 +166,9 @@ function computePrecision(task: LabTask, includedDocs: LabDocument[]): MetricRes
 // ─── Recall ─────────────────────────────────────────────────────────────────
 
 /**
- * Size-weighted recall: fraction of all available relevant context
- * that was retrieved.
- *
- *   recall = Σ(included_size × relevance) / Σ(available_size × relevance)
- *
- * Every document with relevance > 0 contributes to both numerator
- * and denominator. Returns null when no weight exists in the repository.
+ * Size-weighted recall: Σ(included × relevance) / Σ(available × relevance)
+ * Returns null when denominator is zero.
+ * Guaranteed to be 0–1 when inputs are valid (included ⊆ available).
  */
 function computeRecall(
   task: LabTask,
@@ -168,22 +191,21 @@ function computeRecall(
   }
 
   const value = numerator / denominator;
-
   const contributing = includedDocs.filter((d) => (d.relevanceByTask[task.id] ?? 0) > 0);
   const relevantAvailable = availableDocs.filter((d) => (d.relevanceByTask[task.id] ?? 0) > 0);
   const missing = relevantAvailable.filter((d) => !contributing.some((c) => c.id === d.id));
 
   const parts: string[] = [
     `How much of the available relevant context is included?`,
-    `Of ${relevantAvailable.length} documents with positive relevance for this task, ${contributing.length} are selected.`,
+    `Of ${relevantAvailable.length} documents with positive relevance, ${contributing.length} are selected.`,
   ];
   if (missing.length > 0) {
     parts.push(
-      `Missing documents: ${missing.map((d) => `${d.title} (relevance ${(d.relevanceByTask[task.id] ?? 0).toFixed(1)})`).join('; ')}.`,
+      `Missing: ${missing.map((d) => `${d.title} (relevance ${(d.relevanceByTask[task.id] ?? 0).toFixed(1)})`).join('; ')}.`,
     );
   }
   parts.push(
-    `Recall = included relevant weight (${numerator.toLocaleString(undefined, { maximumFractionDigits: 0 })}) ÷ total relevant weight (${denominator.toLocaleString(undefined, { maximumFractionDigits: 0 })}) = ${(value * 100).toFixed(1)}%.`,
+    `Recall = ${numerator.toLocaleString(undefined, { maximumFractionDigits: 0 })} ÷ ${denominator.toLocaleString(undefined, { maximumFractionDigits: 0 })} = ${(value * 100).toFixed(1)}%.`,
   );
 
   return {
@@ -197,11 +219,6 @@ function computeRecall(
 
 // ─── Sufficiency ────────────────────────────────────────────────────────────
 
-/**
- * Requirement-coverage sufficiency.
- *
- *   sufficiency = covered_requirements / total_requirements
- */
 function computeSufficiency(task: LabTask, includedDocs: LabDocument[]): MetricResult {
   const total = task.requirements.length;
 
@@ -221,21 +238,18 @@ function computeSufficiency(task: LabTask, includedDocs: LabDocument[]): MetricR
   const covered = task.requirements.filter((req) =>
     includedDocs.some((doc) => doc.covers.includes(req)),
   );
-  const coveredCount = covered.length;
   const uncovered = task.requirements.filter(
     (req) => !includedDocs.some((doc) => doc.covers.includes(req)),
   );
-  const value = coveredCount / total;
+  const value = covered.length / total;
 
   const lines: string[] = [
-    `How many of the task requirements are addressed by selected documents? ${coveredCount} of ${total} requirements are covered. Sufficiency = ${coveredCount} ÷ ${total} = ${(value * 100).toFixed(0)}%.`,
+    `${covered.length} of ${total} requirements are covered. Sufficiency = ${covered.length} ÷ ${total} = ${(value * 100).toFixed(0)}%.`,
   ];
   if (covered.length > 0) {
-    const details = covered.map((req) => {
-      const doc = includedDocs.find((d) => d.covers.includes(req));
-      return `${req.replace(/-/g, ' ')} → ${doc?.title ?? 'unknown'}`;
-    });
-    lines.push(`Covered: ${details.join('; ')}.`);
+    lines.push(
+      `Covered: ${covered.map((req) => `${req.replace(/-/g, ' ')} → ${includedDocs.find((d) => d.covers.includes(req))?.title ?? '?'}`).join('; ')}.`,
+    );
   }
   if (uncovered.length > 0) {
     lines.push(`Not covered: ${uncovered.map((r) => r.replace(/-/g, ' ')).join(', ')}.`);
@@ -256,19 +270,6 @@ function computeSufficiency(task: LabTask, includedDocs: LabDocument[]): MetricR
 
 const TIER_ORDER: Record<string, number> = { high: 3, medium: 2, low: 1 };
 
-/**
- * Authority clarity: for covered requirements, what fraction have an
- * unambiguous authoritative source at the highest applicable authority tier?
- *
- * For each covered requirement:
- * 1. Find included docs claiming authority for it.
- * 2. Determine the highest authority tier present.
- * 3. Among docs at that highest tier, check for conflicts.
- * 4. Multiple conflicting docs at the same highest tier → ambiguous.
- * 5. Lower-tier docs do not override a clear higher-tier source.
- *
- * Returns null when no requirements are covered.
- */
 function computeAuthorityClarity(task: LabTask, includedDocs: LabDocument[]): MetricResult {
   const covered = task.requirements.filter((req) =>
     includedDocs.some((doc) => doc.covers.includes(req)),
@@ -278,8 +279,7 @@ function computeAuthorityClarity(task: LabTask, includedDocs: LabDocument[]): Me
     return {
       value: null,
       label: 'Authority Clarity',
-      explanation:
-        'No requirements are covered by selected documents. Authority clarity cannot be assessed.',
+      explanation: 'No requirements are covered. Authority clarity cannot be assessed.',
       higherIsBetter: true,
       contributingDocs: [],
       notApplicableReason: 'No requirements are covered.',
@@ -300,11 +300,9 @@ function computeAuthorityClarity(task: LabTask, includedDocs: LabDocument[]): Me
       continue;
     }
 
-    // Find the highest tier present
     const maxTier = Math.max(...authoritative.map((d) => TIER_ORDER[d.authority] ?? 0));
     const topTier = authoritative.filter((d) => TIER_ORDER[d.authority] === maxTier);
 
-    // Check conflicts only among top-tier docs
     const conflict = topTier.some((a) =>
       topTier.some(
         (b) => b.id !== a.id && (a.conflictsWith.includes(b.id) || b.conflictsWith.includes(a.id)),
@@ -314,10 +312,9 @@ function computeAuthorityClarity(task: LabTask, includedDocs: LabDocument[]): Me
     if (!conflict && topTier.length >= 1) {
       clearReqs.push(req);
     } else {
-      const names = topTier.map((d) => d.title).join(', ');
       ambiguousReqs.push({
         req,
-        reason: `Competing authority on "${req.replace(/-/g, ' ')}" among top-tier documents: ${names}.`,
+        reason: `Competing authority on "${req.replace(/-/g, ' ')}" among top-tier docs: ${topTier.map((d) => d.title).join(', ')}.`,
       });
     }
   }
@@ -325,7 +322,7 @@ function computeAuthorityClarity(task: LabTask, includedDocs: LabDocument[]): Me
   const value = covered.length > 0 ? clearReqs.length / covered.length : 0;
 
   const parts: string[] = [
-    `Of ${covered.length} covered requirements, ${clearReqs.length} have clear authority and ${ambiguousReqs.length} are ambiguous or conflicting. Clarity = ${clearReqs.length} ÷ ${covered.length} = ${(value * 100).toFixed(0)}%.`,
+    `${clearReqs.length} of ${covered.length} covered requirements have clear authority. Clarity = ${clearReqs.length} ÷ ${covered.length} = ${(value * 100).toFixed(0)}%.`,
   ];
   if (clearReqs.length > 0)
     parts.push(`Clear: ${clearReqs.map((r) => r.replace(/-/g, ' ')).join(', ')}.`);
@@ -344,11 +341,6 @@ function computeAuthorityClarity(task: LabTask, includedDocs: LabDocument[]): Me
 
 // ─── Context size ───────────────────────────────────────────────────────────
 
-/**
- * Active context size.
- *
- * Token estimate uses charsPerToken (default 4 for English prose).
- */
 function computeContextSize(includedDocs: LabDocument[], charsPerToken: number): ContextSizeResult {
   const chars = includedDocs.reduce((sum, d) => sum + d.length, 0);
   const estimatedTokens = Math.round(chars / charsPerToken);
@@ -358,8 +350,8 @@ function computeContextSize(includedDocs: LabDocument[], charsPerToken: number):
     estimatedTokens,
     label: 'Active Context Size',
     explanation: [
-      `Total size across ${includedDocs.length} document${includedDocs.length !== 1 ? 's' : ''}: ${chars.toLocaleString()} characters, approximately ${estimatedTokens.toLocaleString()} tokens (estimated at 1 token ≈ ${charsPerToken} characters for English prose, not a real tokenizer).`,
-      `Interpret alongside precision, recall, and sufficiency — larger context with high precision is better than small context with low sufficiency.`,
+      `${includedDocs.length} document${includedDocs.length !== 1 ? 's' : ''}: ${chars.toLocaleString()} characters, ~${estimatedTokens.toLocaleString()} tokens (≈${charsPerToken} chars/token for English prose, not a real tokenizer).`,
+      `Interpret alongside precision, recall, and sufficiency.`,
     ].join(' '),
     contributingDocs: docNames(includedDocs),
   };

@@ -4,9 +4,12 @@
  * Wires the analysis engine to the DOM. Handles state, rendering,
  * and event binding. All state is local to this module.
  */
-import { runFixtureAnalysis } from './engine';
+import { runFixtureAnalysis } from './fixture-analysis';
 import { DOCUMENTS, PRESETS, TASKS } from './fixtures';
 import type { ContextSizeResult, LabState, MetricResult } from './types';
+
+/** Display-only threshold for labeling a document as strongly relevant. */
+const STRONG_RELEVANCE_THRESHOLD = 0.6;
 
 const state: LabState = {
   selectedTaskId: 'a11y',
@@ -29,10 +32,26 @@ export function initialize(): void {
 }
 
 function renderAll(): void {
+  // Save focus before re-rendering
+  const activeName = document.activeElement?.getAttribute('name');
+  const activeValue =
+    activeName === 'task' || activeName === 'preset'
+      ? (document.activeElement as HTMLInputElement)?.value
+      : null;
+  const restoreName = activeName === 'task' || activeName === 'preset' ? activeName : null;
+
   renderTaskSelector();
   renderPresetSelector();
   renderDocList();
   renderMetrics();
+
+  // Restore focus to the selected radio after re-render
+  if (activeValue && restoreName) {
+    const restored = document.querySelector<HTMLInputElement>(
+      `input[name="${restoreName}"][value="${activeValue}"]`,
+    );
+    if (restored) restored.focus();
+  }
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -149,7 +168,8 @@ function renderDocList(): void {
       ${DOCUMENTS.map((doc) => {
         const isIncluded = state.includedDocIds.has(doc.id);
         const relevance = doc.relevanceByTask[taskId] ?? 0;
-        const isRelevant = relevance >= 0.6;
+        const isRelevant = relevance >= STRONG_RELEVANCE_THRESHOLD;
+        const badgeLabel = isRelevant ? 'strong relevance' : 'partial relevance';
         return `
           <li class="doc-list__item${isIncluded ? ' doc-list__item--included' : ''}">
             <label class="doc-list__label">
@@ -165,7 +185,7 @@ function renderDocList(): void {
                   ${doc.description}
                   <span class="doc-list__badge doc-list__badge--${doc.authority}">${doc.authority}</span>
                   <span class="doc-list__relevance${isRelevant ? ' doc-list__relevance--relevant' : ''}">
-                    relevance ${relevance.toFixed(1)}
+                    ${badgeLabel}: ${relevance.toFixed(1)}
                   </span>
                   <span class="doc-list__size">${doc.length.toLocaleString()} chars</span>
                 </span>

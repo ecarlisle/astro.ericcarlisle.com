@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { analyzeContext, runFixtureAnalysis } from '../src/lab/context/engine';
+import { analyzeContext } from '../src/lab/context/engine';
+import { runFixtureAnalysis } from '../src/lab/context/fixture-analysis';
 import { DOCUMENTS, PRESETS, TASKS } from '../src/lab/context/fixtures';
 import type { LabDocument } from '../src/lab/context/types';
 
@@ -54,6 +55,119 @@ test('analyzeContext with null recall returns null with reason', () => {
   const result = analyzeContext({ task, includedDocs: [], availableDocs: docs });
   expect(result.recall.value).toBeNull();
   expect(result.recall.notApplicableReason).toBeTruthy();
+});
+
+// ─── Input validation ───────────────────────────────────────────────────────
+
+test('included doc absent from availableDocs is rejected', () => {
+  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
+  const included = [
+    {
+      id: 'd1',
+      title: '',
+      description: '',
+      authority: 'high' as const,
+      length: 100,
+      relevanceByTask: {},
+      covers: [],
+      authoritativeFor: [],
+      conflictsWith: [],
+    },
+  ];
+  expect(() => analyzeContext({ task, includedDocs: included, availableDocs: [] })).toThrow(
+    /not present in availableDocs/,
+  );
+});
+
+test('duplicate doc IDs are rejected', () => {
+  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
+  const d = {
+    id: 'd1',
+    title: '',
+    description: '',
+    authority: 'high' as const,
+    length: 100,
+    relevanceByTask: {},
+    covers: [],
+    authoritativeFor: [],
+    conflictsWith: [],
+  };
+  expect(() => analyzeContext({ task, includedDocs: [d, d], availableDocs: [d] })).toThrow(
+    /duplicate/,
+  );
+});
+
+test('charsPerToken zero or negative is rejected', () => {
+  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
+  const d = {
+    id: 'd1',
+    title: '',
+    description: '',
+    authority: 'high' as const,
+    length: 100,
+    relevanceByTask: {},
+    covers: [],
+    authoritativeFor: [],
+    conflictsWith: [],
+  };
+  expect(() =>
+    analyzeContext({ task, includedDocs: [], availableDocs: [d], charsPerToken: 0 }),
+  ).toThrow(/positive finite/);
+  expect(() =>
+    analyzeContext({ task, includedDocs: [], availableDocs: [d], charsPerToken: -1 }),
+  ).toThrow(/positive finite/);
+});
+
+test('relevance outside 0-1 is rejected', () => {
+  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
+  const d = {
+    id: 'd1',
+    title: '',
+    description: '',
+    authority: 'high' as const,
+    length: 100,
+    relevanceByTask: { test: 1.5 },
+    covers: [],
+    authoritativeFor: [],
+    conflictsWith: [],
+  };
+  expect(() => analyzeContext({ task, includedDocs: [d], availableDocs: [d] })).toThrow(
+    /invalid relevance/,
+  );
+});
+
+test('negative doc length is rejected', () => {
+  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
+  const d = {
+    id: 'd1',
+    title: '',
+    description: '',
+    authority: 'high' as const,
+    length: -100,
+    relevanceByTask: {},
+    covers: [],
+    authoritativeFor: [],
+    conflictsWith: [],
+  };
+  expect(() => analyzeContext({ task, includedDocs: [d], availableDocs: [d] })).toThrow(
+    /invalid length/,
+  );
+});
+
+test('valid precision stays within 0-1', () => {
+  const result = runFixtureAnalysis('a11y', new Set(['doc-a11y-guidelines', 'doc-tokens']));
+  expect(result.precision.value).not.toBeNull();
+  const v = result.precision.value as number;
+  expect(v).toBeGreaterThanOrEqual(0);
+  expect(v).toBeLessThanOrEqual(1);
+});
+
+test('valid recall stays within 0-1', () => {
+  const result = runFixtureAnalysis('a11y', new Set(['doc-a11y-guidelines']));
+  expect(result.recall.value).not.toBeNull();
+  const v = result.recall.value as number;
+  expect(v).toBeGreaterThanOrEqual(0);
+  expect(v).toBeLessThanOrEqual(1);
 });
 
 // ─── Engine: continuous relevance (0.5 document contributes to numerator) ────
