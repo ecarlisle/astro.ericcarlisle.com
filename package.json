@@ -46,6 +46,7 @@
     "@fontsource-variable/fira-code": "^5.2.7",
     "@playform/compress": "^0.2.3",
     "@playwright/test": "^1.61.1",
+    "@sentry/astro": "10.65.0",
     "@storybook-astro/framework": "1.9.0",
     "@storybook-astro/renderer": "1.9.0",
     "@storybook/addon-a11y": "10.5.2",
