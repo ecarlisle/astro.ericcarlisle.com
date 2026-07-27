@@ -1,5 +1,6 @@
 ---
 import '../../styles/global.css';
+import ContextCheckCard from '../../components/lab/ContextCheckCard.astro';
 
 interface EvidenceCitation {
   path: string;
@@ -73,7 +74,17 @@ function statusLabel(status: ContextMetric['status']) {
 }
 
 function percentage(score: number | null) {
-  return score === null ? 'Measured' : `${Math.round(score * 100)}%`;
+  return score === null ? '—' : `${Math.round(score * 100)}%`;
+}
+
+function formatNumber(value: number | undefined) {
+  return value === undefined ? '—' : value.toLocaleString('en-US');
+}
+
+function metricDisplayValue(metric: ContextMetric) {
+  return metric.id === 'active-context-size'
+    ? `${formatNumber(metric.details?.characters)} chars`
+    : percentage(metric.score);
 }
 ---
 
@@ -99,7 +110,7 @@ function percentage(score: number | null) {
 
       .ch-page__heading,
       .ch-section-heading,
-      .ch-overview h2,
+      .ch-overview h3,
       .ch-methodology h3 {
         font-family: var(--font-headers);
       }
@@ -153,15 +164,23 @@ function percentage(score: number | null) {
         gap: var(--space-component-lg);
       }
 
-      .ch-overview h2 {
+      .ch-overview h3 {
         margin: 0 0 var(--space-sm);
         font-size: var(--type-size-h5);
       }
 
-      .ch-overview ul {
+      .ch-overview ul,
+      .ch-overview ol {
         margin: 0;
+      }
+
+      .ch-overview ul {
         padding: 0;
         list-style: none;
+      }
+
+      .ch-overview ol {
+        padding-inline-start: var(--space-component-lg);
       }
 
       .ch-overview li {
@@ -296,7 +315,7 @@ function percentage(score: number | null) {
 
       .ch-contributors {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
         gap: var(--space-component);
       }
 
@@ -478,13 +497,13 @@ function percentage(score: number | null) {
         <p class="ch-overview__summary">{report.overallSummary}</p>
         <div class="ch-overview__columns">
           <div>
-            <h2>Key strengths</h2>
+            <h3>Key strengths</h3>
             <ul>
               {report.strengths.map((strength) => <li>{strength}</li>)}
             </ul>
           </div>
           <div>
-            <h2>Prioritized improvements</h2>
+            <h3>Prioritized improvements</h3>
             <ol>
               {
                 report.priorities.map((priority) => (
@@ -511,9 +530,7 @@ function percentage(score: number | null) {
                     metric.id === 'active-context-size' && 'ch-score__value--size',
                   ]}
                 >
-                  {metric.id === 'active-context-size'
-                    ? `${metric.details?.characters.toLocaleString()} chars`
-                    : percentage(metric.score)}
+                  {metricDisplayValue(metric)}
                 </div>
                 <h3 class="ch-score__label">{metric.label}</h3>
                 <div class:list={['ch-status', statusClass(metric.status)]}>
@@ -538,70 +555,24 @@ function percentage(score: number | null) {
             return (
               <details>
                 <summary>
-                  {metric.label}: {percentage(metric.score)}
+                  {metric.label}: {metricDisplayValue(metric)}
                 </summary>
                 <p class="ch-details__interp">{metric.interpretation}</p>
 
                 {metric.checks && (
                   <div class="ch-contributors">
-                    <section class="ch-contributor-group" aria-label={`${metric.label} positives`}>
-                      <h3>Positive contributors</h3>
-                      {positive.map((check) => (
-                        <article class="ch-check ch-check--positive">
-                          <div class="ch-check__header">
-                            <span class="ch-check__label">{check.label}</span>
-                            <span class="ch-check__result">Pass</span>
-                          </div>
-                          <p class="ch-check__evidence">
-                            <strong>Observed:</strong> {check.evidence.observation}
-                          </p>
-                          <p class="ch-check__interpretation">
-                            <strong>Assessment:</strong> {check.interpretation}
-                          </p>
-                          <ul class="ch-check__citations">
-                            {check.evidence.citations.map((citation) => (
-                              <li>
-                                {citation.path} — {citation.section}
-                              </li>
-                            ))}
-                          </ul>
-                          <div class="ch-check__weight">
-                            Weight {Math.round(check.weight * 100)}% · contribution{' '}
-                            {(check.contribution * 100).toFixed(1)} points
-                          </div>
-                        </article>
-                      ))}
-                    </section>
-                    <section class="ch-contributor-group" aria-label={`${metric.label} negatives`}>
-                      <h3>Negative contributors</h3>
-                      {negative.map((check) => (
-                        <article class="ch-check ch-check--negative">
-                          <div class="ch-check__header">
-                            <span class="ch-check__label">{check.label}</span>
-                            <span class="ch-check__result">
-                              {check.result === 'partial' ? 'Partial' : 'Fail'}
-                            </span>
-                          </div>
-                          <p class="ch-check__evidence">
-                            <strong>Observed:</strong> {check.evidence.observation}
-                          </p>
-                          <p class="ch-check__interpretation">
-                            <strong>Assessment:</strong> {check.interpretation}
-                          </p>
-                          <ul class="ch-check__citations">
-                            {check.evidence.citations.map((citation) => (
-                              <li>
-                                {citation.path} — {citation.section}
-                              </li>
-                            ))}
-                          </ul>
-                          <div class="ch-check__weight">
-                            Weight {Math.round(check.weight * 100)}% · contribution{' '}
-                            {(check.contribution * 100).toFixed(1)} points
-                          </div>
-                        </article>
-                      ))}
-                    </section>
+                    {positive.length > 0 && (
+                      <section class="ch-contributor-group" aria-label={`${metric.label} positives`}>
+                        <h3>Positive contributors</h3>
+                        {positive.map((check) => <ContextCheckCard check={check} />)}
+                      </section>
+                    )}
+                    {negative.length > 0 && (
+                      <section class="ch-contributor-group" aria-label={`${metric.label} negatives`}>
+                        <h3>Negative contributors</h3>
+                        {negative.map((check) => <ContextCheckCard check={check} />)}
+                      </section>
+                    )}
                   </div>
                 )}
 
@@ -610,13 +581,13 @@ function percentage(score: number | null) {
                     <div class="ch-size-grid">
                       <div class="ch-size-stat">
                         <div class="ch-size-stat__value">
-                          {metric.details.characters.toLocaleString()}
+                          {formatNumber(metric.details.characters)}
                         </div>
                         <div class="ch-size-stat__label">Characters</div>
                       </div>
                       <div class="ch-size-stat">
                         <div class="ch-size-stat__value">
-                          ~{metric.details.estimatedTokens.toLocaleString()}
+                          ~{formatNumber(metric.details.estimatedTokens)}
                         </div>
                         <div class="ch-size-stat__label">Estimated tokens</div>
                       </div>
@@ -630,15 +601,15 @@ function percentage(score: number | null) {
                       <table class="ch-file-table">
                         <thead>
                           <tr>
-                            <th>Declared file</th>
-                            <th>Characters</th>
+                            <th scope="col">Declared file</th>
+                            <th scope="col">Characters</th>
                           </tr>
                         </thead>
                         <tbody>
                           {metric.details.measuredFiles.map((file) => (
                             <tr>
                               <td>{file.path}</td>
-                              <td>{file.characters.toLocaleString()}</td>
+                              <td>{formatNumber(file.characters)}</td>
                             </tr>
                           ))}
                         </tbody>

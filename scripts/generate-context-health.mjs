@@ -15,6 +15,7 @@ const repositoryRoot = resolve(scriptDirectory, '..');
 const reportPath = process.env.CONTEXT_HEALTH_REPORT_PATH
   ? resolve(process.env.CONTEXT_HEALTH_REPORT_PATH)
   : resolve(repositoryRoot, 'src/data/context-health.json');
+const validatorExecutable = process.env.CONTEXT_HEALTH_VALIDATOR_EXECUTABLE ?? process.execPath;
 
 let report;
 try {
@@ -50,15 +51,25 @@ try {
 }
 
 const validation = spawnSync(
-  process.execPath,
+  validatorExecutable,
   [resolve(scriptDirectory, 'validate-context-health.mjs')],
   {
     encoding: 'utf8',
     env: { ...process.env, CONTEXT_HEALTH_REPORT_PATH: reportPath },
   },
 );
+if (validation.error) {
+  fail(`cannot run validator: ${validation.error.message}`);
+}
+if (validation.status === null) {
+  fail(
+    validation.stderr?.trim() ||
+      validation.stdout?.trim() ||
+      'validator process ended without an exit status',
+  );
+}
 if (validation.status !== 0) {
-  fail(validation.stderr.trim() || validation.stdout.trim() || 'generated report is invalid');
+  fail(validation.stderr?.trim() || validation.stdout?.trim() || 'generated report is invalid');
 }
 
 console.log('Context Health report generated');

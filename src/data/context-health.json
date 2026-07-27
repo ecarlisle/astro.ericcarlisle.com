@@ -210,7 +210,7 @@
             "citations": [
               {
                 "path": "AGENTS.md",
-                "section": "| Contact worker | `contact-worker/` |"
+                "section": "## Before making significant changes"
               },
               {
                 "path": "docs/deployment.md",
@@ -442,7 +442,7 @@
             "citations": [
               {
                 "path": "AGENTS.md",
-                "section": "| `package.json`, `src/`, config files | Source of truth for exact scripts, schemas, variables, routes, and behavior. |"
+                "section": "## Documentation Authority"
               }
             ]
           },

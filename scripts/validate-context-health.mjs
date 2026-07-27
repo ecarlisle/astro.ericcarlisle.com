@@ -139,7 +139,7 @@ for (const metric of report.metrics ?? []) {
     if (!check.id || checkIds.has(check.id))
       errors.push(`${metric.id} has a missing or duplicate check id`);
     checkIds.add(check.id);
-    if (!(check.result in RESULT_SCORES))
+    if (!Object.hasOwn(RESULT_SCORES, check.result))
       errors.push(`${check.id} has invalid result ${check.result}`);
     if (!['positive', 'negative'].includes(check.impact)) {
       errors.push(`${check.id} must classify impact as positive or negative`);

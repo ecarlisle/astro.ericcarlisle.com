@@ -32,8 +32,10 @@ export function calculateMetric(checks) {
 
   let weightedScore = 0;
   const generatedChecks = checks.map((check) => {
+    if (!Object.hasOwn(RESULT_SCORES, check.result)) {
+      throw new Error(`unknown result "${check.result}"`);
+    }
     const resultScore = RESULT_SCORES[check.result];
-    if (resultScore === undefined) throw new Error(`unknown result "${check.result}"`);
     const contribution = (check.weight * resultScore) / totalWeight;
     weightedScore += contribution;
     return { ...check, contribution: round(contribution) };

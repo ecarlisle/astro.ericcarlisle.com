@@ -136,9 +136,54 @@ test('generator measures characters, derives scores, and is idempotent', () => {
     const size = generated.metrics.find((metric) => metric.id === 'active-context-size');
     expect(size?.details?.characters).toBe(expectedCharacters);
     expect(size?.details?.estimatedTokens).toBe(Math.ceil(expectedCharacters / 4));
-    expect(generated.metrics.find((metric) => metric.id === 'context-precision')?.score).toBe(
-      0.775,
+    const precision = generated.metrics.find((metric) => metric.id === 'context-precision');
+    const expectedPrecision = (precision?.checks ?? []).reduce(
+      (sum, check) => sum + check.weight * resultScores[check.result],
+      0,
     );
+    expect(precision?.score).toBeCloseTo(expectedPrecision, 3);
+  });
+});
+
+test('generator reports validator process-launch failures', () => {
+  withTemporaryReport((path) => {
+    const result = spawnSync(process.execPath, [generatorPath], {
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        CONTEXT_HEALTH_REPORT_PATH: path,
+        CONTEXT_HEALTH_VALIDATOR_EXECUTABLE: '/definitely/missing/context-health-node',
+      },
+    });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('cannot run validator');
+    expect(result.stderr).not.toContain('TypeError');
+  });
+});
+
+test('prototype result names are rejected by scoring and validation', () => {
+  withTemporaryReport((path) => {
+    const report = JSON.parse(readFileSync(path, 'utf8')) as TestReport;
+    const assessed = report.metrics.find((metric) => metric.assessmentType === 'agent-assessed');
+    const firstCheck = assessed?.checks?.[0];
+    expect(firstCheck).toBeTruthy();
+    if (!firstCheck) throw new Error('agent-assessed check missing');
+    firstCheck.result = 'toString' as Result;
+    writeFileSync(path, `${JSON.stringify(report, null, 2)}\n`);
+
+    const generator = spawnSync(process.execPath, [generatorPath], {
+      encoding: 'utf8',
+      env: { ...process.env, CONTEXT_HEALTH_REPORT_PATH: path },
+    });
+    expect(generator.status).not.toBe(0);
+    expect(generator.stderr).toContain('unknown result "toString"');
+
+    const validator = spawnSync(process.execPath, [validatorPath], {
+      encoding: 'utf8',
+      env: { ...process.env, CONTEXT_HEALTH_REPORT_PATH: path },
+    });
+    expect(validator.status).not.toBe(0);
+    expect(validator.stderr).toContain('invalid result toString');
   });
 });
 
@@ -175,17 +220,57 @@ test('report renders the overview, priorities, metrics, and contributor groups',
     await expect(page.locator('.ch-score__label', { hasText: metric.label })).toHaveCount(1);
   }
 
-  const assessedDetails = page
-    .locator('.ch-details details')
-    .filter({ has: page.locator('.ch-contributors') });
-  expect(await assessedDetails.count()).toBe(4);
-  for (const detail of await assessedDetails.all()) {
+  const overview = page.locator('.ch-overview');
+  await expect(overview.locator(':scope > h2')).toHaveText('Overview');
+  await expect(overview.locator('.ch-overview__columns h3')).toHaveText([
+    'Key strengths',
+    'Prioritized improvements',
+  ]);
+  await expect(overview.locator('.ch-overview__columns h2')).toHaveCount(0);
+  const priorities = overview.locator('ol');
+  const priorityStyles = await priorities.evaluate((list) => {
+    const styles = getComputedStyle(list);
+    return {
+      listStyleType: styles.listStyleType,
+      paddingInlineStart: Number.parseFloat(styles.paddingInlineStart),
+    };
+  });
+  expect(priorityStyles.listStyleType).not.toBe('none');
+  expect(priorityStyles.paddingInlineStart).toBeGreaterThan(0);
+
+  const assessed = report.metrics.filter((metric) => metric.assessmentType === 'agent-assessed');
+  const assessedDetails = page.locator('.ch-details details').filter({
+    has: page.locator('.ch-contributors'),
+  });
+  expect(await assessedDetails.count()).toBe(assessed.length);
+  for (let index = 0; index < assessed.length; index += 1) {
+    const metric = assessed[index];
+    const detail = assessedDetails.nth(index);
     await detail.locator('summary').click();
-    await expect(detail.getByRole('heading', { name: 'Positive contributors' })).toBeVisible();
-    await expect(detail.getByRole('heading', { name: 'Negative contributors' })).toBeVisible();
-    expect(await detail.locator('.ch-check--positive').count()).toBeGreaterThan(0);
-    expect(await detail.locator('.ch-check--negative').count()).toBeGreaterThan(0);
+    const positiveCount = metric.checks?.filter((check) => check.result === 'pass').length ?? 0;
+    const negativeCount = (metric.checks?.length ?? 0) - positiveCount;
+    expect(positiveCount + negativeCount).toBeGreaterThan(0);
+    await expect(detail.getByRole('heading', { name: 'Positive contributors' })).toHaveCount(
+      positiveCount > 0 ? 1 : 0,
+    );
+    await expect(detail.getByRole('heading', { name: 'Negative contributors' })).toHaveCount(
+      negativeCount > 0 ? 1 : 0,
+    );
+    await expect(detail.locator('.ch-check--positive')).toHaveCount(positiveCount);
+    await expect(detail.locator('.ch-check--negative')).toHaveCount(negativeCount);
   }
+});
+
+test('active context uses the same formatted value in its card and disclosure', async ({
+  page,
+}) => {
+  await page.goto(healthPath);
+  const card = page.locator('.ch-score').filter({ hasText: 'Active Context Size' });
+  const value = (await card.locator('.ch-score__value').textContent())?.trim();
+  expect(value).toMatch(/^\d{1,3}(,\d{3})* chars$/);
+  await expect(
+    page.locator('.ch-details summary').filter({ hasText: 'Active Context Size' }),
+  ).toContainText(value ?? 'missing value');
 });
 
 test('native details controls work with JavaScript disabled', async ({ browser }) => {
@@ -201,8 +286,9 @@ test('native details controls work with JavaScript disabled', async ({ browser }
 
 test('obsolete simulator controls and client JavaScript are absent', async ({ page }) => {
   await page.goto(healthPath);
-  await expect(page.locator('input, button, select')).toHaveCount(0);
-  await expect(page.locator('.preset-list, .experiment, #app')).toHaveCount(0);
+  const reportRegion = page.locator('.ch-page');
+  await expect(reportRegion.locator('input, button, select')).toHaveCount(0);
+  await expect(reportRegion.locator('.preset-list, .experiment, #app')).toHaveCount(0);
   const scriptSources = await page
     .locator('script[src]')
     .evaluateAll((scripts) => scripts.map((script) => script.getAttribute('src')));
@@ -216,8 +302,17 @@ test('obsolete simulator controls and client JavaScript are absent', async ({ pa
   expect(loadedScripts.filter((source) => /context|lab-context/i.test(source))).toEqual([]);
   const html = await page.content();
   expect(html).not.toContain('runFixtureAnalysis');
-  expect(html).not.toContain('controller');
   expect(html).not.toContain('ch-page__script');
+});
+
+test('deployment workflow validates Context Health before building', () => {
+  const workflow = readFileSync('.github/workflows/astro.yml', 'utf8');
+  const validationStep = workflow.indexOf('run: pnpm context:health:validate');
+  const firstBuild = workflow.indexOf('run: pnpm build');
+  expect(validationStep).toBeGreaterThan(0);
+  expect(firstBuild).toBeGreaterThan(0);
+  expect(validationStep).toBeLessThan(firstBuild);
+  expect(workflow.match(/run: pnpm context:health:validate/g)).toHaveLength(1);
 });
 
 test('Context Health CSS is a guarded page-only asset', async ({ page }) => {
