@@ -20,16 +20,11 @@ Copy `.env.example` to `.env.local` and fill in required values before running l
 | ------- | ---- |
 | `pnpm dev` | Dev server at `localhost:4321` |
 | `pnpm build` | Production build → `dist/` (includes Pagefind indexing) |
-| `pnpm preview` | Preview production build |
 | `pnpm typecheck` | `astro check` (TS + Astro diagnostics) |
 | `pnpm lint` | `biome check .` |
-| `pnpm format` | `biome format . --write` |
-| `pnpm lighthouse:all` | Full Lighthouse audit across all HTML pages |
-| `pnpm structured-data:report` | Build + validate JSON-LD output |
-| `pnpm fallow:dead-code` | Dead code analysis |
-| `pnpm test:e2e` / `pnpm test:a11y` | Playwright tests |
+| `pnpm test:e2e` | Full Playwright suite |
 
-See [docs/testing.md](docs/testing.md) for when to run each check.
+See [docs/testing.md](docs/testing.md) for all validation and maintenance commands.
 
 ## Project Structure
 
@@ -68,11 +63,6 @@ docs/             → Reference documentation
 | Playwright | Browser-based testing (a11y, routes, SEO) |
 
 Integrations are configured in [astro.config.mjs](astro.config.mjs). Site constants live in [src/consts.ts](src/consts.ts).
-
-## Onboarding Notes
-
-- **Biome** — `noUnusedVariables`, `noUnusedImports`, and `noImportantStyles` are **off** in `biome.json`.
-- **Env files** — `.env.production` / `.env.development` are gitignored. Use `.env.example` as template.
 
 ---
 

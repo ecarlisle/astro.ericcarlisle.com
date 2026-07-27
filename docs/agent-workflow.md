@@ -6,7 +6,7 @@
 
 ### Standard Development Steps
 
-1. Check `specs/` for relevant change specifications.
+1. If the task references a feature, plan, or prior decision, inspect `specs/` filenames and read only the matching specification.
 2. Read the relevant files in `docs/`.
 3. Inspect source files before editing.
 4. Make the smallest safe change that satisfies the request.

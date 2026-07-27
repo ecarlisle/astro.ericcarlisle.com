@@ -20,6 +20,7 @@
     "lighthouse:all": "node scripts/lighthouse-all.mjs",
     "structured-data:report": "pnpm build && node scripts/jsonld-report.mjs",
     "validate:content": "node scripts/validate-no-blog-h1.mjs",
+    "validate:agent-docs": "node scripts/validate-agent-docs.mjs",
     "test:validate-content": "node scripts/test-validate-no-blog-h1.mjs",
     "jsonld:report": "pnpm structured-data:report",
     "test:e2e": "playwright test",
