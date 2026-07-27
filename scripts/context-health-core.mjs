@@ -7,23 +7,12 @@ export const RESULT_SCORES = Object.freeze({
   fail: 0,
 });
 
-export const SCORE_THRESHOLDS = Object.freeze({
-  healthy: 0.85,
-  needsAttention: 0.7,
-});
-
 export const TOKEN_ESTIMATE_CHARACTERS = 4;
 
-export function scoreStatus(score) {
-  if (score >= SCORE_THRESHOLDS.healthy) return 'healthy';
-  if (score >= SCORE_THRESHOLDS.needsAttention) return 'needs-attention';
-  return 'at-risk';
-}
-
-export function sizeStatus(estimatedTokens) {
-  if (estimatedTokens <= 24_000) return 'healthy';
-  if (estimatedTokens <= 48_000) return 'needs-attention';
-  return 'at-risk';
+export function assessedStatus(checks) {
+  return checks.every((check) => check.result === 'pass')
+    ? 'complete-for-current-static-checks'
+    : 'gaps-found';
 }
 
 export function calculateMetric(checks) {
@@ -44,7 +33,7 @@ export function calculateMetric(checks) {
   return {
     checks: generatedChecks,
     score: round(weightedScore),
-    status: scoreStatus(weightedScore),
+    status: assessedStatus(checks),
   };
 }
 

@@ -11,10 +11,11 @@ Use [the Context Health rubric](../../../docs/context-health-rubric.md) as the m
 
 1. Read the rubric completely.
 2. Declare whether the audit is task-specific or repository-wide.
-3. Record the task, expected outcome, requirements, included context sources, explicit exclusions, and audit profile.
+3. Record the task, expected outcome, requirements, included context sources, explicit exclusions, profile identifier, and profile version.
 4. Perform the rubric’s preliminary context inventory. Load only applicable routes by default and record why additional context materially expands the scope.
 5. Derive checks and weights from the declared task and inventory. Lock them before classifying evidence or assigning results.
 6. Record the audited repository revision from Git. Never invent a commit SHA. Use the rubric’s documented fallback only when a valid audited revision is unavailable.
+7. List materially different task profiles as `not-evaluated`; do not assign scores or averages to them.
 
 If scope, authority, evidence, or comparison compatibility cannot be established, stop or mark the audit provisional as the rubric requires.
 
@@ -27,6 +28,28 @@ If scope, authority, evidence, or comparison compatibility cannot be established
 5. Preserve uncertainty, confidence, exclusions, and provisional findings required by the rubric.
 
 Do not omit required context to improve Precision. Do not include unrelated context to make the audit appear comprehensive.
+
+## Preserve assessment boundaries
+
+For every metric, maintain separate `assessed` and `observed` records.
+
+- Static assessment may classify repository evidence, calculate the locked check score, report a
+  deterministic size estimate, and assign an evidence-maturity level with a reason.
+- Observed evaluation requires a versioned representative task suite. Never infer it from static
+  files, structural validation, generated output, or an agent’s confidence.
+- When no suite has run, use `not-measured`, null result fields, and consistent zero counts. Do not
+  create plausible tasks, agents, configurations, variance, confidence, or outcomes.
+- Do not calculate an aggregate Context Health score or average unevaluated profiles.
+- Treat 100% as completion of finite current static checks, not proof of universal readiness or
+  task success.
+- Do not introduce universal token thresholds or convert size into a health label.
+
+Assign maturity using the rubric’s versioned levels: `declared`, `structurally-verified`,
+`observed`, `repeated`, or `resilient`. Maturity is not a percentage. Explain the evidence that
+qualifies each metric and do not promote static evidence to an observed level.
+
+Describe external standards and projects only as bounded influences. Do not imply that they define
+or endorse Context Health.
 
 ## Record structured source references
 
@@ -53,8 +76,12 @@ Use PR diff links only to discuss a PR change, never as permanent report evidenc
 3. Run `pnpm context:health:validate`.
 4. Run the generator again and confirm the second run produces no additional diff.
 5. Review every report-data change. Explain each score change from its evidence; do not manually preserve a previous calculated score.
-6. Confirm the title, overview, priorities, positive contributors, negative contributors, and methodology remain internally consistent.
-7. When the rubric, checks, weights, or task profile changes materially, increment the relevant methodology version and do not compare with older reports unless they are regenerated under the same methodology.
+6. Confirm assessed and observed sections, evidence maturity, profile coverage, title, overview, priorities, contributor groups, and methodology remain internally consistent.
+7. Confirm an unmeasured report contains no invented observed runs or outcomes.
+8. When the rubric, schema, maturity definitions, checks, weights, or task profile changes materially, increment the relevant version and do not compare with older reports unless they are regenerated under the same methodology.
+
+The portable scenario taxonomy documents future evaluation coverage only. Do not build a runner,
+simulator, telemetry system, or synthetic observed dataset during an ordinary refresh.
 
 Use `copy-edit` for meaningful explanatory prose changes. Copy editing must not alter evidence, certainty, result classifications, weights, or calculated scores.
 
@@ -67,7 +94,7 @@ Run the current repository commands:
 - `pnpm build`
 - `pnpm exec playwright test tests/lab-context.spec.ts`
 
-Run `pnpm test:e2e` when the scope affects shared site behavior or the repository workflow requires the full suite. Use the focused Context Health suite to verify accessibility, evidence paths and line ranges, static rendering, absence of Context Health client JavaScript, CSS and bundle isolation, Sentry production isolation, and narrow-viewport overflow.
+Run `pnpm test:e2e` when the scope affects shared site behavior or the repository workflow requires the full suite. Use the focused Context Health suite to verify assessed/observed separation, null unmeasured results, evidence maturity, profile coverage, accessibility, evidence paths and line ranges, static rendering, absence of Context Health client JavaScript, CSS and bundle isolation, Sentry production isolation, and narrow-viewport overflow.
 
 Review `git diff --check`, `git diff --stat`, and `git diff`. Confirm generated files did not change unexpectedly. Inspect `git status --short`; preserve unrelated work and never discard changes merely to produce a clean status.
 
@@ -76,8 +103,10 @@ Review `git diff --check`, `git diff --stat`, and `git diff`. Confirm generated 
 Report:
 
 - audit scope and revision;
+- methodology, schema, maturity-model, and profile versions;
 - files changed;
-- scores and Active Context Size before and after;
+- static scores, observed statuses, evidence maturity, and Active Context Size before and after;
+- evaluated and unevaluated profile coverage;
 - evidence changes and the cause of every score change;
 - generator, validator, page, accessibility, and isolation results;
 - commit hash and PR URL when applicable;

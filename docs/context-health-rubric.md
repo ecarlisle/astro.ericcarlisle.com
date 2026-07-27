@@ -1,335 +1,338 @@
-# Context Health Scoring Rubric
+# Context Health Core 0.1
 
-## 1. Purpose and non-goals
+Context Health Core 0.1 is an experimental methodology for describing how well a repository’s
+coding-agent context supports a declared task profile. It separates:
 
-This rubric governs how coding agents evaluate repository context and record Context Health findings. Its purpose is to make separate audits of the same declared scope more repeatable, reviewable, and comparable. It improves inter-rater consistency by fixing the order of decisions, the meaning of result labels, and the evidence expected for each finding.
+- **static assessment** of repository readiness;
+- **observed evaluation** from representative task runs;
+- **evidence maturity** for each metric; and
+- **profile coverage**, including profiles not yet evaluated.
 
-The rubric does not measure actual LLM behavior or output quality. It also does not make semantic judgment objective. Context relevance, sufficiency, and authority still require an agent to interpret the declared task. The report makes that judgment visible instead of presenting it as deterministic.
+There is no known complete open standard that combines these four concerns. Core 0.1 adapts
+narrower ideas from established evaluation and repository-guidance projects; none of those sources
+defines or endorses this methodology.
 
-Use the [Context Health refresh skill](../.agents/skills/context-health-refresh/SKILL.md) for the operational refresh procedure. This rubric remains authoritative for scope, scoring, evidence, calibration, versioning, and comparison.
+Use the [Context Health refresh skill](../.agents/skills/context-health-refresh/SKILL.md) for the
+repository procedure. This document owns metric definitions, evidence requirements, statuses,
+versioning, and comparison rules.
 
-### Assessment boundaries
+## External foundations
 
-Context Health separates five concepts:
+Core 0.1 draws carefully bounded inspiration from:
 
-- **Deterministic measurement** is derived by repository tooling from declared inputs. The current implementation calculates contributions, metric scores, score statuses, effective-context JavaScript string lengths, approximate token counts, size status, and the size interpretation.
-- **Agent-assessed judgment** classifies a defined check as Pass, Partial, or Fail and records its positive or negative impact.
-- **Evidence** states what is observable and cites where it can be verified.
-- **Interpretation** explains why the observation matters to the declared task and metric.
-- **Recommendation** proposes a useful response to a Partial or Fail finding. In the current report schema, recommendations belong in the prioritized recommendations or accompanying audit notes, not as an unsupported field on an individual check.
+- [TREC](https://trec.nist.gov/about.html), for versioned test collections, topics, and relevance
+  judgments;
+- [Ragas Context Precision](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/context_precision/)
+  and [Context Recall](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/context_recall/),
+  for distinguishing retrieved relevance from required coverage;
+- [SWE-bench](https://swe-agent-bench.github.io/original.html), for repository-bound tasks evaluated by execution against
+  outcome tests;
+- [OpenTelemetry Generative AI attributes](https://opentelemetry.io/docs/specs/semconv/registry/attributes/gen-ai/),
+  for future runtime measurement vocabulary. Relevant conventions remain under development, and
+  some registry attributes have moved to a separate GenAI semantic-conventions repository;
+- [AGENTS.md](https://agents.md/), for repository instruction discovery and nearest-file
+  precedence; and
+- [OpenSSF Scorecard](https://www.scorecard.dev/), for evidence-backed checks and actionable
+  remediation.
 
-## 2. Select one audit scope
+Precision and recall are adapted concepts, not Ragas-compatible implementations. Task execution is
+inspired by benchmark practice, not a SWE-bench result. **Authority Clarity is project-defined.**
 
-Choose the audit type before defining checks or assigning results.
+## Required report boundaries
 
-### Task-specific audit
+Every report must name:
 
-A task-specific audit evaluates only the context needed for one declared task or task category. Examples include:
+- the schema version and experimental Core methodology version;
+- the audited repository revision;
+- one or more profile identifiers and versions;
+- which profiles are statically assessed, observed, or not evaluated;
+- the declared task, expected outcome, requirements, and exclusions;
+- the complete context inventory used by the static assessment;
+- each metric’s assessed and observed records; and
+- limitations that prevent broader claims.
 
-- a significant Astro UI change;
-- a content-only change;
-- a deployment change;
-- a contact-worker change;
-- a design-system change.
+Do not calculate an aggregate Context Health score. Do not average profiles. Do not represent an
+unevaluated profile with a zero, placeholder score, or inherited result.
 
-The effective context should contain the authority, routed documentation, skills, and source references that an agent would use for that task. Unrelated repository concerns may be recorded, but they do not affect the task-specific score.
+### Schema 3.0 migration
 
-### Repository-wide audit
+Schema 3.0 moves each metric’s prior static result into an `assessed` record and adds a separate
+`observed` record. The current profile-v2 migration preserves the audited revision, citations,
+checks, weights, contributions, scores, and declared full-file measurement from schema 2.1. It is a
+data-model migration, not a new behavioral audit. Initial observed records are `not-measured`.
 
-A repository-wide audit evaluates routing and context health across multiple task categories. It must use separate task profiles or subreports, each with its own requirements, effective-context set, checks, weights, and exclusions.
+## Static assessment and observed evaluation
 
-> A single score must not mix task-specific context quality with unrelated repository-wide documentation concerns.
+### Static assessment
 
-There is no universal effective-context set for the repository. Combining every possible task route into one set would measure document volume more than the context an agent receives for a real task.
+Static assessment asks whether declared repository instructions, routes, source-of-truth
+relationships, and selected context appear ready for a profile. It can use agent judgment and
+deterministic structural validation.
 
-## 3. Declare the scope
+Static scores describe only the finite checks and weights locked for the named profile. A 100%
+score means those checks passed; it does not prove task success, universal completeness, or model
+behavior.
 
-Declare the following before the preliminary context inventory:
+Use these static statuses:
 
-- **Audit type:** task-specific or repository-wide.
-- **Task or task category:** the concrete work being evaluated.
-- **Expected outcome:** what a successful agent change or review would produce.
-- **Known requirements:** behavior, constraints, validation, and stop conditions already identified.
-- **Effective-context entry point:** normally `AGENTS.md`, followed by the routes that apply to the task.
-- **Routed files and skills:** the files intentionally loaded for the task.
-- **Explicit exclusions:** irrelevant routes, files, and checks.
-- **Audit revision:** the Git revision whose repository context is being assessed.
+- `complete-for-current-static-checks` — every locked check passes;
+- `gaps-found` — one or more locked checks are Partial or Fail; and
+- `declared-estimate` — a deterministic estimate is reported without a quality score.
 
-Establish the task and scope before inventory work. Use a preliminary inventory to discover the applicable context and derive the final checks and weights. Lock those checks and weights before classifying evidence or assigning results.
+Do not convert static scores or size estimates into universal “healthy,” “needs attention,” or “at
+risk” labels.
 
-## 4. Use the smallest useful unit of evaluation
+### Observed evaluation
 
-Prefer evidence about a requirement, section, claim, instruction, or routing relationship. Identify the smallest practical section, heading, rule, or claim. File-level routing relevance and within-file content precision are related but distinct assessments.
+Observed evaluation requires representative task runs. Each observed record must support:
 
-Assess every portion actually loaded into the agent’s context. A useful section does not excuse unrelated material elsewhere in the same loaded file; irrelevant loaded sections reduce Context Precision. For example, the performance skill contains directly relevant bundle-isolation guidance for a page-specific JavaScript task and unrelated media guidance for a text-only change. The audit should record both rather than treating the file as uniformly relevant.
+- status: `not-measured`, `measured`, or `insufficient-evidence`;
+- score and numerator/denominator, when measured;
+- task, run, agent, and configuration counts;
+- repository revision and evaluation-suite version;
+- variation or confidence information when the design permits it; and
+- interpretation and limitations.
 
-## 5. Apply the core scoring rule
+`not-measured` requires a null score, numerator, denominator, revision, suite version, variation,
+and confidence, with task, run, and configuration counts set consistently to zero or omitted by a
+future schema. Never infer observed performance from static evidence.
 
-> A finding may affect a task-specific score only when it affects the declared task’s requirements or effective context.
+## Evidence maturity model v1
 
-Apply the rule consistently:
+Assign one level to every assessed metric and explain why it qualifies. Maturity is ordinal
+provenance, not a percentage and not another health score.
 
-- Contact-worker discoverability must not lower a UI-only task score.
-- Performance guidance should not reduce Context Precision when bundle isolation or page performance is part of the declared task.
-- A document reached through an intentional routing chain is not missing merely because it requires one additional hop.
-- An unrelated repository weakness may be recorded separately but excluded from the task score.
+1. `declared` — a documented claim has identified evidence and explicit limitations.
+2. `structurally-verified` — deterministic checks confirm relevant files, links, headings, scripts,
+   precedence, measurements, or report structure.
+3. `observed` — at least one representative task run supplies direct performance evidence.
+4. `repeated` — multiple representative runs show the result across declared agents or
+   configurations.
+5. `resilient` — repeated results remain acceptable under versioned perturbation, stale guidance,
+   noise, or authority-conflict challenges.
 
-## 6. Assign result anchors
+A metric may have structurally verified citations while its semantic conclusion remains declared.
+Choose the level supported by the result itself, and state this distinction in the reason.
 
-The current schema supports three results:
+## Static check model
 
-| Result | Numeric value | Anchor |
-|---|---:|---|
-| **Pass** | 1 | Fully satisfies the defined check with clear evidence. |
-| **Partial** | 0.5 | Useful but meaningfully incomplete, indirect, duplicated, mildly ambiguous, or difficult to apply. |
-| **Fail** | 0 | Missing, materially irrelevant, contradictory, unactionable, or without identifiable authority. |
+For scored static metrics:
 
-The current validator requires Pass checks to be positive contributors and Partial or Fail checks to be negative contributors. Do not use the impact field to reverse or soften the result anchor.
+- Check results are `Pass = 1`, `Partial = 0.5`, and `Fail = 0`.
+- Weights must be positive and total 1.
+- Contribution = `check weight × result score`.
+- Metric score = sum of contributions.
 
-The schema has no `not-applicable` result. Remove an irrelevant check before scoring and document it under scope exclusions. Do not write unsupported result values into `src/data/context-health.json`.
+Checks and weights are profile-specific. Lock them before classifying evidence or assigning
+results.
 
-For each agent-assessed metric:
+### Result anchors
 
-```text
-contribution = check weight × result value
-metric score = sum of contributions
-```
+- **Pass:** evidence supports the complete, profile-specific check.
+- **Partial:** evidence supports only part of the check, or loaded material introduces a documented
+  precision or ambiguity cost.
+- **Fail:** the required capability is absent, contradicted, unreachable, or unsupported.
 
-Valid report weights total 1, so no additional normalization is needed. The current status bands are:
+Do not weaken a requirement after seeing evidence. Do not omit required context to improve
+Precision. Do not add unrelated checks merely to make an audit look comprehensive.
 
-- Healthy: 85% or higher
-- Needs attention: 70% through 84.9%
-- At risk: below 70%
-
-## 7. Set weights before results
-
-After declaring the task and completing a preliminary context inventory, derive stable check IDs and weights from the task requirements and inventory. Lock them before classifying evidence or assigning Pass, Partial, or Fail. This prevents the desired score from shaping the scoring model after evidence is known.
-
-- Weights must total 1 within each scored metric.
-- Weight reflects a check’s importance to the declared task.
-- Similar audits should reuse the same versioned check profile.
-- Explain every changed check or weight.
-- Do not adjust weights merely to produce a preferred score.
-- Compare scores only when scope and weighting profiles are compatible.
-
-If the rubric, checks, or weights change materially after they are locked, stop the comparison and increment the relevant rubric or task-profile version. Do not compare the result directly with older reports unless those reports are regenerated under the same methodology.
-
-This repository does not yet define canonical machine-readable task profiles, version fields, or universal weights. Treat profile standardization as future work. Until profiles exist, record the methodology version and the reason for each change in the audit notes rather than adding unsupported fields to the report.
-
-## 8. Assess each metric
+## Metric definitions
 
 ### Context Precision
 
-Context Precision asks whether the context actually loaded for the declared task is relevant.
+Static Context Precision asks whether all loaded material is relevant at the smallest practical
+file, section, heading, rule, or claim.
 
-Evaluate both whether each file was appropriately routed and whether each loaded portion of that file is relevant. Positive evidence may include task-specific routing, relevant constraints, necessary validation guidance, and concise authoritative references. Negative evidence may include unrelated loaded sections, redundant instructions, stale sections, and mandatory guidance whose breadth is not justified by the task.
+- Assess every loaded portion of a document.
+- Useful sections do not excuse unrelated material elsewhere in the same loaded file.
+- Irrelevant loaded sections reduce Precision.
+- File-level routing relevance and within-file content precision are related but distinct.
+- Evidence must identify the smallest practical section, heading, rule, or claim.
 
-Do not penalize performance, accessibility, or testing guidance merely because it is lengthy. If the declared task includes page performance, bundle isolation, semantic behavior, or verification, that guidance is relevant. Length becomes a Precision concern when loaded content is unrelated to the task, including unrelated material inside an otherwise useful file.
+The current static score uses locked weighted checks. A future observed result must use:
 
-Evaluate whether the auditor selected the applicable task routes and left unrelated routes unloaded unless investigation established a concrete need. Additional context should have a recorded reason when it materially expands the initial scope. Prefer routes to the narrowest practical document or section.
+`relevant loaded units / all loaded units`
+
+Define the unit before running the suite. Record the numerator, denominator, and judgment method.
+Do not silently switch between files, chunks, sections, or claims.
 
 ### Context Recall
 
-Context Recall asks whether required information is reachable through the declared context path.
+Static Context Recall asks whether the declared profile routes to every required context item in the
+locked inventory.
 
-Distinguish among:
+A future observed result must use:
 
-- guidance that is missing;
-- guidance that is reachable but indirectly routed;
-- guidance intentionally excluded because it does not apply.
+`sum(weights for required units actually loaded) / sum(weights for all required units)`
 
-One intentional routing hop may reduce convenience or discoverability, but it should not automatically be treated as missing context. Record the route and judge whether the extra hop materially impedes the declared task.
-
-Confirm that every required task-specific source was loaded. Do not omit required context merely to improve Context Precision; missing required routes reduce Context Recall and may also reduce Sufficiency.
+Lock required units, weights, and ground truth before executing tasks. Derive ground truth from
+acceptance criteria, canonical documentation, source, tests, and human-reviewed task analysis.
+Report missing units and their discovery paths. Ground truth must not be reconstructed from what
+the agent happened to retrieve, and broad repository loading must not substitute for effective
+routing.
 
 ### Sufficiency
 
-Sufficiency asks whether the available guidance is actionable enough to complete and verify the task. A mention alone is not sufficient.
+Static Sufficiency asks whether selected context appears actionable for the profile’s requirements.
+This is a readiness judgment, not task-performance evidence.
 
-Look for:
+A future observed Sufficiency result requires paired conditions:
 
-- required behavior;
-- constraints;
-- implementation boundaries;
-- validation commands;
-- stop conditions;
-- failure or escalation guidance where relevant.
+- **oracle:** the task receives the complete, predeclared context;
+- **routed:** the task receives context through normal repository routing; and
+- **baseline:** an optional no-routing or ordinary-context comparison.
 
-The question is not whether a subject appears somewhere in the context. The evidence should show that an agent can act on it.
+Score:
+
+`routed-condition passes / oracle-passable tasks`
+
+Exclude tasks that the oracle condition cannot pass from the denominator, and report those
+exclusions. Keep model, tools, environment, task fixtures, and success criteria constant across
+conditions.
 
 ### Authority Clarity
 
-Authority Clarity asks whether an agent can identify the canonical source and resolve disagreement.
+Authority Clarity is project-defined. Static checks inspect declared authority, precedence,
+source-of-truth boundaries, protected-file rules, and conflict guidance.
 
-Look for named sources of truth, documentation boundaries, supersession rules, conflicting instructions, and duplicate summaries that could drift. Audience-specific summaries are not conflicts by themselves. They affect Authority Clarity only when the canonical source or required behavior becomes genuinely ambiguous.
+Future observed evaluation adds authority-challenge tasks:
+
+`correct authority decisions / all authority decisions`
+
+Report instruction conflicts separately from ordinary failures. Also report unresolved conflict
+count, ambiguous authority areas, the expected controlling source, and evidence supporting that
+decision. Record which source won, why, and whether the expected precedence rule was applied.
 
 ### Active Context Size
 
-Active Context Size is deterministic:
+The static generator reads each declared file as UTF-8 and reports the resulting JavaScript string
+length in UTF-16 code units. This is not a byte count or Unicode-code-point count.
 
-- Measure only the declared `effectiveContext.files`.
-- Report the JavaScript string length (UTF-16 code units) produced after UTF-8 decoding. This is not a byte count or Unicode-code-point count.
-- Estimate tokens as `ceil(total JavaScript string length / 4)`.
-- Identify that estimate as an approximation, not a tokenizer result.
-- Do not substitute repository-wide file volume for active context.
-- Do not present the size status bands as model context-window limits.
+The static token estimate is:
 
-The current review bands are Healthy at 24,000 estimated tokens or fewer, Needs attention from 24,001 through 48,000, and At risk above 48,000. They describe this report’s review bands, not a model capability.
+`ceil(total UTF-16 code units / 4)`
 
-## 9. Record evidence, interpretation, and recommendations
+This remains an approximation, not actual tokenization. Core 0.1 defines no universal useful,
+healthy, or risky token thresholds.
 
-Every scored finding must include:
+Future observed size reporting should capture, when available:
 
-- a stable finding or check ID;
-- an observable evidence statement;
-- an interpretation;
-- a result;
-- a weight;
-- a positive or negative classification;
-- a recommendation for Partial or Fail findings where useful.
+- actual model-input and retrieved-context tokens;
+- median and p95 tokens across runs;
+- tokens per successful task;
+- irrelevant-context volume; and
+- routed-to-oracle context ratio.
 
-Repository-backed findings must identify their source file. A genuinely file-level finding may link the whole file. For a named Markdown section where exact lines are unnecessary, prefer its stable rendered heading anchor. Section- or claim-level passages must link the narrowest practical line or line range; exact Markdown evidence uses GitHub source mode as `?plain=1#Lx` or `?plain=1#Lx-Ly`, with the query before the fragment. Do not use a PR diff as permanent audit evidence.
+Interpret those measurements within the task, retrieval, model, and configuration profile.
 
-Use a commit-specific permalink to the audited revision when available so later repository changes do not invalidate the evidence; use the repository’s main branch only when no valid audited revision is available. The auditor must verify that every link opens the intended source file, rendered section, or source passage and supports the associated finding. Do not add a repository link to an unsupported narrative claim merely for appearance. The current validator checks repository paths, line ranges, section references, and generated GitHub URLs against the audited revision.
+## Evidence requirements
 
-Keep the reasoning fields separate:
+Separate observation, interpretation, and recommendation. An observation states what the audited
+source contains. Interpretation explains why it affects the check. A recommendation describes a
+future change.
 
-```text
-Observed:
-Assessment:
-Recommendation:
-```
+Repository-backed findings must identify their source file. Section- or claim-level findings must
+link the narrowest practical line or line range. Unsupported narrative claims must not receive a
+repository link merely for appearance.
 
-`Observed` states what can be verified without including the conclusion it is supposed to prove. `Assessment` connects that observation to the declared task and metric. `Recommendation` describes a proportionate response. Because the current check schema has no recommendation property, place recommendations in `priorities` or in accompanying audit notes.
+Store repository evidence as structured metadata:
 
-## 10. Record exclusions and non-scoring observations
+- `path`;
+- optional `startLine` and `endLine`; and
+- optional `section` containing an exact, stable Markdown heading.
 
-Useful repository issues outside the declared scope may be recorded as:
+The report root stores `repositoryRevision`. The page derives URLs centrally:
 
-- out-of-scope observations;
-- repository-wide follow-up opportunities;
-- recommendations for another task profile.
+- whole file: `blob/{auditedRevision}/{path}`;
+- named Markdown section: `blob/{auditedRevision}/{path}#{heading-anchor}`;
+- exact Markdown range:
+  `blob/{auditedRevision}/{path}?plain=1#L{startLine}-L{endLine}`; and
+- exact Markdown line: `blob/{auditedRevision}/{path}?plain=1#L{line}`.
 
-They must not affect the current task-specific score. State both why the observation is useful and why it is excluded. This preserves the finding without quietly broadening the audit.
+Use heading anchors when a named section is sufficient and stable. Use `?plain=1` before the
+fragment for exact Markdown passages. Prefer commit-specific permalinks. If no valid audited
+revision exists, the URL builder may fall back to `main`; never invent a revision. PR diff links
+are for discussing a particular change, not permanent audit evidence.
 
-## 11. Calibrate judgments with repository examples
+The auditor must verify that every source link resolves to the intended file, rendered heading, or
+source passage and supports its associated finding.
 
-These examples illustrate the anchors; they do not establish universal checks or weights.
+## Audit procedure
 
-### Direct authoritative route
+1. Declare the task, expected outcome, requirements, exclusions, and profile.
+2. Perform a preliminary repository and context inventory.
+3. Derive checks and weights from the task requirements and inventory.
+4. Lock checks and weights before classifying evidence or assigning scores.
+5. Capture the audited revision and complete effective-context file set.
+6. Assess every loaded portion at the smallest practical unit.
+7. Record structured citations, interpretations, limitations, and maturity reasons.
+8. Record observed data only from a versioned representative suite; otherwise use
+   `not-measured`.
+9. Generate, validate, and regenerate to prove idempotence.
+10. Inspect the static page, source links, accessibility, responsive layout, and bundle isolation.
 
-- **Scope:** Significant Astro UI change.
-- **Evidence:** `AGENTS.md` directly routes styling, tokens, and accessibility work under `## Task-Specific Context Routing`, and names the matching UI skills under `## Skill Routing`.
-- **Expected result:** Pass.
-- **Affects the score:** Yes, for Context Recall or Authority Clarity.
-- **Rationale:** The primary agent authority exposes the relevant sources without an undeclared discovery step.
+If the rubric, checks, weights, profile, or evidence-maturity definitions change materially,
+increment the relevant version. Do not compare the result directly with older reports unless they
+are regenerated under the same methodology and profile.
 
-### One intentional routing hop
+## Profile coverage
 
-- **Scope:** A feature change governed by a repository specification.
-- **Evidence:** `AGENTS.md` routes agent-workflow changes to `docs/agent-workflow.md`; `### Standard Development Steps` then tells the agent to check `specs/`.
-- **Expected result:** Partial may be appropriate for discoverability, but not Fail.
-- **Affects the score:** Yes, only if specification discovery is a requirement of the declared task profile.
-- **Rationale:** The information is reachable through an intentional route. The additional hop may add friction, but the guidance is not missing.
+Every report must list the evaluated profile and materially different task families that remain
+unevaluated. The current minimum inventory is:
 
-### Unrelated contact-worker issue
+- Significant Astro UI implementation profile v2 — static assessed;
+- content and editorial work — not evaluated;
+- deployment and CI diagnosis — not evaluated;
+- Contact Worker changes — not evaluated; and
+- pull-request review — not evaluated.
 
-- **Scope:** Astro UI-only change.
-- **Evidence:** `AGENTS.md` routes contact-worker work separately, and `docs/deployment.md` contains `## Contact Worker Deployment`.
-- **Expected result:** Excluded.
-- **Affects the score:** No.
-- **Rationale:** Contact-worker discoverability does not affect the UI task’s requirements or effective context. It may be recorded as a repository-wide follow-up.
+Do not infer cross-profile coverage. Add a new profile version when its task requirements, context
+selection rule, checks, or weights change materially.
 
-### Relevant performance guidance
+Evaluate another profile only after declaring its purpose, representative tasks, acceptance
+criteria, required-context ground truth, versioned checks, and evidence.
 
-- **Scope:** Verify that a page-specific feature does not leak JavaScript or CSS into ordinary production pages.
-- **Evidence:** `.agents/skills/performance-budget/SKILL.md` includes `## JavaScript Checks` and `## Verification`; `tests/lab-context.spec.ts` checks feature-script and stylesheet isolation.
-- **Expected result:** Pass when that guidance is intentionally routed and actionable.
-- **Affects the score:** Yes, for Context Precision and Sufficiency.
-- **Rationale:** Bundle isolation and production-output verification are explicit requirements of the task. The guidance is relevant even if the full skill is long.
+## Future scenario taxonomy
 
-### Repeated command summaries
+A future observed suite should version representative scenarios across:
 
-- **Scope:** Repository-wide authority audit.
-- **Evidence:** `AGENTS.md` has `## Commands`, `README.md` has `## Primary Commands`, and `docs/testing.md` has `## Available Checks`; `AGENTS.md` identifies `package.json` as the source of truth for exact scripts.
-- **Expected result:** Partial may be appropriate for synchronization risk.
-- **Affects the score:** Yes, when the profile checks duplication or maintenance risk.
-- **Rationale:** The summaries can drift, but authority remains resolvable through `package.json`. Duplication alone does not establish a conflicting authority.
+1. localized implementation;
+2. cross-cutting change;
+3. defect diagnosis;
+4. configuration or deployment;
+5. documentation change;
+6. pull-request review;
+7. scope or authorization boundary; and
+8. repository-specific specialist task.
 
-### Genuine conflicting authority
+A scenario must be representative, context-dependent, bounded, verifiable, non-leading about file
+paths, safe and reversible, versioned, and reviewed before execution.
 
-- **Scope:** Any task whose validation command is disputed.
-- **Evidence:** Hypothetically, `AGENTS.md` requires command A while an equally authoritative repository instruction requires incompatible command B for the same change, with no supersession rule.
-- **Expected result:** Fail until authority is resolved.
-- **Affects the score:** Yes, for Authority Clarity and possibly Sufficiency.
-- **Rationale:** An agent cannot determine which instruction governs. This example is hypothetical; the current repository command summaries may drift, but `AGENTS.md` names `package.json` as the source of truth for exact scripts.
+This taxonomy is documentation, not authorization to build a runner, simulator, telemetry system,
+or synthetic result set.
 
-## 12. Follow the audit procedure
+## Comparison and regression rules
 
-1. Declare the task, audit type, scope, expected outcome, known requirements, and explicit exclusions.
-2. Read `AGENTS.md`, select the applicable task routes, and build a preliminary effective-context inventory. Record why any additional context materially expands those initial routes.
-3. Derive check IDs and weights from the task requirements and preliminary inventory.
-4. Lock the checks and weights before classifying evidence or assigning scores.
-5. Assess every loaded portion, recording observable evidence at the smallest practical section, heading, rule, or claim.
-6. Assign Pass, Partial, or Fail results.
-7. If the rubric, checks, or weights change materially, increment the relevant methodology version and establish a new comparison baseline.
-8. Finalize the effective-context inventory and exclusions.
-9. Add source links for repository-backed evidence and verify that each link resolves and supports its finding.
-10. Run `pnpm context:health`.
-11. Run `pnpm context:health:validate`.
-12. Review generated changes and confirm that only intended deterministic fields changed.
-13. Run the site checks relevant to the affected files.
-14. Compare the result only with compatible prior reports.
-15. Report disagreements, uncertainty, and provisional findings.
+Direct comparison requires the same:
 
-`pnpm context:health` recalculates agent-assessed contributions, metric scores, score statuses, and Active Context Size from the declared report inputs. It does not decide semantic results or rewrite evidence judgments for the agent.
-
-## 13. Stop or mark the audit provisional
-
-Stop the audit or label its findings provisional when:
-
-- the task is not defined;
-- the effective context cannot be established;
-- canonical authority cannot be determined;
-- evidence conflicts materially;
-- a required citation cannot be verified;
-- the rubric or check profile changed during comparison;
-- task-specific and repository-wide findings cannot be separated.
-
-Do not fill these gaps with assumed scope, invented evidence, or adjusted weights. Record the blocking uncertainty and what would resolve it.
-
-## 14. Version and compare reports
-
-Record both the report `schemaVersion` and the audited `repositoryRevision`. The schema version describes the report structure; the repository revision identifies the baseline being assessed.
-
-Document scoring-method changes, including changes to the rubric, task profile, check definitions, result anchors, or weights. Increment the relevant methodology version when any of these changes materially. Compare scores only when all of the following are compatible:
-
-- audit type and declared task scope;
-- task profile;
+- methodology and evidence-maturity versions;
+- profile identifier and version;
+- checks, weights, and scoring anchors;
 - effective-context selection rule;
-- checks and weights;
-- scoring rubric and report schema.
+- observed suite version, task set, repository revision policy, agents, tools, and configurations;
+  and
+- measurement units and judgment method.
 
-A changed rubric or profile requires a new baseline unless earlier reports are regenerated under the same methodology. Do not label a score difference as improvement or regression when the underlying measurement changed.
+When comparability holds, use `regression-detected` to flag a meaningful worsening against the
+declared baseline. Otherwise describe the difference without a trend claim.
 
-## 15. Use the audit summary format
+## Calibration examples
 
-```text
-Audit scope:
-Audited revision:
-Effective context:
-Excluded context:
-Metric scores:
-Key positive contributors:
-Key negative contributors:
-Out-of-scope observations:
-Prioritized recommendations:
-Provisional findings:
-Validation results:
-```
-
-Keep the summary concise enough to review against the detailed report. It should expose scope and exclusions before presenting scores.
-
-## Future profile work
-
-Machine-readable task profiles and automated inter-rater comparisons would make repeated audits easier to calibrate. They could standardize check IDs, weights, and compatibility metadata. They are future improvements, not part of the current report schema or this rubric.
+- A routing table links the correct UI documents, but a required loaded performance playbook has
+  several unrelated media sections: Precision is Partial for the affected check.
+- Every locked requirement has an identified route: static Recall may be 100% and
+  `complete-for-current-static-checks`, but observed Recall remains `not-measured`.
+- Guidance looks actionable and passes all static checks: static Sufficiency can be complete, but
+  it cannot become observed until paired oracle and routed tasks run.
+- The generator confirms exact file lengths and valid evidence links: Active Context Size and
+  relevant structural claims may be `structurally-verified`, not `observed`.
