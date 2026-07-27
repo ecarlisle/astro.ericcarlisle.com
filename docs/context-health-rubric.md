@@ -176,15 +176,15 @@ Every scored finding must include:
 
 - a stable finding or check ID;
 - an observable evidence statement;
-- a file path;
-- a section heading or other stable identifier;
 - an interpretation;
 - a result;
 - a weight;
 - a positive or negative classification;
 - a recommendation for Partial or Fail findings where useful.
 
-Prefer headings or stable identifiers over line numbers and exact table-row text. The current validator confirms that the cited path exists and that the cited section string appears in the file.
+Repository-backed findings must identify their source file. A genuinely file-level finding may link the whole file; section- or claim-level findings must link the narrowest practical line or line range. Target the audited commit revision when it is available so later repository changes do not invalidate the evidence; use the repository’s main branch only when no valid audited revision is available.
+
+The auditor must verify that every source link resolves and that the linked content supports the associated finding. Do not add a repository link to an unsupported narrative claim merely for appearance. The current validator checks repository paths, line ranges, section references, and generated GitHub URLs against the audited revision.
 
 Keep the reasoning fields separate:
 
@@ -268,12 +268,13 @@ These examples illustrate the anchors; they do not establish universal checks or
 6. Assign Pass, Partial, or Fail results.
 7. If the rubric, checks, or weights change materially, increment the relevant methodology version and establish a new comparison baseline.
 8. Finalize the effective-context inventory and exclusions.
-9. Run `pnpm context:health`.
-10. Run `pnpm context:health:validate`.
-11. Review generated changes and confirm that only intended deterministic fields changed.
-12. Run the site checks relevant to the affected files.
-13. Compare the result only with compatible prior reports.
-14. Report disagreements, uncertainty, and provisional findings.
+9. Add source links for repository-backed evidence and verify that each link resolves and supports its finding.
+10. Run `pnpm context:health`.
+11. Run `pnpm context:health:validate`.
+12. Review generated changes and confirm that only intended deterministic fields changed.
+13. Run the site checks relevant to the affected files.
+14. Compare the result only with compatible prior reports.
+15. Report disagreements, uncertainty, and provisional findings.
 
 `pnpm context:health` recalculates agent-assessed contributions, metric scores, score statuses, and Active Context Size from the declared report inputs. It does not decide semantic results or rewrite evidence judgments for the agent.
 

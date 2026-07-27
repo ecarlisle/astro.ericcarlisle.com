@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildEvidenceUrl, validateCitationShape } from '../src/lib/context-health-evidence.mjs';
 import {
   calculateMetric,
   measureEffectiveContext,
@@ -157,7 +159,9 @@ for (const metric of report.metrics ?? []) {
     if (!Array.isArray(check.evidence?.citations) || check.evidence.citations.length === 0) {
       errors.push(`${check.id} needs at least one evidence citation`);
     }
-    for (const citation of check.evidence?.citations ?? []) validateCitation(citation, check.id);
+    for (const citation of check.evidence?.citations ?? []) {
+      validateCitation(citation, check.id, report.repositoryRevision);
+    }
   }
 
   try {
@@ -201,18 +205,36 @@ console.log('Context Health report valid');
 console.log(`Audit revision: ${report.repositoryRevision}`);
 console.log(`Metrics: ${report.metrics.length}; priorities: ${report.priorities.length}`);
 
-function validateCitation(citation, checkId) {
-  if (!citation?.path || !citation?.section) {
-    errors.push(`${checkId} citation needs path and section`);
+function validateCitation(citation, checkId, repositoryRevision) {
+  try {
+    validateCitationShape(citation);
+    buildEvidenceUrl(repositoryRevision, citation);
+  } catch (error) {
+    errors.push(`${checkId} invalid evidence citation: ${error.message}`);
     return;
   }
-  const path = resolve(repositoryRoot, citation.path);
-  if (!existsSync(path)) {
-    errors.push(`${checkId} evidence path does not exist: ${citation.path}`);
+
+  let source;
+  try {
+    source = execFileSync('git', ['show', `${repositoryRevision}:${citation.path}`], {
+      cwd: repositoryRoot,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+  } catch {
+    errors.push(`${checkId} evidence path does not exist at audited revision: ${citation.path}`);
     return;
   }
-  const source = readFileSync(path, 'utf8');
-  if (!source.includes(citation.section)) {
+
+  if (citation.startLine === undefined) return;
+  const lines = source.split(/\r?\n/);
+  const endLine = citation.endLine ?? citation.startLine;
+  if (endLine > lines.length) {
+    errors.push(`${checkId} evidence line range exceeds ${citation.path} (${lines.length} lines)`);
+    return;
+  }
+  const citedSource = lines.slice(citation.startLine - 1, endLine).join('\n');
+  if (citation.section !== undefined && !citedSource.includes(citation.section)) {
     errors.push(`${checkId} evidence section not found in ${citation.path}: ${citation.section}`);
   }
 }
