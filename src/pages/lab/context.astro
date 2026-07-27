@@ -24,7 +24,7 @@ import '../../styles/global.css';
     <meta name="robots" content="noindex, follow" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <style>
+    <style is:global>
       /* ── Lab page layout ───────────────────────────────────────────── */
       .lab-page {
         max-width: var(--layout-rail-page);
@@ -61,12 +61,12 @@ import '../../styles/global.css';
         color: var(--text-secondary);
       }
 
-      /* ── Steps ──────────────────────────────────────────────────────── */
-      .step {
+      /* ── All runtime-generated content is scoped under .lab-page ────── */
+      .lab-page .step {
         margin-bottom: var(--space-xl);
       }
 
-      .step__heading {
+      .lab-page .step__heading {
         font-family: var(--font-headers);
         font-weight: var(--font-weight-bold);
         font-size: var(--type-size-h4);
@@ -74,13 +74,13 @@ import '../../styles/global.css';
         margin: 0 0 var(--space-sm);
       }
 
-      .step__hint {
+      .lab-page .step__hint {
         font-size: var(--type-size-small);
         color: var(--text-muted);
         margin: 0 0 var(--space-sm);
       }
 
-      .step__note {
+      .lab-page .step__note {
         font-size: var(--type-size-small);
         color: var(--text-muted);
         margin: var(--space-sm) 0 0;
@@ -88,17 +88,17 @@ import '../../styles/global.css';
       }
 
       /* ── Task list (native radio) ────────────────────────────────────── */
-      .task-list {
+      .lab-page .task-list {
         border: none;
         padding: 0;
         margin: 0 0 var(--space-sm);
       }
 
-      .task-list .step__heading {
+      .lab-page .task-list .step__heading {
         margin-bottom: var(--space-sm);
       }
 
-      .task-list__item {
+      .lab-page .task-list__item {
         display: flex;
         align-items: flex-start;
         gap: var(--space-sm);
@@ -112,61 +112,61 @@ import '../../styles/global.css';
         margin-bottom: var(--space-sm);
       }
 
-      .task-list__item:hover {
+      .lab-page .task-list__item:hover {
         border-color: var(--color-link);
       }
 
-      .task-list:has(:checked) .task-list__item:has(:not(:checked)) {
+      .lab-page .task-list:has(:checked) .task-list__item:has(:not(:checked)) {
         opacity: 0.7;
       }
 
-      .task-list__item:has(:checked) {
+      .lab-page .task-list__item:has(:checked) {
         border-color: var(--color-link);
         box-shadow: 0 0 0 1px var(--color-link);
       }
 
-      .task-list__radio {
+      .lab-page .task-list__radio {
         position: absolute;
         opacity: 0;
         width: 0;
         height: 0;
       }
 
-      .task-list__radio:focus-visible + .task-list__content {
+      .lab-page .task-list__radio:focus-visible + .task-list__content {
         outline: var(--focus-outline-width) var(--focus-outline-style) var(--color-focus);
         outline-offset: var(--focus-outline-offset);
       }
 
-      .task-list__content {
+      .lab-page .task-list__content {
         display: flex;
         flex-direction: column;
         gap: var(--space-xs);
         flex: 1;
       }
 
-      .task-list__item-title {
+      .lab-page .task-list__item-title {
         font-family: var(--font-headers);
         font-weight: var(--font-weight-bold);
         font-size: var(--type-size-body);
       }
 
-      .task-list__item-desc {
+      .lab-page .task-list__item-desc {
         font-size: var(--type-size-small);
         color: var(--text-secondary);
       }
 
       /* ── Preset list (native radio) ─────────────────────────────────── */
-      .preset-list {
+      .lab-page .preset-list {
         border: none;
         padding: 0;
         margin: 0 0 var(--space-sm);
       }
 
-      .preset-list .step__heading {
+      .lab-page .preset-list .step__heading {
         margin-bottom: var(--space-sm);
       }
 
-      .preset-list__item {
+      .lab-page .preset-list__item {
         flex: 1;
         min-width: 200px;
         display: flex;
@@ -182,51 +182,57 @@ import '../../styles/global.css';
         margin-bottom: var(--space-sm);
       }
 
-      .preset-list__item:hover {
+      .lab-page .preset-list__item:hover {
         border-color: var(--color-link);
       }
 
-      .preset-list:has(:checked) .preset-list__item:has(:not(:checked)) {
+      .lab-page .preset-list:has(:checked) .preset-list__item:has(:not(:checked)) {
         opacity: 0.7;
       }
 
-      .preset-list__item:has(:checked) {
+      .lab-page .preset-list__item:has(:checked) {
         border-color: var(--color-link);
         box-shadow: 0 0 0 1px var(--color-link);
       }
 
-      .preset-list__radio {
+      .lab-page .preset-list__radio {
         position: absolute;
         opacity: 0;
         width: 0;
         height: 0;
       }
 
-      .preset-list__radio:focus-visible + .preset-list__content {
+      .lab-page .preset-list__radio:focus-visible + .preset-list__content {
         outline: var(--focus-outline-width) var(--focus-outline-style) var(--color-focus);
         outline-offset: var(--focus-outline-offset);
       }
 
-      .preset-list__content {
+      .lab-page .preset-list__content {
         display: flex;
         flex-direction: column;
         gap: var(--space-xs);
         flex: 1;
       }
 
+      .lab-page .preset-list__item-count {
+        font-size: var(--type-size-small);
+        color: var(--text-muted);
+        font-family: var(--font-mono);
+      }
+
       @supports not selector(:has(*)) {
-        .task-list__item--selected {
+        .lab-page .task-list__item--selected {
           border-color: var(--color-link);
           box-shadow: 0 0 0 1px var(--color-link);
         }
-        .preset-list__item--selected {
+        .lab-page .preset-list__item--selected {
           border-color: var(--color-link);
           box-shadow: 0 0 0 1px var(--color-link);
         }
       }
 
       /* ── Document list ──────────────────────────────────────────────── */
-      .doc-list {
+      .lab-page .doc-list {
         list-style: none;
         padding: 0;
         margin: 0;
@@ -235,15 +241,15 @@ import '../../styles/global.css';
         gap: var(--space-sm);
       }
 
-      .doc-list__item {
+      .lab-page .doc-list__item {
         margin: 0;
       }
 
-      .doc-list__item--included {
+      .lab-page .doc-list__item--included {
         border-left: var(--size-border-thick) solid var(--color-link);
       }
 
-      .doc-list__label {
+      .lab-page .doc-list__label {
         display: flex;
         align-items: flex-start;
         gap: var(--space-sm);
@@ -255,32 +261,32 @@ import '../../styles/global.css';
         transition: border-color var(--transition-fast);
       }
 
-      .doc-list__label:hover {
+      .lab-page .doc-list__label:hover {
         border-color: var(--color-link);
       }
 
-      .doc-list__checkbox {
+      .lab-page .doc-list__checkbox {
         margin-top: 0.2em;
         min-width: 18px;
         min-height: 18px;
         accent-color: var(--color-action);
       }
 
-      .doc-list__info {
+      .lab-page .doc-list__info {
         display: flex;
         flex-direction: column;
         gap: 0.2em;
         flex: 1;
       }
 
-      .doc-list__title {
+      .lab-page .doc-list__title {
         font-family: var(--font-headers);
         font-weight: var(--font-weight-bold);
         font-size: var(--type-size-body);
         color: var(--text-primary);
       }
 
-      .doc-list__meta {
+      .lab-page .doc-list__meta {
         display: flex;
         flex-wrap: wrap;
         gap: var(--space-inline);
@@ -289,7 +295,7 @@ import '../../styles/global.css';
         color: var(--text-secondary);
       }
 
-      .doc-list__badge {
+      .lab-page .doc-list__badge {
         display: inline-block;
         padding: 0.1em 0.5em;
         border-radius: 999px;
@@ -298,61 +304,67 @@ import '../../styles/global.css';
         text-transform: uppercase;
       }
 
-      .doc-list__badge--high {
+      .lab-page .doc-list__badge--high {
         background: oklch(0.45 0.1 250);
         color: #fff;
       }
 
-      .doc-list__badge--medium {
+      .lab-page .doc-list__badge--medium {
         background: oklch(0.5 0.06 260);
         color: #fff;
       }
 
-      .doc-list__badge--low {
+      .lab-page .doc-list__badge--low {
         background: oklch(0.4 0.02 260);
         color: var(--text-muted);
       }
 
-      .doc-list__relevance {
+      .lab-page .doc-list__relevance {
         font-family: var(--font-mono);
         font-size: 0.85em;
         color: var(--text-muted);
       }
 
-      .doc-list__relevance--relevant {
+      .lab-page .doc-list__relevance--relevant {
         color: var(--color-success);
       }
 
+      .lab-page .doc-list__size {
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+        color: var(--text-muted);
+      }
+
       /* ── Metrics grid ───────────────────────────────────────────────── */
-      .metrics-grid {
+      .lab-page .metrics-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: var(--space-component);
       }
 
-      .metric-card {
+      .lab-page .metric-card {
         background: var(--color-card-bg);
         border: var(--size-border-pixel) solid var(--color-card-border);
         border-radius: var(--radius-md);
         padding: var(--space-component);
       }
 
-      .metric-card__header {
+      .lab-page .metric-card__header {
         margin-bottom: var(--space-sm);
       }
 
-      .metric-card__value {
+      .lab-page .metric-card__value {
         display: flex;
         align-items: baseline;
         gap: var(--space-sm);
         margin-bottom: var(--space-xs);
       }
 
-      .metric-card__value--size {
+      .lab-page .metric-card__value--size {
         flex-wrap: wrap;
       }
 
-      .metric-card__number {
+      .lab-page .metric-card__number {
         font-family: var(--font-headers);
         font-weight: var(--font-weight-bold);
         font-size: var(--type-size-h3);
@@ -360,17 +372,17 @@ import '../../styles/global.css';
         color: var(--color-link);
       }
 
-      .metric-card__number--size {
+      .lab-page .metric-card__number--size {
         font-size: var(--type-size-body);
         font-family: var(--font-mono);
       }
 
-      .metric-card__label--sub {
+      .lab-page .metric-card__label--sub {
         font-size: var(--type-size-small);
         color: var(--text-muted);
       }
 
-      .metric-card__bar {
+      .lab-page .metric-card__bar {
         display: block;
         width: 100%;
         height: 8px;
@@ -380,7 +392,7 @@ import '../../styles/global.css';
         margin-top: var(--space-xs);
       }
 
-      .metric-card__bar-fill {
+      .lab-page .metric-card__bar-fill {
         display: block;
         height: 100%;
         background: var(--color-link);
@@ -388,7 +400,7 @@ import '../../styles/global.css';
         transition: width var(--transition-normal);
       }
 
-      .metric-card__label {
+      .lab-page .metric-card__label {
         font-family: var(--font-headers);
         font-weight: var(--font-weight-medium);
         font-size: var(--type-size-body);
@@ -396,7 +408,7 @@ import '../../styles/global.css';
         color: var(--text-primary);
       }
 
-      .metric-card__toggle {
+      .lab-page .metric-card__toggle {
         display: inline-block;
         background: none;
         border: none;
@@ -409,55 +421,55 @@ import '../../styles/global.css';
         text-underline-offset: 2px;
       }
 
-      .metric-card__toggle:hover {
+      .lab-page .metric-card__toggle:hover {
         color: var(--color-link-hover);
       }
 
-      .metric-card__toggle:focus-visible {
+      .lab-page .metric-card__toggle:focus-visible {
         outline: var(--focus-outline-width) var(--focus-outline-style) var(--color-focus);
         outline-offset: var(--focus-outline-offset);
       }
 
-      .metric-card__detail {
+      .lab-page .metric-card__detail {
         margin-top: var(--space-sm);
         padding-top: var(--space-sm);
         border-top: var(--size-border-pixel) solid var(--border-muted);
       }
 
-      .metric-card__explanation {
+      .lab-page .metric-card__explanation {
         font-size: var(--type-size-small);
         color: var(--text-secondary);
         line-height: 1.6;
         margin: 0 0 var(--space-xs);
       }
 
-      .metric-card__direction {
+      .lab-page .metric-card__direction {
         font-size: var(--type-size-small);
         color: var(--text-muted);
         font-family: var(--font-mono);
         margin: 0;
       }
 
-      .metric-card__number--na {
+      .lab-page .metric-card__number--na {
         color: var(--text-muted);
         font-size: var(--type-size-h4);
       }
 
-      .metric-card__na-note {
+      .lab-page .metric-card__na-note {
         font-size: var(--type-size-small);
         color: var(--text-muted);
         font-style: italic;
         margin: 0 0 var(--space-xs);
       }
 
-      .metric-card__docs {
+      .lab-page .metric-card__docs {
         font-size: var(--type-size-small);
         color: var(--text-secondary);
         line-height: 1.5;
         margin: 0 0 var(--space-xs);
       }
 
-      .metric-card__improve {
+      .lab-page .metric-card__improve {
         font-size: var(--type-size-small);
         color: var(--brand-accent);
         line-height: 1.5;
@@ -466,20 +478,8 @@ import '../../styles/global.css';
         border-top: var(--size-border-pixel) solid var(--border-muted);
       }
 
-      .preset-list__item-count {
-        font-size: var(--type-size-small);
-        color: var(--text-muted);
-        font-family: var(--font-mono);
-      }
-
-      .doc-list__size {
-        font-family: var(--font-mono);
-        font-size: 0.85em;
-        color: var(--text-muted);
-      }
-
-      /* ── Empty state ────────────────────────────────────────────────── */
-      .empty-state {
+      /* ── Empty state (no-JS message) ────────────────────────────────── */
+      .lab-page .empty-state {
         text-align: center;
         padding: var(--space-xl);
         color: var(--text-muted);
@@ -491,19 +491,19 @@ import '../../styles/global.css';
           padding: var(--space-component);
         }
 
-        .preset-list {
+        .lab-page .preset-list {
           flex-direction: column;
         }
 
-        .preset-list__item {
+        .lab-page .preset-list__item {
           min-width: unset;
         }
 
-        .metrics-grid {
+        .lab-page .metrics-grid {
           grid-template-columns: 1fr;
         }
 
-        .doc-list__meta {
+        .lab-page .doc-list__meta {
           flex-direction: column;
           align-items: flex-start;
         }
@@ -538,6 +538,7 @@ import '../../styles/global.css';
             </p>
           </div>
         </noscript>
+
         <div class="step" id="step-task" role="region" aria-label="Task selection">
           <!-- Rendered by controller -->
         </div>
