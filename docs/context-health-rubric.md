@@ -124,6 +124,8 @@ Evaluate both whether each file was appropriately routed and whether each loaded
 
 Do not penalize performance, accessibility, or testing guidance merely because it is lengthy. If the declared task includes page performance, bundle isolation, semantic behavior, or verification, that guidance is relevant. Length becomes a Precision concern when loaded content is unrelated to the task, including unrelated material inside an otherwise useful file.
 
+Evaluate whether the auditor selected the applicable task routes and left unrelated routes unloaded unless investigation established a concrete need. Additional context should have a recorded reason when it materially expands the initial scope. Prefer routes to the narrowest practical document or section.
+
 ### Context Recall
 
 Context Recall asks whether required information is reachable through the declared context path.
@@ -135,6 +137,8 @@ Distinguish among:
 - guidance intentionally excluded because it does not apply.
 
 One intentional routing hop may reduce convenience or discoverability, but it should not automatically be treated as missing context. Record the route and judge whether the extra hop materially impedes the declared task.
+
+Confirm that every required task-specific source was loaded. Do not omit required context merely to improve Context Precision; missing required routes reduce Context Recall and may also reduce Sufficiency.
 
 ### Sufficiency
 
@@ -213,7 +217,7 @@ These examples illustrate the anchors; they do not establish universal checks or
 ### Direct authoritative route
 
 - **Scope:** Significant Astro UI change.
-- **Evidence:** `AGENTS.md` directly routes styling, tokens, and accessibility work under `## Before making significant changes`, and names the UI skills under `## Skills`.
+- **Evidence:** `AGENTS.md` directly routes styling, tokens, and accessibility work under `## Task-Specific Context Routing`, and names the matching UI skills under `## Skill Routing`.
 - **Expected result:** Pass.
 - **Affects the score:** Yes, for Context Recall or Authority Clarity.
 - **Rationale:** The primary agent authority exposes the relevant sources without an undeclared discovery step.
@@ -261,7 +265,7 @@ These examples illustrate the anchors; they do not establish universal checks or
 ## 12. Follow the audit procedure
 
 1. Declare the task, audit type, scope, expected outcome, known requirements, and explicit exclusions.
-2. Read `AGENTS.md` and the documentation it routes for the task, then build a preliminary effective-context inventory.
+2. Read `AGENTS.md`, select the applicable task routes, and build a preliminary effective-context inventory. Record why any additional context materially expands those initial routes.
 3. Derive check IDs and weights from the task requirements and preliminary inventory.
 4. Lock the checks and weights before classifying evidence or assigning scores.
 5. Assess every loaded portion, recording observable evidence at the smallest practical section, heading, rule, or claim.
