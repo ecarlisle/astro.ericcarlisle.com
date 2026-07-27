@@ -87,42 +87,61 @@
         line-height: 1.5;
       }
 
-      /* ── Task list ──────────────────────────────────────────────────── */
+      /* ── Task list (native radio) ────────────────────────────────────── */
       .task-list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-sm);
+        border: none;
+        padding: 0;
+        margin: 0 0 var(--space-sm);
+      }
+
+      .task-list .step__heading {
+        margin-bottom: var(--space-sm);
       }
 
       .task-list__item {
         display: flex;
-        flex-direction: column;
-        gap: var(--space-xs);
+        align-items: flex-start;
+        gap: var(--space-sm);
         padding: var(--space-component);
         background: var(--color-card-bg);
         border: var(--size-border-pixel) solid var(--color-card-border);
         border-radius: var(--radius-md);
         cursor: pointer;
-        text-align: left;
-        font-family: inherit;
-        font-size: inherit;
-        color: inherit;
         transition: border-color var(--transition-fast),
                     box-shadow var(--transition-fast);
+        margin-bottom: var(--space-sm);
       }
 
       .task-list__item:hover {
         border-color: var(--color-link);
       }
 
-      .task-list__item--selected {
+      .task-list:has(:checked) .task-list__item:has(:not(:checked)) {
+        opacity: 0.7;
+      }
+
+      .task-list__item:has(:checked) {
         border-color: var(--color-link);
         box-shadow: 0 0 0 1px var(--color-link);
       }
 
-      .task-list__item:focus-visible {
+      .task-list__radio {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .task-list__radio:focus-visible + .task-list__content {
         outline: var(--focus-outline-width) var(--focus-outline-style) var(--color-focus);
         outline-offset: var(--focus-outline-offset);
+      }
+
+      .task-list__content {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+        flex: 1;
       }
 
       .task-list__item-title {
@@ -136,56 +155,74 @@
         color: var(--text-secondary);
       }
 
-      /* ── Preset list ────────────────────────────────────────────────── */
+      /* ── Preset list (native radio) ─────────────────────────────────── */
       .preset-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-sm);
+        border: none;
+        padding: 0;
+        margin: 0 0 var(--space-sm);
+      }
+
+      .preset-list .step__heading {
+        margin-bottom: var(--space-sm);
       }
 
       .preset-list__item {
         flex: 1;
         min-width: 200px;
         display: flex;
-        flex-direction: column;
-        gap: var(--space-xs);
+        align-items: flex-start;
+        gap: var(--space-sm);
         padding: var(--space-component);
         background: var(--color-card-bg);
         border: var(--size-border-pixel) solid var(--color-card-border);
         border-radius: var(--radius-md);
         cursor: pointer;
-        text-align: left;
-        font-family: inherit;
-        font-size: inherit;
-        color: inherit;
         transition: border-color var(--transition-fast),
                     box-shadow var(--transition-fast);
+        margin-bottom: var(--space-sm);
       }
 
       .preset-list__item:hover {
         border-color: var(--color-link);
       }
 
-      .preset-list__item--selected {
+      .preset-list:has(:checked) .preset-list__item:has(:not(:checked)) {
+        opacity: 0.7;
+      }
+
+      .preset-list__item:has(:checked) {
         border-color: var(--color-link);
         box-shadow: 0 0 0 1px var(--color-link);
       }
 
-      .preset-list__item:focus-visible {
+      .preset-list__radio {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .preset-list__radio:focus-visible + .preset-list__content {
         outline: var(--focus-outline-width) var(--focus-outline-style) var(--color-focus);
         outline-offset: var(--focus-outline-offset);
       }
 
-      .preset-list__item-label {
-        font-family: var(--font-headers);
-        font-weight: var(--font-weight-bold);
-        font-size: var(--type-size-body);
-        color: var(--text-primary);
+      .preset-list__content {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+        flex: 1;
       }
 
-      .preset-list__item-desc {
-        font-size: var(--type-size-small);
-        color: var(--text-secondary);
+      @supports not selector(:has(*)) {
+        .task-list__item--selected {
+          border-color: var(--color-link);
+          box-shadow: 0 0 0 1px var(--color-link);
+        }
+        .preset-list__item--selected {
+          border-color: var(--color-link);
+          box-shadow: 0 0 0 1px var(--color-link);
+        }
       }
 
       /* ── Document list ──────────────────────────────────────────────── */

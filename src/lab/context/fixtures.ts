@@ -145,10 +145,10 @@ export const DOCUMENTS: LabDocument[] = [
   },
   {
     id: 'doc-legacy-a11y-notes',
-    title: 'Outdated Frontend Accessibility Notes',
+    title: 'Alternative Accessibility Approach',
     description:
-      'Earlier accessibility recommendations superseded by modern WCAG guidance. Some approaches conflict with current standards.',
-    authority: 'medium',
+      'A competing frontend accessibility standard that differs from WCAG on keyboard-navigation expectations. Provides legitimate but divergent guidance at the same authority level.',
+    authority: 'high',
     length: 2200,
     relevanceByTask: { a11y: 0.5, perf: 0.0, tokens: 0.0 },
     covers: ['keyboard-navigation', 'aria-labels'],
@@ -157,10 +157,10 @@ export const DOCUMENTS: LabDocument[] = [
   },
   {
     id: 'doc-legacy-perf-notes',
-    title: 'Legacy Performance Optimization Notes',
+    title: 'Alternative Performance Recommendations',
     description:
-      'Older performance recommendations that predate modern bundling and lazy-loading patterns. Some advice is still directionally correct but no longer state of the art.',
-    authority: 'medium',
+      'A competing performance optimization guide that prioritizes different tradeoffs than the standard budget policy. Same authority level but conflicting recommendations on bundle strategy.',
+    authority: 'high',
     length: 2000,
     relevanceByTask: { a11y: 0.0, perf: 0.5, tokens: 0.0 },
     covers: ['bundle-optimization', 'image-optimization'],
@@ -237,15 +237,3 @@ export const PRESETS: LabPreset[] = [
     },
   },
 ];
-
-/** Relevance score threshold for binary relevance classification. */
-export const RELEVANCE_THRESHOLD = 0.6;
-
-export const AUTHORITY_WEIGHTS: Record<string, number> = {
-  high: 1.0,
-  medium: 0.6,
-  low: 0.3,
-};
-
-/** Characters per token approximation (plain English prose). */
-export const CHARS_PER_TOKEN = 4;

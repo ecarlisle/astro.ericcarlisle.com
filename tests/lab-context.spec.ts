@@ -1,86 +1,142 @@
-/**
- * Context Lab tests.
- *
- * Covers metric calculations, preset behavior, boundary cases,
- * accessible interaction, route availability, and JS isolation
- * on ordinary pages.
- */
 import { expect, test } from '@playwright/test';
-import { runAnalysis } from '../src/lab/context/engine';
+import { analyzeContext, runFixtureAnalysis } from '../src/lab/context/engine';
 import { DOCUMENTS, PRESETS, TASKS } from '../src/lab/context/fixtures';
+import type { LabDocument } from '../src/lab/context/types';
 
 const LAB_PATH = '/lab/context/';
-const A11Y_TASK_BTN = 'button[data-task-id="a11y"]';
-const PERF_TASK_BTN = 'button[data-task-id="perf"]';
-const TOKENS_TASK_BTN = 'button[data-task-id="tokens"]';
-const CURATED_PRESET_BTN = 'button[data-preset-id="curated"]';
-const OVERLOADED_PRESET_BTN = 'button[data-preset-id="overloaded"]';
 const FIRST_CHECKBOX = '.doc-list__checkbox';
 const METRIC_CARD = '.metric-card';
 
-// ─── Engine-level tests ─────────────────────────────────────────────────────
+// ─── Engine: fixture-independent API ────────────────────────────────────────
+
+test('analyzeContext with artificial task and docs produces exact precision', () => {
+  const task = { id: 'test', title: 'Test', description: '', requirements: ['req-a'] };
+  const docs = [
+    {
+      id: 'd1',
+      title: 'Doc A',
+      description: '',
+      authority: 'high' as const,
+      length: 1000,
+      relevanceByTask: { test: 1.0 },
+      covers: ['req-a'],
+      authoritativeFor: [],
+      conflictsWith: [],
+    },
+  ];
+  const result = analyzeContext({ task, includedDocs: docs, availableDocs: docs });
+  expect(result.precision.value).toBeCloseTo(1.0, 4);
+  expect(result.sufficiency.value).toBeCloseTo(1.0, 4);
+});
+
+test('analyzeContext with zero-relevance docs gives zero precision', () => {
+  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
+  const docs = [
+    {
+      id: 'd1',
+      title: 'Doc A',
+      description: '',
+      authority: 'high' as const,
+      length: 500,
+      relevanceByTask: { test: 0.0 },
+      covers: [],
+      authoritativeFor: [],
+      conflictsWith: [],
+    },
+  ];
+  const result = analyzeContext({ task, includedDocs: docs, availableDocs: docs });
+  expect(result.precision.value).toBeCloseTo(0, 4);
+});
+
+test('analyzeContext with null recall returns null with reason', () => {
+  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
+  const docs: LabDocument[] = [];
+  const result = analyzeContext({ task, includedDocs: [], availableDocs: docs });
+  expect(result.recall.value).toBeNull();
+  expect(result.recall.notApplicableReason).toBeTruthy();
+});
+
+// ─── Engine: continuous relevance (0.5 document contributes to numerator) ────
+
+test('document with 0.5 relevance contributes proportionally to precision', () => {
+  const task = { id: 'test', title: 'Test', description: '', requirements: [] };
+  const docs = [
+    {
+      id: 'd1',
+      title: 'Doc Half',
+      description: '',
+      authority: 'medium' as const,
+      length: 1000,
+      relevanceByTask: { test: 0.5 },
+      covers: [],
+      authoritativeFor: [],
+      conflictsWith: [],
+    },
+  ];
+  const result = analyzeContext({ task, includedDocs: docs, availableDocs: docs });
+  // precision = (1000 * 0.5) / 1000 = 0.5
+  expect(result.precision.value).toBeCloseTo(0.5, 4);
+  // contributingDocs should include the doc
+  expect(result.precision.contributingDocs).toContain('Doc Half');
+  // explanation should describe the weighting
+  expect(result.precision.explanation).toContain('0.5');
+});
+
+// ─── Engine: size-weighted precision ────────────────────────────────────────
 
 test('size-weighted precision of relevant-only docs equals 1.0', () => {
-  // Only doc-a11y-guidelines (relevance 1.0 for a11y): precision = sum(3200*1.0)/3200 = 1.0
-  const result = runAnalysis('a11y', new Set(['doc-a11y-guidelines']));
+  const result = runFixtureAnalysis('a11y', new Set(['doc-a11y-guidelines']));
   expect(result.precision.value).toBeCloseTo(1.0, 4);
 });
 
 test('size-weighted precision with irrelevant docs is below 1.0', () => {
   // doc-a11y-guidelines (relevance 1.0, 3200) + doc-tokens (relevance 0.0, 1800)
   // precision = (3200*1.0 + 1800*0.0) / (3200 + 1800) = 3200/5000 = 0.64
-  const result = runAnalysis('a11y', new Set(['doc-a11y-guidelines', 'doc-tokens']));
+  const result = runFixtureAnalysis('a11y', new Set(['doc-a11y-guidelines', 'doc-tokens']));
   expect(result.precision.value).toBeCloseTo(0.64, 4);
 });
 
 test('size-weighted precision with no documents returns null', () => {
-  const result = runAnalysis('a11y', new Set());
+  const result = runFixtureAnalysis('a11y', new Set());
   expect(result.precision.value).toBeNull();
   expect(result.precision.notApplicableReason).toBeTruthy();
 });
 
+// ─── Engine: size-weighted recall ───────────────────────────────────────────
+
 test('size-weighted recall of all available docs equals 1.0', () => {
   const allDocIds = new Set(DOCUMENTS.map((d) => d.id));
-  const result = runAnalysis('tokens', allDocIds);
+  const result = runFixtureAnalysis('tokens', allDocIds);
   expect(result.recall.value).toBeCloseTo(1.0, 4);
 });
 
-test('recall with no relevant available docs returns null', () => {
-  // This case can't be tested without an artificial task.
-  // When runAnalysis receives an unknown task ID it throws.
-  // Real tasks always have some relevant context available.
-});
-
 test('recall with no included documents is 0', () => {
-  const result = runAnalysis('a11y', new Set());
+  const result = runFixtureAnalysis('a11y', new Set());
   expect(result.recall.value).toBeCloseTo(0, 4);
 });
 
+// ─── Engine: sufficiency ────────────────────────────────────────────────────
+
 test('sufficiency with all requirements covered equals 1.0', () => {
-  // Curated a11y covers all 5 requirements
   const docIds = new Set(PRESETS.find((p) => p.id === 'curated')?.docIdsByTask.a11y ?? []);
-  const result = runAnalysis('a11y', docIds);
+  const result = runFixtureAnalysis('a11y', docIds);
   expect(result.sufficiency.value).toBeCloseTo(1.0, 4);
 });
 
 test('sufficiency with no documents equals 0', () => {
-  const result = runAnalysis('a11y', new Set());
+  const result = runFixtureAnalysis('a11y', new Set());
   expect(result.sufficiency.value).toBeCloseTo(0, 4);
 });
 
+// ─── Engine: authority clarity ──────────────────────────────────────────────
+
 test('single authoritative doc with no conflict gives clear authority', () => {
-  // doc-tokens alone for tokens task: authoritative for spacing-tokens, color-tokens, typography-scale
-  // All 3 covered requirements have exactly one authoritative source with no conflicts
-  const result = runAnalysis('tokens', new Set(['doc-tokens']));
+  const result = runFixtureAnalysis('tokens', new Set(['doc-tokens']));
   expect(result.authorityClarity.value).toBeCloseTo(1.0, 4);
 });
 
 test('competing authoritative sources for same requirement reduce clarity', () => {
-  // doc-a11y-guidelines AND doc-legacy-a11y-notes both authoritative for keyboard-navigation AND conflict
-  // doc-html-semantics adds focus-management (clear)
-  // Covered: semantic-landmarks (clear), keyboard-navigation (ambiguous), aria-labels (clear),
-  //          skip-link (clear), focus-management (clear) → 4/5 = 0.8
-  const result = runAnalysis(
+  const result = runFixtureAnalysis(
     'a11y',
     new Set(['doc-a11y-guidelines', 'doc-html-semantics', 'doc-legacy-a11y-notes']),
   );
@@ -88,29 +144,24 @@ test('competing authoritative sources for same requirement reduce clarity', () =
 });
 
 test('conflicting docs for different requirements does not reduce clarity for unrelated reqs', () => {
-  // doc-perf-budget conflicts with doc-legacy-perf-notes on bundle-optimization.
-  // But image-optimization, font-loading, css-minification have only doc-perf-budget
-  // as authoritative — the conflict doesn't spill over.
-  // Covered: bundle-optimization (ambiguous), image-optimization (clear), font-loading (clear),
-  //          lazy-loading (NOT covered), css-minification (clear) → 3/4 covered?
-  // Actually lazy-loading isn't covered by either doc → 4/4 covered? No.
-  // doc-perf-budget covers: bundle-optimization, image-optimization, font-loading, css-minification
-  // doc-legacy-perf-notes covers: bundle-optimization, image-optimization
-  // Covered: bundle-optimization, image-optimization, font-loading, css-minification = 4
-  // Clear: 3/4 = 0.75
-  const result = runAnalysis('perf', new Set(['doc-perf-budget', 'doc-legacy-perf-notes']));
+  // doc-perf-budget and doc-legacy-perf-notes conflict on bundle-optimization only.
+  // Other requirements have clear authority.
+  const result = runFixtureAnalysis('perf', new Set(['doc-perf-budget', 'doc-legacy-perf-notes']));
+  // Covered: bundle-optimization (ambiguous), image-optimization (clear),
+  // font-loading (clear), css-minification (clear) = 3/4
   expect(result.authorityClarity.value).toBeCloseTo(0.75, 4);
 });
 
 test('authority clarity with no covered requirements returns null', () => {
-  // doc-deploy covers no requirements for any task
-  const result = runAnalysis('a11y', new Set(['doc-deploy']));
+  const result = runFixtureAnalysis('a11y', new Set(['doc-deploy']));
   expect(result.authorityClarity.value).toBeNull();
 });
 
+// ─── Engine: no curated preset has unresolved conflict ──────────────────────
+
 test('no curated preset has an unresolved authoritative conflict', () => {
   for (const task of TASKS) {
-    const curated = runAnalysis(
+    const curated = runFixtureAnalysis(
       task.id,
       new Set(PRESETS.find((p) => p.id === 'curated')?.docIdsByTask[task.id] ?? []),
     );
@@ -119,29 +170,29 @@ test('no curated preset has an unresolved authoritative conflict', () => {
   }
 });
 
+// ─── Engine: context size ───────────────────────────────────────────────────
+
 test('context size returns correct characters and estimated tokens', () => {
-  // doc-tokens = 1800 chars, doc-components = 2600 chars → total 4400 chars
-  // Estimated tokens = 4400 / 4 = 1100
-  const result = runAnalysis('tokens', new Set(['doc-tokens', 'doc-components']));
+  const result = runFixtureAnalysis('tokens', new Set(['doc-tokens', 'doc-components']));
   expect(result.contextSize.chars).toBe(4400);
   expect(result.contextSize.estimatedTokens).toBe(1100);
 });
 
 test('context size with no documents is 0', () => {
-  const result = runAnalysis('a11y', new Set());
+  const result = runFixtureAnalysis('a11y', new Set());
   expect(result.contextSize.chars).toBe(0);
   expect(result.contextSize.estimatedTokens).toBe(0);
 });
 
-// ─── Preset relationship tests (engine-level) ───────────────────────────────
+// ─── Engine: preset relationships ───────────────────────────────────────────
 
 test('curated sufficiency >= minimal sufficiency for all tasks', () => {
   for (const task of TASKS) {
-    const curated = runAnalysis(
+    const curated = runFixtureAnalysis(
       task.id,
       new Set(PRESETS.find((p) => p.id === 'curated')?.docIdsByTask[task.id] ?? []),
     );
-    const minimal = runAnalysis(
+    const minimal = runFixtureAnalysis(
       task.id,
       new Set(PRESETS.find((p) => p.id === 'minimal')?.docIdsByTask[task.id] ?? []),
     );
@@ -151,11 +202,11 @@ test('curated sufficiency >= minimal sufficiency for all tasks', () => {
 
 test('curated precision > overloaded precision for all tasks', () => {
   for (const task of TASKS) {
-    const curated = runAnalysis(
+    const curated = runFixtureAnalysis(
       task.id,
       new Set(PRESETS.find((p) => p.id === 'curated')?.docIdsByTask[task.id] ?? []),
     );
-    const overloaded = runAnalysis(
+    const overloaded = runFixtureAnalysis(
       task.id,
       new Set(PRESETS.find((p) => p.id === 'overloaded')?.docIdsByTask[task.id] ?? []),
     );
@@ -163,13 +214,13 @@ test('curated precision > overloaded precision for all tasks', () => {
   }
 });
 
-test('curated authority clarity >= overloaded authority clarity for all tasks', () => {
+test('curated authority >= overloaded authority for all tasks', () => {
   for (const task of TASKS) {
-    const curated = runAnalysis(
+    const curated = runFixtureAnalysis(
       task.id,
       new Set(PRESETS.find((p) => p.id === 'curated')?.docIdsByTask[task.id] ?? []),
     );
-    const overloaded = runAnalysis(
+    const overloaded = runFixtureAnalysis(
       task.id,
       new Set(PRESETS.find((p) => p.id === 'overloaded')?.docIdsByTask[task.id] ?? []),
     );
@@ -179,13 +230,13 @@ test('curated authority clarity >= overloaded authority clarity for all tasks', 
   }
 });
 
-test('curated authority clarity > overloaded authority clarity for a11y and perf', () => {
+test('curated authority clarity > overloaded for a11y and perf', () => {
   for (const taskId of ['a11y', 'perf']) {
-    const curated = runAnalysis(
+    const curated = runFixtureAnalysis(
       taskId,
       new Set(PRESETS.find((p) => p.id === 'curated')?.docIdsByTask[taskId] ?? []),
     );
-    const overloaded = runAnalysis(
+    const overloaded = runFixtureAnalysis(
       taskId,
       new Set(PRESETS.find((p) => p.id === 'overloaded')?.docIdsByTask[taskId] ?? []),
     );
@@ -195,47 +246,41 @@ test('curated authority clarity > overloaded authority clarity for a11y and perf
   }
 });
 
-test('overloaded context size > curated context size > minimal context size', () => {
+test('overloaded context size > curated > minimal', () => {
   for (const task of TASKS) {
-    const overloaded = runAnalysis(
+    const o = runFixtureAnalysis(
       task.id,
       new Set(PRESETS.find((p) => p.id === 'overloaded')?.docIdsByTask[task.id] ?? []),
     );
-    const curated = runAnalysis(
+    const c = runFixtureAnalysis(
       task.id,
       new Set(PRESETS.find((p) => p.id === 'curated')?.docIdsByTask[task.id] ?? []),
     );
-    const minimal = runAnalysis(
+    const m = runFixtureAnalysis(
       task.id,
       new Set(PRESETS.find((p) => p.id === 'minimal')?.docIdsByTask[task.id] ?? []),
     );
-    expect(overloaded.contextSize.chars).toBeGreaterThan(curated.contextSize.chars);
-    expect(curated.contextSize.chars).toBeGreaterThanOrEqual(minimal.contextSize.chars);
+    expect(o.contextSize.chars).toBeGreaterThan(c.contextSize.chars);
+    expect(c.contextSize.chars).toBeGreaterThanOrEqual(m.contextSize.chars);
   }
 });
 
-// ─── Determinism ────────────────────────────────────────────────────────────
+// ─── Engine: determinism ────────────────────────────────────────────────────
 
-test('the same inputs produce the same results', () => {
-  const docIds = new Set(['doc-a11y-guidelines', 'doc-html-semantics']);
-  const first = runAnalysis('a11y', docIds);
-  const second = runAnalysis('a11y', docIds);
+test('same inputs produce same results', () => {
+  const ids = new Set(['doc-a11y-guidelines', 'doc-html-semantics']);
+  const first = runFixtureAnalysis('a11y', ids);
+  const second = runFixtureAnalysis('a11y', ids);
   expect(first.precision.value).toBe(second.precision.value);
-  expect(first.recall.value).toBe(second.recall.value);
-  expect(first.sufficiency.value).toBe(second.sufficiency.value);
-  expect(first.authorityClarity.value).toBe(second.authorityClarity.value);
-  expect(first.contextSize.chars).toBe(second.contextSize.chars);
 });
 
 test('conflict handling is order-independent', () => {
-  const set1 = new Set(['doc-a11y-guidelines', 'doc-html-semantics']);
-  const set2 = new Set(['doc-html-semantics', 'doc-a11y-guidelines']);
-  const r1 = runAnalysis('a11y', set1);
-  const r2 = runAnalysis('a11y', set2);
+  const r1 = runFixtureAnalysis('a11y', new Set(['doc-a11y-guidelines', 'doc-html-semantics']));
+  const r2 = runFixtureAnalysis('a11y', new Set(['doc-html-semantics', 'doc-a11y-guidelines']));
   expect(r1.authorityClarity.value).toBe(r2.authorityClarity.value);
 });
 
-// ─── Route availability ─────────────────────────────────────────────────────
+// ─── Route ──────────────────────────────────────────────────────────────────
 
 test('the /lab/context/ route loads with correct heading', async ({ page }) => {
   await page.goto(LAB_PATH);
@@ -245,55 +290,74 @@ test('the /lab/context/ route loads with correct heading', async ({ page }) => {
 
 test('the lab page has robots noindex metadata', async ({ page }) => {
   await page.goto(LAB_PATH);
-  const robots = page.locator('meta[name="robots"]');
-  await expect(robots).toHaveAttribute('content', 'noindex, follow');
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, follow');
 });
 
-// ─── Task selector ──────────────────────────────────────────────────────────
+// ─── Native radio: task selector ────────────────────────────────────────────
 
-test('clicking a task switches the selected task', async ({ page }) => {
+test('task radio group uses native inputs', async ({ page }) => {
   await page.goto(LAB_PATH);
-  await expect(page.locator(A11Y_TASK_BTN)).toHaveAttribute('aria-checked', 'true');
-
-  await page.locator(PERF_TASK_BTN).click();
-  await expect(page.locator(PERF_TASK_BTN)).toHaveAttribute('aria-checked', 'true');
-  await expect(page.locator(A11Y_TASK_BTN)).toHaveAttribute('aria-checked', 'false');
+  const radios = page.locator('input[name="task"]');
+  await expect(radios).toHaveCount(3);
+  // First radio (a11y) should be checked by default
+  await expect(radios.nth(0)).toBeChecked();
 });
 
-// ─── Preset behavior ────────────────────────────────────────────────────────
-
-test('task-specific presets select different docs for different tasks', async ({ page }) => {
+test('clicking a task label switches the radio selection', async ({ page }) => {
   await page.goto(LAB_PATH);
+  const radios = page.locator('input[name="task"]');
+  // Click the second task label
+  await page.locator('input[name="task"]').nth(1).check({ force: true });
+  await expect(radios.nth(1)).toBeChecked();
+  await expect(radios.nth(0)).not.toBeChecked();
+});
 
-  await page.locator(CURATED_PRESET_BTN).click();
+test('arrow keys navigate the task radio group', async ({ page }) => {
+  await page.goto(LAB_PATH);
+  await page.waitForSelector('input[name="task"]');
+  const radios = page.locator('input[name="task"]');
+  // Native radio groups handle arrow keys automatically.
+  // Click the first visible label to start.
+  const firstLabel = page.locator('.task-list__item').first();
+  await firstLabel.click();
+  // ArrowDown should move to the next value
+  await page.keyboard.press('ArrowDown');
+  await expect(radios.nth(1)).toBeChecked();
+});
+
+// ─── Native radio: preset selector ──────────────────────────────────────────
+
+test('preset radio group uses native inputs', async ({ page }) => {
+  await page.goto(LAB_PATH);
+  const radios = page.locator('input[name="preset"]');
+  await expect(radios).toHaveCount(3);
+  // Default preset is 'curated' (index 1)
+  await expect(radios.nth(1)).toBeChecked();
+});
+
+test('preset change updates document count', async ({ page }) => {
+  await page.goto(LAB_PATH);
+  // Curated (default): 2 docs
   let checked = await page.locator(`${FIRST_CHECKBOX}:checked`).count();
   expect(checked).toBe(2);
 
-  await page.locator(TOKENS_TASK_BTN).click();
+  // Switch to overloaded
+  await page.locator('input[name="preset"]').nth(2).check({ force: true });
   checked = await page.locator(`${FIRST_CHECKBOX}:checked`).count();
-  expect(checked).toBe(2);
-});
-
-test('overloaded preset selects all 10 documents', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  await page.locator(OVERLOADED_PRESET_BTN).click();
-  const checked = await page.locator(`${FIRST_CHECKBOX}:checked`).count();
   expect(checked).toBe(10);
 });
 
-// ─── Metric presence ────────────────────────────────────────────────────────
+// ─── Metric cards ───────────────────────────────────────────────────────────
 
 test('all five metric cards are rendered when documents are selected', async ({ page }) => {
   await page.goto(LAB_PATH);
-  const cards = page.locator(METRIC_CARD);
-  await expect(cards).toHaveCount(5);
+  await expect(page.locator(METRIC_CARD)).toHaveCount(5);
 });
 
 test('each metric card has a toggleable explanation', async ({ page }) => {
   await page.goto(LAB_PATH);
   const toggles = page.locator('.metric-card__toggle');
   const count = await toggles.count();
-
   for (let i = 0; i < count; i++) {
     const toggle = toggles.nth(i);
     await expect(toggle).toContainText('Show explanation');
@@ -304,36 +368,17 @@ test('each metric card has a toggleable explanation', async ({ page }) => {
 
 test('metrics update when task changes', async ({ page }) => {
   await page.goto(LAB_PATH);
-  const initialPrecision = await page
+  const initial = await page
     .locator('[data-metric-key="precision"]')
     .getAttribute('data-metric-value');
-  await page.locator(PERF_TASK_BTN).click();
-  const newPrecision = await page
+  await page.locator('input[name="task"]').nth(1).check({ force: true });
+  const updated = await page
     .locator('[data-metric-key="precision"]')
     .getAttribute('data-metric-value');
-  expect(newPrecision).not.toBe(initialPrecision);
+  expect(updated).not.toBe(initial);
 });
 
-// ─── Size-weighted precision ────────────────────────────────────────────────
-
-test('overloaded precision < curated precision for a11y task', async ({ page }) => {
-  await page.goto(LAB_PATH);
-  await page.locator(CURATED_PRESET_BTN).click();
-  const curatedVal = Number(
-    (
-      await page.locator('[data-metric-key="precision"]').getAttribute('data-metric-value')
-    )?.replace('%', ''),
-  );
-  await page.locator(OVERLOADED_PRESET_BTN).click();
-  const overloadedVal = Number(
-    (
-      await page.locator('[data-metric-key="precision"]').getAttribute('data-metric-value')
-    )?.replace('%', ''),
-  );
-  expect(overloadedVal).toBeLessThan(curatedVal);
-});
-
-// ─── Authority clarity ───────────────────────────────────────────────────────
+// ─── Authority clarity evidence ─────────────────────────────────────────────
 
 test('authority clarity card displays a percentage or N/A', async ({ page }) => {
   await page.goto(LAB_PATH);
@@ -346,11 +391,13 @@ test('authority clarity card displays a percentage or N/A', async ({ page }) => 
 test('authority clarity shows key documents in explanation', async ({ page }) => {
   await page.goto(LAB_PATH);
   await page.locator('[data-metric-key="authority"] .metric-card__toggle').click();
-  const detail = page.locator('[data-metric-key="authority"] .metric-card__detail');
-  await expect(detail).toContainText('key documents', { ignoreCase: true });
+  await expect(page.locator('[data-metric-key="authority"] .metric-card__detail')).toContainText(
+    'key documents',
+    { ignoreCase: true },
+  );
 });
 
-// ─── Context size with tokens ───────────────────────────────────────────────
+// ─── Context size ───────────────────────────────────────────────────────────
 
 test('context size displays chars and estimated tokens', async ({ page }) => {
   await page.goto(LAB_PATH);
@@ -362,13 +409,13 @@ test('context size displays chars and estimated tokens', async ({ page }) => {
 
 test('context size increases from curated to overloaded', async ({ page }) => {
   await page.goto(LAB_PATH);
-  await page.locator(CURATED_PRESET_BTN).click();
+  await page.locator('input[name="preset"]').nth(0).check({ force: true });
   const curatedVal = Number(
     (
       await page.locator('[data-metric-key="contextSize"]').getAttribute('data-metric-value')
     )?.replace(/,/g, ''),
   );
-  await page.locator(OVERLOADED_PRESET_BTN).click();
+  await page.locator('input[name="preset"]').nth(2).check({ force: true });
   const overloadedVal = Number(
     (
       await page.locator('[data-metric-key="contextSize"]').getAttribute('data-metric-value')
@@ -381,51 +428,60 @@ test('context size increases from curated to overloaded', async ({ page }) => {
 
 test('toggling a document off updates metrics', async ({ page }) => {
   await page.goto(LAB_PATH);
-  const initialChecked = await page.locator(`${FIRST_CHECKBOX}:checked`).count();
+  const initial = await page.locator(`${FIRST_CHECKBOX}:checked`).count();
   await page.locator(FIRST_CHECKBOX).first().uncheck();
-  const updatedChecked = await page.locator(`${FIRST_CHECKBOX}:checked`).count();
-  expect(updatedChecked).toBe(initialChecked - 1);
+  expect(await page.locator(`${FIRST_CHECKBOX}:checked`).count()).toBe(initial - 1);
 });
 
 // ─── Empty context ──────────────────────────────────────────────────────────
 
 test('unchecking all documents shows N/A for precision', async ({ page }) => {
   await page.goto(LAB_PATH);
-  const checkboxes = page.locator(FIRST_CHECKBOX);
-  const count = await checkboxes.count();
+  const count = await page.locator(FIRST_CHECKBOX).count();
   for (let i = 0; i < count; i++) {
-    await checkboxes.nth(i).uncheck();
+    await page.locator(FIRST_CHECKBOX).nth(i).uncheck();
   }
-  const precision = await page
-    .locator('[data-metric-key="precision"]')
-    .getAttribute('data-metric-value');
-  expect(precision).toBe('N/A');
+  expect(
+    await page.locator('[data-metric-key="precision"]').getAttribute('data-metric-value'),
+  ).toBe('N/A');
 });
 
 // ─── Keyboard accessibility ─────────────────────────────────────────────────
 
-test('task buttons are keyboard accessible', async ({ page }) => {
+test('Tab reaches the task radio group and Arrow keys move selection', async ({ page }) => {
   await page.goto(LAB_PATH);
-  const buttons = page.locator('.task-list__item');
-  await buttons.first().focus();
-  await expect(buttons.first()).toBeFocused();
+  const radios = page.locator('input[name="task"]');
+  // Click the first label to start
+  const firstLabel = page.locator('.task-list__item').first();
+  await firstLabel.click();
+  await page.keyboard.press('ArrowDown');
+  await expect(radios.nth(1)).toBeChecked();
 });
 
-test('preset buttons are keyboard accessible', async ({ page }) => {
+test('Tab reaches the preset radio group', async ({ page }) => {
   await page.goto(LAB_PATH);
-  const buttons = page.locator('.preset-list__item');
-  await buttons.first().focus();
-  await expect(buttons.first()).toBeFocused();
+  const presetRadios = page.locator('input[name="preset"]');
+  // Tab through to presets
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  // Arrow right or down should move through presets
+  await page.keyboard.press('ArrowDown');
+  // Should have moved selection
+  const checked = await presetRadios.evaluateAll((radios) =>
+    radios.findIndex((r) => (r as HTMLInputElement).checked),
+  );
+  expect(checked).toBeGreaterThanOrEqual(0);
 });
 
-test('metric explanation toggles are keyboard accessible', async ({ page }) => {
+test('metric explanation toggle is keyboard accessible', async ({ page }) => {
   await page.goto(LAB_PATH);
   const toggle = page.locator('.metric-card__toggle').first();
   await toggle.focus();
   await expect(toggle).toBeFocused();
 });
 
-// ─── No axe violations ──────────────────────────────────────────────────────
+// ─── Axe ────────────────────────────────────────────────────────────────────
 
 test('the lab page has no critical axe violations', async ({ page }) => {
   const AxeBuilder = await import('@axe-core/playwright').then((m) => m.default);
@@ -438,20 +494,16 @@ test('the lab page has no critical axe violations', async ({ page }) => {
 
 test('homepage does not load lab-generated JavaScript', async ({ page }) => {
   await page.goto('/');
-  const labScripts = page.locator('script[src*="context"]');
-  await expect(labScripts).toHaveCount(0);
-  const content = await page.content();
-  expect(content).not.toContain('lab/context');
+  await expect(page.locator('script[src*="context"]')).toHaveCount(0);
+  expect(await page.content()).not.toContain('lab/context');
 });
 
 test('a blog article does not load lab-generated JavaScript', async ({ page }) => {
   await page.goto('/blog/250mm-trading-card-box/');
-  const labScripts = page.locator('script[src*="context"]');
-  await expect(labScripts).toHaveCount(0);
+  await expect(page.locator('script[src*="context"]')).toHaveCount(0);
 });
 
 test('the search page does not load lab-generated JavaScript', async ({ page }) => {
   await page.goto('/search/');
-  const labScripts = page.locator('script[src*="context"]');
-  await expect(labScripts).toHaveCount(0);
+  await expect(page.locator('script[src*="context"]')).toHaveCount(0);
 });

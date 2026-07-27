@@ -4,7 +4,7 @@
  * Wires the analysis engine to the DOM. Handles state, rendering,
  * and event binding. All state is local to this module.
  */
-import { runAnalysis } from './engine';
+import { runFixtureAnalysis } from './engine';
 import { DOCUMENTS, PRESETS, TASKS } from './fixtures';
 import type { ContextSizeResult, LabState, MetricResult } from './types';
 
@@ -55,22 +55,20 @@ function renderTaskSelector(): void {
   const currentTask = TASKS.find((t) => t.id === state.selectedTaskId);
 
   container.innerHTML = `
-    <h2 class="step__heading">1. Select a task</h2>
-    <div class="task-list" role="radiogroup" aria-label="Select a sample task">
+    <fieldset class="task-list">
+      <legend class="step__heading">1. Select a task</legend>
       ${TASKS.map(
         (t) => `
-        <button
-          class="task-list__item${t.id === state.selectedTaskId ? ' task-list__item--selected' : ''}"
-          role="radio"
-          aria-checked="${t.id === state.selectedTaskId}"
-          data-task-id="${t.id}"
-        >
-          <span class="task-list__item-title">${t.title}</span>
-          <span class="task-list__item-desc">${t.description}</span>
-        </button>
+        <label class="task-list__item${t.id === state.selectedTaskId ? ' task-list__item--selected' : ''}">
+          <input type="radio" name="task" value="${t.id}"${t.id === state.selectedTaskId ? ' checked' : ''} class="task-list__radio" />
+          <span class="task-list__content">
+            <span class="task-list__item-title">${t.title}</span>
+            <span class="task-list__item-desc">${t.description}</span>
+          </span>
+        </label>
       `,
       ).join('')}
-    </div>
+    </fieldset>
     ${
       currentTask
         ? `<p class="step__note">Requirements: ${currentTask.requirements.map((r) => r.replace(/-/g, ' ')).join(' · ')}</p>`
@@ -78,10 +76,10 @@ function renderTaskSelector(): void {
     }
   `;
 
-  container.querySelectorAll('[data-task-id]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = (btn as HTMLElement).dataset.taskId;
-      if (!id) return;
+  container.querySelectorAll('input[name="task"]').forEach((radio) => {
+    radio.addEventListener('change', (e) => {
+      const id = (e.target as HTMLInputElement).value;
+      if (!id || id === state.selectedTaskId) return;
       state.selectedTaskId = id;
       applyPreset(state.selectedPresetId || 'curated');
       renderAll();
@@ -96,34 +94,32 @@ function renderPresetSelector(): void {
   if (!container) return;
 
   container.innerHTML = `
-    <h2 class="step__heading">2. Choose a preset</h2>
-    <p class="step__hint">
-      Presets define which documents are included for the selected task.
-      The same preset selects different documents for different tasks.
-      You can also toggle individual documents below.
-    </p>
-    <div class="preset-list" role="radiogroup" aria-label="Select a context preset">
+    <fieldset class="preset-list">
+      <legend class="step__heading">2. Choose a preset</legend>
+      <p class="step__hint">
+        Presets define which documents are included for the selected task.
+        The same preset selects different documents for different tasks.
+        You can also toggle individual documents below.
+      </p>
       ${PRESETS.map((p) => {
         const docs = p.docIdsByTask[state.selectedTaskId] ?? [];
         return `
-        <button
-          class="preset-list__item${p.id === state.selectedPresetId ? ' preset-list__item--selected' : ''}"
-          role="radio"
-          aria-checked="${p.id === state.selectedPresetId}"
-          data-preset-id="${p.id}"
-        >
-          <span class="preset-list__item-label">${p.label}</span>
-          <span class="preset-list__item-desc">${p.description}</span>
-          <span class="preset-list__item-count">${docs.length} documents for this task</span>
-        </button>
+        <label class="preset-list__item${p.id === state.selectedPresetId ? ' preset-list__item--selected' : ''}">
+          <input type="radio" name="preset" value="${p.id}"${p.id === state.selectedPresetId ? ' checked' : ''} class="preset-list__radio" />
+          <span class="preset-list__content">
+            <span class="preset-list__item-label">${p.label}</span>
+            <span class="preset-list__item-desc">${p.description}</span>
+            <span class="preset-list__item-count">${docs.length} documents for this task</span>
+          </span>
+        </label>
       `;
       }).join('')}
-    </div>
+    </fieldset>
   `;
 
-  container.querySelectorAll('[data-preset-id]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = (btn as HTMLElement).dataset.presetId;
+  container.querySelectorAll('input[name="preset"]').forEach((radio) => {
+    radio.addEventListener('change', (e) => {
+      const id = (e.target as HTMLInputElement).value;
       if (!id || id === state.selectedPresetId) return;
       applyPreset(id);
       renderAll();
@@ -205,7 +201,7 @@ function renderMetrics(): void {
   const container = $(METRICS_SEL);
   if (!container) return;
 
-  const result = runAnalysis(state.selectedTaskId, state.includedDocIds);
+  const result = runFixtureAnalysis(state.selectedTaskId, state.includedDocIds);
 
   container.innerHTML = `
     <h2 class="step__heading">4. Context quality metrics</h2>

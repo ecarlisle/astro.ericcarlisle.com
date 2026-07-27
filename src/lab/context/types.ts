@@ -1,9 +1,4 @@
-/**
- * Types for the Context Lab analysis engine.
- *
- * This is an educational model of context-quality metrics for agent
- * context documents. It does not measure actual agent behavior.
- */
+/** Types for the Context Lab analysis engine. Educational model. */
 
 export type AuthorityLevel = 'high' | 'medium' | 'low';
 
@@ -40,16 +35,19 @@ export interface LabPreset {
   docIdsByTask: Record<string, string[]>;
 }
 
+export interface AnalysisInput {
+  task: LabTask;
+  includedDocs: LabDocument[];
+  availableDocs: LabDocument[];
+  charsPerToken?: number;
+}
+
 export interface MetricResult {
   value: number | null;
   label: string;
-  /** Human-readable explanation of the result. */
   explanation: string;
-  /** Whether higher values are generally better. */
   higherIsBetter: boolean;
-  /** Names of documents that contributed to this metric. */
   contributingDocs: string[];
-  /** When value is null, explains why the metric is not applicable. */
   notApplicableReason?: string;
 }
 
