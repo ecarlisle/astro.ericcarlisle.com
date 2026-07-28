@@ -65,6 +65,26 @@ test('the portfolio page renders case study content', async ({ page }) => {
   await expect(caseStudies.first()).toBeVisible();
 });
 
+test('the about page links to selected talks without loading video code', async ({ page }) => {
+  const response = await page.goto('/about/');
+  expect(response?.ok()).toBe(true);
+
+  const speakingLinks = page.locator('a[href="/speaking/"]');
+  await expect(speakingLinks).toHaveCount(1);
+  await expect(speakingLinks).toHaveText('View selected talks');
+  await expect(page.locator('youtube-facade')).toHaveCount(0);
+
+  const html = await page.content();
+  expect(html).not.toMatch(/youtube(?:-nocookie)?\.com|youtu\.be|ytimg\.com/);
+  expect(html).not.toContain('YouTubeFacade');
+  expect(html).not.toContain('youtube-facade');
+  expect(html).not.toContain('youtube-player');
+
+  await speakingLinks.click();
+  await expect(page).toHaveURL('/speaking/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Selected Talks' })).toBeVisible();
+});
+
 test('the contact form has accessible structure', async ({ page }) => {
   await page.goto('/contact/');
 
