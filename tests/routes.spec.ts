@@ -119,3 +119,14 @@ test('the contact form has accessible structure', async ({ page }) => {
   const errorEl = page.locator('#contact-error');
   await expect(errorEl).toHaveAttribute('role', 'alert');
 });
+
+test('/about/ inline links have correct text spacing', async ({ page }) => {
+  await page.goto('/about/');
+
+  // The speaking link paragraph should have "web. View selected talks."
+  const body = page.locator('main');
+  const text = await body.textContent();
+
+  expect(text).toContain('web. View selected talks.');
+  expect(text).toContain('LinkedIn or GitHub');
+});
