@@ -1,4 +1,6 @@
 ---
+import YouTubeFacade from '@components/YouTubeFacade.astro';
+import { featuredTalk } from '../data/talks';
 import Layout from '../layouts/BlogPost.astro';
 ---
 
@@ -286,6 +288,30 @@ import Layout from '../layouts/BlogPost.astro';
     </p>
   </section>
 
+  <section class="speaking-feature" aria-labelledby="portfolio-speaking-heading">
+    <div class="speaking-feature-copy">
+      <h2 id="portfolio-speaking-heading">Speaking</h2>
+      <p>
+        Conference speaking is part of how I practice explaining technical
+        decisions and complex systems. This session uses Astro’s architecture to
+        connect rendering choices, framework interoperability, and browser JavaScript.
+      </p>
+      <p class="speaking-meta">
+        {featuredTalk.event} <span aria-hidden="true">·</span> <time datetime={String(featuredTalk.year)}>{featuredTalk.year}</time>
+      </p>
+      <h3>{featuredTalk.title}</h3>
+      <p>
+        <a href="/speaking/" class="button button--outline">View all talks</a>
+      </p>
+    </div>
+    <YouTubeFacade
+      class="portfolio-talk-player"
+      videoId={featuredTalk.videoId}
+      title={featuredTalk.title}
+      poster={featuredTalk.poster}
+    />
+  </section>
+
   <section class="supporting-artifacts" aria-labelledby="supporting-artifacts-heading">
     <h2 id="supporting-artifacts-heading">Supporting Artifacts</h2>
     <p>
@@ -490,10 +516,43 @@ import Layout from '../layouts/BlogPost.astro';
     padding-top: var(--space-section);
   }
 
+  .speaking-feature {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(20rem, 1.15fr);
+    align-items: center;
+    gap: var(--space-component-lg);
+    max-width: var(--layout-rail-page);
+    margin-top: var(--space-section);
+    padding-block: var(--space-section);
+    border-block: var(--size-border-pixel) solid var(--border-main);
+  }
+
+  .speaking-feature h2,
+  .speaking-feature h3 {
+    margin-top: 0;
+  }
+
+  .speaking-feature h3 {
+    max-width: 28ch;
+    font-size: var(--type-size-h4);
+  }
+
+  .speaking-meta {
+    display: flex;
+    gap: var(--space-inline);
+    margin-bottom: var(--space-xs);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--type-size-small);
+  }
+
+  :global(youtube-facade.portfolio-talk-player) {
+    margin-block: 0;
+  }
+
   .supporting-artifacts {
     max-width: var(--layout-rail-prose);
     padding-top: var(--space-section);
-    border-top: var(--size-border-pixel) solid var(--border-main);
   }
 
   .supporting-artifacts h2 {
@@ -557,6 +616,10 @@ import Layout from '../layouts/BlogPost.astro';
       grid-template-columns: 1fr;
       column-gap: var(--space-component-lg);
       row-gap: var(--space-component-lg);
+    }
+
+    .speaking-feature {
+      grid-template-columns: 1fr;
     }
   }
 

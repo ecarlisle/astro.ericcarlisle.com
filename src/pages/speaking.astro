@@ -1,0 +1,186 @@
+---
+import YouTubeFacade from '@components/YouTubeFacade.astro';
+import { earlierTalks, featuredTalk, talks } from '../data/talks';
+import Layout from '../layouts/BlogPost.astro';
+
+const description =
+  'Selected presentations by Eric Carlisle on Astro, responsive design, CSS Flexbox, and D3.js.';
+---
+
+<Layout
+  title="Selected Talks"
+  {description}
+  pageType="speaking"
+  socialImage={featuredTalk.poster}
+  speakingTalks={talks}
+  breadcrumbs={[
+    { name: 'Home', item: 'https://ericcarlisle.com/' },
+    { name: 'Selected Talks', item: 'https://ericcarlisle.com/speaking/' },
+  ]}
+>
+  <p class="speaking-intro">
+    These recordings cover frontend architecture and implementation across Astro,
+    responsive design, CSS layout, and data visualization. The newest presentation
+    is featured first; earlier recordings are preserved below as an archive.
+  </p>
+
+  <section class="featured-talk" aria-labelledby="featured-talk-heading">
+    <div class="section-heading">
+      <p class="section-label">Featured presentation</p>
+      <h2 id="featured-talk-heading">{featuredTalk.title}</h2>
+      <p class="talk-meta">{featuredTalk.event} <span aria-hidden="true">·</span> <time datetime={String(featuredTalk.year)}>{featuredTalk.year}</time></p>
+      <p>{featuredTalk.description}</p>
+    </div>
+    <YouTubeFacade
+      class="talk-player talk-player--featured"
+      videoId={featuredTalk.videoId}
+      title={featuredTalk.title}
+      poster={featuredTalk.poster}
+    />
+  </section>
+
+  <section class="earlier-talks" aria-labelledby="earlier-talks-heading">
+    <div class="section-heading">
+      <h2 id="earlier-talks-heading">Earlier talks</h2>
+      <p>
+        These archive recordings reflect the browser support, libraries, and
+        production practices of their original presentation years.
+      </p>
+    </div>
+
+    <div class="talk-grid">
+      {earlierTalks.map((talk) => (
+        <article class="talk-card" data-video-id={talk.videoId}>
+          <p class="talk-meta">
+            <span class="archive-label">Archive</span>
+            <span>{talk.event} <span aria-hidden="true">·</span> <time datetime={String(talk.year)}>{talk.year}</time></span>
+          </p>
+          <h3>{talk.title}</h3>
+          <p>{talk.description}</p>
+          <YouTubeFacade
+            class="talk-player"
+            videoId={talk.videoId}
+            title={talk.title}
+            poster={talk.poster}
+          />
+        </article>
+      ))}
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .speaking-intro,
+  .section-heading {
+    max-width: var(--layout-rail-prose);
+  }
+
+  .speaking-intro {
+    margin-block: 0 var(--space-section);
+    font-size: var(--type-size-large);
+    line-height: 1.55;
+    color: var(--text-secondary);
+  }
+
+  .featured-talk {
+    max-width: 1020px;
+    padding-bottom: var(--space-section);
+    border-bottom: var(--size-border-pixel) solid var(--border-main);
+  }
+
+  .section-heading > :first-child,
+  .talk-card > :first-child {
+    margin-top: 0;
+  }
+
+  .section-label {
+    margin-bottom: var(--space-xs);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--type-size-small);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--letter-spacing-label);
+    text-transform: uppercase;
+  }
+
+  .featured-talk h2,
+  .earlier-talks h2,
+  .talk-card h3 {
+    margin-top: 0;
+  }
+
+  .featured-talk h2 {
+    max-width: 26ch;
+  }
+
+  .talk-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-inline);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--type-size-small);
+  }
+
+  .archive-label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.75rem;
+    padding-inline: var(--space-sm);
+    border: var(--size-border-pixel) solid var(--border-main);
+    border-radius: 999px;
+    color: var(--text-secondary);
+    font-family: var(--font-copy);
+    font-weight: var(--font-weight-medium);
+  }
+
+  :global(youtube-facade.talk-player) {
+    margin-block: var(--space-component-lg) 0;
+  }
+
+  .earlier-talks {
+    padding-top: var(--space-section);
+  }
+
+  .talk-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+    gap: var(--space-component-lg);
+    margin-top: var(--space-component-lg);
+  }
+
+  .talk-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: var(--space-component);
+    border: var(--size-border-pixel) solid var(--border-main);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+  }
+
+  .talk-card > p:not(.talk-meta) {
+    color: var(--text-secondary);
+  }
+
+  .talk-card :global(youtube-facade) {
+    margin-top: auto;
+    padding-top: var(--space-component);
+  }
+
+  @media (max-width: 720px) {
+    .speaking-intro {
+      margin-bottom: var(--space-component-lg);
+    }
+
+    .featured-talk,
+    .earlier-talks {
+      padding-block-end: var(--space-component-lg);
+    }
+
+    .talk-grid {
+      gap: var(--space-component);
+    }
+  }
+</style>

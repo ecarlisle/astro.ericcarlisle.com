@@ -10,6 +10,7 @@ import {
   AUTHOR_ORG,
   AUTHOR_WEBSITE,
 } from '../consts';
+import type { ResolvedTalk } from '../data/talks';
 import type { ArticleModelMetadata, ResolvedArticleVideoMetadata } from '../lib/structured-data';
 
 type PostItem = {
@@ -23,6 +24,7 @@ type Props = {
     | 'about'
     | 'contact'
     | 'portfolio'
+    | 'speaking'
     | 'article'
     | 'collection'
     | 'search'
@@ -42,6 +44,7 @@ type Props = {
   wordCount?: number;
   video?: ResolvedArticleVideoMetadata;
   model3d?: ArticleModelMetadata;
+  speakingTalks?: readonly ResolvedTalk[];
   breadcrumbs?: Array<{ name: string; item: string }>;
 };
 
@@ -62,6 +65,7 @@ const {
   wordCount,
   video,
   model3d,
+  speakingTalks = [],
   breadcrumbs,
 } = Astro.props;
 
@@ -309,6 +313,74 @@ switch (type) {
     }
 
     graphArray.push(portfolioEntity);
+    break;
+  }
+
+  case 'speaking': {
+    const webpageId = `${pageUrl}/#webpage`;
+    const talksId = `${pageUrl}/#talks`;
+    const breadcrumbId = `${pageUrl}/#breadcrumb`;
+
+    const speakingPageEntity: Record<string, unknown> = {
+      '@type': 'CollectionPage',
+      '@id': webpageId,
+      url,
+      name: title,
+      description,
+      isPartOf: { '@id': `${siteUrl}/#website` },
+      author: { '@id': `${siteUrl}/#person` },
+      mainEntity: { '@id': talksId },
+      breadcrumb: { '@id': breadcrumbId },
+    };
+
+    const speakingBreadcrumb = breadcrumbs
+      ? buildBreadcrumb(pageUrl, breadcrumbs)
+      : buildBreadcrumb(pageUrl, [
+          { name: 'Home', item: `${siteUrl}/` },
+          { name: 'Selected Talks', item: url },
+        ]);
+
+    graphArray.push(
+      speakingPageEntity,
+      {
+        '@type': 'ItemList',
+        '@id': talksId,
+        numberOfItems: speakingTalks.length,
+        itemListElement: speakingTalks.map((talk, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          item: { '@id': `${pageUrl}/#video-${talk.videoId}` },
+        })),
+      },
+      speakingBreadcrumb,
+    );
+
+    for (const talk of speakingTalks) {
+      const eventId = `${pageUrl}/#event-${talk.videoId}`;
+      graphArray.push({
+        '@type': 'VideoObject',
+        '@id': `${pageUrl}/#video-${talk.videoId}`,
+        name: talk.title,
+        description: talk.description,
+        thumbnailUrl: talk.thumbnailUrl,
+        uploadDate: talk.uploadDate,
+        duration: talk.duration,
+        embedUrl: `https://www.youtube-nocookie.com/embed/${talk.videoId}`,
+        creator: { '@id': `${siteUrl}/#person` },
+        ...(talk.eventDate && talk.eventUrl && { recordedAt: { '@id': eventId } }),
+      });
+
+      if (talk.eventDate && talk.eventUrl) {
+        graphArray.push({
+          '@type': 'Event',
+          '@id': eventId,
+          name: `${talk.event} ${talk.year}`,
+          startDate: talk.eventDate,
+          url: talk.eventUrl,
+          performer: { '@id': `${siteUrl}/#person` },
+        });
+      }
+    }
     break;
   }
 

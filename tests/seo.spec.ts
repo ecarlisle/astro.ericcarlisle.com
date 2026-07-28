@@ -52,6 +52,14 @@ const pages: MetadataExpectations[] = [
     hasOgDescription: true,
   },
   {
+    path: '/speaking/',
+    titlePattern: /Selected Talks [|\u2014] Eric Carlisle/,
+    descriptionNonEmpty: true,
+    hasCanonical: true,
+    hasOgTitle: true,
+    hasOgDescription: true,
+  },
+  {
     path: '/contact/',
     titlePattern: /Contact [|\u2014] Eric Carlisle/,
     descriptionNonEmpty: true,

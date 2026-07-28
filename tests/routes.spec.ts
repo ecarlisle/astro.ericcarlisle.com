@@ -14,6 +14,7 @@ const routes = [
   { path: '/about/', expectedHeading: 'About Me' },
   { path: '/blog/', expectedHeading: 'Blog' },
   { path: '/portfolio/', expectedHeading: 'Portfolio' },
+  { path: '/speaking/', expectedHeading: 'Selected Talks' },
   { path: '/contact/', expectedHeading: 'Contact' },
   { path: '/search/', expectedHeading: 'Search' },
 ] as const;

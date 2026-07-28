@@ -2,6 +2,8 @@ import { expect, type Page, test } from '@playwright/test';
 
 const ARTICLE = '/blog/250mm-trading-card-box/';
 const UNRELATED_ARTICLE = '/blog/why-do-i-need-all-this-usb-and-sd-media-holder/';
+const SPEAKING = '/speaking/';
+const PORTFOLIO = '/portfolio/';
 const SITE = 'https://ericcarlisle.com';
 
 type JsonLdNode = Record<string, unknown> & {
@@ -67,7 +69,7 @@ test('article JSON-LD preserves the existing graph and adds connected media node
   });
   expect(video).not.toHaveProperty('contentUrl');
   expect(video.thumbnailUrl).toMatch(
-    /^https:\/\/ericcarlisle\.com\/_astro\/250mm-trading-card-box-timelapse\..+\.(?:jpg|webp)$/,
+    /^https:\/\/ericcarlisle\.com\/(?:_astro\/250mm-trading-card-box-timelapse\..+\.(?:jpg|webp)|@fs\/.+\/250mm-trading-card-box-timelapse\.jpg\?.+)$/,
   );
   expect(video.thumbnailUrl).not.toMatch(/youtube|ytimg\.com/);
 
@@ -94,4 +96,70 @@ test('page-specific media nodes are absent from unrelated article JSON-LD', asyn
   const [blogPosting] = nodesOfType(graph, 'BlogPosting');
   expect(blogPosting).not.toHaveProperty('video');
   expect(blogPosting).not.toHaveProperty('hasPart');
+});
+
+test('speaking JSON-LD connects its CollectionPage, ItemList, and four videos', async ({
+  page,
+}) => {
+  await page.goto(SPEAKING);
+  const graph = await readJsonLd(page);
+
+  const [collectionPage] = nodesOfType(graph, 'CollectionPage');
+  const [itemList] = nodesOfType(graph, 'ItemList');
+  const videos = nodesOfType(graph, 'VideoObject');
+  const events = nodesOfType(graph, 'Event');
+
+  expect(collectionPage['@id']).toBe(`${SITE}${SPEAKING}#webpage`);
+  expect((collectionPage.mainEntity as JsonLdNode)['@id']).toBe(`${SITE}${SPEAKING}#talks`);
+  expect(itemList['@id']).toBe(`${SITE}${SPEAKING}#talks`);
+  expect(itemList.numberOfItems).toBe(4);
+  expect(itemList.itemListElement).toEqual([
+    {
+      '@type': 'ListItem',
+      position: 1,
+      item: { '@id': `${SITE}${SPEAKING}#video-cW4-WJq8WbE` },
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      item: { '@id': `${SITE}${SPEAKING}#video-VAclokb-vsE` },
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      item: { '@id': `${SITE}${SPEAKING}#video-qqBVjr0dabM` },
+    },
+    {
+      '@type': 'ListItem',
+      position: 4,
+      item: { '@id': `${SITE}${SPEAKING}#video-WEB3UMzbIt0` },
+    },
+  ]);
+
+  expect(videos).toHaveLength(4);
+  for (const video of videos) {
+    expect(video['@id']).toMatch(new RegExp(`^${SITE}${SPEAKING}#video-`));
+    expect(video.thumbnailUrl).toMatch(
+      /^https:\/\/ericcarlisle\.com\/(?:_astro\/talk-.+\.(?:jpg|webp)|@fs\/.+\/talk-.+\.jpg\?.+)$/,
+    );
+    expect(video.thumbnailUrl).not.toMatch(/youtube|ytimg\.com/);
+    expect(video.embedUrl).toMatch(/^https:\/\/www\.youtube-nocookie\.com\/embed\//);
+    expect(video.creator).toEqual({ '@id': `${SITE}/#person` });
+    expect(video).not.toHaveProperty('contentUrl');
+  }
+
+  expect(events).toHaveLength(1);
+  expect(events[0]).toMatchObject({
+    name: 'CFE.dev Meetup 2024',
+    startDate: '2024-09-10',
+    url: 'https://cfe.dev/events/choose-your-adventure-astro/',
+  });
+});
+
+test('portfolio JSON-LD does not duplicate speaking VideoObjects', async ({ page }) => {
+  await page.goto(PORTFOLIO);
+  const graph = await readJsonLd(page);
+
+  expect(nodesOfType(graph, 'VideoObject')).toHaveLength(0);
+  expect(nodesOfType(graph, 'ItemList')).toHaveLength(0);
 });
