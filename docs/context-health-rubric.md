@@ -25,7 +25,7 @@ Core 0.1 draws carefully bounded inspiration from:
 - [Ragas Context Precision](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/context_precision/)
   and [Context Recall](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/context_recall/),
   for distinguishing retrieved relevance from required coverage;
-- [SWE-bench](https://swe-agent-bench.github.io/original.html), for repository-bound tasks evaluated by execution against
+- [SWE-bench](https://www.swebench.com/), for repository-bound tasks evaluated by execution against
   outcome tests;
 - [OpenTelemetry Generative AI attributes](https://opentelemetry.io/docs/specs/semconv/registry/attributes/gen-ai/),
   for future runtime measurement vocabulary. Relevant conventions remain under development, and
