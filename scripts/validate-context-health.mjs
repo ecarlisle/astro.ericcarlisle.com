@@ -476,7 +476,7 @@ function validateCitation(citation, checkId, repositoryRevision) {
           return false;
         }
       });
-    if (!matches.includes(citation.section.trim())) {
+    if (matches.length === 0) {
       errors.push(
         `${checkId} evidence section heading not found in ${citation.path}: ${citation.section}`,
       );

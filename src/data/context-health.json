@@ -831,7 +831,7 @@
       },
       {
         "label": "SWE-bench",
-        "url": "https://swe-agent-bench.github.io/original.html",
+        "url": "https://www.swebench.com/",
         "adaptation": "Motivates task-level execution against repository state and outcome-based tests."
       },
       {

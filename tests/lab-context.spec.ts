@@ -5,6 +5,7 @@ import { dirname, join, resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { buildEvidenceUrl } from '../src/lib/context-health-evidence.mjs';
+import { buildObservedPresentation } from '../src/lib/context-health-observed.mjs';
 
 const healthPath = '/lab/context/';
 const reportPath = 'src/data/context-health.json';
@@ -188,6 +189,9 @@ test('schema versions, baseline scores, and profile coverage are explicit', () =
   ]);
   expect(report.profileCoverage.every((profile) => profile.score === undefined)).toBe(true);
   expect(report.score).toBeUndefined();
+  expect(
+    report.methodology.foundations.find((foundation) => foundation.url.includes('swebench')),
+  ).toEqual(expect.objectContaining({ url: 'https://www.swebench.com/' }));
 });
 
 test('static assessments retain locked checks and use non-universal statuses', () => {
@@ -323,11 +327,117 @@ test('evidence URL builder selects GitHub file, heading, and Markdown source vie
       section: '## Available Checks',
     }),
   ).toBe(`${repositoryUrl}/blob/${revision}/docs/testing.md#available-checks`);
+  expect(
+    buildEvidenceUrl(revision, {
+      path: 'docs/testing.md',
+      section: 'Available Checks',
+    }),
+  ).toBe(`${repositoryUrl}/blob/${revision}/docs/testing.md#available-checks`);
   expect(rangeUrl.indexOf('?plain=1')).toBeLessThan(rangeUrl.indexOf('#L5'));
   expect(buildEvidenceUrl('not-a-revision', { path: 'AGENTS.md' })).toContain('/blob/main/');
   expect(() =>
     buildEvidenceUrl(revision, { path: 'docs/testing.md', startLine: 13, endLine: 5 }),
   ).toThrow('citation line range must not be reversed');
+});
+
+test('validator accepts prefixed and hashless Markdown heading citations', () => {
+  for (const section of ['## Available Checks', 'Available Checks']) {
+    withTemporaryReport((path) => {
+      const report = JSON.parse(readFileSync(path, 'utf8')) as TestReport;
+      const citation = report.metrics.find((metric) => metric.assessed.checks)?.assessed.checks?.[0]
+        .evidence.citations[0];
+      if (!citation) throw new Error('citation missing');
+      citation.path = 'docs/testing.md';
+      citation.section = section;
+      delete citation.startLine;
+      delete citation.endLine;
+      writeFileSync(path, `${JSON.stringify(report, null, 2)}\n`);
+
+      const result = runValidator(path);
+      expect(result.status, result.stderr).toBe(0);
+    });
+  }
+});
+
+test('validator rejects duplicate normalized Markdown heading anchors', () => {
+  withTemporaryReport((path) => {
+    const report = JSON.parse(readFileSync(path, 'utf8')) as TestReport;
+    const citation = report.metrics.find((metric) => metric.assessed.checks)?.assessed.checks?.[0]
+      .evidence.citations[0];
+    if (!citation) throw new Error('citation missing');
+    citation.path = '.agents/skills/copy-edit/SKILL.md';
+    citation.section = 'Drafting';
+    delete citation.startLine;
+    delete citation.endLine;
+    writeFileSync(path, `${JSON.stringify(report, null, 2)}\n`);
+
+    const result = runValidator(path);
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('does not have a stable unique anchor');
+  });
+});
+
+test('observed presentation follows status and omits unavailable optional values', () => {
+  const base: Observed = {
+    status: 'not-measured',
+    score: null,
+    numerator: null,
+    denominator: null,
+    taskCount: 0,
+    runCount: 0,
+    agentConfigurationCount: 0,
+    repositoryRevision: null,
+    evaluationSuiteVersion: null,
+    variation: null,
+    confidence: null,
+  };
+
+  expect(buildObservedPresentation(base)).toEqual({
+    lead: 'No agent task results yet.',
+    metadata: ['Tasks 0', 'Runs 0', 'Agent configurations 0', 'Suite not assigned'],
+  });
+
+  expect(
+    buildObservedPresentation({
+      ...base,
+      status: 'measured',
+      score: 0.8,
+      numerator: 4,
+      denominator: 5,
+      taskCount: 5,
+      runCount: 10,
+      agentConfigurationCount: 2,
+      evaluationSuiteVersion: 'suite-1.2.0',
+      variation: 'range 0.7–0.9',
+      confidence: '95% CI 0.72–0.88',
+    }),
+  ).toEqual({
+    lead: null,
+    metadata: [
+      'Score 80%',
+      'Numerator 4',
+      'Denominator 5',
+      'Tasks 5',
+      'Runs 10',
+      'Agent configurations 2',
+      'Suite suite-1.2.0',
+      'Variation range 0.7–0.9',
+      'Confidence 95% CI 0.72–0.88',
+    ],
+  });
+
+  const insufficient = buildObservedPresentation({
+    ...base,
+    status: 'insufficient-evidence',
+    taskCount: 2,
+    runCount: 2,
+    agentConfigurationCount: 1,
+  });
+  expect(insufficient).toEqual({
+    lead: null,
+    metadata: ['Tasks 2', 'Runs 2', 'Agent configurations 1'],
+  });
+  expect(insufficient.metadata.join(' ')).not.toContain('not assigned');
 });
 
 test('generator preserves baseline scores, measures code units, and is idempotent', () => {
@@ -431,7 +541,7 @@ test('validator rejects invalid repository evidence metadata', () => {
   }
 });
 
-test('page distinguishes static assessment, observed evidence, maturity, and coverage', async ({
+test('page distinguishes static assessment, agent task results, maturity, and coverage', async ({
   page,
 }) => {
   const report = readReport();
@@ -445,10 +555,14 @@ test('page distinguishes static assessment, observed evidence, maturity, and cov
   await expect(
     page.getByText('Experimental methodology; no observed task performance yet.'),
   ).toBeVisible();
+  await expect(
+    page.getByText(
+      'These scores describe the repository’s static context readiness. Agent task performance has not yet been measured.',
+    ),
+  ).toBeVisible();
   await expect(page.locator('.ch-score')).toHaveCount(5);
-  await expect(page.locator('.ch-score__observed')).toHaveText(
-    Array(5).fill('Observed: Not yet measured'),
-  );
+  await expect(page.locator('.ch-score__observed')).toHaveCount(0);
+  await expect(page.locator('.ch-scores')).not.toContainText('Not yet measured');
   await expect(page.locator('.ch-profile')).toHaveCount(5);
   await expect(page.locator('.ch-profile .ch-status--not-evaluated')).toHaveCount(4);
   await expect(page.getByText(/No aggregate score is calculated/)).toBeVisible();
@@ -458,8 +572,9 @@ test('page distinguishes static assessment, observed evidence, maturity, and cov
     const detail = page.locator('.ch-details details').filter({ hasText: metric.label });
     await detail.locator('summary').click();
     await expect(detail.getByRole('heading', { name: 'Static assessed' })).toBeVisible();
-    await expect(detail.getByRole('heading', { name: 'Observed performance' })).toBeVisible();
-    await expect(detail.getByText('No observed evidence yet.')).toBeVisible();
+    await expect(detail.locator('summary')).toContainText('agent task results not yet measured');
+    await expect(detail.getByRole('heading', { name: 'Agent task results' })).toBeVisible();
+    await expect(detail.getByText('No agent task results yet.')).toBeVisible();
     await expect(detail.getByText(/Evidence maturity:/)).toBeVisible();
   }
 });

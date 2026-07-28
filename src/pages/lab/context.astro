@@ -1,6 +1,7 @@
 ---
 import '../../styles/global.css';
 import ContextCheckCard from '../../components/lab/ContextCheckCard.astro';
+import { buildObservedPresentation } from '../../lib/context-health-observed.mjs';
 
 interface EvidenceCitation {
   path: string;
@@ -331,7 +332,6 @@ function maturityLabel(value: string) {
       }
 
       .ch-score__interp,
-      .ch-score__observed,
       .ch-profile p,
       .ch-mode p,
       .ch-mode li,
@@ -343,18 +343,23 @@ function maturityLabel(value: string) {
       }
 
       .ch-score__interp {
-        margin: 0 0 var(--space-sm);
-      }
-
-      .ch-score__observed {
         margin: 0;
-        padding-top: var(--space-sm);
-        border-top: var(--size-border-pixel) solid var(--border-muted);
       }
 
       .ch-section-heading {
         margin: 0 0 var(--space-component);
         font-size: var(--type-size-h4);
+      }
+
+      .ch-section-heading--with-intro {
+        margin-bottom: var(--space-xs);
+      }
+
+      .ch-section-intro {
+        max-width: var(--layout-rail-prose);
+        margin: 0 0 var(--space-component);
+        color: var(--text-secondary);
+        line-height: 1.6;
       }
 
       .ch-details > details,
@@ -566,8 +571,8 @@ function maturityLabel(value: string) {
 
       <aside class="ch-page__disclaimer">
         <strong>Experimental methodology; no observed task performance yet.</strong> Static
-        assessment reports repository readiness for one declared profile. Observed results require
-        representative task runs and are shown separately as not measured. No aggregate score is
+        assessment reports repository readiness for one declared profile. Agent task results
+        require representative runs and are shown separately as not measured. No aggregate score is
         calculated. A 100% static score means only that all finite checks in this profile passed.
         The next evidence step is a versioned suite of representative task runs.
       </aside>
@@ -597,7 +602,13 @@ function maturityLabel(value: string) {
       </section>
 
       <section aria-labelledby="scores-heading">
-        <h2 id="scores-heading" class="ch-section-heading">Static assessment</h2>
+        <h2 id="scores-heading" class="ch-section-heading ch-section-heading--with-intro">
+          Static assessment
+        </h2>
+        <p class="ch-section-intro">
+          These scores describe the repository’s static context readiness. Agent task performance
+          has not yet been measured.
+        </p>
         <div class="ch-scores">
           {
             report.metrics.map((metric) => (
@@ -616,9 +627,6 @@ function maturityLabel(value: string) {
                   {statusLabels[metric.assessed.status]}
                 </div>
                 <p class="ch-score__interp">{metric.assessed.interpretation}</p>
-                <p class="ch-score__observed">
-                  <strong>Observed:</strong> {statusLabels[metric.observed.status]}
-                </p>
               </article>
             ))
           }
@@ -651,10 +659,11 @@ function maturityLabel(value: string) {
               metric.assessed.checks?.filter((check) => check.impact === 'positive') ?? [];
             const negative =
               metric.assessed.checks?.filter((check) => check.impact === 'negative') ?? [];
+            const observedPresentation = buildObservedPresentation(metric.observed);
             return (
               <details>
                 <summary>
-                  {metric.label}: assessed {assessedValue(metric)}; observed{' '}
+                  {metric.label}: assessed {assessedValue(metric)}; agent task results{' '}
                   {statusLabels[metric.observed.status].toLowerCase()}
                 </summary>
                 <div class="ch-mode-grid">
@@ -750,14 +759,18 @@ function maturityLabel(value: string) {
                   </section>
 
                   <section class="ch-mode ch-mode--observed">
-                    <h3>Observed performance</h3>
+                    <h3>Agent task results</h3>
                     <div class:list={['ch-status', `ch-status--${metric.observed.status}`]}>
                       {statusLabels[metric.observed.status]}
                     </div>
-                    <p><strong>No observed evidence yet.</strong> {metric.observed.interpretation}</p>
+                    <p>
+                      {observedPresentation.lead && (
+                        <strong>{observedPresentation.lead}</strong>
+                      )}{' '}
+                      {metric.observed.interpretation}
+                    </p>
                     <p class="ch-mode__metadata">
-                      Tasks {metric.observed.taskCount} · Runs {metric.observed.runCount} · Agent
-                      configurations {metric.observed.agentConfigurationCount} · Suite not assigned
+                      {observedPresentation.metadata.join(' · ')}
                     </p>
                     <ul>
                       {metric.observed.limitations.map((limitation) => <li>{limitation}</li>)}

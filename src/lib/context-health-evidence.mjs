@@ -99,9 +99,12 @@ function isPositiveInteger(value) {
 }
 
 function headingText(section) {
-  const match = section.trim().match(/^#{1,6}\s+(.+)$/);
-  if (!match) throw new Error('section citation needs a stable Markdown heading');
-  return match[1].trim();
+  const value = section.trim();
+  const match = value.match(/^#{1,6}\s+(.+)$/);
+  if (value.startsWith('#') && !match) {
+    throw new Error('section citation needs a stable Markdown heading');
+  }
+  return (match?.[1] ?? value).trim();
 }
 
 function isMarkdownPath(path) {
