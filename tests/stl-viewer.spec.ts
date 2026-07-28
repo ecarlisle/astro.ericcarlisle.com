@@ -113,9 +113,7 @@ test('YouTube facade renders on the article', async ({ page }) => {
 
 test('article facade has no iframe before activation', async ({ page }) => {
   await page.goto(ARTICLE_1);
-  const html = await page.content();
-  expect(html).not.toContain('youtube-nocookie.com');
-  expect(html).not.toContain('www.youtube.com/embed');
+  await expect(page.locator('iframe[src*="youtube"]')).toHaveCount(0);
 });
 
 test('no YouTube requests from the article before activation', async ({ page }) => {

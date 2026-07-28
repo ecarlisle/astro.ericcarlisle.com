@@ -10,6 +10,7 @@ import {
   AUTHOR_ORG,
   AUTHOR_WEBSITE,
 } from '../consts';
+import type { ArticleModelMetadata, ResolvedArticleVideoMetadata } from '../lib/structured-data';
 
 type PostItem = {
   title: string;
@@ -39,6 +40,8 @@ type Props = {
   updatedDate?: Date;
   tags?: string[];
   wordCount?: number;
+  video?: ResolvedArticleVideoMetadata;
+  model3d?: ArticleModelMetadata;
   breadcrumbs?: Array<{ name: string; item: string }>;
 };
 
@@ -57,6 +60,8 @@ const {
   updatedDate,
   tags,
   wordCount,
+  video,
+  model3d,
   breadcrumbs,
 } = Astro.props;
 
@@ -179,6 +184,8 @@ switch (type) {
     const articleId = `${pageUrl}/#article`;
     const breadcrumbId = `${pageUrl}/#breadcrumb`;
     const primaryImageId = `${pageUrl}/#primaryimage`;
+    const videoId = `${pageUrl}/#timelapse`;
+    const modelId = `${pageUrl}/#3d-model`;
     const articleBreadcrumb = breadcrumbs
       ? buildBreadcrumb(pageUrl, breadcrumbs)
       : {
@@ -190,6 +197,45 @@ switch (type) {
             { '@type': 'ListItem', position: 3, name: title, item: url },
           ],
         };
+
+    const blogPostingEntity: Record<string, unknown> = {
+      '@type': 'BlogPosting',
+      '@id': articleId,
+      url,
+      mainEntityOfPage: { '@id': webpageId },
+      headline: title,
+      description,
+      ...(pubDate && {
+        datePublished: pubDate.toISOString(),
+        dateModified: (updatedDate ?? pubDate).toISOString(),
+      }),
+      ...(tags &&
+        tags.length > 0 && {
+          articleSection: tags.join(', '),
+          keywords: tags.join(', '),
+        }),
+      isPartOf: { '@id': `${siteUrl}/#blog` },
+      ...(wordCount && { wordCount }),
+      ...(wordCount && { timeRequired: `PT${Math.ceil(wordCount / 200)}M` }),
+      author: { '@id': `${siteUrl}/#person` },
+      publisher: { '@id': `${siteUrl}/#person` },
+      image: {
+        '@type': 'ImageObject',
+        '@id': primaryImageId,
+        url: image.startsWith('http') ? image : `${siteUrl}${image}`,
+        width: imageWidth,
+        height: imageHeight,
+      },
+      inLanguage: 'en-US',
+    };
+
+    if (video) {
+      blogPostingEntity.video = { '@id': videoId };
+    }
+
+    if (model3d) {
+      blogPostingEntity.hasPart = [{ '@id': modelId }];
+    }
 
     graphArray.push(
       {
@@ -203,38 +249,34 @@ switch (type) {
         primaryImageOfPage: { '@id': primaryImageId },
         mainEntity: { '@id': articleId },
       },
-      {
-        '@type': 'BlogPosting',
-        '@id': articleId,
-        url,
-        mainEntityOfPage: { '@id': webpageId },
-        headline: title,
-        description,
-        ...(pubDate && {
-          datePublished: pubDate.toISOString(),
-          dateModified: (updatedDate ?? pubDate).toISOString(),
-        }),
-        ...(tags &&
-          tags.length > 0 && {
-            articleSection: tags.join(', '),
-            keywords: tags.join(', '),
-          }),
-        isPartOf: { '@id': `${siteUrl}/#blog` },
-        ...(wordCount && { wordCount }),
-        ...(wordCount && { timeRequired: `PT${Math.ceil(wordCount / 200)}M` }),
-        author: { '@id': `${siteUrl}/#person` },
-        publisher: { '@id': `${siteUrl}/#person` },
-        image: {
-          '@type': 'ImageObject',
-          '@id': primaryImageId,
-          url: image.startsWith('http') ? image : `${siteUrl}${image}`,
-          width: imageWidth,
-          height: imageHeight,
-        },
-        inLanguage: 'en-US',
-      },
+      blogPostingEntity,
       articleBreadcrumb,
     );
+
+    if (video) {
+      graphArray.push({
+        '@type': 'VideoObject',
+        '@id': videoId,
+        name: video.name,
+        description: video.description,
+        thumbnailUrl: video.thumbnailUrl,
+        uploadDate: video.uploadDate,
+        duration: video.duration,
+        embedUrl: video.embedUrl,
+      });
+    }
+
+    if (model3d) {
+      graphArray.push({
+        '@type': '3DModel',
+        '@id': modelId,
+        name: model3d.name,
+        description: model3d.description,
+        contentUrl: model3d.contentUrl,
+        encodingFormat: model3d.encodingFormat,
+        creator: { '@id': `${siteUrl}/#person` },
+      });
+    }
     break;
   }
 

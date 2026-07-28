@@ -3,6 +3,11 @@
 // all pages through the use of the <BaseHead /> component.
 import '../styles/global.css';
 import FallbackImage from '@images/og-image.jpg';
+import type {
+  ArticleModelMetadata,
+  ArticleVideoMetadata,
+  ResolvedArticleVideoMetadata,
+} from '@lib/structured-data';
 import type { ImageMetadata } from 'astro';
 import { AUTHOR_GITHUB, SITE_TITLE, WEBMENTION_IO_DOMAIN } from '../consts';
 import GoogleAnalytics from './GoogleAnalytics.astro';
@@ -30,6 +35,8 @@ interface Props {
   updatedDate?: Date;
   tags?: string[];
   wordCount?: number;
+  video?: ArticleVideoMetadata;
+  model3d?: ArticleModelMetadata;
   twitterHandle?: string;
   robots?: string;
   breadcrumbs?: Array<{ name: string; item: string }>;
@@ -60,6 +67,8 @@ const {
   updatedDate,
   tags,
   wordCount,
+  video,
+  model3d,
   twitterHandle,
   robots = 'index, follow',
   breadcrumbs,
@@ -71,6 +80,13 @@ const pageTitle =
   pageType === 'homepage'
     ? title
     : `${title.replace(/\s*[—–-]\s*(Eric Carlisle)?\s*$/, '').trim()} | ${SITE_TITLE}`;
+
+const resolvedVideo: ResolvedArticleVideoMetadata | undefined = video
+  ? {
+      ...video,
+      thumbnailUrl: new URL(video.thumbnail.src, canonicalURL).toString(),
+    }
+  : undefined;
 ---
 
 <!-- Theme: apply stored preference before first paint to prevent flash -->
@@ -161,6 +177,8 @@ const pageTitle =
     updatedDate={updatedDate}
     tags={tags}
     wordCount={wordCount}
+    video={resolvedVideo}
+    {model3d}
     breadcrumbs={breadcrumbs}
   />
 )}

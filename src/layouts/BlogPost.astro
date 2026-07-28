@@ -9,6 +9,7 @@ import ShareStrip from '@components/ShareStrip.astro';
 import TagFilterBar from '@components/TagFilterBar.astro';
 import Webmentions from '@components/Webmentions.astro';
 import type { TagData } from '@lib/blog-utils';
+import type { ArticleModelMetadata, ArticleVideoMetadata } from '@lib/structured-data';
 import type { Webmention } from '@lib/webmentions';
 import type { ImageMetadata } from 'astro';
 
@@ -24,6 +25,8 @@ interface Props {
   socialTitle?: string;
   socialDescription?: string;
   socialImage?: ImageMetadata;
+  video?: ArticleVideoMetadata;
+  model3d?: ArticleModelMetadata;
   twitterHandle?: string;
   robots?: string;
   share?: { enabled?: boolean; networks?: string[]; scheduledFor?: Date };
@@ -46,6 +49,8 @@ const {
   socialTitle,
   socialDescription,
   socialImage,
+  video,
+  model3d,
   twitterHandle,
   robots,
   wordCount = 0,
@@ -77,6 +82,8 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
       {tags}
       {wordCount}
       {twitterHandle}
+      {video}
+      {model3d}
       breadcrumbs={breadcrumbs}
     />
 	<style>

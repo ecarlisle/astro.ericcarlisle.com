@@ -20,6 +20,24 @@ const blog = defineCollection({
         socialDescription: z.string().max(200).optional(),
         socialImage: z.optional(image()),
         twitterHandle: z.string().optional(),
+        video: z
+          .object({
+            name: z.string(),
+            description: z.string(),
+            thumbnail: image(),
+            uploadDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            duration: z.string().regex(/^PT(?=\d)(?:\d+H)?(?:\d+M)?(?:\d+S)?$/),
+            embedUrl: z.url(),
+          })
+          .optional(),
+        model3d: z
+          .object({
+            name: z.string(),
+            description: z.string(),
+            contentUrl: z.url(),
+            encodingFormat: z.literal('model/stl'),
+          })
+          .optional(),
         share: z
           .object({
             enabled: z.boolean().default(true),
