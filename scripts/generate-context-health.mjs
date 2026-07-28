@@ -6,7 +6,6 @@ import { fileURLToPath } from 'node:url';
 import {
   calculateMetric,
   measureEffectiveContext,
-  sizeStatus,
   TOKEN_ESTIMATE_CHARACTERS,
 } from './context-health-core.mjs';
 
@@ -26,23 +25,25 @@ try {
 
 try {
   for (const metric of report.metrics ?? []) {
-    if (metric.assessmentType !== 'agent-assessed') continue;
-    const generated = calculateMetric(metric.checks ?? []);
-    metric.checks = generated.checks;
-    metric.score = generated.score;
-    metric.status = generated.status;
+    if (!metric.assessed?.checks) continue;
+    const generated = calculateMetric(metric.assessed.checks);
+    metric.assessed.checks = generated.checks;
+    metric.assessed.score = generated.score;
+    metric.assessed.status = generated.status;
   }
 
   const sizeMetric = report.metrics?.find((metric) => metric.id === 'active-context-size');
   if (!sizeMetric) throw new Error('active-context-size metric is missing');
   const measurement = measureEffectiveContext(report, repositoryRoot);
-  sizeMetric.details = {
+  sizeMetric.assessed.details = {
     ...measurement,
-    estimationMethod: `Estimated tokens = ceil(characters / ${TOKEN_ESTIMATE_CHARACTERS}). This is an approximation, not a tokenizer result.`,
+    estimationMethod:
+      `Estimated tokens = ceil(UTF-16 code units / ${TOKEN_ESTIMATE_CHARACTERS}). ` +
+      'This is an approximation, not a tokenizer result.',
   };
-  sizeMetric.status = sizeStatus(measurement.estimatedTokens);
-  sizeMetric.interpretation =
-    `The declared effective context contains ${measurement.characters.toLocaleString('en-US')} ` +
+  sizeMetric.assessed.status = 'declared-estimate';
+  sizeMetric.assessed.interpretation =
+    `The declared full-file context contains ${measurement.characters.toLocaleString('en-US')} ` +
     `characters (~${measurement.estimatedTokens.toLocaleString('en-US')} estimated tokens).`;
 
   writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
@@ -77,12 +78,16 @@ console.log(`Audit revision: ${report.repositoryRevision}`);
 console.log(`Effective-context files: ${report.effectiveContext.files.length}`);
 const sizeMetric = report.metrics.find((metric) => metric.id === 'active-context-size');
 console.log(
-  `Active context: ${sizeMetric.details.characters.toLocaleString('en-US')} chars / ` +
-    `~${sizeMetric.details.estimatedTokens.toLocaleString('en-US')} tokens`,
+  `Active context: ${sizeMetric.assessed.details.characters.toLocaleString('en-US')} chars / ` +
+    `~${sizeMetric.assessed.details.estimatedTokens.toLocaleString('en-US')} tokens`,
 );
 for (const metric of report.metrics) {
-  const score = metric.score === null ? 'not scored' : `${Math.round(metric.score * 100)}%`;
-  console.log(`- ${metric.label}: ${score} (${metric.status})`);
+  const score =
+    metric.assessed.score === null ? 'not scored' : `${Math.round(metric.assessed.score * 100)}%`;
+  console.log(
+    `- ${metric.label}: assessed ${score} (${metric.assessed.status}); ` +
+      `observed ${metric.observed.status}`,
+  );
 }
 
 function fail(message) {

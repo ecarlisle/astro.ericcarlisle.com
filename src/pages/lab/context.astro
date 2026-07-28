@@ -17,25 +17,50 @@ interface ContextCheck {
   impact: 'positive' | 'negative';
   interpretation: string;
   contribution: number;
-  evidence: {
-    observation: string;
-    citations: EvidenceCitation[];
-  };
+  evidence: { observation: string; citations: EvidenceCitation[] };
 }
+
+type AssessedStatus = 'complete-for-current-static-checks' | 'gaps-found' | 'declared-estimate';
+type ObservedStatus = 'not-measured' | 'measured' | 'insufficient-evidence';
 
 interface ContextMetric {
   id: string;
   label: string;
-  score: number | null;
-  status: 'healthy' | 'needs-attention' | 'at-risk';
-  interpretation: string;
-  assessmentType: 'deterministic' | 'agent-assessed';
-  checks?: ContextCheck[];
-  details?: {
-    characters: number;
-    estimatedTokens: number;
-    estimationMethod: string;
-    measuredFiles: Array<{ path: string; characters: number }>;
+  assessed: {
+    score: number | null;
+    status: AssessedStatus;
+    evidenceMaturity: 'declared' | 'structurally-verified' | 'observed' | 'repeated' | 'resilient';
+    evidenceMaturityReason: string;
+    interpretation: string;
+    limitations: string[];
+    checks?: ContextCheck[];
+    details?: {
+      characters: number;
+      estimatedTokens: number;
+      estimationMethod: string;
+      measuredFiles: Array<{ path: string; characters: number }>;
+    };
+  };
+  observed: {
+    status: ObservedStatus;
+    score: number | null;
+    numerator: number | null;
+    denominator: number | null;
+    taskCount: number;
+    runCount: number;
+    agentConfigurationCount: number;
+    repositoryRevision: string | null;
+    evaluationSuiteVersion: string | null;
+    variation: string | null;
+    confidence: string | null;
+    authorityDiagnostics: {
+      unresolvedConflictCount: number | null;
+      ambiguousAreas: string[];
+      expectedControllingSources: string[];
+      decisionEvidence: string[];
+    } | null;
+    interpretation: string;
+    limitations: string[];
   };
 }
 
@@ -44,36 +69,55 @@ interface ContextHealthReport {
   auditedAt: string;
   repositoryRevision: string;
   effectiveContext: {
+    id: string;
+    version: string;
     name: string;
+    status: 'static-assessed';
     selectionRule: string;
     files: string[];
   };
+  profileCoverage: Array<{
+    id: string;
+    version: string | null;
+    label: string;
+    status: 'static-assessed' | 'not-evaluated';
+    note: string;
+  }>;
   overallSummary: string;
   strengths: string[];
   priorities: Array<{ priority: number; finding: string; recommendation: string }>;
   metrics: ContextMetric[];
   methodology: {
+    id: string;
+    version: string;
+    status: 'experimental';
+    evidenceMaturityVersion: string;
     scoreCalculation: string;
     assessmentBoundary: string;
     tokenEstimation: { formula: string; charactersPerToken: number; note: string };
-    activeContextThresholds: string;
+    observedSizeMeasures: string[];
+    evidenceMaturityLevels: Array<{ id: string; definition: string }>;
+    scenarioTaxonomy: string[];
+    foundations: Array<{ label: string; url: string; adaptation: string }>;
   };
   limitations: string[];
 }
 
 const report = (await import('../../data/context-health.json')).default as ContextHealthReport;
 
-function statusClass(status: ContextMetric['status']) {
-  return `ch-status--${status}`;
-}
-
-function statusLabel(status: ContextMetric['status']) {
-  return {
-    healthy: 'Healthy',
-    'needs-attention': 'Needs attention',
-    'at-risk': 'At risk',
-  }[status];
-}
+const statusLabels: Record<
+  AssessedStatus | ObservedStatus | 'static-assessed' | 'not-evaluated',
+  string
+> = {
+  'complete-for-current-static-checks': 'Complete for current static checks',
+  'gaps-found': 'Gaps found',
+  'declared-estimate': 'Declared estimate',
+  'not-measured': 'Not yet measured',
+  measured: 'Measured',
+  'insufficient-evidence': 'Insufficient evidence',
+  'static-assessed': 'Static assessed',
+  'not-evaluated': 'Not evaluated',
+};
 
 function percentage(score: number | null) {
   return score === null ? '—' : `${Math.round(score * 100)}%`;
@@ -83,10 +127,15 @@ function formatNumber(value: number | undefined) {
   return value === undefined ? '—' : value.toLocaleString('en-US');
 }
 
-function metricDisplayValue(metric: ContextMetric) {
+function assessedValue(metric: ContextMetric) {
   return metric.id === 'active-context-size'
-    ? `${formatNumber(metric.details?.characters)} chars`
-    : percentage(metric.score);
+    ? `${formatNumber(metric.assessed.details?.characters)} code units`
+    : percentage(metric.assessed.score);
+}
+
+function maturityLabel(value: string) {
+  const label = value.replaceAll('-', ' ');
+  return `${label.charAt(0).toUpperCase()}${label.slice(1)}`;
 }
 ---
 
@@ -98,7 +147,7 @@ function metricDisplayValue(metric: ContextMetric) {
     <title>Context Health: EricCarlisle.com</title>
     <meta
       name="description"
-      content="A static, evidence-backed audit of the coding-agent context for EricCarlisle.com."
+      content="An experimental static assessment of coding-agent context readiness, with observed performance reported separately."
     />
     <meta name="robots" content="noindex, follow" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -112,8 +161,7 @@ function metricDisplayValue(metric: ContextMetric) {
 
       .ch-page__heading,
       .ch-section-heading,
-      .ch-overview h3,
-      .ch-methodology h3 {
+      .ch-page h3 {
         font-family: var(--font-headers);
       }
 
@@ -125,9 +173,10 @@ function metricDisplayValue(metric: ContextMetric) {
       }
 
       .ch-page__meta,
-      .ch-score__type,
+      .ch-score__eyebrow,
       .ch-check__weight,
-      .ch-file-table {
+      .ch-file-table,
+      .ch-mode__metadata {
         font-family: var(--font-mono);
         font-size: var(--type-size-small);
       }
@@ -145,10 +194,12 @@ function metricDisplayValue(metric: ContextMetric) {
         background: var(--bg-surface);
         color: var(--text-secondary);
         font-size: var(--type-size-small);
+        line-height: 1.6;
       }
 
       .ch-overview,
       .ch-scores,
+      .ch-profile-coverage,
       .ch-details {
         margin-bottom: var(--space-section);
       }
@@ -156,23 +207,25 @@ function metricDisplayValue(metric: ContextMetric) {
       .ch-overview__summary {
         max-width: var(--layout-rail-prose);
         margin: 0 0 var(--space-lg);
-        font-size: var(--type-size-body);
         line-height: 1.6;
       }
 
-      .ch-overview__columns {
+      .ch-overview__columns,
+      .ch-mode-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: var(--space-component-lg);
       }
 
-      .ch-overview h3 {
+      .ch-overview h3,
+      .ch-mode h3 {
         margin: 0 0 var(--space-sm);
         font-size: var(--type-size-h5);
       }
 
       .ch-overview ul,
-      .ch-overview ol {
+      .ch-overview ol,
+      .ch-mode ul {
         margin: 0;
       }
 
@@ -181,7 +234,8 @@ function metricDisplayValue(metric: ContextMetric) {
         list-style: none;
       }
 
-      .ch-overview ol {
+      .ch-overview ol,
+      .ch-mode ul {
         padding-inline-start: var(--space-component-lg);
       }
 
@@ -192,31 +246,37 @@ function metricDisplayValue(metric: ContextMetric) {
         line-height: 1.5;
       }
 
-      .ch-overview li:last-child {
-        border-bottom: 0;
-      }
-
       .ch-priority__recommendation {
         display: block;
         margin-top: var(--space-xs);
         color: var(--brand-accent);
       }
 
-      .ch-scores {
+      .ch-scores,
+      .ch-profile-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.75rem), 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
         gap: var(--space-component);
       }
 
       .ch-score,
-      .ch-details details {
+      .ch-profile,
+      .ch-details > details,
+      .ch-methodology details {
         border: var(--size-border-pixel) solid var(--color-card-border);
         border-radius: var(--radius-md);
         background: var(--color-card-bg);
       }
 
-      .ch-score {
+      .ch-score,
+      .ch-profile {
         padding: var(--space-component);
+      }
+
+      .ch-score__eyebrow {
+        margin: 0 0 var(--space-xs);
+        color: var(--text-muted);
+        text-transform: uppercase;
       }
 
       .ch-score__value {
@@ -225,7 +285,7 @@ function metricDisplayValue(metric: ContextMetric) {
         font-family: var(--font-headers);
         font-size: var(--type-size-h3);
         font-weight: var(--font-weight-bold);
-        line-height: 1;
+        line-height: 1.1;
       }
 
       .ch-score__value--size {
@@ -234,37 +294,47 @@ function metricDisplayValue(metric: ContextMetric) {
         font-size: var(--type-size-body);
       }
 
-      .ch-score__label {
-        margin-bottom: var(--space-xs);
-        font-family: var(--font-headers);
-        font-weight: var(--font-weight-medium);
+      .ch-score__label,
+      .ch-profile h3 {
+        margin: 0 0 var(--space-xs);
+        font-size: var(--type-size-body);
       }
 
       .ch-status {
         display: inline-block;
         margin-bottom: var(--space-xs);
         padding: 0.15em 0.55em;
+        border: var(--size-border-pixel) solid currentColor;
         border-radius: var(--radius-sm);
-        color: #fff;
         font-family: var(--font-mono);
         font-size: var(--type-size-small);
         font-weight: var(--font-weight-bold);
       }
 
-      .ch-status--healthy {
-        background: #126044;
+      .ch-status--complete-for-current-static-checks,
+      .ch-status--static-assessed {
+        color: var(--color-success);
       }
 
-      .ch-status--needs-attention {
-        background: #755400;
+      .ch-status--gaps-found {
+        color: var(--brand-accent);
       }
 
-      .ch-status--at-risk {
-        background: #842c24;
+      .ch-status--declared-estimate {
+        color: var(--color-link);
+      }
+
+      .ch-status--not-measured,
+      .ch-status--not-evaluated,
+      .ch-status--insufficient-evidence {
+        color: var(--text-muted);
       }
 
       .ch-score__interp,
-      .ch-details__interp,
+      .ch-score__observed,
+      .ch-profile p,
+      .ch-mode p,
+      .ch-mode li,
       .ch-methodology p,
       .ch-methodology li {
         color: var(--text-secondary);
@@ -273,12 +343,13 @@ function metricDisplayValue(metric: ContextMetric) {
       }
 
       .ch-score__interp {
-        margin: 0;
+        margin: 0 0 var(--space-sm);
       }
 
-      .ch-score__type {
-        margin-top: var(--space-xs);
-        color: var(--text-muted);
+      .ch-score__observed {
+        margin: 0;
+        padding-top: var(--space-sm);
+        border-top: var(--size-border-pixel) solid var(--border-muted);
       }
 
       .ch-section-heading {
@@ -286,42 +357,52 @@ function metricDisplayValue(metric: ContextMetric) {
         font-size: var(--type-size-h4);
       }
 
-      .ch-details details {
+      .ch-details > details,
+      .ch-methodology details {
         margin-bottom: var(--space-component);
         padding: var(--space-component);
       }
 
-      .ch-details summary {
+      .ch-page summary {
         cursor: pointer;
         font-family: var(--font-headers);
-        font-size: var(--type-size-h5);
         font-weight: var(--font-weight-bold);
         overflow-wrap: anywhere;
       }
 
-      .ch-details summary:focus-visible {
+      .ch-page summary:focus-visible {
         border-radius: var(--radius-sm);
         outline: var(--focus-outline-width) var(--focus-outline-style) var(--color-focus);
         outline-offset: var(--focus-outline-offset);
       }
 
-      .ch-details details[open] summary {
+      .ch-page details[open] > summary {
         margin-bottom: var(--space-component);
         padding-bottom: var(--space-component);
         border-bottom: var(--size-border-pixel) solid var(--border-muted);
       }
 
-      .ch-details__interp {
-        margin: 0 0 var(--space-component);
+      .ch-mode {
+        min-width: 0;
+      }
+
+      .ch-mode--observed {
+        padding-left: var(--space-component);
+        border-left: var(--size-border-pixel) solid var(--border-muted);
+      }
+
+      .ch-mode__metadata {
+        color: var(--text-muted);
+        overflow-wrap: anywhere;
       }
 
       .ch-contributors {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
         gap: var(--space-component);
+        margin-top: var(--space-component);
       }
 
-      .ch-contributor-group h3 {
+      .ch-contributor-group h4 {
         margin: 0 0 var(--space-sm);
         font-family: var(--font-headers);
         font-size: var(--type-size-body);
@@ -352,16 +433,15 @@ function metricDisplayValue(metric: ContextMetric) {
         font-size: var(--type-size-small);
       }
 
-      .ch-check__label {
+      .ch-check__label,
+      .ch-check__result {
         color: var(--text-primary);
         font-weight: var(--font-weight-bold);
       }
 
       .ch-check__result {
         flex: none;
-        color: var(--text-primary);
         font-family: var(--font-mono);
-        font-weight: var(--font-weight-bold);
       }
 
       .ch-check__evidence,
@@ -390,7 +470,6 @@ function metricDisplayValue(metric: ContextMetric) {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: var(--space-component);
-        margin-bottom: var(--space-component);
       }
 
       .ch-size-stat {
@@ -405,17 +484,11 @@ function metricDisplayValue(metric: ContextMetric) {
         font-family: var(--font-headers);
         font-size: var(--type-size-h3);
         font-weight: var(--font-weight-bold);
-        line-height: 1;
       }
 
-      .ch-size-stat__label {
-        margin-top: var(--space-xs);
-        color: var(--text-muted);
-        font-size: var(--type-size-small);
-      }
-
+      .ch-size-stat__label,
       .ch-size-note {
-        color: var(--text-secondary);
+        color: var(--text-muted);
         font-size: var(--type-size-small);
       }
 
@@ -434,11 +507,6 @@ function metricDisplayValue(metric: ContextMetric) {
         padding: var(--space-xs) var(--space-inline);
         border-bottom: var(--size-border-pixel) solid var(--border-muted);
         text-align: left;
-      }
-
-      .ch-file-table th {
-        color: var(--text-primary);
-        font-family: var(--font-headers);
       }
 
       .ch-file-table td {
@@ -469,9 +537,16 @@ function metricDisplayValue(metric: ContextMetric) {
 
       @media (max-width: 720px) {
         .ch-overview__columns,
-        .ch-contributors,
+        .ch-mode-grid,
         .ch-size-grid {
           grid-template-columns: 1fr;
+        }
+
+        .ch-mode--observed {
+          padding-top: var(--space-component);
+          padding-left: 0;
+          border-top: var(--size-border-pixel) solid var(--border-muted);
+          border-left: 0;
         }
 
         .ch-check__header {
@@ -485,13 +560,16 @@ function metricDisplayValue(metric: ContextMetric) {
     <main class="ch-page" data-pagefind-ignore="all">
       <h1 class="ch-page__heading">Context Health: EricCarlisle.com</h1>
       <p class="ch-page__meta">
-        Audited {report.auditedAt} · Audited repository revision {report.repositoryRevision} · Schema
-        v{report.schemaVersion}
+        Audited {report.auditedAt} · Revision {report.repositoryRevision} · Schema v{report.schemaVersion}
+        · {report.methodology.id} v{report.methodology.version}
       </p>
 
       <aside class="ch-page__disclaimer">
-        <strong>Context structure audit, not an LLM evaluation.</strong> Deterministic values are
-        generated from the declared file set. Semantic findings are explicitly agent-assessed.
+        <strong>Experimental methodology; no observed task performance yet.</strong> Static
+        assessment reports repository readiness for one declared profile. Observed results require
+        representative task runs and are shown separately as not measured. No aggregate score is
+        calculated. A 100% static score means only that all finite checks in this profile passed.
+        The next evidence step is a versioned suite of representative task runs.
       </aside>
 
       <section class="ch-overview" aria-labelledby="overview-heading">
@@ -500,9 +578,7 @@ function metricDisplayValue(metric: ContextMetric) {
         <div class="ch-overview__columns">
           <div>
             <h3>Key strengths</h3>
-            <ul>
-              {report.strengths.map((strength) => <li>{strength}</li>)}
-            </ul>
+            <ul>{report.strengths.map((strength) => <li>{strength}</li>)}</ul>
           </div>
           <div>
             <h3>Prioritized improvements</h3>
@@ -521,27 +597,46 @@ function metricDisplayValue(metric: ContextMetric) {
       </section>
 
       <section aria-labelledby="scores-heading">
-        <h2 id="scores-heading" class="ch-section-heading">Current metrics</h2>
+        <h2 id="scores-heading" class="ch-section-heading">Static assessment</h2>
         <div class="ch-scores">
           {
             report.metrics.map((metric) => (
               <article class="ch-score">
+                <p class="ch-score__eyebrow">Assessed</p>
                 <div
                   class:list={[
                     'ch-score__value',
                     metric.id === 'active-context-size' && 'ch-score__value--size',
                   ]}
                 >
-                  {metricDisplayValue(metric)}
+                  {assessedValue(metric)}
                 </div>
                 <h3 class="ch-score__label">{metric.label}</h3>
-                <div class:list={['ch-status', statusClass(metric.status)]}>
-                  {statusLabel(metric.status)}
+                <div class:list={['ch-status', `ch-status--${metric.assessed.status}`]}>
+                  {statusLabels[metric.assessed.status]}
                 </div>
-                <p class="ch-score__interp">{metric.interpretation}</p>
-                <div class="ch-score__type">
-                  {metric.assessmentType === 'deterministic' ? 'Deterministic' : 'Agent-assessed'}
+                <p class="ch-score__interp">{metric.assessed.interpretation}</p>
+                <p class="ch-score__observed">
+                  <strong>Observed:</strong> {statusLabels[metric.observed.status]}
+                </p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="ch-profile-coverage" aria-labelledby="coverage-heading">
+        <h2 id="coverage-heading" class="ch-section-heading">Profile coverage</h2>
+        <div class="ch-profile-grid">
+          {
+            report.profileCoverage.map((profile) => (
+              <article class="ch-profile">
+                <h3>{profile.label}</h3>
+                <div class:list={['ch-status', `ch-status--${profile.status}`]}>
+                  {statusLabels[profile.status]}
                 </div>
+                <p>{profile.note}</p>
+                {profile.version && <p class="ch-mode__metadata">Profile v{profile.version}</p>}
               </article>
             ))
           }
@@ -549,86 +644,126 @@ function metricDisplayValue(metric: ContextMetric) {
       </section>
 
       <section class="ch-details" aria-labelledby="details-heading">
-        <h2 id="details-heading" class="ch-section-heading">Detailed findings</h2>
+        <h2 id="details-heading" class="ch-section-heading">Metric evidence</h2>
         {
           report.metrics.map((metric) => {
-            const positive = metric.checks?.filter((check) => check.impact === 'positive') ?? [];
-            const negative = metric.checks?.filter((check) => check.impact === 'negative') ?? [];
+            const positive =
+              metric.assessed.checks?.filter((check) => check.impact === 'positive') ?? [];
+            const negative =
+              metric.assessed.checks?.filter((check) => check.impact === 'negative') ?? [];
             return (
               <details>
                 <summary>
-                  {metric.label}: {metricDisplayValue(metric)}
+                  {metric.label}: assessed {assessedValue(metric)}; observed{' '}
+                  {statusLabels[metric.observed.status].toLowerCase()}
                 </summary>
-                <p class="ch-details__interp">{metric.interpretation}</p>
-
-                {metric.checks && (
-                  <div class="ch-contributors">
-                    {positive.length > 0 && (
-                      <section class="ch-contributor-group" aria-label={`${metric.label} positives`}>
-                        <h3>Positive contributors</h3>
-                        {positive.map((check) => (
-                          <ContextCheckCard
-                            check={check}
-                            repositoryRevision={report.repositoryRevision}
-                          />
-                        ))}
-                      </section>
-                    )}
-                    {negative.length > 0 && (
-                      <section class="ch-contributor-group" aria-label={`${metric.label} negatives`}>
-                        <h3>Negative contributors</h3>
-                        {negative.map((check) => (
-                          <ContextCheckCard
-                            check={check}
-                            repositoryRevision={report.repositoryRevision}
-                          />
-                        ))}
-                      </section>
-                    )}
-                  </div>
-                )}
-
-                {metric.details && (
-                  <div>
-                    <div class="ch-size-grid">
-                      <div class="ch-size-stat">
-                        <div class="ch-size-stat__value">
-                          {formatNumber(metric.details.characters)}
-                        </div>
-                        <div class="ch-size-stat__label">Characters</div>
-                      </div>
-                      <div class="ch-size-stat">
-                        <div class="ch-size-stat__value">
-                          ~{formatNumber(metric.details.estimatedTokens)}
-                        </div>
-                        <div class="ch-size-stat__label">Estimated tokens</div>
-                      </div>
+                <div class="ch-mode-grid">
+                  <section class="ch-mode ch-mode--assessed">
+                    <h3>Static assessed</h3>
+                    <div class:list={['ch-status', `ch-status--${metric.assessed.status}`]}>
+                      {statusLabels[metric.assessed.status]}
                     </div>
-                    <p class="ch-size-note">
-                      <strong>{report.effectiveContext.name}:</strong>{' '}
-                      {report.effectiveContext.selectionRule}
+                    <p>
+                      <strong>Evidence maturity:</strong>{' '}
+                      {maturityLabel(metric.assessed.evidenceMaturity)}.{' '}
+                      {metric.assessed.evidenceMaturityReason}
                     </p>
-                    <p class="ch-size-note">{metric.details.estimationMethod}</p>
-                    <div class="ch-file-table-wrap">
-                      <table class="ch-file-table">
-                        <thead>
-                          <tr>
-                            <th scope="col">Declared file</th>
-                            <th scope="col">Characters</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {metric.details.measuredFiles.map((file) => (
-                            <tr>
-                              <td>{file.path}</td>
-                              <td>{formatNumber(file.characters)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <p>{metric.assessed.interpretation}</p>
+                    <ul>
+                      {metric.assessed.limitations.map((limitation) => <li>{limitation}</li>)}
+                    </ul>
+
+                    {metric.assessed.checks && (
+                      <div class="ch-contributors">
+                        {positive.length > 0 && (
+                          <section
+                            class="ch-contributor-group"
+                            aria-label={`${metric.label} positives`}
+                          >
+                            <h4>Positive contributors</h4>
+                            {positive.map((check) => (
+                              <ContextCheckCard
+                                check={check}
+                                repositoryRevision={report.repositoryRevision}
+                              />
+                            ))}
+                          </section>
+                        )}
+                        {negative.length > 0 && (
+                          <section
+                            class="ch-contributor-group"
+                            aria-label={`${metric.label} negatives`}
+                          >
+                            <h4>Negative contributors</h4>
+                            {negative.map((check) => (
+                              <ContextCheckCard
+                                check={check}
+                                repositoryRevision={report.repositoryRevision}
+                              />
+                            ))}
+                          </section>
+                        )}
+                      </div>
+                    )}
+
+                    {metric.assessed.details && (
+                      <div>
+                        <div class="ch-size-grid">
+                          <div class="ch-size-stat">
+                            <div class="ch-size-stat__value">
+                              {formatNumber(metric.assessed.details.characters)}
+                            </div>
+                            <div class="ch-size-stat__label">UTF-16 code units</div>
+                          </div>
+                          <div class="ch-size-stat">
+                            <div class="ch-size-stat__value">
+                              ~{formatNumber(metric.assessed.details.estimatedTokens)}
+                            </div>
+                            <div class="ch-size-stat__label">Estimated tokens</div>
+                          </div>
+                        </div>
+                        <p class="ch-size-note">
+                          <strong>{report.effectiveContext.name}:</strong>{' '}
+                          {report.effectiveContext.selectionRule}
+                        </p>
+                        <p class="ch-size-note">{metric.assessed.details.estimationMethod}</p>
+                        <div class="ch-file-table-wrap">
+                          <table class="ch-file-table">
+                            <thead>
+                              <tr>
+                                <th scope="col">Declared file</th>
+                                <th scope="col">UTF-16 code units</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {metric.assessed.details.measuredFiles.map((file) => (
+                                <tr>
+                                  <td>{file.path}</td>
+                                  <td>{formatNumber(file.characters)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </section>
+
+                  <section class="ch-mode ch-mode--observed">
+                    <h3>Observed performance</h3>
+                    <div class:list={['ch-status', `ch-status--${metric.observed.status}`]}>
+                      {statusLabels[metric.observed.status]}
                     </div>
-                  </div>
-                )}
+                    <p><strong>No observed evidence yet.</strong> {metric.observed.interpretation}</p>
+                    <p class="ch-mode__metadata">
+                      Tasks {metric.observed.taskCount} · Runs {metric.observed.runCount} · Agent
+                      configurations {metric.observed.agentConfigurationCount} · Suite not assigned
+                    </p>
+                    <ul>
+                      {metric.observed.limitations.map((limitation) => <li>{limitation}</li>)}
+                    </ul>
+                  </section>
+                </div>
               </details>
             );
           })
@@ -637,17 +772,59 @@ function metricDisplayValue(metric: ContextMetric) {
 
       <section class="ch-methodology" aria-labelledby="methodology-heading">
         <h2 id="methodology-heading" class="ch-section-heading">Methodology</h2>
-        <p>{report.methodology.scoreCalculation}</p>
-        <p>{report.methodology.assessmentBoundary}</p>
-        <p>
-          Token estimate: {report.methodology.tokenEstimation.formula}.{' '}
-          {report.methodology.tokenEstimation.note}
-        </p>
-        <p>{report.methodology.activeContextThresholds}</p>
-        <h3>Limitations</h3>
-        <ul>
-          {report.limitations.map((limitation) => <li>{limitation}</li>)}
-        </ul>
+        <details open>
+          <summary>Assessment boundaries</summary>
+          <p>{report.methodology.assessmentBoundary}</p>
+          <p>{report.methodology.scoreCalculation}</p>
+          <p>
+            Token estimate: {report.methodology.tokenEstimation.formula}.{' '}
+            {report.methodology.tokenEstimation.note}
+          </p>
+          <h3>Future observed size measures</h3>
+          <ul>
+            {report.methodology.observedSizeMeasures.map((measure) => <li>{measure}</li>)}
+          </ul>
+        </details>
+        <details>
+          <summary>Evidence maturity v{report.methodology.evidenceMaturityVersion}</summary>
+          <ul>
+            {
+              report.methodology.evidenceMaturityLevels.map((level) => (
+                <li>
+                  <strong>{maturityLabel(level.id)}:</strong> {level.definition}
+                </li>
+              ))
+            }
+          </ul>
+        </details>
+        <details>
+          <summary>Future observed scenario taxonomy</summary>
+          <p>
+            These categories document a future evaluation suite. This report does not implement a
+            runner, simulator, or telemetry system.
+          </p>
+          <ul>{report.methodology.scenarioTaxonomy.map((scenario) => <li>{scenario}</li>)}</ul>
+        </details>
+        <details>
+          <summary>External foundations and adaptations</summary>
+          <p>
+            No source below defines or endorses Context Health Core 0.1. The experimental
+            methodology adapts narrower ideas from each source.
+          </p>
+          <ul>
+            {
+              report.methodology.foundations.map((foundation) => (
+                <li>
+                  <a href={foundation.url}>{foundation.label}</a>: {foundation.adaptation}
+                </li>
+              ))
+            }
+          </ul>
+        </details>
+        <details>
+          <summary>Report limitations</summary>
+          <ul>{report.limitations.map((limitation) => <li>{limitation}</li>)}</ul>
+        </details>
       </section>
     </main>
   </body>
