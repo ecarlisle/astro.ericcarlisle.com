@@ -409,14 +409,6 @@ Sentry is included as an integration (`@sentry/astro`) but is **not configured w
 
 Without these steps, Sentry is inert — it does not capture errors or affect runtime behavior.
 
-### Spotlight (Development)
-
-**Configuration:**
-- Automatically enabled in development via `@spotlightjs/astro`
-
-**Behavior:**
-- Shows error overlay in development
-- No production impact
 - Works with or without Sentry
 
 ### Webmentions

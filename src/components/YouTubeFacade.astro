@@ -1,0 +1,202 @@
+---
+/**
+ * YouTubeFacade — a privacy-conscious, low-memory YouTube embed.
+ *
+ * Before activation: local poster image with a play button.
+ * After activation: dynamically imports the player initializer
+ * and mounts a youtube-nocookie.com iframe.
+ *
+ * @prop {string} videoId - YouTube video ID (11 characters, [A-Za-z0-9_-]).
+ * @prop {string} title - Descriptive title for the video.
+ * @prop {ImageMetadata} poster - Local Astro image for the poster.
+ * @prop {string} [caption] - Optional visible caption below the poster.
+ * @prop {number} [start] - Start time in seconds.
+ */
+
+import type { ImageMetadata } from 'astro';
+
+export interface Props {
+  videoId: string;
+  title: string;
+  poster: ImageMetadata;
+  caption?: string;
+  start?: number;
+  class?: string;
+}
+
+const { videoId, title, poster, caption, start, class: className } = Astro.props as Props;
+
+// Validate video ID format
+if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
+  throw new Error(`Invalid YouTube video ID: "${videoId}". Expected 11 characters [A-Za-z0-9_-].`);
+}
+// Validate start if provided
+if (start !== undefined && (!Number.isInteger(start) || start < 0)) {
+  throw new Error(`Invalid start value: ${start}. Expected a nonnegative integer.`);
+}
+
+const { Image } = await import('astro:assets');
+---
+
+<youtube-facade
+  data-video-id={videoId}
+  data-title={title}
+  {...(start !== undefined ? { 'data-start': String(start) } : {})}
+  class={className}
+>
+  <div class="yf-facade">
+    <div class="yf-poster-wrap">
+      <Image class="yf-poster" src={poster} alt="" decoding="async" aria-hidden="true" />
+
+      <div class="yf-overlay">
+        <button class="yf-play" type="button" aria-label={`Play: ${title}`}>
+          <svg class="yf-play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="64" height="64" aria-hidden="true">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </button>
+
+        <div class="yf-status" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="yf-container"></div>
+    </div>
+
+    {caption && <p class="yf-caption">{caption}</p>}
+
+    <noscript>
+      <p class="yf-noscript">
+        <a href={`https://www.youtube.com/watch?v=${videoId}`} rel="noopener noreferrer">
+          Watch on YouTube: {title}
+        </a>
+      </p>
+    </noscript>
+  </div>
+</youtube-facade>
+
+<style>
+  youtube-facade {
+    display: block;
+    margin-block: var(--space-component-lg);
+  }
+
+  .yf-facade {
+    position: relative;
+  }
+
+  .yf-poster-wrap {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    border: var(--size-border-pixel) solid var(--border-main);
+    background: var(--bg-surface);
+  }
+
+  .yf-poster {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .yf-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    cursor: pointer;
+  }
+
+  .yf-play {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border: none;
+    border-radius: 50%;
+    background: oklch(0 0 0 / 0.6);
+    color: #fff;
+    cursor: pointer;
+    transition: background var(--transition-fast), transform var(--transition-fast);
+    min-width: var(--size-touch-target-min);
+    min-height: var(--size-touch-target-min);
+    position: relative;
+    z-index: 2;
+  }
+
+  .yf-play:hover {
+    background: oklch(0 0 0 / 0.8);
+    transform: scale(1.05);
+  }
+
+  .yf-play:focus-visible {
+    outline: var(--focus-outline-width) var(--focus-outline-style) var(--color-focus);
+    outline-offset: var(--focus-outline-offset);
+  }
+
+  .yf-play-icon {
+    width: 40px;
+    height: 40px;
+    margin-left: 4px; /* optical center for play triangle */
+  }
+
+  .yf-caption {
+    margin-top: var(--space-inline-strong);
+    font-size: var(--type-size-small);
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .yf-status {
+    font-size: var(--type-size-small);
+    color: var(--text-primary);
+    text-align: center;
+  }
+
+  .yf-status--loading {
+    color: var(--text-secondary);
+  }
+
+  .yf-status--error {
+    color: oklch(0.6 0.15 30);
+  }
+
+  .yf-container {
+    position: absolute;
+    inset: 0;
+  }
+
+  .yf-container > iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .yf-facade:has(.yf-container > iframe) .yf-overlay {
+    display: none;
+  }
+
+  .yf-noscript {
+    margin-top: var(--space-inline-strong);
+    font-size: var(--type-size-small);
+  }
+
+  .yf-noscript a {
+    color: var(--color-link);
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .yf-play {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import './youtube-facade.ts';
+</script>

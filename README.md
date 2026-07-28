@@ -55,7 +55,7 @@ docs/             → Reference documentation
 |-------------|---------|
 | Partytown | GA4 analytics offloaded to web worker |
 | Pagefind | Static site search at `/search` |
-| Sentry + Spotlight | Error tracking (dev overlay via Spotlight) |
+| Sentry | Error tracking (currently unconfigured) |
 | Cloudflare Turnstile | CAPTCHA on contact form |
 | Resend | Email delivery for contact form |
 | Expressive Code | Syntax-highlighted code blocks |

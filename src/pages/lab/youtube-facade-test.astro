@@ -1,0 +1,31 @@
+---
+import YouTubeFacade from '@components/YouTubeFacade.astro';
+import '../../styles/global.css';
+import testPoster from '@images/250mm-trading-card-box-hero.webp';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YouTube Facade Test — Eric Carlisle</title>
+    <meta name="robots" content="noindex" />
+  </head>
+  <body>
+    <h1>YouTube Facade Test</h1>
+
+    <YouTubeFacade
+      videoId="_tiRKn5gV28"
+      title="Test video"
+      poster={testPoster}
+      caption="Test caption"
+    />
+
+    <YouTubeFacade
+      videoId="dQw4w9WgXcQ"
+      title="Second test video"
+      poster={testPoster}
+    />
+  </body>
+</html>

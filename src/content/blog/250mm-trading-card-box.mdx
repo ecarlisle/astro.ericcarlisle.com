@@ -12,14 +12,33 @@ socialImage: '@images/250mm-trading-card-box-hero.webp'
 ---
 
 import ModelResourceLinks from '@components/ModelResourceLinks.astro';
+import StlViewer from '@components/StlViewer.astro';
+import YouTubeFacade from '@components/YouTubeFacade.astro';
+import modelPoster from '@images/250mm-trading-card-box-hero.webp';
+import timelapsePoster from '@images/250mm-trading-card-box-timelapse.jpg';
 
 I made this top-load trading card box to store Magic: The Gathering cards I collected from centuries past. It will store around 800 cards and will fit cards having light sleeves. The lift-off lid has a 0.6mm width and length clearance gap from the main container, providing a comfortable fit. All walls are 1.2mm, giving it adequate strength with minimal material usage.
 
 The depth is 250mm, so a printer with a larger bed is needed. I plan to create smaller models for smaller beds.
 
+## Interactive Model
+
+Rotate, pan, and zoom to inspect the model.
+
+<StlViewer
+  src="/models/250mm-trading-card-box.stl"
+  poster={modelPoster.src}
+  alt="3D model of the 250mm trading card storage box with its lift-off lid"
+/>
+
 ## Timelapse Video using Octolapse
 
-[Watch the Octolapse timelapse on YouTube](https://www.youtube.com/watch?v=_tiRKn5gV28).
+<YouTubeFacade
+  videoId="_tiRKn5gV28"
+  title="Timelapse of the 250mm trading card box being printed with Octolapse"
+  poster={timelapsePoster}
+  caption="Octolapse timelapse of the 250mm trading card box being printed."
+/>
 
 ## Model Resources
 

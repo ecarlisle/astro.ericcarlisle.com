@@ -1,0 +1,180 @@
+---
+/**
+ * StlViewer — an interactive 3D STL model viewer.
+ *
+ * Renders a poster/fallback region before activation. Three.js and its addons
+ * are dynamically imported only after the reader clicks the activate button.
+ *
+ * @prop {string} src - Path to the STL file.
+ * @prop {string} alt - Meaningful description of the model.
+ * @prop {string} [poster] - Poster image shown before activation.
+ * @prop {string} [color="#d97757"] - Model surface color.
+ * @prop {string} [background] - Scene background color.
+ * @prop {boolean} [download=false] - Show direct STL download link.
+ * @prop {string} [downloadLabel="Download STL"] - Download link text.
+ */
+
+export interface Props {
+  src: string;
+  alt: string;
+  poster?: string;
+  color?: string;
+  background?: string;
+  download?: boolean;
+  downloadLabel?: string;
+  class?: string;
+}
+
+const {
+  src,
+  alt,
+  poster,
+  color,
+  background,
+  download = false,
+  downloadLabel = 'Download STL',
+  class: className,
+} = Astro.props as Props;
+---
+
+<stl-viewer
+  src={src}
+  {...(color ? { 'data-color': color } : {})}
+  background={background}
+  class={className}
+>
+  <div class="stl-container">
+    {
+      poster ? (
+        <img class="stl-poster" src={poster} alt="" decoding="async" loading="lazy" />
+      ) : (
+        <div class="stl-poster stl-poster--fallback" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </div>
+      )
+    }
+
+    <div class="stl-overlay">
+      <button class="stl-activate button" type="button">
+        View interactive 3D model
+      </button>
+
+      <div class="stl-status" role="status" aria-live="polite"></div>
+
+      <canvas class="stl-canvas" hidden aria-hidden="true"></canvas>
+
+      <button class="stl-reset button button--outline" type="button" hidden>
+        Reset view
+      </button>
+    </div>
+
+    {
+      download && (
+        <a class="stl-download" href={src} download>
+          {downloadLabel}
+        </a>
+      )
+    }
+  </div>
+
+  <span class="sr-only">{alt}</span>
+</stl-viewer>
+
+<style>
+  stl-viewer {
+    display: block;
+    margin-block: var(--space-component-lg);
+  }
+
+  .stl-container {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    border: var(--size-border-pixel) solid var(--border-main);
+    background: var(--bg-surface);
+  }
+
+  .stl-poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .stl-poster--fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+  }
+
+  .stl-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-component);
+    background: oklch(0 0 0 / 0.3);
+    z-index: 1;
+  }
+
+  .stl-overlay:has(.stl-canvas:not([hidden])) {
+    background: none;
+  }
+
+  .stl-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .stl-status {
+    font-size: var(--type-size-small);
+    color: var(--text-primary);
+    text-align: center;
+  }
+
+  .stl-status--loading {
+    color: var(--text-secondary);
+  }
+
+  .stl-status--error {
+    color: oklch(0.6 0.15 30);
+  }
+
+  .stl-reset {
+    position: absolute;
+    bottom: var(--space-component);
+    right: var(--space-component);
+    z-index: 2;
+  }
+
+  .stl-download {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-inline);
+    margin-top: var(--space-inline-strong);
+    font-size: var(--type-size-small);
+    color: var(--color-link);
+  }
+
+  .stl-download:hover {
+    color: var(--color-link-hover);
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .stl-container {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import './stl-viewer.ts';
+</script>
