@@ -119,7 +119,7 @@ test('article facade has no iframe before activation', async ({ page }) => {
 });
 
 test('no YouTube requests from the article before activation', async ({ page }) => {
-  const requests = [];
+  const requests: string[] = [];
   page.on('request', (req) => {
     const url = req.url();
     if (
