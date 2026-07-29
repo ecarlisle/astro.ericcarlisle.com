@@ -7,6 +7,7 @@ import { expect, test } from '@playwright/test';
 import {
   checkFeed,
   checkSourceLinks,
+  checkSourceNotLinked,
   mockResponse,
   parseArgs,
   validateUrl,
@@ -49,8 +50,12 @@ test('parseArgs detects --check', () => {
   expect(parseArgs(['--check']).check).toBe(true);
 });
 
-test('parseArgs detects --help', () => {
-  expect(parseArgs(['--help']).help).toBe(true);
+test('parseArgs detects --withdraw', () => {
+  expect(parseArgs(['--withdraw']).withdraw).toBe(true);
+});
+
+test('parseArgs detects --fixture', () => {
+  expect(parseArgs(['--fixture']).fixture).toBe(true);
 });
 
 test('parseArgs reads SOURCE_URL from env', () => {
@@ -84,6 +89,19 @@ test('checkSourceLinks passes when HTML contains the target URL', async () => {
   expect(result.ok).toBe(true);
 });
 
+test('checkSourceLinks passes when HTML contains the target URL without protocol', async () => {
+  const fetcher = () =>
+    Promise.resolve(
+      mockResponse(200, '<html><a href="//ericcarlisle.com/blog/test/">link</a></html>'),
+    );
+  const result = await checkSourceLinks(
+    'https://example.com/page',
+    'https://ericcarlisle.com/blog/test/',
+    fetcher,
+  );
+  expect(result.ok).toBe(true);
+});
+
 test('checkSourceLinks fails when HTML lacks the target', async () => {
   const fetcher = () =>
     Promise.resolve(mockResponse(200, '<html><a href="https://other.com/page">link</a></html>'));
@@ -96,15 +114,50 @@ test('checkSourceLinks fails when HTML lacks the target', async () => {
   expect(result.reason).toContain('does not contain a link');
 });
 
-test('checkSourceLinks fails on HTTP error', async () => {
-  const fetcher = () => Promise.resolve(mockResponse(404, 'Not found'));
-  const result = await checkSourceLinks(
+test('checkSourceNotLinked passes when source has no link to target', async () => {
+  const fetcher = () => Promise.resolve(mockResponse(200, '<html><p>No links here</p></html>'));
+  const result = await checkSourceNotLinked(
     'https://example.com/page',
-    'https://ericcarlisle.com/blog/test/',
+    'https://ericcarlisle.com/blog/target/',
+    fetcher,
+  );
+  expect(result.ok).toBe(true);
+});
+
+test('checkSourceNotLinked fails when source still links to target', async () => {
+  const fetcher = () =>
+    Promise.resolve(
+      mockResponse(200, '<html><a href="https://ericcarlisle.com/blog/target/">link</a></html>'),
+    );
+  const result = await checkSourceNotLinked(
+    'https://example.com/page',
+    'https://ericcarlisle.com/blog/target/',
     fetcher,
   );
   expect(result.ok).toBe(false);
-  expect(result.reason).toContain('HTTP 404');
+  expect(result.reason).toContain('still links');
+});
+
+test('checkSourceNotLinked fails on HTTP error', async () => {
+  const fetcher = () => Promise.resolve(mockResponse(500, 'Server error'));
+  const result = await checkSourceNotLinked(
+    'https://example.com/page',
+    'https://ericcarlisle.com/blog/target/',
+    fetcher,
+  );
+  expect(result.ok).toBe(false);
+  expect(result.reason).toContain('HTTP 500');
+});
+
+test('checkSourceNotLinked fails on network error', async () => {
+  const fetcher = () => Promise.reject(new Error('DNS failure'));
+  const result = await checkSourceNotLinked(
+    'https://example.com/page',
+    'https://ericcarlisle.com/blog/target/',
+    fetcher,
+  );
+  expect(result.ok).toBe(false);
+  expect(result.reason).toContain('DNS failure');
 });
 
 test('checkSourceLinks fails on network error', async () => {

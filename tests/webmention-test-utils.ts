@@ -7,6 +7,7 @@ export interface AppArgs {
   send?: boolean;
   check?: boolean;
   fixture?: boolean;
+  withdraw?: boolean;
   source?: string;
   target?: string;
   [key: string]: string | boolean | undefined;
@@ -81,6 +82,14 @@ export function parseArgs(argv: string[]): AppArgs {
       args.check = true;
       continue;
     }
+    if (arg === '--withdraw') {
+      args.withdraw = true;
+      continue;
+    }
+    if (arg === '--fixture') {
+      args.fixture = true;
+      continue;
+    }
     const m = arg.match(/^--([^=]+)=(.*)/);
     if (m) args[m[1]] = m[2];
   }
@@ -118,6 +127,37 @@ export async function checkSourceLinks(
     return { ok: true, reason: null };
   }
   return { ok: false, reason: `Source HTML does not contain a link to "${targetStr}".` };
+}
+
+/**
+ * Check that a source page does NOT contain a link to the target URL.
+ * Returns { ok, reason } where ok=true means the link is absent.
+ */
+export async function checkSourceNotLinked(
+  sourceUrl: string,
+  targetUrl: string | URL,
+  fetcher: Fetcher = fetch,
+): Promise<SourceCheckResult> {
+  let res: Response | MockResponse;
+  try {
+    res = await fetcher(sourceUrl, { redirect: 'follow' } as RequestInit);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { ok: false, reason: `Could not fetch source: ${msg}` };
+  }
+  if (!res.ok) {
+    return { ok: false, reason: `Source returned HTTP ${res.status}` };
+  }
+  const html = await res.text();
+  const targetStr = typeof targetUrl === 'string' ? targetUrl : targetUrl.toString();
+  if (html.includes(targetStr)) {
+    return { ok: false, reason: `Source still links to "${targetStr}".` };
+  }
+  const withoutProtocol = targetStr.replace(/^https?:\/\//, '');
+  if (html.includes(withoutProtocol)) {
+    return { ok: false, reason: `Source still links to "${targetStr}".` };
+  }
+  return { ok: true, reason: null };
 }
 
 /**
