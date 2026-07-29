@@ -1,15 +1,16 @@
 ---
 /**
- * Webmention Integration Test — temporary source page.
+ * Webmention Integration Test — withdrawal notice.
  *
- * This page exists solely to provide a publicly fetchable source for
- * Webmention integration testing. It is excluded from search indexing,
- * sitemaps, and Pagefind. See scripts/test-webmention-production.mjs
- * for the end-to-end test workflow.
+ * This page previously served as a controlled source for Webmention
+ * integration testing. The test has been completed and the mention
+ * withdrawn. This page remains only to provide a permanent 200 at the
+ * same URL while Webmention.io processes the withdrawal.
+ *
+ * See scripts/test-webmention-production.mjs for --withdraw usage.
  */
 import '../../styles/global.css';
 
-const TARGET_URL = 'https://ericcarlisle.com/blog/250mm-trading-card-box/';
 const SOURCE_CANONICAL = 'https://ericcarlisle.com/lab/webmention-test/';
 ---
 
@@ -39,32 +40,29 @@ const SOURCE_CANONICAL = 'https://ericcarlisle.com/lab/webmention-test/';
         padding-left: 1rem;
         margin-top: 1.5rem;
       }
+      .withdrawn {
+        font-size: 1rem;
+        border: 1px solid var(--border-muted, #ccc);
+        border-radius: 6px;
+        padding: 1rem;
+        background: var(--bg-surface, #fafafa);
+      }
     </style>
   </head>
   <body data-pagefind-ignore="all">
     <h1>Webmention Integration Test</h1>
 
-    <article class="h-entry">
-      <p class="p-content">
-        Temporary Webmention integration test replying to{' '}
-        <a class="u-in-reply-to" href={TARGET_URL}>
-          250mm Trading Card Box, a 3D Print
-        </a>.
-      </p>
-
-      <footer>
-        <span class="h-card p-author">
-          <span class="p-name">Eric Carlisle</span>
-        </span>
-        —
-        <a class="u-url" href={SOURCE_CANONICAL}>permalink</a>
-      </footer>
-    </article>
+    <p class="withdrawn">
+      <strong>Test completed.</strong> The temporary Webmention integration
+      test has been completed and withdrawn. No link to any article exists
+      on this page.
+    </p>
 
     <p class="note">
-      This is a controlled, temporary integration-test source page.
-      It is excluded from search results and site navigation.
-      It remains only as long as the Webmention integration test requires it.
+      This controlled integration-test source page remains live so that
+      Webmention.io can re-fetch and confirm the link removal. It is
+      excluded from search results, site navigation, and sitemaps.
+      It will be removed once withdrawal is complete.
     </p>
   </body>
 </html>

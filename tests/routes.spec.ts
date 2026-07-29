@@ -208,41 +208,23 @@ test('webmention test page has canonical source URL', async ({ page }) => {
   await expect(canonical).toHaveAttribute('href', 'https://ericcarlisle.com/lab/webmention-test/');
 });
 
-test('webmention test page has exactly one h-entry', async ({ page }) => {
+test('webmention test page no longer links to the target article', async ({ page }) => {
   await page.goto('/lab/webmention-test/');
-  await expect(page.locator('.h-entry')).toHaveCount(1);
+  const html = await page.content();
+  expect(html).not.toContain('https://ericcarlisle.com/blog/250mm-trading-card-box/');
 });
 
-test('webmention test page has u-in-reply-to linking to target', async ({ page }) => {
+test('webmention test page reports test completion', async ({ page }) => {
   await page.goto('/lab/webmention-test/');
-  const reply = page.locator('.u-in-reply-to');
-  await expect(reply).toHaveCount(1);
-  await expect(reply).toHaveAttribute(
-    'href',
-    'https://ericcarlisle.com/blog/250mm-trading-card-box/',
-  );
+  await expect(page.getByText('Test completed')).toBeVisible();
+  await expect(page.getByText('withdrawn')).toBeVisible();
 });
 
-test('webmention test page has p-content with correct text spacing', async ({ page }) => {
+test('webmention test page has no h-entry or u-in-reply-to', async ({ page }) => {
   await page.goto('/lab/webmention-test/');
-  await expect(page.locator('.p-content')).toHaveCount(1);
-  // The space before the link must survive HTML minification
-  await expect(page.locator('.p-content')).toContainText(
-    'Temporary Webmention integration test replying to 250mm Trading Card Box, a 3D Print.',
-  );
-});
-
-test('webmention test page has p-author with h-card', async ({ page }) => {
-  await page.goto('/lab/webmention-test/');
-  await expect(page.locator('.h-card.p-author')).toHaveCount(1);
-  await expect(page.locator('.p-name')).toContainText('Eric Carlisle');
-});
-
-test('webmention test page has u-url permalink', async ({ page }) => {
-  await page.goto('/lab/webmention-test/');
-  const uurl = page.locator('.u-url');
-  await expect(uurl).toHaveCount(1);
-  await expect(uurl).toHaveAttribute('href', 'https://ericcarlisle.com/lab/webmention-test/');
+  await expect(page.locator('.h-entry')).toHaveCount(0);
+  await expect(page.locator('.u-in-reply-to')).toHaveCount(0);
+  await expect(page.locator('.p-content')).toHaveCount(0);
 });
 
 test('webmention test page has no client-side JavaScript', async ({ page }) => {
