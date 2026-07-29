@@ -64,12 +64,23 @@ jobs:
           PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
           PUBLIC_CONTACT_API_URL: ${{ vars.PUBLIC_CONTACT_API_URL }}
 
+      - name: Check Webmention token presence
+        run: |
+          test -n "$WEBMENTION_IO_TOKEN" || (
+            echo "Missing WEBMENTION_IO_TOKEN GitHub Actions secret"
+            exit 1
+          )
+          echo "Webmention API token present"
+        env:
+          WEBMENTION_IO_TOKEN: ${{ secrets.WEBMENTION_IO_TOKEN }}
+
       - name: Build with Astro
         run: pnpm build
         env:
           SITE: ${{ steps.pages.outputs.origin }}
           PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
           PUBLIC_CONTACT_API_URL: ${{ vars.PUBLIC_CONTACT_API_URL }}
+          WEBMENTION_IO_TOKEN: ${{ secrets.WEBMENTION_IO_TOKEN }}
 
       - name: Build Storybook
         run: pnpm build:storybook
@@ -94,6 +105,7 @@ jobs:
           SITE: ${{ steps.pages.outputs.origin }}
           PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
           PUBLIC_CONTACT_API_URL: ${{ vars.PUBLIC_CONTACT_API_URL }}
+          WEBMENTION_IO_TOKEN: ${{ secrets.WEBMENTION_IO_TOKEN }}
 
       - name: Copy Storybook to dist (final)
         run: |
