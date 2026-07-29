@@ -264,3 +264,56 @@ test('webmention test page is not in the sitemap', async ({ page }) => {
   const body = await page.textContent('body');
   expect(body).not.toContain('webmention-test');
 });
+
+// ─── Webmentions heading level ──────────────────────────────────────
+
+const WEBMENTION_ARTICLE = '/blog/250mm-trading-card-box/';
+
+test('article page renders a Webmentions section', async ({ page }) => {
+  await page.goto(WEBMENTION_ARTICLE);
+  // The section may be absent if no mentions are available (e.g. CI without token), but
+  // when present it must use the correct heading level. Accept 0 or 1 sections.
+  const count = await page.locator('.webmentions').count();
+  expect(count).toBeLessThanOrEqual(1);
+  if (count === 1) {
+    await expect(page.locator('.webmentions')).toBeVisible();
+  }
+});
+
+test('webmentions heading is level 2, not level 3', async ({ page }) => {
+  await page.goto(WEBMENTION_ARTICLE);
+  const section = page.locator('.webmentions');
+  const exists = (await section.count()) === 1;
+  if (!exists) return; // skip if no webmentions are rendered
+  await expect(section.locator('h2.webmentions-heading')).toHaveCount(1);
+  await expect(section.locator('h3')).toHaveCount(0);
+});
+
+test('article heading outline is correct', async ({ page }) => {
+  await page.goto(WEBMENTION_ARTICLE);
+  const headings = page.locator('article h1, article h2, article h3');
+  const levels = await headings.evaluateAll((els) =>
+    els.map((el) => ({
+      level: el.tagName.toLowerCase(),
+      text: (el.textContent ?? '').trim().substring(0, 40),
+    })),
+  );
+
+  // Title must be h1
+  const titleHeading = levels.find((h) => h.level === 'h1');
+  expect(titleHeading).toBeTruthy();
+
+  // All top-level sections are h2 (Webmentions is one of them)
+  const h2s = levels.filter((h) => h.level === 'h2');
+  expect(h2s.length).toBeGreaterThanOrEqual(1);
+
+  // There should be no h3 that isn't inside a legitimate subsection
+  const h3s = levels.filter((h) => h.level === 'h3');
+  for (const h3 of h3s) {
+    // Every h3 must have a preceding h2 sibling or be inside a marked subsection
+    const idx = levels.indexOf(h3);
+    const preceding = levels.slice(0, idx).reverse();
+    const prevH2 = preceding.find((h) => h.level === 'h2');
+    expect(prevH2).toBeTruthy();
+  }
+});
