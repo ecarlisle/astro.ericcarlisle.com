@@ -69,3 +69,6 @@ graphify-out/
 # Generated structured-data reports
 data/structured-data/
 storybook-static/
+
+# Lighthouse deployment scores (regenerated per deployment)
+/src/generated/lighthouse-scores.json

@@ -1,0 +1,28 @@
+{
+  "lighthouseVersion": "13.4.0",
+  "requestedUrl": "http://localhost:4321/",
+  "finalUrl": "http://localhost:4321/",
+  "fetchTime": "2026-07-20T04:31:16.791Z",
+  "configSettings": {
+    "formFactor": "mobile",
+    "throttlingMethod": "simulate"
+  },
+  "categories": {
+    "performance": {
+      "id": "performance",
+      "score": 0.84
+    },
+    "accessibility": {
+      "id": "accessibility",
+      "score": 1.0
+    },
+    "best-practices": {
+      "id": "best-practices",
+      "score": 0.96
+    },
+    "seo": {
+      "id": "seo",
+      "score": 1.0
+    }
+  }
+}

@@ -99,7 +99,23 @@ jobs:
       - name: Generate Site Quality JSON
         run: pnpm quality:generate
 
-      - name: Rebuild Astro with Site Quality data
+      - name: Run Lighthouse audit
+        run: pnpm lighthouse:all
+
+      - name: Generate per-page Lighthouse scores
+        run: pnpm lighthouse:scores
+
+      - name: Validate Lighthouse scores
+        run: node scripts/validate-lighthouse-scores.mjs
+
+      - name: Upload Lighthouse reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: lh-reports/
+          retention-days: 14
+
+      - name: Rebuild Astro with Site Quality and Lighthouse data
         run: pnpm build
         env:
           SITE: ${{ steps.pages.outputs.origin }}
