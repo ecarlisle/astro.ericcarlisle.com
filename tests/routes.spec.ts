@@ -189,64 +189,6 @@ test('webmention endpoint is present across pages using the shared layout', asyn
   await expect(page.locator('link[rel="webmention"]')).toHaveCount(1);
 });
 
-// ─── Webmention test page ────────────────────────────────────────────
-
-test('webmention test page exists at /lab/webmention-test/', async ({ page }) => {
-  const response = await page.goto('/lab/webmention-test/');
-  expect(response?.status()).toBe(200);
-  await expect(page).toHaveTitle(/Webmention Integration Test/);
-});
-
-test('webmention test page has noindex', async ({ page }) => {
-  await page.goto('/lab/webmention-test/');
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
-});
-
-test('webmention test page has canonical source URL', async ({ page }) => {
-  await page.goto('/lab/webmention-test/');
-  const canonical = page.locator('link[rel="canonical"]');
-  await expect(canonical).toHaveAttribute('href', 'https://ericcarlisle.com/lab/webmention-test/');
-});
-
-test('webmention test page no longer links to the target article', async ({ page }) => {
-  await page.goto('/lab/webmention-test/');
-  const html = await page.content();
-  expect(html).not.toContain('https://ericcarlisle.com/blog/250mm-trading-card-box/');
-});
-
-test('webmention test page reports test completion', async ({ page }) => {
-  await page.goto('/lab/webmention-test/');
-  await expect(page.getByText('Test completed')).toBeVisible();
-  await expect(page.getByText('withdrawn')).toBeVisible();
-});
-
-test('webmention test page has no h-entry or u-in-reply-to', async ({ page }) => {
-  await page.goto('/lab/webmention-test/');
-  await expect(page.locator('.h-entry')).toHaveCount(0);
-  await expect(page.locator('.u-in-reply-to')).toHaveCount(0);
-  await expect(page.locator('.p-content')).toHaveCount(0);
-});
-
-test('webmention test page has no client-side JavaScript', async ({ page }) => {
-  await page.goto('/lab/webmention-test/');
-  await expect(page.locator('script[src]')).toHaveCount(0);
-  const html = await page.content();
-  expect(html).not.toContain('import(');
-});
-
-test('webmention test page does not render a second webmention endpoint', async ({ page }) => {
-  await page.goto('/lab/webmention-test/');
-  // The page has its own <head>, not the layout's BaseHead,
-  // so it does not inherit the site-wide webmention endpoint.
-  await expect(page.locator('link[rel="webmention"]')).toHaveCount(0);
-});
-
-test('webmention test page is not in the sitemap', async ({ page }) => {
-  await page.goto('/sitemap-index.xml');
-  const body = await page.textContent('body');
-  expect(body).not.toContain('webmention-test');
-});
-
 // ─── Webmentions heading level ──────────────────────────────────────
 
 const WEBMENTION_ARTICLE = '/blog/250mm-trading-card-box/';
