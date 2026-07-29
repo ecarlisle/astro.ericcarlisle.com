@@ -155,11 +155,14 @@ function main() {
       timestamp: lh.fetchTime || null,
       lighthouseVersion: lh.lighthouseVersion || null,
       formFactor: configSettings.formFactor || 'mobile',
+      _file: fileName,
     });
   }
 
   // Deduplicate by route — if multiple reports exist for the same route,
-  // use the median of each score (project convention: median representative run).
+  // select the single report with median Performance score (deterministic
+  // tie-breaking: first report alphabetically by filename).
+  // All scores, timestamp, version, and form factor come from that one report.
   const byRoute = new Map();
   for (const record of records) {
     if (!byRoute.has(record.route)) {
@@ -171,34 +174,21 @@ function main() {
   const pages = [];
   for (const [route, entries] of byRoute) {
     if (entries.length === 1) {
-      pages.push({ ...entries[0], route });
+      const { _file, ...rest } = entries[0];
+      pages.push({ ...rest, route });
     } else {
-      // Multiple runs: median per score category
-      const median = (values) => {
-        const sorted = [...values].sort((a, b) => a - b);
-        const mid = Math.floor(sorted.length / 2);
-        return sorted.length % 2 !== 0
-          ? sorted[mid]
-          : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
-      };
-
-      const perfScores = entries.map((e) => e.scores.performance).filter((v) => v !== null);
-      const a11yScores = entries.map((e) => e.scores.accessibility).filter((v) => v !== null);
-      const bpScores = entries.map((e) => e.scores.bestPractices).filter((v) => v !== null);
-      const seoScores = entries.map((e) => e.scores.seo).filter((v) => v !== null);
-
-      pages.push({
-        route,
-        scores: {
-          performance: perfScores.length > 0 ? median(perfScores) : null,
-          accessibility: a11yScores.length > 0 ? median(a11yScores) : null,
-          bestPractices: bpScores.length > 0 ? median(bpScores) : null,
-          seo: seoScores.length > 0 ? median(seoScores) : null,
-        },
-        timestamp: entries[0].timestamp,
-        lighthouseVersion: entries[0].lighthouseVersion,
-        formFactor: entries[0].formFactor,
+      // Sort by Performance score, then by filename for deterministic tie-breaking
+      const sorted = [...entries].sort((a, b) => {
+        const aScore = a.scores.performance ?? -1;
+        const bScore = b.scores.performance ?? -1;
+        if (aScore !== bScore) return aScore - bScore;
+        return (a._file || '').localeCompare(b._file || '');
       });
+      // Pick the median: middle element (floor for even count)
+      const medianIdx = Math.floor(sorted.length / 2);
+      const chosen = sorted[medianIdx];
+      const { _file, ...rest } = chosen;
+      pages.push({ ...rest, route });
     }
   }
 
