@@ -42,6 +42,7 @@ export default defineConfig({
     // }),
     sitemap({
       customPages: ['https://ericcarlisle.com/design-system/lab/'],
+      filter: (page) => !page.includes('/lab/webmention-test/'),
     }),
   ],
   vite: {
