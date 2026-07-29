@@ -223,9 +223,13 @@ test('webmention test page has u-in-reply-to linking to target', async ({ page }
   );
 });
 
-test('webmention test page has p-content', async ({ page }) => {
+test('webmention test page has p-content with correct text spacing', async ({ page }) => {
   await page.goto('/lab/webmention-test/');
   await expect(page.locator('.p-content')).toHaveCount(1);
+  // The space before the link must survive HTML minification
+  await expect(page.locator('.p-content')).toContainText(
+    'Temporary Webmention integration test replying to 250mm Trading Card Box, a 3D Print.',
+  );
 });
 
 test('webmention test page has p-author with h-card', async ({ page }) => {
