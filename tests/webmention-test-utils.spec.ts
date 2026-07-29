@@ -1,5 +1,3 @@
-// @ts-nocheck — mocked fetch responses don't match Response type
-
 /**
  * Webmention test utility unit tests.
  *
@@ -142,8 +140,10 @@ test('checkFeed finds a matching mention', async () => {
     fetcher,
   );
   expect(result.found).toBe(true);
-  expect(result.mention['wm-id']).toBe(42);
-  expect(result.mention['wm-property']).toBe('in-reply-to');
+  expect(result.mention).toBeTruthy();
+  const m = result.mention as NonNullable<typeof result.mention>;
+  expect(m['wm-id']).toBe(42);
+  expect(m['wm-property']).toBe('in-reply-to');
 });
 
 test('checkFeed returns not found when no source matches', async () => {
