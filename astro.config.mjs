@@ -37,9 +37,6 @@ export default defineConfig({
     }),
     mdx(),
     pagefind(),
-    // compress({
-    //   Image: false,
-    // }),
     sitemap({
       customPages: ['https://ericcarlisle.com/design-system/lab/'],
     }),

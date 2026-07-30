@@ -51,7 +51,6 @@
     "@axe-core/playwright": "^4.12.1",
     "@biomejs/biome": "^2.5.0",
     "@fontsource-variable/fira-code": "^5.2.7",
-    "@playform/compress": "^0.2.3",
     "@playwright/test": "^1.61.1",
     "@sentry/astro": "10.65.0",
     "@storybook-astro/framework": "1.9.0",
