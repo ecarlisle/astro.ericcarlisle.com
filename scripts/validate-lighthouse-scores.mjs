@@ -16,7 +16,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ROOT = join(import.meta.dirname, '..');
-const DATA_PATH = join(ROOT, 'src', 'generated', 'lighthouse-scores.json');
+const DATA_PATH = process.env.DATA_PATH || join(ROOT, 'src', 'generated', 'lighthouse-scores.json');
 
 function isValidRoute(route) {
   return (
@@ -36,8 +36,11 @@ function isValidScore(value) {
 
 function main() {
   if (!existsSync(DATA_PATH)) {
-    console.log('⚠️  lighthouse-scores.json not found — nothing to validate.');
-    return;
+    console.error(
+      '❌ lighthouse-scores.json not found.\n' +
+        '   Run pnpm lighthouse:all then pnpm lighthouse:scores first.',
+    );
+    process.exit(1);
   }
 
   const raw = readFileSync(DATA_PATH, 'utf-8');
@@ -58,6 +61,14 @@ function main() {
   // Pages
   if (!Array.isArray(data.pages)) {
     console.error('❌ "pages" is not an array.');
+    process.exit(1);
+  }
+
+  if (data.pages.length === 0) {
+    console.error(
+      '❌ lighthouse-scores.json "pages" array is empty.\n' +
+        '   No valid score records were generated. Check lighthouse:all output.',
+    );
     process.exit(1);
   }
 

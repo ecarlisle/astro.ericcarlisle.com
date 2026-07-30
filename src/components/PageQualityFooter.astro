@@ -4,9 +4,11 @@
  *
  * Renders a subtle single-line "Page quality: Performance 84 · …" treatment
  * that fits naturally alongside the copyright and social links. Omitted
- * entirely when no score data is available.
+ * entirely when no score data is available. Metrics with null scores are
+ * omitted from the display.
  */
-import type { LighthousePageData } from './lighthouse-scores';
+import type { LighthousePageData } from '../lib/lighthouse-utils';
+import { hasAnyScore } from '../lib/lighthouse-utils';
 
 interface Props {
   /** Pre-resolved score data for the current page. */
@@ -22,12 +24,18 @@ interface Metric {
   score: number;
 }
 
-const metrics: Metric[] = [
+// Build the metric list, omitting categories where the score is null.
+const rawMetrics: { label: string; score: number | null }[] = [
   { label: 'Performance', score: data.scores.performance },
   { label: 'Accessibility', score: data.scores.accessibility },
   { label: 'Best practices', score: data.scores.bestPractices },
   { label: 'SEO', score: data.scores.seo },
 ];
+
+const metrics: Metric[] = rawMetrics.filter((m): m is Metric => m.score !== null);
+
+// If no valid metrics remain, render nothing.
+if (metrics.length === 0) return;
 ---
 
 <section
@@ -96,5 +104,18 @@ const metrics: Metric[] = [
 
   .page-quality-score {
     font-family: var(--font-mono);
+  }
+
+  /* On narrow screens, hide the dots so they can't appear orphaned at
+     line-start/end. The natural inline gaps provide sufficient separation. */
+  @media (max-width: 480px) {
+    .page-quality-metric + .page-quality-metric::before {
+      content: '';
+      margin: 0;
+    }
+
+    .page-quality-metric {
+      margin: 0 0.15em;
+    }
   }
 </style>

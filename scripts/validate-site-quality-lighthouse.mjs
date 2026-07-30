@@ -7,11 +7,6 @@
  * generated Site Quality JSON has no Lighthouse data despite
  * CI expecting it.
  *
- * Does NOT fail outside CI (e.g. local dev without lh-reports/)
- * because the intent is to catch deployment pipeline failures.
- * However, if running in CI and the file exists, it MUST have
- * valid Lighthouse data.
- *
  * Exit codes:
  *   0 – site-quality.json contains valid Lighthouse data
  *   1 – missing, invalid, or empty Lighthouse data

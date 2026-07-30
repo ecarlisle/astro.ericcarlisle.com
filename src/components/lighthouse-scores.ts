@@ -1,26 +1,11 @@
 /**
  * Type definitions for Lighthouse per-page score data used by the
  * PageQualityFooter component.
+ *
+ * Re-exports from the shared utility module at src/lib/lighthouse-utils.ts.
  */
-
-export interface LighthousePageScores {
-  performance: number;
-  accessibility: number;
-  bestPractices: number;
-  seo: number;
-}
-
-export interface LighthousePageData {
-  route: string;
-  scores: LighthousePageScores;
-  timestamp: string | null;
-  lighthouseVersion: string | null;
-  formFactor: string;
-}
-
-export interface LighthouseScoresFile {
-  generatedAt: string;
-  commitSha: string;
-  lighthouseVersion: string | null;
-  pages: LighthousePageData[];
-}
+export type {
+  LighthousePageData,
+  LighthousePageScores,
+  LighthouseScoresFile,
+} from '../lib/lighthouse-utils';

@@ -77,11 +77,12 @@ function main() {
     return;
   }
 
-  // Find all JSON report files (prefer .report.json, fall back to other .json)
+  // Find all JSON report files. Prefer .report.json exclusively; only fall
+  // back to plain .json files if no .report.json files exist.
   const allFiles = readdirSync(LH_REPORTS);
-  const reportFiles = allFiles.filter(
-    (f) => f.endsWith('.report.json') || (f.endsWith('.json') && !f.endsWith('.report.json')),
-  );
+  const reportJsonFiles = allFiles.filter((f) => f.endsWith('.report.json'));
+  const otherJsonFiles = allFiles.filter((f) => f.endsWith('.json') && !f.endsWith('.report.json'));
+  const reportFiles = reportJsonFiles.length > 0 ? reportJsonFiles : otherJsonFiles;
 
   if (reportFiles.length === 0) {
     console.log('⚠️  No Lighthouse JSON reports found in lh-reports/.');

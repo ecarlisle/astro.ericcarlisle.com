@@ -156,17 +156,11 @@ The Worker also has environment-specific names configured in `wrangler.toml`:
 
 Every page includes a compact line in the footer reporting Lighthouse lab scores:
 
-```
-Deployment audit · P 96 · A 100 · BP 100 · SEO 100
+```text
+Page quality: Performance 84 · Accessibility 100 · Best practices 96 · SEO 100
 ```
 
-**What the scores mean:**
-- **P** = Performance (lab, not field Core Web Vitals)
-- **A** = Accessibility
-- **BP** = Best Practices
-- **SEO** = Search Engine Optimization
-
-These are automated Lighthouse lab measurements, run against the candidate build during deployment.
+These are automated Lighthouse lab measurements, run against the candidate build during deployment. All four categories refer to the standard Lighthouse category scores (Performance, Accessibility, Best Practices, and SEO), not field Core Web Vitals.
 
 **How it works:**
 1. After the initial build, `pnpm lighthouse:all` runs Lighthouse on every HTML page
