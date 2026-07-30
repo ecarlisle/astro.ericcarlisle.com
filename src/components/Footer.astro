@@ -13,9 +13,11 @@ const today = new Date();
 // fails to resolve a missing literal path during bundling.
 let pageData = null;
 try {
-  // Resolve relative to the project root using the Astro build root.
-  // During both dev and build, process.cwd() is the project root.
-  const dataPath = join(process.cwd(), 'src', 'generated', 'lighthouse-scores.json');
+  // Allow override via environment variable for testing.
+  // Falls back to the default path in the project.
+  const dataPath =
+    process.env.LIGHTHOUSE_SCORES_PATH ||
+    join(process.cwd(), 'src', 'generated', 'lighthouse-scores.json');
   if (existsSync(dataPath)) {
     const raw = readFileSync(dataPath, 'utf-8');
     const scoresFile: LighthouseScoresFile = JSON.parse(raw);

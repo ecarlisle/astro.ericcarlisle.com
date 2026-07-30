@@ -91,6 +91,12 @@ export function hasAnyScore(scores: LighthousePageScores): boolean {
 /**
  * Select the median representative entry from a list of records for the same route.
  * Uses Performance score as the sort key, with filename as tie-breaker.
+ *
+ * For an even number of entries, selects the upper-middle entry
+ * (Math.floor(N/2)), which is the higher of the two middle values.
+ * For 4 entries sorted [a, b, c, d], index 2 (c) is selected.
+ * This is a deliberate policy; use the same selection in both the
+ * generator and tests.
  */
 export function selectRepresentative(
   entries: (LighthousePageData & { _file?: string })[],

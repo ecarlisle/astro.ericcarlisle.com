@@ -8,7 +8,6 @@
  * omitted from the display.
  */
 import type { LighthousePageData } from '../lib/lighthouse-utils';
-import { hasAnyScore } from '../lib/lighthouse-utils';
 
 interface Props {
   /** Pre-resolved score data for the current page. */
@@ -80,22 +79,17 @@ if (metrics.length === 0) return;
   }
 
   .page-quality-scores {
-    display: inline;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 0.3em;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
   .page-quality-metric {
-    display: inline;
     white-space: nowrap;
-  }
-
-  /* · separator between metrics, hidden from screen readers */
-  .page-quality-metric + .page-quality-metric::before {
-    content: ' · ';
-    color: var(--text-muted);
-    white-space: pre;
   }
 
   .page-quality-label {
@@ -104,18 +98,5 @@ if (metrics.length === 0) return;
 
   .page-quality-score {
     font-family: var(--font-mono);
-  }
-
-  /* On narrow screens, hide the dots so they can't appear orphaned at
-     line-start/end. The natural inline gaps provide sufficient separation. */
-  @media (max-width: 480px) {
-    .page-quality-metric + .page-quality-metric::before {
-      content: '';
-      margin: 0;
-    }
-
-    .page-quality-metric {
-      margin: 0 0.15em;
-    }
   }
 </style>

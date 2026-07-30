@@ -23,9 +23,10 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { join } from 'node:path';
 
 const ROOT = join(import.meta.dirname, '..');
-const LH_REPORTS = join(ROOT, 'lh-reports');
-const GENERATED_DIR = join(ROOT, 'src', 'generated');
-const OUTPUT_PATH = join(GENERATED_DIR, 'lighthouse-scores.json');
+const LH_REPORTS = process.env.LH_REPORTS_DIR || join(ROOT, 'lh-reports');
+const GENERATED_DIR = process.env.GENERATED_SCORES_DIR || join(ROOT, 'src', 'generated');
+const OUTPUT_PATH =
+  process.env.LIGHTHOUSE_SCORES_PATH || join(GENERATED_DIR, 'lighthouse-scores.json');
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -185,7 +186,7 @@ function main() {
         if (aScore !== bScore) return aScore - bScore;
         return (a._file || '').localeCompare(b._file || '');
       });
-      // Pick the median: middle element (floor for even count)
+      // Upper-middle for even counts: floor(N/2) selects index 2 of 4
       const medianIdx = Math.floor(sorted.length / 2);
       const chosen = sorted[medianIdx];
       const { _file, ...rest } = chosen;
