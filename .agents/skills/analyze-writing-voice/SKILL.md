@@ -16,7 +16,7 @@ triggers:
   - writing style analysis
   - speaking style analysis
 priority: high
-version: 1
+version: 2
 ---
 
 # Analyze Writing Voice
@@ -107,7 +107,8 @@ When a profile change is authorized:
 4. Propose the smallest profile change.
 5. Preserve the previous meaning where evidence has not changed.
 6. Update the profile version and change history.
-7. Mark the supporting evidence entry as promoted.
+7. Append a `promoted` row to the evidence status history. Treat the latest dated status row for
+   an evidence ID as authoritative.
 
 Do not silently rewrite the profile during an unrelated task.
 

@@ -295,13 +295,13 @@
             "impact": "positive",
             "interpretation": "The authority file exposes one baseline implementation skill and separate conditional routes for every specialized task type.",
             "evidence": {
-              "observation": "AGENTS.md maps Astro, performance, accessibility, CSS, search, SEO, prose, and Context Health work to separate skills.",
+              "observation": "AGENTS.md maps Astro, performance, accessibility, CSS, search, SEO, prose, voice-analysis, and Context Health work to separate skills.",
               "citations": [
                 {
                   "path": "AGENTS.md",
                   "section": "## Skill Routing",
                   "startLine": 115,
-                  "endLine": 128
+                  "endLine": 130
                 }
               ]
             },

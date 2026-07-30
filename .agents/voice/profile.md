@@ -2,13 +2,14 @@
 
 ## Status
 
-- **Version:** 0.1
+- **Version:** 0.2
 - **Last reviewed:** 2026-07-30
 - **Intended uses:** Reflective technical articles, documentation, professional social posts,
   career writing, portfolio copy, and professional communication
 - **Evidence scope:** Published blog prose, established editorial guidance, the historical
-  `copy-edit` voice guide, and explicit author feedback from drafting sessions
-- **Overall confidence:** Medium-high; strongest for reflective technical prose
+  [copy-edit voice guide](https://github.com/ecarlisle/astro.ericcarlisle.com/blob/b04252390bb48cdc288919df93860c9df383b359/.agents/skills/copy-edit/references/voice-guide.md),
+  and explicit author feedback from drafting sessions
+- **Overall confidence:** medium; strongest for reflective technical prose
 
 This profile is the canonical output of `analyze-writing-voice` and the required voice input for
 `write-in-a-voice`.
@@ -67,35 +68,35 @@ not lecture, market, or over-explain. Invite recognition rather than manufacturi
   interpretation.
 - Use substantial paragraphs and delay broad conclusions until concrete evidence supports them.
 - Avoid tidy frameworks or motivational endings added for completeness.
-- **Confidence:** High
+- **Confidence:** high
 
 ### Professional social post
 
 - Compress the reasoning without turning it into promotional fragments.
 - Sound conversational and intentional rather than market-driven.
 - Lead with the observation or idea instead of an engagement formula.
-- **Confidence:** Medium-high
+- **Confidence:** medium
 
 ### Technical documentation and instructions
 
 - Prioritize operational clarity, accuracy, and maintainable practice.
 - Preserve precise distinctions, but remove article-like reflection that does not help the task.
 - Explain both what something does and why it matters when that affects correct use.
-- **Confidence:** Medium-high
+- **Confidence:** medium
 
 ### Résumé and career writing
 
 - Be concise, specific, evidence-based, and professionally restrained.
 - Avoid invented metrics, inflated expertise, fashionable terminology, and generic accomplishments.
 - Retain engineering depth and UX judgment without turning the document into an essay.
-- **Confidence:** Medium
+- **Confidence:** medium
 
 ### Portfolio and website copy
 
 - Be concise, concrete, selective, and human.
 - Prefer practical value and maintainable outcomes over slogans.
 - Avoid abstractions that could describe any experienced engineer.
-- **Confidence:** Medium
+- **Confidence:** medium
 
 ### Conversational and prompt register
 
@@ -105,7 +106,7 @@ not lecture, market, or over-explain. Invite recognition rather than manufacturi
   shorthand in finished prose.
 - This register is intentionally under observation because individual prompts are strongly shaped
   by the immediate task.
-- **Confidence:** Low-medium
+- **Confidence:** low
 
 ## Preserve
 
@@ -157,5 +158,7 @@ high-confidence mechanical conclusions.
 
 ## Change history
 
+- **0.2 — 2026-07-30:** Normalized confidence values and linked the historical editing guidance
+  to a durable archived source.
 - **0.1 — 2026-07-30:** Initial profile extracted from established blog guidance, published prose,
   and explicit author direction for the voice-analysis workflow.

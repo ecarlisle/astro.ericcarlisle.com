@@ -15,7 +15,10 @@ Record:
 - date when known;
 - whether the evidence supports, contradicts, or qualifies a profile rule;
 - confidence; and
-- status: `candidate`, `promoted`, `rejected`, or `superseded`.
+- initial status: `candidate`, `promoted`, `rejected`, or `superseded`.
+
+Keep evidence records immutable. Record later status changes by appending status-history rows; the
+latest dated status for an evidence ID is authoritative.
 
 ## Weight
 

@@ -23,7 +23,7 @@ triggers:
   - rewrite
   - editorial feedback
 priority: high
-version: 1
+version: 2
 ---
 
 # Write in a Voice
@@ -112,6 +112,12 @@ articles may preserve visible reasoning and unresolved questions.
 Imitate method, not subject matter. Do not import experiences, opinions, project names, metaphors,
 jokes, or recurring topics from the profile or unrelated samples.
 
+## Load task-relevant guidance
+
+Read [AI-writing anti-patterns](references/anti-patterns.md) before drafting new prose or making
+substantial edits. This includes draft, continue, expand, rewrite, and structural-revision modes.
+Use [the vocabulary guide](references/vocabulary.md) when project terminology is relevant.
+
 ## Drafting
 
 1. Identify the movement of thought and supplied boundaries.
@@ -128,9 +134,7 @@ jokes, or recurring topics from the profile or unrelated samples.
 2. Make the smallest effective changes.
 3. Preserve terminology, reasoning, rhythm, and certainty.
 4. Compare the revision with the source for altered meaning.
-5. Read [AI-writing anti-patterns](references/anti-patterns.md) for substantial edits or new prose.
-6. Use [the vocabulary guide](references/vocabulary.md) when project terminology is relevant.
-7. Return only the affected passage when the task is narrow.
+5. Return only the affected passage when the task is narrow.
 
 ## Continuing
 
