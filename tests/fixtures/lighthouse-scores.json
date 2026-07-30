@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-07-29T12:00:00.000Z",
+  "commitSha": "test-fixture",
+  "lighthouseVersion": "13.4.0",
+  "pages": [
+    {
+      "route": "/",
+      "scores": {
+        "performance": 84,
+        "accessibility": 100,
+        "bestPractices": 96,
+        "seo": 100
+      },
+      "timestamp": "2026-07-29T12:00:00.000Z",
+      "lighthouseVersion": "13.4.0",
+      "formFactor": "mobile"
+    },
+    {
+      "route": "/about/",
+      "scores": {
+        "performance": 88,
+        "accessibility": 100,
+        "bestPractices": 96,
+        "seo": 100
+      },
+      "timestamp": null,
+      "lighthouseVersion": null,
+      "formFactor": "mobile"
+    },
+    {
+      "route": "/blog/250mm-trading-card-box/",
+      "scores": {
+        "performance": 85,
+        "accessibility": 100,
+        "bestPractices": 96,
+        "seo": 100
+      },
+      "timestamp": null,
+      "lighthouseVersion": null,
+      "formFactor": "mobile"
+    }
+  ]
+}

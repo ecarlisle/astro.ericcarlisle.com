@@ -152,6 +152,40 @@ The Worker also has environment-specific names configured in `wrangler.toml`:
 10. **Upload artifact** — `actions/upload-pages-artifact@v4`
 11. **Deploy** — `actions/deploy-pages@v4`
 
+### Page Quality Footer
+
+Every page includes a compact line in the footer reporting Lighthouse lab scores:
+
+```text
+Page quality: Performance 84 · Accessibility 100 · Best practices 96 · SEO 100
+```
+
+These are automated Lighthouse lab measurements, run against the candidate build during deployment. All four categories refer to the standard Lighthouse category scores (Performance, Accessibility, Best Practices, and SEO), not field Core Web Vitals.
+
+**How it works:**
+1. After the initial build, `pnpm lighthouse:all` runs Lighthouse on every HTML page
+2. `pnpm lighthouse:scores` extracts and validates per-route scores from those reports
+3. The final `pnpm build` renders the scores into each page's footer
+4. Full reports are uploaded as a workflow artifact (retained 14 days)
+
+**What it reports:**
+- Lighthouse 13 mobile simulation with default throttling
+- Median representative run (if multiple runs exist for a route)
+- The candidate build is measured, then the site is rebuilt with the scores embedded
+- Minor score differences between the measured candidate and the final rebuild are expected
+
+**When no data is available:**
+- Local development and production builds without a prior Lighthouse audit render the footer without the quality line
+- The component gracefully degrades — no placeholder scores or broken output
+- `.env`, `.env.local`, and local builds are unaffected
+
+**Reproducing locally:**
+```sh
+pnpm lighthouse:report    # build → audit → generate scores
+```
+
+Full reports appear in `lh-reports/`. The generated score data lives at `src/generated/lighthouse-scores.json` but is not committed (it is deployment-specific).
+
 ### Required Repository Settings
 
 1. **GitHub Pages** enabled:

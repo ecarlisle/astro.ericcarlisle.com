@@ -32,5 +32,8 @@ export default defineConfig({
     url: 'http://localhost:4321',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      LIGHTHOUSE_SCORES_PATH: './tests/fixtures/lighthouse-scores.json',
+    },
   },
 });

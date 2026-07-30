@@ -1,7 +1,31 @@
 ---
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { findPageData } from '../lib/lighthouse-utils';
+import type { LighthousePageData, LighthouseScoresFile } from './lighthouse-scores';
+import PageQualityFooter from './PageQualityFooter.astro';
 import SocialLinks from './SocialLinks.astro';
 
 const today = new Date();
+
+// Load Lighthouse scores if available; gracefully handle missing data.
+// Uses existsSync + readFileSync instead of dynamic import so Vite never
+// fails to resolve a missing literal path during bundling.
+let pageData: LighthousePageData | null = null;
+try {
+  // Allow override via environment variable for testing.
+  // Falls back to the default path in the project.
+  const dataPath =
+    process.env.LIGHTHOUSE_SCORES_PATH ||
+    join(process.cwd(), 'src', 'generated', 'lighthouse-scores.json');
+  if (existsSync(dataPath)) {
+    const raw = readFileSync(dataPath, 'utf-8');
+    const scoresFile: LighthouseScoresFile = JSON.parse(raw);
+    pageData = findPageData(scoresFile, Astro.url.pathname);
+  }
+} catch {
+  // No generated scores data — render footer without quality line.
+}
 ---
 
 <footer class="site-frame" data-pagefind-ignore>
@@ -9,6 +33,7 @@ const today = new Date();
 		<nav aria-label="Social links" class="social-links">
 			<SocialLinks />
 		</nav>
+		<PageQualityFooter data={pageData} />
 </footer>
 <style>
 footer {

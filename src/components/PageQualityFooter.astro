@@ -1,0 +1,102 @@
+---
+/**
+ * PageQualityFooter — compact inline Lighthouse score report for the footer.
+ *
+ * Renders a subtle single-line "Page quality: Performance 84 · …" treatment
+ * that fits naturally alongside the copyright and social links. Omitted
+ * entirely when no score data is available. Metrics with null scores are
+ * omitted from the display.
+ */
+import type { LighthousePageData } from '../lib/lighthouse-utils';
+
+interface Props {
+  /** Pre-resolved score data for the current page. */
+  data?: LighthousePageData | null;
+}
+
+const { data } = Astro.props;
+
+if (!data) return;
+
+interface Metric {
+  label: string;
+  score: number;
+}
+
+// Build the metric list, omitting categories where the score is null.
+const rawMetrics: { label: string; score: number | null }[] = [
+  { label: 'Performance', score: data.scores.performance },
+  { label: 'Accessibility', score: data.scores.accessibility },
+  { label: 'Best practices', score: data.scores.bestPractices },
+  { label: 'SEO', score: data.scores.seo },
+];
+
+const metrics: Metric[] = rawMetrics.filter((m): m is Metric => m.score !== null);
+
+// If no valid metrics remain, render nothing.
+if (metrics.length === 0) return;
+---
+
+<section
+  class="page-quality-footer"
+  aria-label="Page quality, measured with Lighthouse"
+>
+  <a href="/portfolio/site-quality/" class="page-quality-link">
+    Page quality:
+  </a>{' '}
+  <ul class="page-quality-scores" aria-label="Lighthouse scores out of 100">
+    {metrics.map((m) => (
+      <li class="page-quality-metric">
+        <span class="page-quality-label">{m.label}</span>{' '}
+        <span
+          class="page-quality-score"
+          aria-label={m.score + ' out of 100'}
+        >{m.score}</span>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .page-quality-footer {
+    margin-top: var(--space-component);
+    font-size: var(--type-size-small);
+    line-height: var(--line-height-body);
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .page-quality-link {
+    color: var(--text-muted);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+    white-space: nowrap;
+  }
+
+  .page-quality-link:hover {
+    color: var(--text-secondary);
+  }
+
+  .page-quality-scores {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 0.3em;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .page-quality-metric {
+    white-space: nowrap;
+  }
+
+  .page-quality-label {
+    font-weight: var(--font-weight-medium);
+  }
+
+  .page-quality-score {
+    font-family: var(--font-mono);
+  }
+</style>
