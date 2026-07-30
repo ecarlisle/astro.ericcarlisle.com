@@ -70,28 +70,6 @@ const NULL_FIXTURE: LighthouseScoresFile = {
   ],
 };
 
-/** Run pnpm build with a specific LIGHTHOUSE_SCORES_PATH. */
-function buildWithScores(scoresPath: string): void {
-  // Set the env var via process.env directly before spawning the build,
-  // then restore it after. This is the most reliable cross-platform method.
-  const prev = process.env.LIGHTHOUSE_SCORES_PATH;
-  process.env.LIGHTHOUSE_SCORES_PATH = scoresPath;
-  try {
-    execSync('pnpm build', {
-      cwd: REPO_ROOT,
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-      timeout: 60_000,
-    });
-  } finally {
-    if (prev === undefined) {
-      delete process.env.LIGHTHOUSE_SCORES_PATH;
-    } else {
-      process.env.LIGHTHOUSE_SCORES_PATH = prev;
-    }
-  }
-}
-
 // ─── Score extraction ─────────────────────────────────────────────────────
 
 test('extracts valid category scores from Lighthouse JSON fixture', () => {
@@ -236,36 +214,6 @@ test('selectRepresentative: strips _file', () => {
   const r = selectRepresentative([mkEntry(80, 'x')]);
   expect(r).not.toHaveProperty('_file');
 });
-
-// ─── Score-absent build ──────────────────────────────────────────────────
-
-test('build with absent and present scores produces correct output', async () => {
-  // Absent: build with nonexistent path
-  const nonePath = join(tmpdir(), 'lh-scores-none.json');
-  buildWithScores(nonePath);
-  let html = readFileSync(join(REPO_ROOT, 'dist', 'index.html'), 'utf-8');
-  expect(html).not.toContain('page-quality-footer');
-  expect(html).toContain('Eric Carlisle');
-
-  // Present: build with fixture
-  const tmpDir = mkdtempSync(join(tmpdir(), 'lh-pres-test-'));
-  const fixturePath = join(tmpDir, 'scores.json');
-  writeFileSync(fixturePath, JSON.stringify(VALID_FIXTURE), 'utf-8');
-  buildWithScores(fixturePath);
-  rmSync(tmpDir, { recursive: true, force: true });
-
-  html = readFileSync(join(REPO_ROOT, 'dist', 'index.html'), 'utf-8');
-  expect(html).toContain('page-quality-footer');
-  expect(html).toContain('Page quality:');
-  // Verify exact fixture values appear
-  expect(html).toContain('Performance');
-  expect(html).toContain('Accessibility');
-  expect(html).toContain('Best practices');
-  expect(html).toContain('SEO');
-  expect(html).toContain('class="page-quality-score"');
-});
-
-// ─── Rendering via served build ──────────────────────────────────────────
 
 // ─── Generator integration tests ─────────────────────────────────────────
 
@@ -643,4 +591,120 @@ test('validate-lighthouse-scores.mjs fails when pages empty', () => {
     expect(errText).toContain('empty');
   }
   rmSync(tmpDir, { recursive: true, force: true });
+});
+
+// ─── Browser layout tests (deterministic fixture via webServer env) ──────
+
+test('desktop 1024px: footer present, link+metrics on same line, no overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 800 });
+  await page.goto('/');
+  const footer = page.locator('.page-quality-footer');
+  await expect(footer).toBeVisible();
+
+  // Link and first metric on same line
+  const linkBox = await footer.locator('.page-quality-link').boundingBox();
+  const firstBox = await footer.locator('.page-quality-metric').first().boundingBox();
+  expect(linkBox).not.toBeNull();
+  expect(firstBox).not.toBeNull();
+  expect(Math.abs(linkBox!.y - firstBox!.y)).toBeLessThan(5);
+
+  // 4 metrics with correct labels
+  await expect(footer.locator('.page-quality-metric')).toHaveCount(4);
+  await expect(footer.locator('.page-quality-label').first()).toHaveText('Performance');
+
+  // No overflow
+  const scrollW = await footer.evaluate((el: HTMLElement) => el.scrollWidth);
+  const clientW = await footer.evaluate((el: HTMLElement) => el.clientWidth);
+  expect(scrollW).toBeLessThanOrEqual(clientW);
+});
+
+test('desktop 1024px: accessible labels, link, and no abbreviations', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 800 });
+  await page.goto('/');
+  const footer = page.locator('.page-quality-footer');
+  await expect(footer).toBeVisible();
+
+  await expect(footer).toHaveAttribute('aria-label', /measured with Lighthouse/i);
+  await expect(footer.locator('.page-quality-score').first()).toHaveAttribute(
+    'aria-label',
+    /84 out of 100/,
+  );
+  await expect(footer.locator('.page-quality-link')).toHaveAttribute(
+    'href',
+    '/portfolio/site-quality/',
+  );
+
+  const inner = await footer.innerHTML();
+  expect(inner).not.toContain('>P<');
+  expect(inner).not.toContain('>A<');
+  expect(inner).not.toContain('>BP<');
+});
+
+test('mobile 375px: label+score together, no overflow, exact values', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/');
+  const footer = page.locator('.page-quality-footer');
+  await expect(footer).toBeVisible();
+
+  // No overflow
+  const scrollW = await footer.evaluate((el: HTMLElement) => el.scrollWidth);
+  const clientW = await footer.evaluate((el: HTMLElement) => el.clientWidth);
+  expect(scrollW).toBeLessThanOrEqual(clientW);
+
+  // Each metric fits on one line
+  const metrics = footer.locator('.page-quality-metric');
+  const n = await metrics.count();
+  for (let i = 0; i < n; i++) {
+    const h = await metrics.nth(i).evaluate((el: HTMLElement) => el.offsetHeight);
+    expect(h).toBeLessThan(40);
+  }
+
+  // Exact fixture values
+  const labels = footer.locator('.page-quality-label');
+  await expect(labels).toHaveCount(4);
+  await expect(labels.nth(0)).toHaveText('Performance');
+  await expect(labels.nth(1)).toHaveText('Accessibility');
+  await expect(labels.nth(2)).toHaveText('Best practices');
+  await expect(labels.nth(3)).toHaveText('SEO');
+
+  const scores = footer.locator('.page-quality-score');
+  await expect(scores.nth(0)).toHaveText('84');
+  await expect(scores.nth(1)).toHaveText('100');
+  await expect(scores.nth(2)).toHaveText('96');
+  await expect(scores.nth(3)).toHaveText('100');
+
+  // No jank from separator artifacts
+  const inner = await footer.innerHTML();
+  expect(inner).not.toContain('>null<');
+});
+
+test('481px: no overflow, all metrics visible', async ({ page }) => {
+  await page.setViewportSize({ width: 481, height: 800 });
+  await page.goto('/');
+  const footer = page.locator('.page-quality-footer');
+  await expect(footer).toBeVisible();
+
+  const scrollW = await footer.evaluate((el: HTMLElement) => el.scrollWidth);
+  const clientW = await footer.evaluate((el: HTMLElement) => el.clientWidth);
+  expect(scrollW).toBeLessThanOrEqual(clientW);
+  await expect(footer.locator('.page-quality-metric')).toHaveCount(4);
+});
+
+test('600px: no overflow, all metrics visible', async ({ page }) => {
+  await page.setViewportSize({ width: 600, height: 800 });
+  await page.goto('/');
+  const footer = page.locator('.page-quality-footer');
+  await expect(footer).toBeVisible();
+
+  const scrollW = await footer.evaluate((el: HTMLElement) => el.scrollWidth);
+  const clientW = await footer.evaluate((el: HTMLElement) => el.clientWidth);
+  expect(scrollW).toBeLessThanOrEqual(clientW);
+  await expect(footer.locator('.page-quality-metric')).toHaveCount(4);
+});
+
+test('no client-side JavaScript from quality footer', async ({ page }) => {
+  await page.goto('/');
+  const footer = page.locator('.page-quality-footer');
+  await expect(footer).toBeVisible();
+  await expect(footer.locator('script')).toHaveCount(0);
 });

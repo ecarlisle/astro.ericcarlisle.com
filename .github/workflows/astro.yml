@@ -93,6 +93,9 @@ jobs:
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
 
+      - name: Validate page quality build output
+        run: pnpm test:page-quality-build
+
       - name: Run E2E tests
         run: pnpm test:e2e
 
