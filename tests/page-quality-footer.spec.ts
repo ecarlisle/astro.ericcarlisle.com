@@ -7,7 +7,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
@@ -92,14 +92,6 @@ function buildWithScores(scoresPath: string): void {
   }
 }
 
-/**
- * Build dist/ with a fixture scores file and read the resulting HTML.
- * Used for both absent and present assertions without serving.
- */
-function buildAndGetHtml(scoresPath: string): string {
-  buildWithScores(scoresPath);
-  return readFileSync(join(REPO_ROOT, 'dist', 'index.html'), 'utf-8');
-}
 // ─── Score extraction ─────────────────────────────────────────────────────
 
 test('extracts valid category scores from Lighthouse JSON fixture', () => {
@@ -206,10 +198,38 @@ test('selectRepresentative: even 4 picks upper-middle (index 2)', () => {
   expect(r.scores.performance).toBe(85);
 });
 
-test('selectRepresentative: filename tie-breaking', () => {
-  // _file is stripped from output, but the tie-breaking is deterministic
-  const r = selectRepresentative([mkEntry(80, 'z'), mkEntry(80, 'a')]);
-  expect(r.scores.performance).toBe(80);
+test('selectRepresentative: filename tie-breaking picks median by filename', () => {
+  // Three entries with same Performance score.
+  // Sorted by filename: a.json (99), m.json (92), z.json (90).
+  // floor(3/2) = 1 -> index 1 -> m.json with accessibility=92.
+  const entries = [
+    {
+      route: '/' as const,
+      scores: { performance: 80, accessibility: 90, bestPractices: 85, seo: 95 },
+      timestamp: null as string | null,
+      lighthouseVersion: null as string | null,
+      formFactor: 'mobile' as const,
+      _file: 'z.json',
+    },
+    {
+      route: '/' as const,
+      scores: { performance: 80, accessibility: 92, bestPractices: 95, seo: 97 },
+      timestamp: null as string | null,
+      lighthouseVersion: null as string | null,
+      formFactor: 'mobile' as const,
+      _file: 'm.json',
+    },
+    {
+      route: '/' as const,
+      scores: { performance: 80, accessibility: 99, bestPractices: 99, seo: 99 },
+      timestamp: null as string | null,
+      lighthouseVersion: null as string | null,
+      formFactor: 'mobile' as const,
+      _file: 'a.json',
+    },
+  ];
+  const r = selectRepresentative(entries);
+  expect(r.scores.accessibility).toBe(92);
 });
 
 test('selectRepresentative: strips _file', () => {
@@ -219,27 +239,30 @@ test('selectRepresentative: strips _file', () => {
 
 // ─── Score-absent build ──────────────────────────────────────────────────
 
-test('build with nonexistent scores path produces no quality footer', async () => {
+test('build with absent and present scores produces correct output', async () => {
+  // Absent: build with nonexistent path
   const nonePath = join(tmpdir(), 'lh-scores-none.json');
   buildWithScores(nonePath);
-  const html = readFileSync(join(REPO_ROOT, 'dist', 'index.html'), 'utf-8');
+  let html = readFileSync(join(REPO_ROOT, 'dist', 'index.html'), 'utf-8');
   expect(html).not.toContain('page-quality-footer');
   expect(html).toContain('Eric Carlisle');
-});
 
-// ─── Score-present build ─────────────────────────────────────────────────
-
-test('build with valid fixture renders quality footer', async () => {
+  // Present: build with fixture
   const tmpDir = mkdtempSync(join(tmpdir(), 'lh-pres-test-'));
   const fixturePath = join(tmpDir, 'scores.json');
   writeFileSync(fixturePath, JSON.stringify(VALID_FIXTURE), 'utf-8');
-
   buildWithScores(fixturePath);
   rmSync(tmpDir, { recursive: true, force: true });
 
-  const html = readFileSync(join(REPO_ROOT, 'dist', 'index.html'), 'utf-8');
+  html = readFileSync(join(REPO_ROOT, 'dist', 'index.html'), 'utf-8');
   expect(html).toContain('page-quality-footer');
   expect(html).toContain('Page quality:');
+  // Verify exact fixture values appear
+  expect(html).toContain('Performance');
+  expect(html).toContain('Accessibility');
+  expect(html).toContain('Best practices');
+  expect(html).toContain('SEO');
+  expect(html).toContain('class="page-quality-score"');
 });
 
 // ─── Rendering via served build ──────────────────────────────────────────
@@ -576,9 +599,14 @@ test('validate-lighthouse-scores.mjs fails when file missing', () => {
       timeout: 10_000,
       env: { ...process.env, DATA_PATH: join(tmpDir, 'nonexistent.json') },
     });
-    expect(true).toBe(false); // should not succeed
+    throw new Error('Expected validator to fail but it succeeded');
   } catch (e: unknown) {
-    const err = e as { status?: number };
+    const err = e as { status?: number; message?: string };
+    // Validator should exit non-zero (file missing). If it succeeded,
+    // the throw above will be caught here and re-thrown.
+    if (err.status === undefined && err.message?.includes('Expected validator')) {
+      throw e;
+    }
     expect(err.status).not.toBe(0);
   }
   rmSync(tmpDir, { recursive: true, force: true });
@@ -600,11 +628,19 @@ test('validate-lighthouse-scores.mjs fails when pages empty', () => {
       timeout: 10_000,
       env: { ...process.env, DATA_PATH: dataPath },
     });
-    expect(true).toBe(false);
+    throw new Error('Expected validator to fail but it succeeded');
   } catch (e: unknown) {
-    const err = e as { status?: number; stderr?: string };
+    const err = e as { status?: number; stderr?: string | Buffer; message?: string };
+    if (
+      err.status === undefined &&
+      (err as { message?: string }).message?.includes('Expected validator')
+    ) {
+      throw e;
+    }
     expect(err.status).not.toBe(0);
-    expect(err.stderr || '').toContain('empty');
+    const errText =
+      typeof err.stderr === 'string' ? err.stderr : err.stderr ? err.stderr.toString() : '';
+    expect(errText).toContain('empty');
   }
   rmSync(tmpDir, { recursive: true, force: true });
 });
