@@ -148,43 +148,90 @@ test('homepage does not show quality footer when no scores data exists', async (
   // whether lighthouse-scores.json exists at build time.
 });
 
-test('quality footer uses accessible names for abbreviated categories', async ({ page }) => {
+test('quality footer has heading "Page quality"', async ({ page }) => {
   await page.goto('/');
-  const hasQualityFooter = await page.locator('.page-quality-footer').count();
-
-  if (hasQualityFooter === 0) {
+  const footer = page.locator('.page-quality-footer');
+  const count = await footer.count();
+  if (count === 0) {
     test.skip();
     return;
   }
+  await expect(footer.locator('#page-quality-heading')).toHaveCount(1);
+  await expect(footer.locator('.page-quality-heading')).toContainText('Page quality');
+});
 
-  // Check that each abbr has an aria-label with the full category name
-  const perf = page.locator('.page-quality-score abbr').nth(0);
-  const a11y = page.locator('.page-quality-score abbr').nth(1);
-  const bp = page.locator('.page-quality-score abbr').nth(2);
-  const seo = page.locator('.page-quality-score abbr').nth(3);
+test('quality footer displays four full metric labels', async ({ page }) => {
+  await page.goto('/');
+  const footer = page.locator('.page-quality-footer');
+  const count = await footer.count();
+  if (count === 0) {
+    test.skip();
+    return;
+  }
+  const labels = footer.locator('.page-quality-label');
+  await expect(labels).toHaveCount(4);
+  await expect(labels.nth(0)).toHaveText('Performance');
+  await expect(labels.nth(1)).toHaveText('Accessibility');
+  await expect(labels.nth(2)).toHaveText('Best practices');
+  await expect(labels.nth(3)).toHaveText('SEO');
+});
 
-  await expect(perf).toHaveAttribute('aria-label', /Performance score \d+/);
-  await expect(a11y).toHaveAttribute('aria-label', /Accessibility score \d+/);
-  await expect(bp).toHaveAttribute('aria-label', /Best Practices score \d+/);
-  await expect(seo).toHaveAttribute('aria-label', /Search Engine Optimization score \d+/);
+test('each metric score has an accessible label naming the category and "out of 100"', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const footer = page.locator('.page-quality-footer');
+  const count = await footer.count();
+  if (count === 0) {
+    test.skip();
+    return;
+  }
+  const values = footer.locator('.page-quality-value');
+  await expect(values).toHaveCount(4);
+
+  await expect(values.nth(0)).toHaveAttribute('aria-label', /^Performance:? \d+ out of 100$/);
+  await expect(values.nth(1)).toHaveAttribute('aria-label', /^Accessibility:? \d+ out of 100$/);
+  await expect(values.nth(2)).toHaveAttribute('aria-label', /^Best [Pp]ractices:? \d+ out of 100$/);
+  await expect(values.nth(3)).toHaveAttribute('aria-label', /^SEO:? \d+ out of 100$/);
+});
+
+test('quality footer shows "Measured with Lighthouse" note', async ({ page }) => {
+  await page.goto('/');
+  const footer = page.locator('.page-quality-footer');
+  const count = await footer.count();
+  if (count === 0) {
+    test.skip();
+    return;
+  }
+  await expect(footer.locator('.page-quality-note')).toContainText('Measured with Lighthouse');
+});
+
+test('quality footer does not use abbreviated labels (P, A, BP)', async ({ page }) => {
+  await page.goto('/');
+  const footer = page.locator('.page-quality-footer');
+  const count = await footer.count();
+  if (count === 0) {
+    test.skip();
+    return;
+  }
+  const html = await footer.innerHTML();
+  expect(html).not.toContain('>P<');
+  expect(html).not.toContain('>A<');
+  expect(html).not.toContain('>BP<');
 });
 
 test('quality footer does not introduce client-side JavaScript', async ({ page }) => {
   await page.goto('/');
-  // The component uses only static HTML/CSS — no script tags should originate from it.
-  // The .page-quality-footer element should be pure HTML.
   const footer = page.locator('.page-quality-footer');
   const count = await footer.count();
   if (count === 0) {
     test.skip();
     return;
   }
-  // Verify no <script> elements inside the quality footer
-  const scripts = footer.locator('script');
-  await expect(scripts).toHaveCount(0);
+  await expect(footer.locator('script')).toHaveCount(0);
 });
 
-test('quality footer links to /portfolio/site-quality/', async ({ page }) => {
+test('quality footer heading links to /portfolio/site-quality/', async ({ page }) => {
   await page.goto('/');
   const footer = page.locator('.page-quality-footer');
   const count = await footer.count();
@@ -192,8 +239,10 @@ test('quality footer links to /portfolio/site-quality/', async ({ page }) => {
     test.skip();
     return;
   }
-  const link = footer.locator('a');
-  await expect(link).toHaveAttribute('href', '/portfolio/site-quality/');
+  const headingLink = footer.locator('.page-quality-heading a');
+  await expect(headingLink).toHaveAttribute('href', '/portfolio/site-quality/');
+  const noteLink = footer.locator('.page-quality-note a');
+  await expect(noteLink).toHaveAttribute('href', '/portfolio/site-quality/');
 });
 
 // ─── Build-time behavior ───────────────────────────────────────────────────

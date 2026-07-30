@@ -1,10 +1,10 @@
 ---
 /**
- * PageQualityFooter — compact Lighthouse score report for the site footer.
+ * PageQualityFooter — Lighthouse score report for the site footer.
  *
- * Reads generated deployment-audit data and renders a subdued line with
- * per-category scores. The component is self-contained, uses no client
- * JavaScript, and gracefully degrades when no score data is available.
+ * Displays four category scores (Performance, Accessibility, Best practices,
+ * SEO) in a compact grid with full labels. Links to the site-quality page
+ * for methodology details. Gracefully omitted when no score data exists.
  */
 import type { LighthousePageData } from './lighthouse-scores';
 
@@ -17,33 +17,61 @@ const { data } = Astro.props;
 
 // If no data, render nothing — the footer stays clean.
 if (!data) return;
+
+interface Metric {
+  label: string;
+  score: number;
+  slug: string;
+}
+
+const metrics: Metric[] = [
+  { label: 'Performance', score: data.scores.performance, slug: 'performance' },
+  { label: 'Accessibility', score: data.scores.accessibility, slug: 'accessibility' },
+  { label: 'Best practices', score: data.scores.bestPractices, slug: 'best-practices' },
+  { label: 'SEO', score: data.scores.seo, slug: 'seo' },
+];
 ---
 
-<p class="page-quality-footer" role="contentinfo" aria-label="Page quality scores">
-  <a href="/portfolio/site-quality/" class="page-quality-link">
-    <span class="sr-only">Page quality: </span>
-    <span aria-hidden="true">Deployment audit ·</span>
-    <span class="page-quality-score">
-      <abbr title={'Performance: ' + data.scores.performance + ' out of 100'} aria-label={'Performance score ' + data.scores.performance}>P&nbsp;{data.scores.performance}</abbr>
-    </span>
-    <span class="page-quality-score">
-      <abbr title={'Accessibility: ' + data.scores.accessibility + ' out of 100'} aria-label={'Accessibility score ' + data.scores.accessibility}>A&nbsp;{data.scores.accessibility}</abbr>
-    </span>
-    <span class="page-quality-score">
-      <abbr title={'Best Practices: ' + data.scores.bestPractices + ' out of 100'} aria-label={'Best Practices score ' + data.scores.bestPractices}>BP&nbsp;{data.scores.bestPractices}</abbr>
-    </span>
-    <span class="page-quality-score">
-      <abbr title={'SEO: ' + data.scores.seo + ' out of 100'} aria-label={'Search Engine Optimization score ' + data.scores.seo}>SEO&nbsp;{data.scores.seo}</abbr>
-    </span>
-  </a>
-</p>
+<section class="page-quality-footer" aria-labelledby="page-quality-heading">
+  <h3 id="page-quality-heading" class="page-quality-heading">
+    <a href="/portfolio/site-quality/" class="page-quality-link">
+      Page quality
+    </a>
+  </h3>
+
+  <div class="page-quality-scores" role="list">
+    {metrics.map((m) => (
+      <div class="page-quality-metric" role="listitem">
+        <span class="page-quality-label">{m.label}</span>
+        <span
+          class="page-quality-value"
+          aria-label={m.label + ': ' + m.score + ' out of 100'}
+        >{m.score}</span>
+      </div>
+    ))}
+  </div>
+
+  <p class="page-quality-note">
+    <a href="/portfolio/site-quality/" class="page-quality-link">
+      Measured with Lighthouse
+    </a>
+  </p>
+</section>
 
 <style>
   .page-quality-footer {
     margin-top: var(--space-component);
-    font-size: var(--type-size-small);
-    line-height: var(--line-height-body);
     text-align: center;
+  }
+
+  .page-quality-heading {
+    margin: 0 0 var(--space-xs);
+    font-family: var(--font-copy);
+    font-size: var(--type-size-small);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-label);
+    text-transform: uppercase;
   }
 
   .page-quality-link {
@@ -56,28 +84,56 @@ if (!data) return;
     color: var(--text-secondary);
   }
 
-  .page-quality-score {
-    display: inline;
-    white-space: nowrap;
+  .page-quality-scores {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-xs);
+    max-width: 24rem;
+    margin: 0 auto;
   }
 
-  .page-quality-score abbr {
-    font-family: var(--font-mono);
-    font-size: 0.9em;
+  .page-quality-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .page-quality-label {
+    font-family: var(--font-copy);
+    font-size: 0.65rem;
+    line-height: 1.2;
+    color: var(--text-muted);
     letter-spacing: var(--letter-spacing-label);
-    text-decoration: none;
-    cursor: default;
+    text-transform: uppercase;
+    word-break: keep-all;
+    white-space: nowrap;
   }
 
-  :global(.sr-only) {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+  .page-quality-value {
+    font-family: var(--font-mono);
+    font-size: var(--type-size-h4);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.1;
+    color: var(--text-secondary);
+  }
+
+  .page-quality-note {
+    margin: var(--space-xs) 0 0;
+    font-family: var(--font-copy);
+    font-size: 0.65rem;
+    line-height: 1.2;
+    color: var(--text-muted);
+  }
+
+  /* Narrow: 2-column layout */
+  @media (max-width: 480px) {
+    .page-quality-scores {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .page-quality-metric:nth-child(n+3) {
+      margin-top: var(--space-xs);
+    }
   }
 </style>
