@@ -34,7 +34,8 @@
     "lighthouse:scores": "node scripts/generate-lighthouse-scores.mjs",
     "lighthouse:report": "pnpm build && pnpm lighthouse:all && pnpm lighthouse:scores",
     "validate:site-quality-lighthouse": "node scripts/validate-site-quality-lighthouse.mjs",
-    "test:page-quality-build": "node scripts/test-page-quality-build.mjs"
+    "test:page-quality-build": "node scripts/test-page-quality-build.mjs",
+    "inventory:generate": "node scripts/generate-site-inventory.mjs"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",

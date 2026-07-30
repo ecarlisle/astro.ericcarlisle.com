@@ -1,0 +1,477 @@
+{
+  "generatedAt": "2026-07-30T21:21:37.570Z",
+  "summary": {
+    "totalUrls": 25,
+    "builtPages": 24,
+    "sitemapUrls": 24,
+    "orphanedPages": 0,
+    "pagesWithWarnings": 8,
+    "totalWarnings": 14
+  },
+  "pages": [
+    {
+      "route": "/",
+      "file": "index.html",
+      "size": 30958,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Eric Carlisle | Principal Frontend Engineer &amp; UX Architect",
+      "description": "Principal Frontend Engineer &amp; UX Architect. Technical deep-dives on web performance, accessibility, Astro, React, and modern CSS architecture.",
+      "canonical": "https://ericcarlisle.com/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["Hi, I&rsquo;m Eric Carlisle."],
+      "inboundCount": 19,
+      "warnings": []
+    },
+    {
+      "route": "/404.html/",
+      "file": "404.html",
+      "size": 21551,
+      "built": true,
+      "inSitemap": false,
+      "sitemapLastmod": null,
+      "title": "404 | Eric Carlisle",
+      "description": "Page not found.",
+      "canonical": "https://ericcarlisle.com/404/",
+      "robots": "noindex",
+      "h1Count": 1,
+      "h1Texts": ["Page not found"],
+      "inboundCount": 1,
+      "warnings": [
+        {
+          "code": "CANONICAL_MISMATCH",
+          "message": "Canonical URL \"https://ericcarlisle.com/404/\" resolves to \"/404/\", which differs from the page route \"/404.html/\"."
+        }
+      ]
+    },
+    {
+      "route": "/about/",
+      "file": "about/index.html",
+      "size": 25744,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "About Me | Eric Carlisle",
+      "description": "Principal Frontend Engineer &amp; UX Architect building high-performance web experiences.",
+      "canonical": "https://ericcarlisle.com/about/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["About Me"],
+      "inboundCount": 19,
+      "warnings": []
+    },
+    {
+      "route": "/blog/",
+      "file": "blog/index.html",
+      "size": 27747,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Blog | Eric Carlisle",
+      "description": "Articles on frontend architecture, web performance, accessibility, and modern CSS from Principal Frontend Engineer Eric Carlisle.",
+      "canonical": "https://ericcarlisle.com/blog/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["Blog"],
+      "inboundCount": 19,
+      "warnings": []
+    },
+    {
+      "route": "/blog/250mm-trading-card-box/",
+      "file": "blog/250mm-trading-card-box/index.html",
+      "size": 45985,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "250mm Trading Card Box, a 3D Print | Eric Carlisle",
+      "description": "A 3D-printed top-load trading card box for Magic: The Gathering cards, with a lift-off lid, 250mm depth, and efficient material use.",
+      "canonical": "https://ericcarlisle.com/blog/250mm-trading-card-box/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["250mm Trading Card Box, a 3D Print"],
+      "inboundCount": 6,
+      "warnings": []
+    },
+    {
+      "route": "/blog/better-agent-results-start-with-better-context/",
+      "file": "blog/better-agent-results-start-with-better-context/index.html",
+      "size": 44613,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Better Agent Results Start With Better Context | Eric Carlisle",
+      "description": "Better agent results depend on more than better prompts. They need carefully shaped context that makes project knowledge and developer judgment easier to follow.",
+      "canonical": "https://ericcarlisle.com/blog/better-agent-results-start-with-better-context/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["Better Agent Results Start With Better Context"],
+      "inboundCount": 8,
+      "warnings": []
+    },
+    {
+      "route": "/blog/why-do-i-need-all-this-usb-and-sd-media-holder/",
+      "file": "blog/why-do-i-need-all-this-usb-and-sd-media-holder/index.html",
+      "size": 40784,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "The &quot;Why do I need all this USB &amp; SD media?&quot; Holder | Eric Carlisle",
+      "description": "A compact 3D-printed holder for USB-A sticks, SD cards, and MicroSD cards, designed as a rectangular organizer for portable media.",
+      "canonical": "https://ericcarlisle.com/blog/why-do-i-need-all-this-usb-and-sd-media-holder/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["The &quot;Why do I need all this USB &amp; SD media?&quot; Holder"],
+      "inboundCount": 7,
+      "warnings": []
+    },
+    {
+      "route": "/contact/",
+      "file": "contact/index.html",
+      "size": 29872,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Contact | Eric Carlisle",
+      "description": "Get in touch with the blog author.",
+      "canonical": "https://ericcarlisle.com/contact/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["Contact"],
+      "inboundCount": 19,
+      "warnings": []
+    },
+    {
+      "route": "/design-system/lab/",
+      "file": null,
+      "size": null,
+      "built": false,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": null,
+      "description": null,
+      "canonical": null,
+      "robots": null,
+      "h1Count": 0,
+      "h1Texts": [],
+      "inboundCount": 0,
+      "warnings": [
+        {
+          "code": "NO_BUILT_PAGE",
+          "message": "Sitemap references \"/design-system/lab/\" but no corresponding HTML file was generated."
+        }
+      ]
+    },
+    {
+      "route": "/lab/context/",
+      "file": "lab/context/index.html",
+      "size": 46015,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Context Health: EricCarlisle.com",
+      "description": "An experimental static assessment of coding-agent context readiness, with observed performance reported separately.",
+      "canonical": null,
+      "robots": "noindex, follow",
+      "h1Count": 1,
+      "h1Texts": ["Context Health: EricCarlisle.com"],
+      "inboundCount": 1,
+      "warnings": [
+        {
+          "code": "NOINDEX_IN_SITEMAP",
+          "message": "Page has robots=\"noindex\" but is included in the sitemap."
+        }
+      ]
+    },
+    {
+      "route": "/lab/site-inventory/",
+      "file": "lab/site-inventory/index.html",
+      "size": 47629,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Site Inventory — Eric Carlisle",
+      "description": null,
+      "canonical": null,
+      "robots": "noindex, nofollow",
+      "h1Count": 1,
+      "h1Texts": ["Site Inventory"],
+      "inboundCount": 0,
+      "warnings": [
+        {
+          "code": "NOINDEX_IN_SITEMAP",
+          "message": "Page has robots=\"noindex\" but is included in the sitemap."
+        }
+      ]
+    },
+    {
+      "route": "/lab/youtube-facade-test/",
+      "file": "lab/youtube-facade-test/index.html",
+      "size": 7838,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "YouTube Facade Test — Eric Carlisle",
+      "description": null,
+      "canonical": null,
+      "robots": "noindex",
+      "h1Count": 1,
+      "h1Texts": ["YouTube Facade Test"],
+      "inboundCount": 1,
+      "warnings": [
+        {
+          "code": "NOINDEX_IN_SITEMAP",
+          "message": "Page has robots=\"noindex\" but is included in the sitemap."
+        }
+      ]
+    },
+    {
+      "route": "/portfolio/",
+      "file": "portfolio/index.html",
+      "size": 44594,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Portfolio | Eric Carlisle",
+      "description": "Selected projects and work by Principal Frontend Engineer Eric Carlisle.",
+      "canonical": "https://ericcarlisle.com/portfolio/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["Portfolio"],
+      "inboundCount": 3,
+      "warnings": []
+    },
+    {
+      "route": "/portfolio/design-system/",
+      "file": "portfolio/design-system/index.html",
+      "size": 63860,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Design System Companion | Eric Carlisle",
+      "description": "A curated reference for the typography, spacing, color, layout, components, and accessibility decisions implemented across ericcarlisle.com.",
+      "canonical": "https://ericcarlisle.com/portfolio/design-system/",
+      "robots": "noindex, follow",
+      "h1Count": 1,
+      "h1Texts": ["Design System Companion"],
+      "inboundCount": 3,
+      "warnings": [
+        {
+          "code": "NOINDEX_IN_SITEMAP",
+          "message": "Page has robots=\"noindex\" but is included in the sitemap."
+        }
+      ]
+    },
+    {
+      "route": "/portfolio/site-quality/",
+      "file": "portfolio/site-quality/index.html",
+      "size": 96976,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Site Quality | Eric Carlisle",
+      "description": "Measurable quality characteristics of ericcarlisle.com: performance, accessibility, bundle size, test coverage, and Storybook component-lab evidence.",
+      "canonical": "https://ericcarlisle.com/portfolio/site-quality/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["Site Quality"],
+      "inboundCount": 5,
+      "warnings": []
+    },
+    {
+      "route": "/posts/3d-printing/250mm-trading-card-box/",
+      "file": "posts/3d-printing/250mm-trading-card-box/index.html",
+      "size": 445,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Redirecting to: /blog/250mm-trading-card-box/",
+      "description": null,
+      "canonical": "https://ericcarlisle.com/blog/250mm-trading-card-box/",
+      "robots": "noindex",
+      "h1Count": 0,
+      "h1Texts": [],
+      "inboundCount": 1,
+      "warnings": [
+        {
+          "code": "NOINDEX_IN_SITEMAP",
+          "message": "Page has robots=\"noindex\" but is included in the sitemap."
+        },
+        {
+          "code": "CANONICAL_MISMATCH",
+          "message": "Canonical URL \"https://ericcarlisle.com/blog/250mm-trading-card-box/\" resolves to \"/blog/250mm-trading-card-box/\", which differs from the page route \"/posts/3d-printing/250mm-trading-card-box/\"."
+        },
+        {
+          "code": "MISSING_DESCRIPTION",
+          "message": "No meta description found."
+        },
+        {
+          "code": "MISSING_H1",
+          "message": "Page has no <h1>."
+        }
+      ]
+    },
+    {
+      "route": "/posts/3d-printing/why-do-i-need-all-this-usb-and-sd-media-holder/",
+      "file": "posts/3d-printing/why-do-i-need-all-this-usb-and-sd-media-holder/index.html",
+      "size": 589,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Redirecting to: /blog/why-do-i-need-all-this-usb-and-sd-media-holder/",
+      "description": null,
+      "canonical": "https://ericcarlisle.com/blog/why-do-i-need-all-this-usb-and-sd-media-holder/",
+      "robots": "noindex",
+      "h1Count": 0,
+      "h1Texts": [],
+      "inboundCount": 1,
+      "warnings": [
+        {
+          "code": "NOINDEX_IN_SITEMAP",
+          "message": "Page has robots=\"noindex\" but is included in the sitemap."
+        },
+        {
+          "code": "CANONICAL_MISMATCH",
+          "message": "Canonical URL \"https://ericcarlisle.com/blog/why-do-i-need-all-this-usb-and-sd-media-holder/\" resolves to \"/blog/why-do-i-need-all-this-usb-and-sd-media-holder/\", which differs from the page route \"/posts/3d-printing/why-do-i-need-all-this-usb-and-sd-media-holder/\"."
+        },
+        {
+          "code": "MISSING_DESCRIPTION",
+          "message": "No meta description found."
+        },
+        {
+          "code": "MISSING_H1",
+          "message": "Page has no <h1>."
+        }
+      ]
+    },
+    {
+      "route": "/search/",
+      "file": "search/index.html",
+      "size": 22879,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Search | Eric Carlisle",
+      "description": "Find articles, portfolio notes, and other site pages.",
+      "canonical": "https://ericcarlisle.com/search/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["Search"],
+      "inboundCount": 19,
+      "warnings": []
+    },
+    {
+      "route": "/speaking/",
+      "file": "speaking/index.html",
+      "size": 39338,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Selected Talks | Eric Carlisle",
+      "description": "Selected presentations by Eric Carlisle on Astro, responsive design, CSS Flexbox, and D3.js.",
+      "canonical": "https://ericcarlisle.com/speaking/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["Selected Talks"],
+      "inboundCount": 3,
+      "warnings": []
+    },
+    {
+      "route": "/tags/",
+      "file": "tags/index.html",
+      "size": 24213,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Tags | Eric Carlisle",
+      "description": "Browse all 5 topic tags across 3 posts.",
+      "canonical": "https://ericcarlisle.com/tags/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["Tags"],
+      "inboundCount": 1,
+      "warnings": []
+    },
+    {
+      "route": "/tags/3d-printing/",
+      "file": "tags/3d-printing/index.html",
+      "size": 24173,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Tagged: 3d-printing | Eric Carlisle",
+      "description": "Posts tagged with &quot;3d-printing&quot;",
+      "canonical": "https://ericcarlisle.com/tags/3d-printing/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["Tagged: 3d-printing"],
+      "inboundCount": 5,
+      "warnings": []
+    },
+    {
+      "route": "/tags/ai-agents/",
+      "file": "tags/ai-agents/index.html",
+      "size": 23231,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Tagged: ai-agents | Eric Carlisle",
+      "description": "Posts tagged with &quot;ai-agents&quot;",
+      "canonical": "https://ericcarlisle.com/tags/ai-agents/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["Tagged: ai-agents"],
+      "inboundCount": 7,
+      "warnings": []
+    },
+    {
+      "route": "/tags/ai/",
+      "file": "tags/ai/index.html",
+      "size": 23112,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Tagged: ai | Eric Carlisle",
+      "description": "Posts tagged with &quot;ai&quot;",
+      "canonical": "https://ericcarlisle.com/tags/ai/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["Tagged: ai"],
+      "inboundCount": 7,
+      "warnings": []
+    },
+    {
+      "route": "/tags/documentation/",
+      "file": "tags/documentation/index.html",
+      "size": 23299,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Tagged: documentation | Eric Carlisle",
+      "description": "Posts tagged with &quot;documentation&quot;",
+      "canonical": "https://ericcarlisle.com/tags/documentation/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["Tagged: documentation"],
+      "inboundCount": 7,
+      "warnings": []
+    },
+    {
+      "route": "/tags/software-development/",
+      "file": "tags/software-development/index.html",
+      "size": 23418,
+      "built": true,
+      "inSitemap": true,
+      "sitemapLastmod": null,
+      "title": "Tagged: software-development | Eric Carlisle",
+      "description": "Posts tagged with &quot;software-development&quot;",
+      "canonical": "https://ericcarlisle.com/tags/software-development/",
+      "robots": "index, follow",
+      "h1Count": 1,
+      "h1Texts": ["Tagged: software-development"],
+      "inboundCount": 4,
+      "warnings": []
+    }
+  ]
+}

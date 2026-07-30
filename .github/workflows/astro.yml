@@ -129,6 +129,9 @@ jobs:
           PUBLIC_CONTACT_API_URL: ${{ vars.PUBLIC_CONTACT_API_URL }}
           WEBMENTION_IO_TOKEN: ${{ secrets.WEBMENTION_IO_TOKEN }}
 
+      - name: Generate Site Inventory
+        run: pnpm inventory:generate
+
       - name: Copy Storybook to dist (final)
         run: |
           mkdir -p dist/design-system/lab
