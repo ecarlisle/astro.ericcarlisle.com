@@ -17,8 +17,8 @@
 
 import { execSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const ROOT = join(import.meta.dirname, '..');
 const DIST_HTML = join(ROOT, 'dist', 'index.html');
@@ -39,59 +39,79 @@ function build(scoresPath) {
   }
 }
 
-// ── Absent-score build ──────────────────────────────────────────────────
-console.log('1. Building with absent scores…');
-build(join(tmpdir(), 'nonexistent-scores.json'));
-if (!existsSync(DIST_HTML)) fail('dist/index.html not found after build');
-const absentHtml = readFileSync(DIST_HTML, 'utf-8');
-if (absentHtml.includes('page-quality-footer')) {
-  fail('Absent build should not contain page-quality-footer');
-}
-console.log('   ✓ No quality footer when scores absent.');
-
-// ── Present-score build ─────────────────────────────────────────────────
-console.log('2. Building with deterministic fixture…');
-const tmpDir = mkdtempSync(join(tmpdir(), 'lh-build-test-'));
-const fixturePath = join(tmpDir, 'scores.json');
-const fixture = {
-  generatedAt: 't',
-  commitSha: 't',
-  lighthouseVersion: '13.4.0',
-  pages: [
-    {
-      route: '/',
-      scores: { performance: 84, accessibility: 100, bestPractices: 96, seo: 100 },
-      timestamp: null,
-      lighthouseVersion: null,
-      formFactor: 'mobile',
-    },
-  ],
-};
-writeFileSync(fixturePath, JSON.stringify(fixture), 'utf-8');
-build(fixturePath);
-rmSync(tmpDir, { recursive: true, force: true });
-
-const presentHtml = readFileSync(DIST_HTML, 'utf-8');
-
-const checks = [
-  ['page-quality-footer', presentHtml.includes('page-quality-footer')],
-  ['Page quality label', presentHtml.includes('Page quality:')],
-  ['Performance label', presentHtml.includes('Performance')],
-  ['Accessibility label', presentHtml.includes('Accessibility')],
-  ['Best practices label', presentHtml.includes('Best practices')],
-  ['SEO label', presentHtml.includes('SEO')],
-  ['Expected scores', presentHtml.includes('class="page-quality-score"')],
-  ['No null text', !presentHtml.includes('>null<')],
-];
-
-let pass = true;
-for (const [label, ok] of checks) {
-  if (!ok) {
-    console.error(`   ✗ ${label} not found in present build`);
-    pass = false;
+let globalTempDir = null;
+function cleanup() {
+  if (globalTempDir) {
+    try {
+      rmSync(globalTempDir, { recursive: true, force: true });
+    } catch {}
+    globalTempDir = null;
   }
 }
-if (!pass) fail('Present-score build missing expected footer content');
-console.log('   ✓ Quality footer present with expected labels and values.');
 
-console.log('\n✅ All page-quality build assertions pass.');
+try {
+  // ── Absent-score build ──────────────────────────────────────────────────
+  console.log('1. Building with absent scores…');
+  globalTempDir = mkdtempSync(join(tmpdir(), 'lh-absent-'));
+  const absentPath = join(globalTempDir, 'nonexistent-scores.json');
+  // Deliberately do NOT create this file — we need a guaranteed-absent path.
+  build(absentPath);
+
+  if (!existsSync(DIST_HTML)) fail('dist/index.html not found after build');
+  const absentHtml = readFileSync(DIST_HTML, 'utf-8');
+  if (absentHtml.includes('page-quality-footer')) {
+    fail('Absent build should not contain page-quality-footer');
+  }
+  console.log('   ✓ No quality footer when scores absent.');
+
+  // Clean up absent-fixture temp dir before starting present build
+  cleanup();
+
+  // ── Present-score build ─────────────────────────────────────────────────
+  console.log('2. Building with deterministic fixture…');
+  globalTempDir = mkdtempSync(join(tmpdir(), 'lh-present-'));
+  const fixturePath = join(globalTempDir, 'scores.json');
+  const fixture = {
+    generatedAt: 't',
+    commitSha: 't',
+    lighthouseVersion: '13.4.0',
+    pages: [
+      {
+        route: '/',
+        scores: { performance: 84, accessibility: 100, bestPractices: 96, seo: 100 },
+        timestamp: null,
+        lighthouseVersion: null,
+        formFactor: 'mobile',
+      },
+    ],
+  };
+  writeFileSync(fixturePath, JSON.stringify(fixture), 'utf-8');
+  build(fixturePath);
+
+  const presentHtml = readFileSync(DIST_HTML, 'utf-8');
+
+  const checks = [
+    ['page-quality-footer', presentHtml.includes('page-quality-footer')],
+    ['Page quality label', presentHtml.includes('Page quality:')],
+    ['Performance label', presentHtml.includes('Performance')],
+    ['Accessibility label', presentHtml.includes('Accessibility')],
+    ['Best practices label', presentHtml.includes('Best practices')],
+    ['SEO label', presentHtml.includes('SEO')],
+    ['Expected scores', presentHtml.includes('class="page-quality-score"')],
+    ['No null text', !presentHtml.includes('>null<')],
+  ];
+
+  let pass = true;
+  for (const [label, ok] of checks) {
+    if (!ok) {
+      console.error(`   ✗ ${label} not found in present build`);
+      pass = false;
+    }
+  }
+  if (!pass) fail('Present-score build missing expected footer content');
+  console.log('   ✓ Quality footer present with expected labels and values.');
+
+  console.log('\n✅ All page-quality build assertions pass.');
+} finally {
+  cleanup();
+}

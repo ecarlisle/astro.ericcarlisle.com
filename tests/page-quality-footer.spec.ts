@@ -215,6 +215,12 @@ test('selectRepresentative: strips _file', () => {
   expect(r).not.toHaveProperty('_file');
 });
 
+test('selectRepresentative: throws for empty input', () => {
+  expect(() => selectRepresentative([])).toThrow(/requires at least one entry/);
+});
+
+// ─── Generator integration tests ─────────────────────────────────────────
+
 // ─── Generator integration tests ─────────────────────────────────────────
 
 function runGenerator(opts: {
@@ -275,25 +281,27 @@ function writeLhReport(
 
 test('generator writes scores for valid .report.json', () => {
   const tmpDir = mkdtempSync(join(tmpdir(), 'lh-gen-'));
-  const reportsDir = join(tmpDir, 'lh-reports');
-  const outputDir = join(tmpDir, 'output');
-  mkdirSync(reportsDir, { recursive: true });
-  mkdirSync(outputDir, { recursive: true });
+  try {
+    const reportsDir = join(tmpDir, 'lh-reports');
+    const outputDir = join(tmpDir, 'output');
+    mkdirSync(reportsDir, { recursive: true });
+    mkdirSync(outputDir, { recursive: true });
 
-  writeLhReport(reportsDir, 'index.report.json', {
-    requestedUrl: 'http://localhost:4321/',
-  });
+    writeLhReport(reportsDir, 'index.report.json', {
+      requestedUrl: 'http://localhost:4321/',
+    });
 
-  const r = runGenerator({ lhReportsDir: reportsDir, outputDir });
-  expect(r.exitCode).toBe(0);
+    const r = runGenerator({ lhReportsDir: reportsDir, outputDir });
+    expect(r.exitCode).toBe(0);
 
-  const out = JSON.parse(readFileSync(join(outputDir, 'lighthouse-scores.json'), 'utf-8'));
-  expect(out.pages).toHaveLength(1);
-  expect(out.pages[0].route).toBe('/');
-  expect(out.pages[0].scores.performance).toBe(84);
-  expect(out.pages[0].scores.accessibility).toBe(100);
-
-  rmSync(tmpDir, { recursive: true, force: true });
+    const out = JSON.parse(readFileSync(join(outputDir, 'lighthouse-scores.json'), 'utf-8'));
+    expect(out.pages).toHaveLength(1);
+    expect(out.pages[0].route).toBe('/');
+    expect(out.pages[0].scores.performance).toBe(84);
+    expect(out.pages[0].scores.accessibility).toBe(100);
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
 });
 
 test('generator prefers .report.json over other .json', () => {
@@ -303,32 +311,35 @@ test('generator prefers .report.json over other .json', () => {
   mkdirSync(reportsDir, { recursive: true });
   mkdirSync(outputDir, { recursive: true });
 
-  // Both exist — generator should prefer .report.json
-  writeLhReport(reportsDir, 'index.report.json', {
-    requestedUrl: 'http://localhost:4321/',
-    categories: {
-      performance: { score: 0.9 },
-      accessibility: { score: 1.0 },
-      'best-practices': { score: 1.0 },
-      seo: { score: 1.0 },
-    },
-  });
-  writeLhReport(reportsDir, 'index.json', {
-    requestedUrl: 'http://localhost:4321/',
-    categories: {
-      performance: { score: 0.5 },
-      accessibility: { score: 0.5 },
-      'best-practices': { score: 0.5 },
-      seo: { score: 0.5 },
-    },
-  });
+  try {
+    // Both exist — generator should prefer .report.json
+    writeLhReport(reportsDir, 'index.report.json', {
+      requestedUrl: 'http://localhost:4321/',
+      categories: {
+        performance: { score: 0.9 },
+        accessibility: { score: 1.0 },
+        'best-practices': { score: 1.0 },
+        seo: { score: 1.0 },
+      },
+    });
+    writeLhReport(reportsDir, 'index.json', {
+      requestedUrl: 'http://localhost:4321/',
+      categories: {
+        performance: { score: 0.5 },
+        accessibility: { score: 0.5 },
+        'best-practices': { score: 0.5 },
+        seo: { score: 0.5 },
+      },
+    });
 
-  const r = runGenerator({ lhReportsDir: reportsDir, outputDir });
-  expect(r.exitCode).toBe(0);
+    const r = runGenerator({ lhReportsDir: reportsDir, outputDir });
+    expect(r.exitCode).toBe(0);
 
-  const out = JSON.parse(readFileSync(join(outputDir, 'lighthouse-scores.json'), 'utf-8'));
-  expect(out.pages[0].scores.performance).toBe(90);
-  rmSync(tmpDir, { recursive: true, force: true });
+    const out = JSON.parse(readFileSync(join(outputDir, 'lighthouse-scores.json'), 'utf-8'));
+    expect(out.pages[0].scores.performance).toBe(90);
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
 });
 
 test('generator falls back to plain .json when no .report.json exists', () => {
@@ -485,89 +496,122 @@ test('generator output is sorted by route deterministically', () => {
 
 test('generator even-count picks upper-middle (index 2 of 4)', () => {
   const tmpDir = mkdtempSync(join(tmpdir(), 'lh-even-'));
-  const reportsDir = join(tmpDir, 'lh-reports');
-  const outputDir = join(tmpDir, 'output');
-  mkdirSync(reportsDir, { recursive: true });
-  mkdirSync(outputDir, { recursive: true });
+  try {
+    const reportsDir = join(tmpDir, 'lh-reports');
+    const outputDir = join(tmpDir, 'output');
+    mkdirSync(reportsDir, { recursive: true });
+    mkdirSync(outputDir, { recursive: true });
 
-  // Sorted by Performance: 75(a), 80(d), 85(c), 95(b) → floor(4/2)=2 → index 2 (85)
-  writeLhReport(reportsDir, 'a.report.json', {
-    requestedUrl: 'http://localhost:4321/',
-    categories: {
-      performance: { score: 0.75 },
-      accessibility: { score: 1.0 },
-      'best-practices': { score: 1.0 },
-      seo: { score: 1.0 },
-    },
-  });
-  writeLhReport(reportsDir, 'b.report.json', {
-    requestedUrl: 'http://localhost:4321/',
-    categories: {
-      performance: { score: 0.95 },
-      accessibility: { score: 1.0 },
-      'best-practices': { score: 1.0 },
-      seo: { score: 1.0 },
-    },
-  });
-  writeLhReport(reportsDir, 'c.report.json', {
-    requestedUrl: 'http://localhost:4321/',
-    categories: {
-      performance: { score: 0.85 },
-      accessibility: { score: 1.0 },
-      'best-practices': { score: 1.0 },
-      seo: { score: 1.0 },
-    },
-  });
-  writeLhReport(reportsDir, 'd.report.json', {
-    requestedUrl: 'http://localhost:4321/',
-    categories: {
-      performance: { score: 0.8 },
-      accessibility: { score: 1.0 },
-      'best-practices': { score: 1.0 },
-      seo: { score: 1.0 },
-    },
-  });
+    writeLhReport(reportsDir, 'a.report.json', {
+      requestedUrl: 'http://localhost:4321/',
+      categories: {
+        performance: { score: 0.75 },
+        accessibility: { score: 1.0 },
+        'best-practices': { score: 1.0 },
+        seo: { score: 1.0 },
+      },
+    });
+    writeLhReport(reportsDir, 'b.report.json', {
+      requestedUrl: 'http://localhost:4321/',
+      categories: {
+        performance: { score: 0.95 },
+        accessibility: { score: 1.0 },
+        'best-practices': { score: 1.0 },
+        seo: { score: 1.0 },
+      },
+    });
+    writeLhReport(reportsDir, 'c.report.json', {
+      requestedUrl: 'http://localhost:4321/',
+      categories: {
+        performance: { score: 0.85 },
+        accessibility: { score: 1.0 },
+        'best-practices': { score: 1.0 },
+        seo: { score: 1.0 },
+      },
+    });
+    writeLhReport(reportsDir, 'd.report.json', {
+      requestedUrl: 'http://localhost:4321/',
+      categories: {
+        performance: { score: 0.8 },
+        accessibility: { score: 1.0 },
+        'best-practices': { score: 1.0 },
+        seo: { score: 1.0 },
+      },
+    });
 
-  const r = runGenerator({ lhReportsDir: reportsDir, outputDir });
-  expect(r.exitCode).toBe(0);
-  const out = JSON.parse(readFileSync(join(outputDir, 'lighthouse-scores.json'), 'utf-8'));
-  expect(out.pages[0].scores.performance).toBe(85);
-  rmSync(tmpDir, { recursive: true, force: true });
+    const r = runGenerator({ lhReportsDir: reportsDir, outputDir });
+    expect(r.exitCode).toBe(0);
+    const out = JSON.parse(readFileSync(join(outputDir, 'lighthouse-scores.json'), 'utf-8'));
+    expect(out.pages[0].scores.performance).toBe(85);
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('generator top-level lighthouseVersion is deterministic', () => {
+  const tmpDir = mkdtempSync(join(tmpdir(), 'lh-ver-'));
+  try {
+    const reportsDir = join(tmpDir, 'lh-reports');
+    const outputDir = join(tmpDir, 'output');
+    mkdirSync(reportsDir, { recursive: true });
+    mkdirSync(outputDir, { recursive: true });
+
+    // Two reports with different versions, out of filename order
+    writeLhReport(reportsDir, 'z.report.json', {
+      requestedUrl: 'http://localhost:4321/about/',
+      lighthouseVersion: '12.0.0',
+    });
+    writeLhReport(reportsDir, 'a.report.json', {
+      requestedUrl: 'http://localhost:4321/',
+      lighthouseVersion: '13.4.0',
+    });
+
+    const r1 = runGenerator({ lhReportsDir: reportsDir, outputDir });
+    expect(r1.exitCode).toBe(0);
+    const out1 = JSON.parse(readFileSync(join(outputDir, 'lighthouse-scores.json'), 'utf-8'));
+    expect(out1.lighthouseVersion).toBe('13.4.0');
+
+    // Second run produces same result
+    rmSync(outputDir, { recursive: true, force: true });
+    mkdirSync(outputDir, { recursive: true });
+    const r2 = runGenerator({ lhReportsDir: reportsDir, outputDir });
+    expect(r2.exitCode).toBe(0);
+    const out2 = JSON.parse(readFileSync(join(outputDir, 'lighthouse-scores.json'), 'utf-8'));
+    expect(out2.lighthouseVersion).toBe('13.4.0');
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('generator creates parent directory for nested OUTPUT_PATH', () => {
+  const tmpDir = mkdtempSync(join(tmpdir(), 'lh-nest-'));
+  try {
+    const reportsDir = join(tmpDir, 'lh-reports');
+    const nestedOutput = join(tmpDir, 'deep', 'nested', 'scores.json');
+    mkdirSync(reportsDir, { recursive: true });
+
+    writeLhReport(reportsDir, 'index.report.json', {
+      requestedUrl: 'http://localhost:4321/',
+    });
+
+    const r = runGenerator({
+      lhReportsDir: reportsDir,
+      outputDir: tmpDir,
+      env: { LIGHTHOUSE_SCORES_PATH: nestedOutput },
+    });
+    expect(r.exitCode).toBe(0);
+
+    const out = JSON.parse(readFileSync(nestedOutput, 'utf-8'));
+    expect(out.pages).toHaveLength(1);
+    expect(out.pages[0].route).toBe('/');
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
 });
 
 // ─── Validator tests ─────────────────────────────────────────────────────
 
-test('validate-lighthouse-scores.mjs fails when file missing', () => {
-  const tmpDir = mkdtempSync(join(tmpdir(), 'lh-val-'));
-  try {
-    execSync('node scripts/validate-lighthouse-scores.mjs', {
-      cwd: REPO_ROOT,
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-      timeout: 10_000,
-      env: { ...process.env, DATA_PATH: join(tmpDir, 'nonexistent.json') },
-    });
-    throw new Error('Expected validator to fail but it succeeded');
-  } catch (e: unknown) {
-    const err = e as { status?: number; message?: string };
-    // Validator should exit non-zero (file missing). If it succeeded,
-    // the throw above will be caught here and re-thrown.
-    if (err.status === undefined && err.message?.includes('Expected validator')) {
-      throw e;
-    }
-    expect(err.status).not.toBe(0);
-  }
-  rmSync(tmpDir, { recursive: true, force: true });
-});
-
-test('validate-lighthouse-scores.mjs fails when pages empty', () => {
-  const tmpDir = mkdtempSync(join(tmpdir(), 'lh-val2-'));
-  const dataPath = join(tmpDir, 'scores.json');
-  writeFileSync(
-    dataPath,
-    JSON.stringify({ pages: [], generatedAt: 't', commitSha: 't', lighthouseVersion: null }),
-    'utf-8',
-  );
+function runValidator(dataPath: string): { exitCode: number; stderr: string } {
   try {
     execSync('node scripts/validate-lighthouse-scores.mjs', {
       cwd: REPO_ROOT,
@@ -576,21 +620,82 @@ test('validate-lighthouse-scores.mjs fails when pages empty', () => {
       timeout: 10_000,
       env: { ...process.env, DATA_PATH: dataPath },
     });
-    throw new Error('Expected validator to fail but it succeeded');
+    return { exitCode: 0, stderr: '' };
   } catch (e: unknown) {
     const err = e as { status?: number; stderr?: string | Buffer; message?: string };
-    if (
-      err.status === undefined &&
-      (err as { message?: string }).message?.includes('Expected validator')
-    ) {
-      throw e;
-    }
-    expect(err.status).not.toBe(0);
     const errText =
-      typeof err.stderr === 'string' ? err.stderr : err.stderr ? err.stderr.toString() : '';
-    expect(errText).toContain('empty');
+      typeof err.stderr === 'string'
+        ? err.stderr
+        : err.stderr
+          ? err.stderr.toString()
+          : (err.message ?? '');
+    return { exitCode: err.status ?? 1, stderr: errText };
   }
-  rmSync(tmpDir, { recursive: true, force: true });
+}
+
+test('validate-lighthouse-scores.mjs fails when file missing', () => {
+  const tmpDir = mkdtempSync(join(tmpdir(), 'lh-val-'));
+  try {
+    const r = runValidator(join(tmpDir, 'nonexistent.json'));
+    expect(r.exitCode).not.toBe(0);
+    expect(r.stderr).toContain('not found');
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('validate-lighthouse-scores.mjs fails when pages empty', () => {
+  const tmpDir = mkdtempSync(join(tmpdir(), 'lh-val2-'));
+  try {
+    const dataPath = join(tmpDir, 'scores.json');
+    writeFileSync(
+      dataPath,
+      JSON.stringify({ pages: [], generatedAt: 't', commitSha: 't', lighthouseVersion: null }),
+      'utf-8',
+    );
+    const r = runValidator(dataPath);
+    expect(r.exitCode).not.toBe(0);
+    expect(r.stderr).toContain('empty');
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('validate-lighthouse-scores.mjs rejects duplicate routes', () => {
+  const tmpDir = mkdtempSync(join(tmpdir(), 'lh-val3-'));
+  try {
+    const dataPath = join(tmpDir, 'scores.json');
+    writeFileSync(
+      dataPath,
+      JSON.stringify({
+        generatedAt: 't',
+        commitSha: 't',
+        lighthouseVersion: null,
+        pages: [
+          {
+            route: '/',
+            scores: { performance: 80, accessibility: 90, bestPractices: 85, seo: 95 },
+            timestamp: null,
+            lighthouseVersion: null,
+            formFactor: 'mobile',
+          },
+          {
+            route: '/',
+            scores: { performance: 85, accessibility: 95, bestPractices: 90, seo: 98 },
+            timestamp: null,
+            lighthouseVersion: null,
+            formFactor: 'mobile',
+          },
+        ],
+      }),
+      'utf-8',
+    );
+    const r = runValidator(dataPath);
+    expect(r.exitCode).not.toBe(0);
+    expect(r.stderr).toContain('Duplicate route');
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
 });
 
 // ─── Browser layout tests (deterministic fixture via webServer env) ──────

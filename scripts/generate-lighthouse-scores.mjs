@@ -20,7 +20,7 @@
 
 import { execSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 const ROOT = join(import.meta.dirname, '..');
 const LH_REPORTS = process.env.LH_REPORTS_DIR || join(ROOT, 'lh-reports');
@@ -200,7 +200,7 @@ function main() {
   const output = {
     generatedAt: new Date().toISOString(),
     commitSha: getCommitSha(),
-    lighthouseVersion: records.length > 0 ? records[0].lighthouseVersion : null,
+    lighthouseVersion: pages.find((p) => p.lighthouseVersion != null)?.lighthouseVersion ?? null,
     pages,
   };
 
@@ -209,7 +209,7 @@ function main() {
 }
 
 function writeOutput(data) {
-  mkdirSync(GENERATED_DIR, { recursive: true });
+  mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
   writeFileSync(OUTPUT_PATH, JSON.stringify(data, null, 2), 'utf-8');
 }
 

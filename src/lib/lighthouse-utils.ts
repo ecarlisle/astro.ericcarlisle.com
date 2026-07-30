@@ -1,7 +1,9 @@
 /**
  * Shared utility functions for Lighthouse score processing.
  *
- * Pure functions used by the generator, footer component, and tests.
+ * Pure functions used by the footer component and tests.
+ * The executable generator (scripts/generate-lighthouse-scores.mjs)
+ * has its own integration-tested implementation.
  */
 
 export interface LighthousePageScores {
@@ -88,19 +90,12 @@ export function hasAnyScore(scores: LighthousePageScores): boolean {
   );
 }
 
-/**
- * Select the median representative entry from a list of records for the same route.
- * Uses Performance score as the sort key, with filename as tie-breaker.
- *
- * For an even number of entries, selects the upper-middle entry
- * (Math.floor(N/2)), which is the higher of the two middle values.
- * For 4 entries sorted [a, b, c, d], index 2 (c) is selected.
- * This is a deliberate policy; use the same selection in both the
- * generator and tests.
- */
 export function selectRepresentative(
   entries: (LighthousePageData & { _file?: string })[],
 ): LighthousePageData {
+  if (entries.length === 0) {
+    throw new Error('selectRepresentative requires at least one entry');
+  }
   const sorted = [...entries].sort((a, b) => {
     const aScore = a.scores.performance ?? -1;
     const bScore = b.scores.performance ?? -1;

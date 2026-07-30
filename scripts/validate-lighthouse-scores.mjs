@@ -72,6 +72,16 @@ function main() {
     process.exit(1);
   }
 
+  // Reject duplicate normalized routes
+  const seenRoutes = new Set();
+  for (const page of data.pages) {
+    if (seenRoutes.has(page.route)) {
+      console.error(`❌ Duplicate route: "${page.route}"`);
+      process.exit(1);
+    }
+    seenRoutes.add(page.route);
+  }
+
   let errors = 0;
 
   for (const page of data.pages) {
