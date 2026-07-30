@@ -115,6 +115,9 @@ jobs:
       - name: Generate Site Quality JSON
         run: pnpm quality:generate
 
+      - name: Validate Site Quality Lighthouse data
+        run: pnpm validate:site-quality-lighthouse
+
       - name: Rebuild Astro with Site Quality and Lighthouse data
         run: pnpm build
         env:
