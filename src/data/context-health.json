@@ -25,7 +25,7 @@
   "strengths": [
     "AGENTS.md explicitly distinguishes coding-agent authority from human-facing documentation and names source-of-truth files.",
     "Task routing exposes architecture, design-system, accessibility, performance, Storybook, specification, and Context Health entry points without loading unrelated routes by default.",
-    "Only the safe-change skill is universal for implementation; Astro, performance, UI, search, SEO, Context Health, and copy-edit skills are conditional.",
+    "Only the safe-change skill is universal for implementation; Astro, performance, UI, search, SEO, Context Health, writing, and voice-analysis skills are conditional.",
     "Package scripts remain authoritative, while the agent documentation validator checks routed links, heading anchors, and documented script names."
   ],
   "priorities": [
@@ -295,13 +295,13 @@
             "impact": "positive",
             "interpretation": "The authority file exposes one baseline implementation skill and separate conditional routes for every specialized task type.",
             "evidence": {
-              "observation": "AGENTS.md maps Astro, performance, accessibility, CSS, search, SEO, prose, and Context Health work to separate skills.",
+              "observation": "AGENTS.md maps Astro, performance, accessibility, CSS, search, SEO, prose, voice-analysis, and Context Health work to separate skills.",
               "citations": [
                 {
                   "path": "AGENTS.md",
                   "section": "## Skill Routing",
                   "startLine": 115,
-                  "endLine": 128
+                  "endLine": 130
                 }
               ]
             },
@@ -683,18 +683,18 @@
         "score": null,
         "evidenceMaturity": "structurally-verified",
         "evidenceMaturityReason": "The generator deterministically measures the declared full-file set; it does not observe actual runtime retrieval or model input.",
-        "interpretation": "The declared full-file context contains 40,135 characters (~10,034 estimated tokens).",
+        "interpretation": "The declared full-file context contains 41,416 characters (~10,354 estimated tokens).",
         "limitations": [
           "This is a declared full-file estimate, not actual model input, retrieved context, or tokenizer output.",
           "No universal token threshold is applied; useful ranges depend on the task, retrieval strategy, model, and outcome."
         ],
         "details": {
-          "characters": 40135,
-          "estimatedTokens": 10034,
+          "characters": 41416,
+          "estimatedTokens": 10354,
           "measuredFiles": [
             {
               "path": "AGENTS.md",
-              "characters": 9105
+              "characters": 10386
             },
             {
               "path": "docs/architecture.md",

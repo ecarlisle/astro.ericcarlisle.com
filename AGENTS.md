@@ -64,7 +64,8 @@ corpus. Use the standard development steps when workflow guidance is also needed
 
 | Task | Read first |
 |---|---|
-| Write or edit article prose or voice | [Editorial Guidelines](docs/editorial-guidelines.md) |
+| Write or edit article prose or voice | [Editorial Guidelines](docs/editorial-guidelines.md) and [Voice Profile](.agents/voice/profile.md) |
+| Analyze voice evidence or update the voice profile | [Analyze Writing Voice](.agents/skills/analyze-writing-voice/SKILL.md) and [Voice Evidence Ledger](.agents/voice/evidence.md) |
 | Create, publish, unpublish, or rename a blog article | [Content Authoring](docs/content-authoring.md) |
 | Remove or replace placeholder/test content | [Placeholder/Test Content](docs/content-status.md#placeholdertest-content) and [Replacement Plan](docs/content-status.md#replacement-plan) |
 | Change content schema or frontmatter fields | `src/content.config.ts` and [Blog Frontmatter](docs/content-model.md#blog-frontmatter) |
@@ -124,8 +125,24 @@ For implementation work, always consult [agent-safe-change](.agents/skills/agent
 | Change CSS, tokens, spacing, typography, layout, themes, or component appearance | [design-system-css](.agents/skills/design-system-css/SKILL.md) |
 | Implement or modify site search | [pagefind-search](.agents/skills/pagefind-search/SKILL.md) |
 | Create or edit pages, posts, images, links, structured data, or page metadata | [seo-review](.agents/skills/seo-review/SKILL.md) |
-| Draft or substantially revise explanatory prose | [copy-edit](.agents/skills/copy-edit/SKILL.md) |
+| Draft, continue, rewrite, copy-edit, or review prose in the established voice | [write-in-a-voice](.agents/skills/write-in-a-voice/SKILL.md) |
+| Analyze writing or speaking style, record voice evidence, or update the voice profile | [analyze-writing-voice](.agents/skills/analyze-writing-voice/SKILL.md) |
 | Audit Context Health, change scores or evidence, or refresh the report | [context-health-refresh](.agents/skills/context-health-refresh/SKILL.md) |
+
+## Voice Evidence
+
+`.agents/voice/profile.md` is the canonical voice description. `.agents/voice/evidence.md` is the
+append-only source for candidate observations.
+
+During writing-related work, record one concise evidence entry when the author explicitly states a
+voice preference, explains why prose sounds wrong, substantially rewrites a passage, or identifies
+representative writing. Ordinary prompts may support the conversational register, but treat them as
+lower-confidence evidence and exclude likely typing, shorthand, and dictation artifacts.
+
+Do not record routine acceptance or modify voice files during unrelated implementation work. Do
+not update the canonical profile silently or from one low-confidence observation. Use
+[analyze-writing-voice](.agents/skills/analyze-writing-voice/SKILL.md) to promote evidence into the
+profile.
 
 ## Storybook
 

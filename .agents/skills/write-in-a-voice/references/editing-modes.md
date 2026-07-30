@@ -50,7 +50,7 @@ Different editing and drafting tasks require different scopes of intervention. C
 **Anti-pattern check:**
 - Does the continuation feel like it belongs in the same draft? (FAILED-CONTINUATION)
 - Did it restart the argument instead of advancing it?
-- Did it import vocabulary or sentence patterns from unrelated samples? (IMPORTED-SUBJECT-MATTER)
+- Did it substitute vocabulary or sentence patterns from unrelated samples? (VOICE-SUBSTITUTED)
 
 **Expected output:** A passage that reads as if it was always part of the same piece. No summary, no restart.
 
@@ -159,7 +159,7 @@ Different editing and drafting tasks require different scopes of intervention. C
 
 **Anti-pattern check:**
 - Did the rewrite replace the writer's voice with generic polish? (GENERIC-VOICE, VOICE-SUBSTITUTED)
-- Did it import vocabulary or sentence patterns from the editorial default? (IMPORTED-SUBJECT-MATTER)
+- Did it substitute vocabulary or sentence patterns from the editorial default? (VOICE-SUBSTITUTED)
 - Did it resolve uncertainty that the writer left open? (PREMATURE-RESOLUTION)
 - Did it add a conclusion or framework not present in the source? (OVER-FINISHED, ARTIFICIAL-COMPLETENESS)
 

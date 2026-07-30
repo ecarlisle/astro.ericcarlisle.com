@@ -5,7 +5,7 @@ description: Refreshes and validates the EricCarlisle.com Context Health report 
 
 # Context Health Refresh
 
-Use [the Context Health rubric](../../../docs/context-health-rubric.md) as the methodology authority. This skill defines the refresh procedure; it does not replace the rubric’s scoring rules, evidence requirements, result anchors, calibration examples, or versioning policy. Follow [AGENTS.md](../../../AGENTS.md) for repository workflow and permissions. Use [copy-edit](../copy-edit/SKILL.md) when drafting or substantially revising explanatory prose.
+Use [the Context Health rubric](../../../docs/context-health-rubric.md) as the methodology authority. This skill defines the refresh procedure; it does not replace the rubric’s scoring rules, evidence requirements, result anchors, calibration examples, or versioning policy. Follow [AGENTS.md](../../../AGENTS.md) for repository workflow and permissions. Use [write-in-a-voice](../write-in-a-voice/SKILL.md) when drafting or substantially revising explanatory prose.
 
 ## Establish the audit
 
@@ -83,7 +83,7 @@ Use PR diff links only to discuss a PR change, never as permanent report evidenc
 The portable scenario taxonomy documents future evaluation coverage only. Do not build a runner,
 simulator, telemetry system, or synthetic observed dataset during an ordinary refresh.
 
-Use `copy-edit` for meaningful explanatory prose changes. Copy editing must not alter evidence, certainty, result classifications, weights, or calculated scores.
+Use `write-in-a-voice` for meaningful explanatory prose changes. Editing must not alter evidence, certainty, result classifications, weights, or calculated scores.
 
 ## Validate the page
 
