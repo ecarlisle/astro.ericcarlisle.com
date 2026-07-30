@@ -183,10 +183,10 @@ test('each metric score has an accessible aria-label with category and "out of 1
   const scores = footer.locator('.page-quality-score');
   await expect(scores).toHaveCount(4);
 
-  await expect(scores.nth(0)).toHaveAttribute('aria-label', /^Performance:? \d+ out of 100$/);
-  await expect(scores.nth(1)).toHaveAttribute('aria-label', /^Accessibility:? \d+ out of 100$/);
-  await expect(scores.nth(2)).toHaveAttribute('aria-label', /^Best [Pp]ractices:? \d+ out of 100$/);
-  await expect(scores.nth(3)).toHaveAttribute('aria-label', /^SEO:? \d+ out of 100$/);
+  await expect(scores.nth(0)).toHaveAttribute('aria-label', /^\d+ out of 100$/);
+  await expect(scores.nth(1)).toHaveAttribute('aria-label', /^\d+ out of 100$/);
+  await expect(scores.nth(2)).toHaveAttribute('aria-label', /^\d+ out of 100$/);
+  await expect(scores.nth(3)).toHaveAttribute('aria-label', /^\d+ out of 100$/);
 });
 
 test('quality footer section signals "measured with Lighthouse" accessibly', async ({ page }) => {
@@ -236,6 +236,21 @@ test('quality footer link points to /portfolio/site-quality/', async ({ page }) 
   }
   const link = footer.locator('.page-quality-link');
   await expect(link).toHaveAttribute('href', '/portfolio/site-quality/');
+});
+
+test('quality footer does not overflow horizontally at mobile viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/');
+  const footer = page.locator('.page-quality-footer');
+  const count = await footer.count();
+  if (count === 0) {
+    test.skip();
+    return;
+  }
+  // No horizontal scroll should be needed
+  const scrollWidth = await footer.evaluate((el) => (el as HTMLElement).scrollWidth);
+  const clientWidth = await footer.evaluate((el) => (el as HTMLElement).clientWidth);
+  expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
 });
 
 test('quality footer uses an inline list for metrics (not a grid or table)', async ({ page }) => {

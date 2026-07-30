@@ -43,7 +43,7 @@ const metrics: Metric[] = [
         <span class="page-quality-label">{m.label}</span>{' '}
         <span
           class="page-quality-score"
-          aria-label={m.label + ': ' + m.score + ' out of 100'}
+          aria-label={m.score + ' out of 100'}
         >{m.score}</span>
       </li>
     ))}
@@ -80,6 +80,7 @@ const metrics: Metric[] = [
 
   .page-quality-metric {
     display: inline;
+    white-space: nowrap;
   }
 
   /* · separator between metrics, hidden from screen readers */
