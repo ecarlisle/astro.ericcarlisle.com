@@ -148,35 +148,7 @@ test('homepage does not show quality footer when no scores data exists', async (
   // whether lighthouse-scores.json exists at build time.
 });
 
-test('quality footer has heading "Page quality"', async ({ page }) => {
-  await page.goto('/');
-  const footer = page.locator('.page-quality-footer');
-  const count = await footer.count();
-  if (count === 0) {
-    test.skip();
-    return;
-  }
-  await expect(footer.locator('#page-quality-heading')).toHaveCount(1);
-  await expect(footer.locator('.page-quality-heading')).toContainText('Page quality');
-});
-
-test('quality footer displays four full metric labels', async ({ page }) => {
-  await page.goto('/');
-  const footer = page.locator('.page-quality-footer');
-  const count = await footer.count();
-  if (count === 0) {
-    test.skip();
-    return;
-  }
-  const labels = footer.locator('.page-quality-label');
-  await expect(labels).toHaveCount(4);
-  await expect(labels.nth(0)).toHaveText('Performance');
-  await expect(labels.nth(1)).toHaveText('Accessibility');
-  await expect(labels.nth(2)).toHaveText('Best practices');
-  await expect(labels.nth(3)).toHaveText('SEO');
-});
-
-test('each metric score has an accessible label naming the category and "out of 100"', async ({
+test('quality footer displays "Page quality:" label and four full metric names', async ({
   page,
 }) => {
   await page.goto('/');
@@ -186,16 +158,21 @@ test('each metric score has an accessible label naming the category and "out of 
     test.skip();
     return;
   }
-  const values = footer.locator('.page-quality-value');
-  await expect(values).toHaveCount(4);
+  // "Page quality:" link text
+  await expect(footer.locator('.page-quality-link')).toContainText('Page quality:');
 
-  await expect(values.nth(0)).toHaveAttribute('aria-label', /^Performance:? \d+ out of 100$/);
-  await expect(values.nth(1)).toHaveAttribute('aria-label', /^Accessibility:? \d+ out of 100$/);
-  await expect(values.nth(2)).toHaveAttribute('aria-label', /^Best [Pp]ractices:? \d+ out of 100$/);
-  await expect(values.nth(3)).toHaveAttribute('aria-label', /^SEO:? \d+ out of 100$/);
+  // Four metric labels in order
+  const labels = footer.locator('.page-quality-label');
+  await expect(labels).toHaveCount(4);
+  await expect(labels.nth(0)).toHaveText('Performance');
+  await expect(labels.nth(1)).toHaveText('Accessibility');
+  await expect(labels.nth(2)).toHaveText('Best practices');
+  await expect(labels.nth(3)).toHaveText('SEO');
 });
 
-test('quality footer shows "Measured with Lighthouse" note', async ({ page }) => {
+test('each metric score has an accessible aria-label with category and "out of 100"', async ({
+  page,
+}) => {
   await page.goto('/');
   const footer = page.locator('.page-quality-footer');
   const count = await footer.count();
@@ -203,7 +180,25 @@ test('quality footer shows "Measured with Lighthouse" note', async ({ page }) =>
     test.skip();
     return;
   }
-  await expect(footer.locator('.page-quality-note')).toContainText('Measured with Lighthouse');
+  const scores = footer.locator('.page-quality-score');
+  await expect(scores).toHaveCount(4);
+
+  await expect(scores.nth(0)).toHaveAttribute('aria-label', /^Performance:? \d+ out of 100$/);
+  await expect(scores.nth(1)).toHaveAttribute('aria-label', /^Accessibility:? \d+ out of 100$/);
+  await expect(scores.nth(2)).toHaveAttribute('aria-label', /^Best [Pp]ractices:? \d+ out of 100$/);
+  await expect(scores.nth(3)).toHaveAttribute('aria-label', /^SEO:? \d+ out of 100$/);
+});
+
+test('quality footer section signals "measured with Lighthouse" accessibly', async ({ page }) => {
+  await page.goto('/');
+  const footer = page.locator('.page-quality-footer');
+  const count = await footer.count();
+  if (count === 0) {
+    test.skip();
+    return;
+  }
+  // The section aria-label communicates the Lighthouse context
+  await expect(footer).toHaveAttribute('aria-label', /measured with Lighthouse/i);
 });
 
 test('quality footer does not use abbreviated labels (P, A, BP)', async ({ page }) => {
@@ -231,7 +226,7 @@ test('quality footer does not introduce client-side JavaScript', async ({ page }
   await expect(footer.locator('script')).toHaveCount(0);
 });
 
-test('quality footer heading links to /portfolio/site-quality/', async ({ page }) => {
+test('quality footer link points to /portfolio/site-quality/', async ({ page }) => {
   await page.goto('/');
   const footer = page.locator('.page-quality-footer');
   const count = await footer.count();
@@ -239,10 +234,22 @@ test('quality footer heading links to /portfolio/site-quality/', async ({ page }
     test.skip();
     return;
   }
-  const headingLink = footer.locator('.page-quality-heading a');
-  await expect(headingLink).toHaveAttribute('href', '/portfolio/site-quality/');
-  const noteLink = footer.locator('.page-quality-note a');
-  await expect(noteLink).toHaveAttribute('href', '/portfolio/site-quality/');
+  const link = footer.locator('.page-quality-link');
+  await expect(link).toHaveAttribute('href', '/portfolio/site-quality/');
+});
+
+test('quality footer uses an inline list for metrics (not a grid or table)', async ({ page }) => {
+  await page.goto('/');
+  const footer = page.locator('.page-quality-footer');
+  const count = await footer.count();
+  if (count === 0) {
+    test.skip();
+    return;
+  }
+  // Metrics live in a <ul> with inline <li> items
+  const list = footer.locator('.page-quality-scores');
+  await expect(list).toHaveCount(1);
+  await expect(footer.locator('.page-quality-scores > li')).toHaveCount(4);
 });
 
 // ─── Build-time behavior ───────────────────────────────────────────────────

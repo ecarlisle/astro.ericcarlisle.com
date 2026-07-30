@@ -1,10 +1,10 @@
 ---
 /**
- * PageQualityFooter — Lighthouse score report for the site footer.
+ * PageQualityFooter — compact inline Lighthouse score report for the footer.
  *
- * Displays four category scores (Performance, Accessibility, Best practices,
- * SEO) in a compact grid with full labels. Links to the site-quality page
- * for methodology details. Gracefully omitted when no score data exists.
+ * Renders a subtle single-line "Page quality: Performance 84 · …" treatment
+ * that fits naturally alongside the copyright and social links. Omitted
+ * entirely when no score data is available.
  */
 import type { LighthousePageData } from './lighthouse-scores';
 
@@ -15,69 +15,56 @@ interface Props {
 
 const { data } = Astro.props;
 
-// If no data, render nothing — the footer stays clean.
 if (!data) return;
 
 interface Metric {
   label: string;
   score: number;
-  slug: string;
 }
 
 const metrics: Metric[] = [
-  { label: 'Performance', score: data.scores.performance, slug: 'performance' },
-  { label: 'Accessibility', score: data.scores.accessibility, slug: 'accessibility' },
-  { label: 'Best practices', score: data.scores.bestPractices, slug: 'best-practices' },
-  { label: 'SEO', score: data.scores.seo, slug: 'seo' },
+  { label: 'Performance', score: data.scores.performance },
+  { label: 'Accessibility', score: data.scores.accessibility },
+  { label: 'Best practices', score: data.scores.bestPractices },
+  { label: 'SEO', score: data.scores.seo },
 ];
 ---
 
-<section class="page-quality-footer" aria-labelledby="page-quality-heading">
-  <h3 id="page-quality-heading" class="page-quality-heading">
-    <a href="/portfolio/site-quality/" class="page-quality-link">
-      Page quality
-    </a>
-  </h3>
-
-  <div class="page-quality-scores" role="list">
+<section
+  class="page-quality-footer"
+  aria-label="Page quality, measured with Lighthouse"
+>
+  <a href="/portfolio/site-quality/" class="page-quality-link">
+    Page quality:
+  </a>{' '}
+  <ul class="page-quality-scores" aria-label="Lighthouse scores out of 100">
     {metrics.map((m) => (
-      <div class="page-quality-metric" role="listitem">
-        <span class="page-quality-label">{m.label}</span>
+      <li class="page-quality-metric">
+        <span class="page-quality-label">{m.label}</span>{' '}
         <span
-          class="page-quality-value"
+          class="page-quality-score"
           aria-label={m.label + ': ' + m.score + ' out of 100'}
         >{m.score}</span>
-      </div>
+      </li>
     ))}
-  </div>
-
-  <p class="page-quality-note">
-    <a href="/portfolio/site-quality/" class="page-quality-link">
-      Measured with Lighthouse
-    </a>
-  </p>
+  </ul>
 </section>
 
 <style>
   .page-quality-footer {
     margin-top: var(--space-component);
-    text-align: center;
-  }
-
-  .page-quality-heading {
-    margin: 0 0 var(--space-xs);
-    font-family: var(--font-copy);
     font-size: var(--type-size-small);
-    font-weight: var(--font-weight-normal);
     line-height: var(--line-height-body);
-    letter-spacing: var(--letter-spacing-label);
-    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: center;
   }
 
   .page-quality-link {
     color: var(--text-muted);
+    font-weight: var(--font-weight-medium);
     text-decoration: none;
     transition: color var(--transition-fast);
+    white-space: nowrap;
   }
 
   .page-quality-link:hover {
@@ -85,55 +72,28 @@ const metrics: Metric[] = [
   }
 
   .page-quality-scores {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-xs);
-    max-width: 24rem;
-    margin: 0 auto;
+    display: inline;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
   .page-quality-metric {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
+    display: inline;
+  }
+
+  /* · separator between metrics, hidden from screen readers */
+  .page-quality-metric + .page-quality-metric::before {
+    content: ' · ';
+    color: var(--text-muted);
+    white-space: pre;
   }
 
   .page-quality-label {
-    font-family: var(--font-copy);
-    font-size: 0.65rem;
-    line-height: 1.2;
-    color: var(--text-muted);
-    letter-spacing: var(--letter-spacing-label);
-    text-transform: uppercase;
-    word-break: keep-all;
-    white-space: nowrap;
-  }
-
-  .page-quality-value {
-    font-family: var(--font-mono);
-    font-size: var(--type-size-h4);
     font-weight: var(--font-weight-medium);
-    line-height: 1.1;
-    color: var(--text-secondary);
   }
 
-  .page-quality-note {
-    margin: var(--space-xs) 0 0;
-    font-family: var(--font-copy);
-    font-size: 0.65rem;
-    line-height: 1.2;
-    color: var(--text-muted);
-  }
-
-  /* Narrow: 2-column layout */
-  @media (max-width: 480px) {
-    .page-quality-scores {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .page-quality-metric:nth-child(n+3) {
-      margin-top: var(--space-xs);
-    }
+  .page-quality-score {
+    font-family: var(--font-mono);
   }
 </style>
