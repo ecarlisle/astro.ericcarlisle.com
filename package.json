@@ -34,7 +34,9 @@
     "lighthouse:scores": "node scripts/generate-lighthouse-scores.mjs",
     "lighthouse:report": "pnpm build && pnpm lighthouse:all && pnpm lighthouse:scores",
     "validate:site-quality-lighthouse": "node scripts/validate-site-quality-lighthouse.mjs",
-    "test:page-quality-build": "node scripts/test-page-quality-build.mjs"
+    "test:page-quality-build": "node scripts/test-page-quality-build.mjs",
+    "inventory:generate": "node scripts/generate-site-inventory.mjs",
+    "postbuild": "node scripts/generate-site-inventory.mjs"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
@@ -63,6 +65,7 @@
     "astro-pagefind": "^2.0.0",
     "fallow": "^2.91.0",
     "lighthouse": "^13.4.0",
+    "linkedom": "^0.18.13",
     "playwright": "^1.60.0",
     "sharp": "^0.34.3",
     "storybook": "10.5.2",

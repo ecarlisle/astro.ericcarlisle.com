@@ -711,7 +711,9 @@ test('desktop 1024px: footer present, link+metrics on same line, no overflow', a
   const firstBox = await footer.locator('.page-quality-metric').first().boundingBox();
   expect(linkBox).not.toBeNull();
   expect(firstBox).not.toBeNull();
-  expect(Math.abs(linkBox!.y - firstBox!.y)).toBeLessThan(5);
+  const linkY = linkBox ? linkBox.y : 0;
+  const firstY = firstBox ? firstBox.y : 0;
+  expect(Math.abs(linkY - firstY)).toBeLessThan(5);
 
   // 4 metrics with correct labels
   await expect(footer.locator('.page-quality-metric')).toHaveCount(4);

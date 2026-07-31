@@ -134,6 +134,9 @@ jobs:
           mkdir -p dist/design-system/lab
           cp -r storybook-static/* dist/design-system/lab/
 
+      - name: Generate Site Inventory
+        run: pnpm inventory:generate
+
       - name: Verify contact endpoint in built output
         run: |
           echo "Checking contact form endpoint..."

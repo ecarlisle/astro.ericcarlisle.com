@@ -1,0 +1,505 @@
+---
+import '../../styles/global.css';
+
+type Warning = { code: string; message: string };
+
+type PageEntry = {
+  route: string;
+  file: string | null;
+  size: number | null;
+  built: boolean;
+  inSitemap: boolean;
+  sitemapLastmod: string | null;
+  title: string | null;
+  description: string | null;
+  canonical: string | null;
+  robots: string | null;
+  h1Count: number;
+  h1Texts: string[];
+  inboundCount: number;
+  warnings: Warning[];
+};
+
+type InventoryData = {
+  provenance: { commitSha?: string };
+  summary: {
+    totalUrls: number;
+    builtPages: number;
+    sitemapUrls: number;
+    orphanedPages: number;
+    pagesWithWarnings: number;
+    totalWarnings: number;
+  };
+  pages: PageEntry[];
+};
+
+// The deployment-specific JSON is written to dist/lab/site-inventory/data.json
+// by scripts/generate-site-inventory.mjs after the final build. The page loads
+// it client-side so the deployed artifact always reflects the same build.
+const DATA_URL = '/lab/site-inventory/data.json';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Site Inventory — Eric Carlisle</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style is:global>
+      .si-page {
+        width: 100%;
+        max-width: var(--layout-rail-page, 72rem);
+        margin: var(--space-layout) auto;
+        padding: 0 var(--space-component);
+        font-family: var(--font-copy);
+        color: var(--text-primary);
+      }
+      .si-page h1 {
+        font-family: var(--font-headers);
+        font-size: var(--type-size-h2);
+        margin: 0 0 var(--space-xs);
+      }
+      .si-page__meta {
+        color: var(--text-muted);
+        font-size: var(--type-size-small);
+        font-family: var(--font-mono);
+        margin: 0 0 var(--space-lg);
+      }
+      .si-page__explainer {
+        max-width: var(--layout-rail-prose);
+        color: var(--text-secondary);
+        font-size: var(--type-size-small);
+        line-height: 1.6;
+        margin-bottom: var(--space-lg);
+        padding: var(--space-component);
+        background: var(--bg-surface);
+        border-left: 3px solid var(--brand-primary);
+        border-radius: var(--radius-md);
+      }
+      .si-page .si-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-component);
+        margin-bottom: var(--space-lg);
+      }
+      .si-page .si-stat {
+        padding: var(--space-component);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-muted);
+        border-radius: var(--radius-md);
+        text-align: center;
+        flex: 1;
+        min-width: 100px;
+      }
+      .si-page .si-stat__value {
+        font-family: var(--font-mono);
+        font-size: var(--type-size-h3);
+        font-weight: var(--font-weight-bold);
+        color: var(--text-primary);
+        line-height: 1.2;
+      }
+      .si-page .si-stat__value--warn {
+        color: var(--brand-highlight);
+      }
+      .si-page .si-stat__label {
+        font-size: var(--type-size-small);
+        color: var(--text-muted);
+        margin-top: var(--space-xs);
+      }
+      .si-page .si-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-sm);
+        margin-bottom: var(--space-component);
+        align-items: center;
+      }
+      .si-page .si-filter-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xs);
+      }
+      .si-page .si-filter-btn {
+        font-family: var(--font-mono);
+        font-size: var(--type-size-small);
+        padding: var(--space-xs) var(--space-sm);
+        border: 1px solid var(--border-control);
+        border-radius: var(--radius-sm);
+        background: var(--bg-surface);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+      }
+      .si-page .si-filter-btn:hover {
+        border-color: var(--color-link);
+        color: var(--color-link);
+      }
+      .si-page .si-filter-btn[aria-pressed='true'] {
+        background: var(--color-link);
+        color: var(--bg-main);
+        border-color: var(--color-link);
+      }
+      .si-page .si-filter-btn:focus-visible,
+      .si-page .si-search:focus-visible,
+      .si-page .si-details-toggle:focus-visible {
+        outline: 2px dashed var(--color-focus);
+        outline-offset: 2px;
+      }
+      .si-page .si-search {
+        font-family: var(--font-mono);
+        font-size: var(--type-size-small);
+        padding: var(--space-xs) var(--space-sm);
+        border: 1px solid var(--border-control);
+        border-radius: var(--radius-sm);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        flex: 1;
+        min-width: 200px;
+      }
+      .si-page .si-status {
+        font-size: var(--type-size-small);
+        color: var(--text-muted);
+        min-height: 1.4em;
+        margin-bottom: var(--space-sm);
+      }
+      .si-page .si-table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--border-muted);
+        border-radius: var(--radius-md);
+      }
+      .si-page .si-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: var(--type-size-small);
+      }
+      .si-page .si-table th {
+        background: var(--bg-surface);
+        color: var(--text-muted);
+        font-weight: var(--font-weight-bold);
+        text-transform: uppercase;
+        letter-spacing: var(--letter-spacing-label);
+        padding: var(--space-sm) var(--space-inline);
+        text-align: left;
+        white-space: nowrap;
+        border-bottom: 2px solid var(--border-main);
+        position: sticky;
+        top: 0;
+      }
+      .si-page .si-table td {
+        padding: var(--space-sm) var(--space-inline);
+        border-bottom: 1px solid var(--border-muted);
+        vertical-align: top;
+      }
+      .si-page .si-row--warn {
+        background: color-mix(in srgb, var(--brand-highlight) 8%, transparent);
+      }
+      .si-page .si-row--warn:hover {
+        background: color-mix(in srgb, var(--brand-highlight) 14%, transparent);
+      }
+      .si-page .si-badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.75em;
+        padding: 1px 6px;
+        border-radius: var(--radius-sm);
+        font-weight: var(--font-weight-bold);
+      }
+      .si-page .si-badge--ok {
+        background: color-mix(in srgb, var(--brand-accent) 15%, transparent);
+        color: var(--brand-accent);
+      }
+      .si-page .si-badge--warn {
+        background: color-mix(in srgb, var(--brand-highlight) 20%, transparent);
+        color: var(--brand-highlight);
+      }
+      .si-page .si-badge--missing {
+        background: color-mix(in srgb, #ef4444 15%, transparent);
+        color: #ef4444;
+      }
+      .si-page .si-warn-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .si-page .si-warn-list li {
+        margin-bottom: 2px;
+        font-size: 0.9em;
+      }
+      .si-page .si-warn-code {
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+        color: var(--brand-highlight);
+      }
+      .si-page .si-route-link {
+        color: var(--color-link);
+        text-decoration: none;
+        font-family: var(--font-mono);
+      }
+      .si-page .si-route-link:hover {
+        text-decoration: underline;
+      }
+      .si-page .si-details-toggle {
+        color: var(--text-muted);
+        cursor: pointer;
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+        background: none;
+        border: none;
+        padding: 0;
+      }
+      .si-page .si-details-toggle:hover {
+        color: var(--color-link);
+      }
+      .si-page .si-details {
+        margin-top: var(--space-xs);
+        color: var(--text-muted);
+        font-size: 0.9em;
+      }
+      .si-page .si-details dt {
+        font-weight: var(--font-weight-bold);
+        color: var(--text-secondary);
+        margin-top: var(--space-xs);
+      }
+      .si-page .si-details dd {
+        margin: 0;
+        word-break: break-word;
+      }
+      .si-page .si-state {
+        text-align: center;
+        padding: var(--space-xl);
+        color: var(--text-muted);
+      }
+      .si-page .si-state--error {
+        color: #ef4444;
+      }
+      .si-page .si-sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      @media (max-width: 720px) {
+        .si-page .si-summary {
+          gap: var(--space-sm);
+        }
+        .si-page .si-stat {
+          min-width: calc(50% - var(--space-sm));
+        }
+        .si-page .si-controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .si-page .si-filter-group {
+          justify-content: center;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .si-page .si-filter-btn {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body data-pagefind-ignore="all">
+    <div class="si-page">
+      <h1>Site Inventory</h1>
+      <p class="si-page__meta">Build audit · generated data</p>
+
+      <div class="si-page__explainer">
+        <strong>What this is:</strong> A post-build inventory that cross-references
+        generated HTML pages, the XML sitemap, and internal links to find missing
+        or inconsistent metadata, orphaned pages, and sitemap discrepancies.
+        This is a developer tool — it measures the generated build and its
+        internal consistency, not live availability, sitemap submission status,
+        or search indexing. See{' '}<a href="/portfolio/site-quality/">Site Quality</a> for Lighthouse scores.
+      </div>
+
+      <div id="inventory-root">
+        <div class="si-state" id="loading-state">Loading inventory data…</div>
+      </div>
+
+      <script>
+        // @ts-nocheck — client-side UI script; checked at runtime by tests
+        (function () {
+          var root = document.getElementById('inventory-root');
+          var DATA_URL = '/lab/site-inventory/data.json';
+          var state = { data: null, filter: 'all', query: '' };
+
+          function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+              return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+          }
+
+          function badge(ok, text, missing) {
+            var cls = missing ? 'si-badge--missing' : ok ? 'si-badge--ok' : 'si-badge--warn';
+            return '<span class="si-badge ' + cls + '">' + esc(text) + '</span>';
+          }
+
+          function stat(value, label, warn) {
+            return '<div class="si-stat"><div class="si-stat__value' + (warn ? ' si-stat__value--warn' : '') + '">' +
+              value + '</div><div class="si-stat__label">' + esc(label) + '</div></div>';
+          }
+
+          function filterBtn(value, label, ariaLabel) {
+            var pressed = state.filter === value ? 'true' : 'false';
+            return '<button type="button" class="si-filter-btn" data-filter="' + value +
+              '" aria-pressed="' + pressed + '" aria-label="' + esc(ariaLabel) + '">' + esc(label) + '</button>';
+          }
+
+          /** Build the static shell once. Controls are NOT recreated on filter. */
+          function buildShell(data) {
+            root.innerHTML =
+              '<div class="si-summary">' +
+              stat(data.summary.totalUrls, 'Total URLs', false) +
+              stat(data.summary.builtPages, 'Built pages', false) +
+              stat(data.summary.sitemapUrls, 'Sitemap URLs', false) +
+              stat(data.summary.orphanedPages, 'Orphaned pages', data.summary.orphanedPages > 0) +
+              stat(data.summary.pagesWithWarnings, 'Pages with warnings', data.summary.pagesWithWarnings > 0) +
+              '</div>' +
+              '<div class="si-controls">' +
+              '<div class="si-filter-group" role="group" aria-label="Filter inventory">' +
+              filterBtn('all', 'All', 'Show all routes') +
+              filterBtn('warnings', 'Warnings', 'Show routes with warnings') +
+              filterBtn('missing-sitemap', 'Missing from sitemap', 'Show indexable pages missing from the sitemap') +
+              filterBtn('missing-page', 'No built page', 'Show sitemap URLs without a built page') +
+              filterBtn('orphaned', 'Orphaned', 'Show pages with no inbound links') +
+              filterBtn('noindex', 'Noindex', 'Show noindex pages') +
+              '</div>' +
+              '<input type="search" class="si-search" placeholder="Filter by route…" aria-label="Filter by URL route" />' +
+              '</div>' +
+              '<p id="si-status" class="si-status" aria-live="polite" role="status"></p>' +
+              '<div class="si-table-wrap"><table class="si-table"><thead><tr>' +
+              '<th>Route</th><th>Built</th><th>Sitemap</th><th>Title</th><th>H1</th><th>Links in</th><th>Warnings</th><th></th>' +
+              '</tr></thead><tbody></tbody></table></div>';
+
+            // Attach listeners ONCE to the persistent controls.
+            var search = root.querySelector('.si-search');
+            search.addEventListener('input', function () {
+              state.query = search.value;
+              renderResults();
+            });
+            root.querySelectorAll('.si-filter-btn').forEach(function (btn) {
+              btn.addEventListener('click', function () {
+                state.filter = btn.getAttribute('data-filter');
+                root.querySelectorAll('.si-filter-btn').forEach(function (b) {
+                  b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+                });
+                renderResults();
+              });
+            });
+            // Details toggles are recreated per row; delegate from the tbody.
+            var tbody = root.querySelector('tbody');
+            tbody.addEventListener('click', function (event) {
+              var target = event.target;
+              var toggle = target.closest ? target.closest('.si-details-toggle') : null;
+              if (!toggle) return;
+              var dl = toggle.nextElementSibling;
+              var expanded = toggle.getAttribute('aria-expanded') === 'true';
+              toggle.setAttribute('aria-expanded', String(!expanded));
+              if (dl) dl.hidden = expanded;
+            });
+
+            renderResults();
+          }
+
+          /** Update only the results table body and status text. */
+          function renderResults() {
+            var data = state.data;
+            if (!data) return;
+            var pages = data.pages;
+            var query = (state.query || '').toLowerCase();
+            var shown = pages.filter(function (p) {
+              var matchFilter = true;
+              if (state.filter === 'warnings') matchFilter = p.warnings.length > 0;
+              else if (state.filter === 'missing-sitemap') matchFilter = p.built && !p.inSitemap && p.warnings.some(function (w) { return w.code === 'MISSING_FROM_SITEMAP'; });
+              else if (state.filter === 'missing-page') matchFilter = !p.built;
+              else if (state.filter === 'orphaned') matchFilter = p.built && p.inboundCount === 0 && p.warnings.some(function (w) { return w.code === 'ORPHANED_PAGE'; });
+              else if (state.filter === 'noindex') matchFilter = (p.robots || '').toLowerCase().indexOf('noindex') >= 0;
+              if (!matchFilter) return false;
+              if (query && p.route.toLowerCase().indexOf(query) < 0) return false;
+              return true;
+            });
+
+            var status = document.getElementById('si-status');
+            if (status) {
+              status.textContent = shown.length + ' of ' + pages.length + ' routes';
+            }
+
+            var rows = shown.map(function (p) {
+              var warnings = (p.warnings || []).map(function (w) {
+                return '<li><span class="si-warn-code">[' + esc(w.code) + ']</span> ' + esc(w.message) + '</li>';
+              }).join('');
+              var warnHtml = warnings
+                ? '<ul class="si-warn-list">' + warnings + '</ul>'
+                : '<span style="color:var(--text-muted)">—</span>';
+
+              var details = [];
+              if (p.classification) details.push('<dt>Classification</dt><dd>' + esc(p.classification) + '</dd>');
+              if (p.canonical) details.push('<dt>Canonical</dt><dd>' + esc(p.canonical) + '</dd>');
+              if (p.redirectTarget) details.push('<dt>Redirects to</dt><dd>' + esc(p.redirectTarget) + '</dd>');
+              if (p.description) details.push('<dt>Description</dt><dd>' + esc(p.description) + '</dd>');
+              if (p.robots) details.push('<dt>Robots</dt><dd>' + esc(p.robots) + '</dd>');
+              if (p.sitemapLastmod) details.push('<dt>Last modified</dt><dd>' + esc(p.sitemapLastmod) + '</dd>');
+              if (p.size) details.push('<dt>Size</dt><dd>' + p.size + ' bytes</dd>');
+              if (p.file) details.push('<dt>File</dt><dd>' + esc(p.file) + '</dd>');
+
+              var detailsHtml = details.length
+                ? '<button type="button" class="si-details-toggle" aria-expanded="false">Details</button>' +
+                  '<dl class="si-details" hidden>' + details.join('') + '</dl>'
+                : '';
+
+              var routeCell = p.built
+                ? '<a class="si-route-link" href="' + esc(p.route) + '">' + esc(p.route) + '</a>'
+                : '<span class="si-route-link" style="color:var(--text-muted)">' + esc(p.route) + '</span>';
+
+              var titleCell = p.title
+                ? esc(p.title)
+                : '<span style="color:var(--text-muted)">—</span>';
+
+              return '<tr class="' + (p.warnings && p.warnings.length ? 'si-row--warn' : '') + '" data-route="' + esc(p.route) + '">' +
+                '<td>' + routeCell + '</td>' +
+                '<td>' + badge(p.built, p.built ? 'Yes' : 'No', !p.built) + '</td>' +
+                '<td>' + badge(p.inSitemap, p.inSitemap ? 'Yes' : 'No', false) + '</td>' +
+                '<td>' + titleCell + '</td>' +
+                '<td>' + (p.h1Count ? esc(p.h1Count) : '<span style="color:var(--text-muted)">—</span>') + '</td>' +
+                '<td>' + p.inboundCount + '</td>' +
+                '<td>' + warnHtml + '</td>' +
+                '<td>' + detailsHtml + '</td>' +
+                '</tr>';
+            }).join('');
+
+            var tbody = root.querySelector('tbody');
+            tbody.innerHTML = rows + (pages.length === 0 ? '<tr><td colspan="8" class="si-state">No pages found.</td></tr>' : '');
+          }
+
+          // Fetch and build the shell once.
+          fetch(DATA_URL)
+            .then(function (res) {
+              if (!res.ok) throw new Error('HTTP ' + res.status);
+              return res.json();
+            })
+            .then(function (data) {
+              if (!data.pages || !data.summary) throw new Error('Malformed inventory data');
+              state.data = data;
+              buildShell(data);
+            })
+            .catch(function (err) {
+              if (!root) return;
+              root.innerHTML = '<div class="si-state si-state--error">' +
+                '<p>Could not load inventory data.</p>' +
+                '<p>' + esc(err.message || String(err)) + '</p>' +
+                '<p>The generated inventory must be viewed from the built site:</p><p><code>pnpm build</code> then <code>pnpm preview</code>.</p>' +
+                '</div>';
+            });
+        })();
+      </script>
+    </div>
+  </body>
+</html>
