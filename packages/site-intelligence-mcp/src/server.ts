@@ -15,6 +15,11 @@ import { getPageToolHandler } from './tools/get-page.js';
 import { getPageLinksToolHandler } from './tools/get-page-links.js';
 import { getSiteOverviewToolHandler } from './tools/get-site-overview.js';
 import { getSiteWarningsToolHandler } from './tools/get-site-warnings.js';
+import { searchPagesToolHandler } from './tools/search-pages.js';
+
+const SearchInputSchema = z.object({
+  query: z.string().describe('Search query string'),
+});
 
 const SERVER_NAME = 'site-intelligence';
 const SERVER_VERSION = '0.1.0';
@@ -76,6 +81,19 @@ export function createServer(): McpServer {
       inputSchema: RouteInputSchema.shape,
     },
     getPageLinksToolHandler,
+  );
+
+  server.registerTool(
+    'search_pages',
+    {
+      title: 'Search pages',
+      description:
+        'Search the site inventory for pages matching a query string. ' +
+        'Returns a ranked list of pages with scores. Requires a query argument. ' +
+        'Read-only.',
+      inputSchema: SearchInputSchema.shape,
+    },
+    searchPagesToolHandler,
   );
 
   return server;
