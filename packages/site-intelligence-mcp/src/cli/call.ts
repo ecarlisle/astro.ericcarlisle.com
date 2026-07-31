@@ -10,6 +10,7 @@
  * Usage:
  *   pnpm mcp:site-intelligence:call --list
  *   pnpm mcp:site-intelligence:call <tool-name>
+ *   pnpm mcp:site-intelligence:call <tool-name> --args '{"route":"/tags/"}'
  */
 import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -25,13 +26,21 @@ const SERVER_PATH = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'serv
 
 const USAGE = `Usage:
   pnpm mcp:site-intelligence:call --list
-  pnpm mcp:site-intelligence:call <tool-name>
+  pnpm mcp:site-intelligence:call <tool-name> [--args '<json>']
 
 Options:
   --list          List available tools
+  --args '<json>' JSON object with tool arguments (required for get_page, get_page_links)
   -h, --help      Show this help
 
-Run \`pnpm mcp:site-intelligence:prepare\` first to build the server and CLI.`;
+Run \`pnpm mcp:site-intelligence:prepare\` first to build the server and CLI.
+
+Examples:
+  pnpm mcp:site-intelligence:call --list
+  pnpm mcp:site-intelligence:call get_site_overview
+  pnpm mcp:site-intelligence:call get_site_warnings
+  pnpm mcp:site-intelligence:call get_page --args '{"route":"/tags/"}'
+  pnpm mcp:site-intelligence:call get_page_links --args '{"route":"/tags/"}'`;
 
 function inheritableEnv(): Record<string, string> {
   const env: Record<string, string> = {};
@@ -54,24 +63,66 @@ function printToolResult(result: CallToolResult): boolean {
   return result.isError === true;
 }
 
+function parseArgs(rawArgs: string): Record<string, unknown> {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawArgs);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Invalid JSON in --args: ${message}`);
+  }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    throw new Error('--args must be a JSON object.');
+  }
+  return parsed as Record<string, unknown>;
+}
+
 async function main(): Promise<number> {
   const args = process.argv.slice(2);
-  const first = args[0];
 
-  if (first === undefined) {
-    process.stderr.write(`${USAGE}\n`);
-    return 2;
+  // Parse flags
+  let toolName: string | undefined;
+  let argsJson: string | undefined;
+  let showHelp = false;
+  let showList = false;
+  let positionalCount = 0;
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (!arg) continue;
+    if (arg === '-h' || arg === '--help') {
+      showHelp = true;
+    } else if (arg === '--list') {
+      showList = true;
+    } else if (arg === '--args') {
+      if (i + 1 >= args.length) {
+        process.stderr.write('Error: --args requires a JSON string.\n');
+        return 2;
+      }
+      argsJson = args[i + 1];
+      i++;
+    } else if (!arg.startsWith('-')) {
+      positionalCount++;
+      if (positionalCount > 1) {
+        process.stderr.write(`${USAGE}\n`);
+        return 2;
+      }
+      toolName = arg;
+    } else {
+      process.stderr.write(`Error: Unknown option "${arg}".\n`);
+      return 2;
+    }
   }
-  if (first === '-h' || first === '--help') {
+
+  if (showHelp) {
     process.stdout.write(`${USAGE}\n`);
     return 0;
   }
-  if (args.length > 1) {
+
+  if (!toolName && !showList) {
     process.stderr.write(`${USAGE}\n`);
     return 2;
   }
-
-  const toolName = first;
 
   if (!existsSync(SERVER_PATH)) {
     process.stderr.write(
@@ -97,7 +148,7 @@ async function main(): Promise<number> {
     await client.connect(transport);
     const { tools } = await client.listTools();
 
-    if (toolName === '--list') {
+    if (showList) {
       for (const tool of tools) {
         process.stdout.write(`${tool.name}\n`);
         if (tool.description) {
@@ -114,7 +165,27 @@ async function main(): Promise<number> {
       return 1;
     }
 
-    const raw = await client.callTool({ name: toolName, arguments: {} }, CallToolResultSchema);
+    if (!toolName) {
+      process.stderr.write('Error: No tool name provided.\n');
+      return 2;
+    }
+
+    // Parse --args if provided
+    let toolArgs: Record<string, unknown> = {};
+    if (argsJson !== undefined) {
+      try {
+        toolArgs = parseArgs(argsJson);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        process.stderr.write(`Error: ${message}\n`);
+        return 1;
+      }
+    }
+
+    const raw = await client.callTool(
+      { name: toolName, arguments: toolArgs },
+      CallToolResultSchema,
+    );
 
     // The SDK types callTool as a union of the modern content shape and the
     // legacy (2024-10-07) toolResult shape. Both members carry an index

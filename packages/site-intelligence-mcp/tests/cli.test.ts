@@ -120,3 +120,103 @@ test('CLI resolves the compiled server from its own location, independent of cwd
     cleanup();
   }
 });
+
+test('CLI --list includes new page tools', () => {
+  const { filePath, cleanup } = createFixtureDir(JSON.stringify(VALID_INVENTORY));
+  try {
+    const { status, stdout } = runCli(['--list'], filePath);
+    assert.equal(status, 0);
+    assert.match(stdout, /get_page/);
+    assert.match(stdout, /get_page_links/);
+  } finally {
+    cleanup();
+  }
+});
+
+test('CLI calls get_page with --args', () => {
+  const { filePath, cleanup } = createFixtureDir(JSON.stringify(VALID_INVENTORY));
+  try {
+    const { status, stdout } = runCli(['get_page', '--args', '{"route":"/about/"}'], filePath);
+    assert.equal(status, 0);
+    assert.match(stdout, /"route": "\/about\/"/);
+    assert.match(stdout, /"title": "About"/);
+  } finally {
+    cleanup();
+  }
+});
+
+test('CLI calls get_page_links with --args', () => {
+  const { filePath, cleanup } = createFixtureDir(JSON.stringify(VALID_INVENTORY));
+  try {
+    const { status, stdout } = runCli(
+      ['get_page_links', '--args', '{"route":"/about/"}'],
+      filePath,
+    );
+    assert.equal(status, 0);
+    assert.match(stdout, /"route": "\/about\/"/);
+    assert.match(stdout, /"incoming":/);
+    assert.match(stdout, /"outgoing":/);
+    assert.match(stdout, /"orphaned":/);
+  } finally {
+    cleanup();
+  }
+});
+
+test('CLI rejects malformed JSON in --args', () => {
+  const { filePath, cleanup } = createFixtureDir(JSON.stringify(VALID_INVENTORY));
+  try {
+    const { status, stderr } = runCli(['get_page', '--args', '{ not json'], filePath);
+    assert.notEqual(status, 0);
+    assert.match(stderr, /Invalid JSON in --args/);
+  } finally {
+    cleanup();
+  }
+});
+
+test('CLI rejects non-object JSON in --args', () => {
+  const { filePath, cleanup } = createFixtureDir(JSON.stringify(VALID_INVENTORY));
+  try {
+    const { status, stderr } = runCli(['get_page', '--args', '[1,2,3]'], filePath);
+    assert.notEqual(status, 0);
+    assert.match(stderr, /--args must be a JSON object/);
+  } finally {
+    cleanup();
+  }
+});
+
+test('CLI rejects missing --args for input-requiring tool', () => {
+  const { filePath, cleanup } = createFixtureDir(JSON.stringify(VALID_INVENTORY));
+  try {
+    const { status, stderr } = runCli(['get_page'], filePath);
+    // The tool will return an MCP error for missing route argument
+    assert.notEqual(status, 0);
+  } finally {
+    cleanup();
+  }
+});
+
+test('CLI unknown tool still exits nonzero', () => {
+  const { filePath, cleanup } = createFixtureDir(JSON.stringify(VALID_INVENTORY));
+  try {
+    const { status, stderr } = runCli(['unknown_tool'], filePath);
+    assert.notEqual(status, 0);
+    assert.match(stderr, /Unknown tool "unknown_tool"/);
+  } finally {
+    cleanup();
+  }
+});
+
+test('CLI stdout only contains tool result, no server noise', () => {
+  const { filePath, cleanup } = createFixtureDir(JSON.stringify(VALID_INVENTORY));
+  try {
+    const { status, stdout, stderr } = runCli(['get_site_overview'], filePath);
+    assert.equal(status, 0);
+    // stderr should not contain the tool result
+    assert.ok(!stdout.includes('stderr'));
+    // stdout should be valid JSON
+    const parsed = JSON.parse(stdout.trim());
+    assert.equal(parsed.totalUrls, 3);
+  } finally {
+    cleanup();
+  }
+});

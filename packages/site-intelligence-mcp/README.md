@@ -5,9 +5,9 @@ A local, **read-only** [Model Context Protocol](https://modelcontextprotocol.io)
 `ericcarlisle.com` site inventory to MCP-capable clients (e.g. Claude Desktop,
 code editors with MCP support).
 
-**Version 2 scope:** two read-only tools — `get_site_overview` and
-`get_site_warnings` — over `stdio`. No network, no authentication, no write
-access, no shell execution.
+**Version 3 scope:** four read-only tools — `get_site_overview`,
+`get_site_warnings`, `get_page`, and `get_page_links` — over `stdio`. No
+network, no authentication, no write access, no shell execution.
 
 ## Purpose
 
@@ -37,13 +37,17 @@ tool call.
 
 ## Current scope
 
-- **Tools:** `get_site_overview` and `get_site_warnings`.
+- **Tools:** `get_site_overview`, `get_site_warnings`, `get_page`, and
+  `get_page_links`.
   - `get_site_overview` returns a compact structured overview: source artifact,
     generated commit, indexed-page counts, sitemap/orphan/warning totals, route
     categories, and warning codes.
   - `get_site_warnings` returns the individual warning records already present
     in the inventory: one entry per warning with its code, route, page title,
     and message, plus a total count and the generated commit.
+  - `get_page` returns selected page metadata, build state, headings, and warnings for a single route.
+  - `get_page_links` returns incoming and outgoing internal route relationships
+    for a single page, with counts and an orphaned flag.
 - **Transport:** local `stdio` only.
 - **Permissions:** read-only. No filesystem-write, shell, Git, or network
   operations are performed.
@@ -109,6 +113,109 @@ When the inventory is missing, malformed, or structurally invalid, the tool
 returns a clear `Error:` message (no stack traces), matching
 `get_site_overview`'s error behavior.
 
+### get_page
+
+Returns selected page metadata, build state, headings, and warnings for a single normalized route.
+
+**Input:**
+
+```json
+{
+  "route": "/tags/"
+}
+```
+
+**Output (text content, shown parsed):**
+
+```json
+{
+  "generatedCommit": "280bdc2",
+  "page": {
+    "route": "/tags/",
+    "title": "Tags | Eric Carlisle",
+    "description": "Browse all 5 topic tags across 3 posts.",
+    "classification": "normal",
+    "built": true,
+    "inSitemap": true,
+    "canonical": "https://ericcarlisle.com/tags/",
+    "robots": "index, follow",
+    "h1Count": 1,
+    "h1Texts": ["Tags"],
+    "redirectTarget": null,
+    "inboundCount": 0,
+    "warnings": [
+      {
+        "code": "ORPHANED_PAGE",
+        "message": "No internal links point to this page. It may be unreachable from navigation."
+      }
+    ]
+  }
+}
+```
+
+**Route normalization:** The input `route` is normalized to the canonical
+inventory format before lookup. The following variants all resolve to `/tags/`:
+
+- `/tags/`
+- `/tags`
+- `tags/`
+- `tags`
+- `https://ericcarlisle.com/tags/`
+
+Empty or whitespace-only input is rejected with a clear error. Unknown routes
+return a clear `Error: Route "..." not found in site inventory.` message.
+No fuzzy matching is performed.
+
+### get_page_links
+
+Returns incoming and outgoing internal route relationships for a single page.
+
+**Input:**
+
+```json
+{
+  "route": "/tags/"
+}
+```
+
+**Output (text content, shown parsed):**
+
+```json
+{
+  "generatedCommit": "280bdc2",
+  "route": "/tags/",
+  "incoming": [],
+  "outgoing": [
+    "/",
+    "/about/",
+    "/blog/",
+    "/contact/",
+    "/portfolio/site-quality/",
+    "/search/",
+    "/tags/3d-printing/",
+    "/tags/ai-agents/",
+    "/tags/ai/",
+    "/tags/documentation/",
+    "/tags/software-development/"
+  ],
+  "inboundCount": 0,
+  "outgoingCount": 11,
+  "orphaned": true
+}
+```
+
+**Fields:**
+
+- `incoming`: Sorted, deduplicated list of routes that link **to** this page.
+- `outgoing`: Sorted, deduplicated list of routes this page links **to**.
+- `inboundCount`: Length of `incoming` (matches the inventory's `inboundCount`).
+- `outgoingCount`: Length of `outgoing`.
+- `orphaned`: `true` when the page is an indexable, built, normal page with
+  `inboundCount === 0` — matching the `ORPHANED_PAGE` warning semantics.
+
+**Route normalization:** Same behavior as `get_page`. Empty, whitespace-only,
+and unknown routes return clear errors.
+
 ## How to generate the underlying site data
 
 ```sh
@@ -117,7 +224,9 @@ pnpm build        # builds the site; the postbuild hook runs the inventory gener
 pnpm build && pnpm inventory:generate
 ```
 
-The inventory artifact is written to `dist/lab/site-inventory/data.json`.
+The inventory artifact is written to `dist/lab/site-inventory/data.json`. The
+generator now produces deterministic, sorted, deduplicated `incoming` and
+`outgoing` route arrays for every page.
 
 ## How to run the MCP server
 
@@ -188,24 +297,40 @@ server implementation functions directly). Print available tools:
 pnpm mcp:site-intelligence:call --list
 ```
 
-Invoke a tool by name (both current tools take no arguments):
+Invoke a tool by name. Tools that require arguments accept a `--args` flag
+with a JSON object:
 
 ```sh
 pnpm mcp:site-intelligence:call get_site_overview
 pnpm mcp:site-intelligence:call get_site_warnings
+pnpm mcp:site-intelligence:call get_page --args '{"route":"/tags/"}'
+pnpm mcp:site-intelligence:call get_page_links --args '{"route":"/tags/"}'
 ```
 
 The CLI prints the tool's text result and exits `0` on success; it exits
-non-zero for unknown tools, usage errors, and protocol failures.
-`pnpm mcp:site-intelligence:call --help` prints usage.
+non-zero for unknown tools, usage errors, malformed JSON, non-object JSON,
+and protocol failures. `pnpm mcp:site-intelligence:call --help` prints usage.
 
 ### Expected workflow
 
 ```sh
-pnpm mcp:site-intelligence:prepare                # build site inventory + MCP server/CLI
-pnpm mcp:site-intelligence:inspect                # interactive Inspector web UI
-pnpm mcp:site-intelligence:call get_site_warnings # one-off manual tool call
+pnpm mcp:site-intelligence:prepare                    # build site inventory + MCP server/CLI
+pnpm mcp:site-intelligence:inspect                    # interactive Inspector web UI
+pnpm mcp:site-intelligence:call get_site_warnings     # one-off manual tool call
 ```
+
+### Example agent workflow
+
+An agent can explore the site inventory systematically:
+
+1. **Call `get_site_overview`** to get a high-level summary (page counts,
+   categories, warning totals).
+2. **Call `get_site_warnings`** to see individual warning records and identify
+   flagged routes.
+3. **Call `get_page`** for a flagged route to see its full metadata, build
+   state, headings, and warnings.
+4. **Call `get_page_links`** for the same route to understand its connectivity
+   — which pages link to it, which pages it links to, and whether it's orphaned.
 
 Notes:
 
@@ -286,12 +411,13 @@ changes you make to it are local to your machine.
 - No authentication — any local process that can connect to the stdio pipe
   (i.e. the parent MCP client) can call the tool. Keep the client local and
   trusted.
-- The tool has no arguments, so no injection surface from tool inputs.
+- The only tool input is a site route string. No arbitrary filesystem paths,
+  shell commands, or network destinations can be supplied.
 
 ## Explicitly deferred
 
 - Graph refresh as an MCP tool
-- Additional tools (page lookup, metrics, etc.)
+- Additional tools (metrics, etc.)
 - Remote transports (HTTP/SSE)
 - Authentication / authorization
 - Graph database or SQLite persistence

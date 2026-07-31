@@ -125,6 +125,7 @@ export async function generateInventory(distDir = DIST) {
 
   // ── 3. Per-page data + link graph ───────────────────────────────────────
   const inboundLinks = new Map();
+  const outboundLinks = new Map();
   const pageMeta = new Map();
 
   for (const [route, file] of filesByRoute) {
@@ -135,6 +136,8 @@ export async function generateInventory(distDir = DIST) {
       if (link === route) continue;
       if (!inboundLinks.has(link)) inboundLinks.set(link, new Set());
       inboundLinks.get(link).add(route);
+      if (!outboundLinks.has(route)) outboundLinks.set(route, new Set());
+      outboundLinks.get(route).add(link);
     }
     pageMeta.set(route, { route, file, ...meta, internalLinks: links });
   }
@@ -146,6 +149,8 @@ export async function generateInventory(distDir = DIST) {
   for (const route of allRoutes) {
     const built = builtRoutes.has(route);
     const meta = pageMeta.get(route) ?? {};
+    const incoming = inboundLinks.get(route) ? [...inboundLinks.get(route)].sort() : [];
+    const outgoing = outboundLinks.get(route) ? [...outboundLinks.get(route)].sort() : [];
     const record = {
       route,
       file: built ? meta.file : null,
@@ -160,7 +165,9 @@ export async function generateInventory(distDir = DIST) {
       h1Count: meta.h1Count ?? 0,
       h1Texts: meta.h1Texts ?? [],
       redirectTarget: meta.redirectTarget ?? null,
-      inboundCount: inboundLinks.get(route)?.size ?? 0,
+      inboundCount: incoming.length,
+      incoming,
+      outgoing,
       warnings: [],
     };
     record.classification = classifyPage(record.route, record).type;
@@ -190,6 +197,8 @@ export async function generateInventory(distDir = DIST) {
       h1Texts: meta.h1Texts ?? [],
       redirectTarget: null,
       inboundCount: 0,
+      incoming: [],
+      outgoing: [],
       warnings: [],
     };
     record.classification = classifyPage(record.route, record).type;
