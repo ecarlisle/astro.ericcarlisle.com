@@ -22,12 +22,23 @@ const repoRoot = resolve(here, '..', '..', '..', '..');
 const compiledLoader = join(here, '..', 'src', 'graph', 'load-graph.js');
 const expectedInventoryPath = join(repoRoot, 'dist', 'lab', 'site-inventory', 'data.json');
 
+/**
+ * Child-process environment with SITE_INTELLIGENCE_INVENTORY_PATH removed, so
+ * tests exercise default resolution regardless of the parent environment.
+ */
+const defaultPathEnv: NodeJS.ProcessEnv = { ...process.env };
+delete defaultPathEnv.SITE_INTELLIGENCE_INVENTORY_PATH;
+
+function loaderScript(): string {
+  return `import { defaultInventoryPath } from ${JSON.stringify(pathToFileURL(compiledLoader).href)}; process.stdout.write(defaultInventoryPath());`;
+}
+
 test('compiled loader resolves the repo inventory from an unrelated cwd (no env override)', () => {
   const unrelated = mkdtempSync(join(tmpdir(), 'mcp-unrelated-cwd-'));
   try {
-    const script = `import { defaultInventoryPath } from ${JSON.stringify(pathToFileURL(compiledLoader).href)}; process.stdout.write(defaultInventoryPath());`;
-    const out = execFileSync(process.execPath, ['--input-type=module', '-e', script], {
+    const out = execFileSync(process.execPath, ['--input-type=module', '-e', loaderScript()], {
       cwd: unrelated,
+      env: defaultPathEnv,
       encoding: 'utf-8',
     });
     assert.equal(out, expectedInventoryPath);
@@ -41,9 +52,9 @@ test('compiled loader result points at the real generated inventory when present
   // has produced the artifact (tests must not depend on build state).
   const unrelated = mkdtempSync(join(tmpdir(), 'mcp-unrelated-cwd2-'));
   try {
-    const script = `import { defaultInventoryPath } from ${JSON.stringify(pathToFileURL(compiledLoader).href)}; process.stdout.write(defaultInventoryPath());`;
-    const out = execFileSync(process.execPath, ['--input-type=module', '-e', script], {
+    const out = execFileSync(process.execPath, ['--input-type=module', '-e', loaderScript()], {
       cwd: unrelated,
+      env: defaultPathEnv,
       encoding: 'utf-8',
     });
     assert.equal(out, expectedInventoryPath);
@@ -74,6 +85,21 @@ test('findRepoRoot returns null above the filesystem root', () => {
   const tmp = mkdtempSync(join(tmpdir(), 'mcp-noroot-'));
   try {
     assert.equal(findRepoRoot(tmp), null);
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('SITE_INTELLIGENCE_INVENTORY_PATH override remains highest priority', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'mcp-override-'));
+  try {
+    const overrideFile = join(tmp, 'custom-inventory.json');
+    const out = execFileSync(process.execPath, ['--input-type=module', '-e', loaderScript()], {
+      cwd: tmp,
+      env: { ...defaultPathEnv, SITE_INTELLIGENCE_INVENTORY_PATH: overrideFile },
+      encoding: 'utf-8',
+    });
+    assert.equal(out, overrideFile);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

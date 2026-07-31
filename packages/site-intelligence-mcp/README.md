@@ -56,17 +56,26 @@ The inventory artifact is written to `dist/lab/site-inventory/data.json`.
 
 ## How to run the MCP server
 
+The server is launched in two phases so that build output never pollutes the
+MCP protocol stream on stdout.
+
+**1. Prepare** — build the site (regenerates the inventory artifact via the
+postbuild hook) and build the MCP package:
+
+```sh
+pnpm mcp:site-intelligence:prepare
+```
+
+**2. Run** — start only the compiled server over `stdio`:
+
 ```sh
 pnpm mcp:site-intelligence
 ```
 
-This builds the package and starts the server over `stdio`. Point an MCP client
-at the underlying command, e.g.:
-
-```sh
-pnpm --filter @ericcarlisle/site-intelligence-mcp build
-node packages/site-intelligence-mcp/dist/src/server.js
-```
+The runtime command (`node packages/site-intelligence-mcp/dist/src/server.js`)
+does not run pnpm, TypeScript, Astro, or the inventory generator, so its stdout
+carries only MCP protocol messages. Point an MCP client directly at the
+compiled entrypoint with `node`, not at the preparation command.
 
 ### Path resolution
 
@@ -108,6 +117,10 @@ Claude Desktop (`claude_desktop_config.json`):
     }
   }
 }
+
+Run `pnpm mcp:site-intelligence:prepare` first so the compiled entrypoint and
+the `dist/lab/site-inventory/data.json` artifact exist before the client
+launches the server.
 ```
 
 ## Security limitations
