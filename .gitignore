@@ -72,4 +72,3 @@ storybook-static/
 
 # Lighthouse deployment scores (regenerated per deployment)
 /src/generated/lighthouse-scores.json
-/src/generated/site-inventory.json

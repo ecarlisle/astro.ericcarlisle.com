@@ -16,9 +16,9 @@ const SITE_ORIGIN = 'https://ericcarlisle.com';
 /** Route/prefix patterns excluded from specific warning checks. */
 export const EXCEPTIONS = {
   /** Routes not expected to have inbound internal links. */
-  noInternalLinksExpected: ['/404.html/', '/lab/', '/search/', '/tags/'],
+  noInternalLinksExpected: ['/404.html/', '/lab/'],
   /** Routes not expected to be in the XML sitemap. */
-  notInSitemapExpected: ['/lab/', '/404.html/', '/tags/'],
+  notInSitemapExpected: ['/lab/', '/404.html/'],
   /** Path prefixes inside dist/ that are not normal site pages. */
   skipFiles: ['pagefind/', '~partytown/', '_astro/', 'icons/'],
   /**
@@ -333,6 +333,23 @@ export function detectWarnings(route, page, builtRoutes, sitemapRoutes) {
   // Canonical mismatch analysis.
   if (page.canonical) {
     const canonRoute = normalizeRoute(page.canonical);
+    // A canonical that points to an external origin is never equivalent to
+    // this site's route, even when its pathname happens to match.
+    if (/^https?:\/\//i.test(page.canonical)) {
+      let canonHost = null;
+      try {
+        canonHost = new URL(page.canonical).hostname;
+      } catch {
+        canonHost = null;
+      }
+      if (canonHost && canonHost !== new URL(SITE_ORIGIN).hostname) {
+        warnings.push({
+          code: 'CANONICAL_EXTERNAL_ORIGIN',
+          message: `Canonical URL "${page.canonical}" points to external origin "${canonHost}".`,
+        });
+        // Still fall through to normal mismatch handling below.
+      }
+    }
     // The 404 page's canonical points to /404/ (its natural URL) while the
     // built file is /404.html — an intentional Astro convention.
     if (cls.type === '404' && canonRoute === '/404/') {

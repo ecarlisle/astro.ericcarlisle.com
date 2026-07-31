@@ -47,8 +47,9 @@ const DATA_URL = '/lab/site-inventory/data.json';
     <title>Site Inventory — Eric Carlisle</title>
     <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <style>
+    <style is:global>
       .si-page {
+        width: 100%;
         max-width: var(--layout-rail-page, 72rem);
         margin: var(--space-layout) auto;
         padding: 0 var(--space-component);
@@ -77,13 +78,13 @@ const DATA_URL = '/lab/site-inventory/data.json';
         border-left: 3px solid var(--brand-primary);
         border-radius: var(--radius-md);
       }
-      .si-summary {
+      .si-page .si-summary {
         display: flex;
         flex-wrap: wrap;
         gap: var(--space-component);
         margin-bottom: var(--space-lg);
       }
-      .si-stat {
+      .si-page .si-stat {
         padding: var(--space-component);
         background: var(--bg-surface);
         border: 1px solid var(--border-muted);
@@ -92,34 +93,34 @@ const DATA_URL = '/lab/site-inventory/data.json';
         flex: 1;
         min-width: 100px;
       }
-      .si-stat__value {
+      .si-page .si-stat__value {
         font-family: var(--font-mono);
         font-size: var(--type-size-h3);
         font-weight: var(--font-weight-bold);
         color: var(--text-primary);
         line-height: 1.2;
       }
-      .si-stat__value--warn {
+      .si-page .si-stat__value--warn {
         color: var(--brand-highlight);
       }
-      .si-stat__label {
+      .si-page .si-stat__label {
         font-size: var(--type-size-small);
         color: var(--text-muted);
         margin-top: var(--space-xs);
       }
-      .si-controls {
+      .si-page .si-controls {
         display: flex;
         flex-wrap: wrap;
         gap: var(--space-sm);
         margin-bottom: var(--space-component);
         align-items: center;
       }
-      .si-filter-group {
+      .si-page .si-filter-group {
         display: flex;
         flex-wrap: wrap;
         gap: var(--space-xs);
       }
-      .si-filter-btn {
+      .si-page .si-filter-btn {
         font-family: var(--font-mono);
         font-size: var(--type-size-small);
         padding: var(--space-xs) var(--space-sm);
@@ -130,22 +131,22 @@ const DATA_URL = '/lab/site-inventory/data.json';
         cursor: pointer;
         transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
       }
-      .si-filter-btn:hover {
+      .si-page .si-filter-btn:hover {
         border-color: var(--color-link);
         color: var(--color-link);
       }
-      .si-filter-btn[aria-pressed='true'] {
+      .si-page .si-filter-btn[aria-pressed='true'] {
         background: var(--color-link);
         color: var(--bg-main);
         border-color: var(--color-link);
       }
-      .si-filter-btn:focus-visible,
-      .si-search:focus-visible,
-      .si-details-toggle:focus-visible {
+      .si-page .si-filter-btn:focus-visible,
+      .si-page .si-search:focus-visible,
+      .si-page .si-details-toggle:focus-visible {
         outline: 2px dashed var(--color-focus);
         outline-offset: 2px;
       }
-      .si-search {
+      .si-page .si-search {
         font-family: var(--font-mono);
         font-size: var(--type-size-small);
         padding: var(--space-xs) var(--space-sm);
@@ -156,23 +157,23 @@ const DATA_URL = '/lab/site-inventory/data.json';
         flex: 1;
         min-width: 200px;
       }
-      .si-status {
+      .si-page .si-status {
         font-size: var(--type-size-small);
         color: var(--text-muted);
         min-height: 1.4em;
         margin-bottom: var(--space-sm);
       }
-      .si-table-wrap {
+      .si-page .si-table-wrap {
         overflow-x: auto;
         border: 1px solid var(--border-muted);
         border-radius: var(--radius-md);
       }
-      .si-table {
+      .si-page .si-table {
         width: 100%;
         border-collapse: collapse;
         font-size: var(--type-size-small);
       }
-      .si-table th {
+      .si-page .si-table th {
         background: var(--bg-surface);
         color: var(--text-muted);
         font-weight: var(--font-weight-bold);
@@ -185,18 +186,18 @@ const DATA_URL = '/lab/site-inventory/data.json';
         position: sticky;
         top: 0;
       }
-      .si-table td {
+      .si-page .si-table td {
         padding: var(--space-sm) var(--space-inline);
         border-bottom: 1px solid var(--border-muted);
         vertical-align: top;
       }
-      .si-row--warn {
+      .si-page .si-row--warn {
         background: color-mix(in srgb, var(--brand-highlight) 8%, transparent);
       }
-      .si-row--warn:hover {
+      .si-page .si-row--warn:hover {
         background: color-mix(in srgb, var(--brand-highlight) 14%, transparent);
       }
-      .si-badge {
+      .si-page .si-badge {
         display: inline-block;
         font-family: var(--font-mono);
         font-size: 0.75em;
@@ -204,41 +205,41 @@ const DATA_URL = '/lab/site-inventory/data.json';
         border-radius: var(--radius-sm);
         font-weight: var(--font-weight-bold);
       }
-      .si-badge--ok {
+      .si-page .si-badge--ok {
         background: color-mix(in srgb, var(--brand-accent) 15%, transparent);
         color: var(--brand-accent);
       }
-      .si-badge--warn {
+      .si-page .si-badge--warn {
         background: color-mix(in srgb, var(--brand-highlight) 20%, transparent);
         color: var(--brand-highlight);
       }
-      .si-badge--missing {
+      .si-page .si-badge--missing {
         background: color-mix(in srgb, #ef4444 15%, transparent);
         color: #ef4444;
       }
-      .si-warn-list {
+      .si-page .si-warn-list {
         list-style: none;
         margin: 0;
         padding: 0;
       }
-      .si-warn-list li {
+      .si-page .si-warn-list li {
         margin-bottom: 2px;
         font-size: 0.9em;
       }
-      .si-warn-code {
+      .si-page .si-warn-code {
         font-family: var(--font-mono);
         font-size: 0.85em;
         color: var(--brand-highlight);
       }
-      .si-route-link {
+      .si-page .si-route-link {
         color: var(--color-link);
         text-decoration: none;
         font-family: var(--font-mono);
       }
-      .si-route-link:hover {
+      .si-page .si-route-link:hover {
         text-decoration: underline;
       }
-      .si-details-toggle {
+      .si-page .si-details-toggle {
         color: var(--text-muted);
         cursor: pointer;
         font-family: var(--font-mono);
@@ -247,32 +248,32 @@ const DATA_URL = '/lab/site-inventory/data.json';
         border: none;
         padding: 0;
       }
-      .si-details-toggle:hover {
+      .si-page .si-details-toggle:hover {
         color: var(--color-link);
       }
-      .si-details {
+      .si-page .si-details {
         margin-top: var(--space-xs);
         color: var(--text-muted);
         font-size: 0.9em;
       }
-      .si-details dt {
+      .si-page .si-details dt {
         font-weight: var(--font-weight-bold);
         color: var(--text-secondary);
         margin-top: var(--space-xs);
       }
-      .si-details dd {
+      .si-page .si-details dd {
         margin: 0;
         word-break: break-word;
       }
-      .si-state {
+      .si-page .si-state {
         text-align: center;
         padding: var(--space-xl);
         color: var(--text-muted);
       }
-      .si-state--error {
+      .si-page .si-state--error {
         color: #ef4444;
       }
-      .si-sr-only {
+      .si-page .si-sr-only {
         position: absolute;
         width: 1px;
         height: 1px;
@@ -284,22 +285,22 @@ const DATA_URL = '/lab/site-inventory/data.json';
         border: 0;
       }
       @media (max-width: 720px) {
-        .si-summary {
+        .si-page .si-summary {
           gap: var(--space-sm);
         }
-        .si-stat {
+        .si-page .si-stat {
           min-width: calc(50% - var(--space-sm));
         }
-        .si-controls {
+        .si-page .si-controls {
           flex-direction: column;
           align-items: stretch;
         }
-        .si-filter-group {
+        .si-page .si-filter-group {
           justify-content: center;
         }
       }
       @media (prefers-reduced-motion: reduce) {
-        .si-filter-btn {
+        .si-page .si-filter-btn {
           transition: none;
         }
       }
@@ -316,8 +317,7 @@ const DATA_URL = '/lab/site-inventory/data.json';
         or inconsistent metadata, orphaned pages, and sitemap discrepancies.
         This is a developer tool — it measures the generated build and its
         internal consistency, not live availability, sitemap submission status,
-        or search indexing. See
-        <a href="/portfolio/site-quality/">Site Quality</a> for Lighthouse scores.
+        or search indexing. See{' '}<a href="/portfolio/site-quality/">Site Quality</a> for Lighthouse scores.
       </div>
 
       <div id="inventory-root">
@@ -495,7 +495,7 @@ const DATA_URL = '/lab/site-inventory/data.json';
               root.innerHTML = '<div class="si-state si-state--error">' +
                 '<p>Could not load inventory data.</p>' +
                 '<p>' + esc(err.message || String(err)) + '</p>' +
-                '<p>Run <code>pnpm build && pnpm inventory:generate</code> to generate the inventory.</p>' +
+                '<p>The generated inventory must be viewed from the built site:</p><p><code>pnpm build</code> then <code>pnpm preview</code>.</p>' +
                 '</div>';
             });
         })();

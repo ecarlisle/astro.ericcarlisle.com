@@ -362,7 +362,8 @@ test('detectWarnings: missing title, description, H1, multiple H1s', () => {
   expect(codes).not.toContain('MISSING_H1');
 });
 
-test('detectWarnings: /tags/ exception suppresses orphan warning', () => {
+test('detectWarnings: /tags/ is no longer exempt from orphan or sitemap checks', () => {
+  // /tags/ is an indexable site page; without inbound links it is orphaned.
   const page = {
     inboundCount: 0,
     robots: null,
@@ -371,8 +372,9 @@ test('detectWarnings: /tags/ exception suppresses orphan warning', () => {
     description: 'D',
     h1Count: 1,
   };
-  const warnings = detectWarnings('/tags/', page, new Set(['/tags/']), new Set(['/tags/']));
-  expect(warnings.filter((w) => w.code === 'ORPHANED_PAGE')).toHaveLength(0);
+  const warnings = detectWarnings('/tags/', page, new Set(['/tags/']), new Set([]));
+  expect(warnings.filter((w) => w.code === 'ORPHANED_PAGE')).toHaveLength(1);
+  expect(warnings.filter((w) => w.code === 'MISSING_FROM_SITEMAP')).toHaveLength(1);
 });
 
 test('detectDuplicateMetadata: flags shared titles and descriptions', () => {
@@ -666,4 +668,90 @@ test('inventory page filter buttons update aria-pressed', async ({ page }) => {
     'aria-pressed',
     'false',
   );
+});
+
+// ─── Dynamic-content styling regression (computed styles) ────────────────
+
+test('dynamic summary area uses flex layout with spacing', async ({ page }) => {
+  await page.goto('/lab/site-inventory/');
+  const summary = page.locator('.si-summary');
+  await expect(summary).toBeVisible();
+  const display = await summary.evaluate((el) => getComputedStyle(el).display);
+  const gap = await summary.evaluate((el) => getComputedStyle(el).gap);
+  expect(display).toBe('flex');
+  expect(gap).not.toBe('normal');
+  expect(gap).not.toBe('');
+});
+
+test('stat card receives designed background and border', async ({ page }) => {
+  await page.goto('/lab/site-inventory/');
+  const stat = page.locator('.si-stat').first();
+  await expect(stat).toBeVisible();
+  const bg = await stat.evaluate((el) => getComputedStyle(el).backgroundColor);
+  const borderStyle = await stat.evaluate((el) => getComputedStyle(el).borderTopStyle);
+  // Not the browser-default transparent background/border.
+  expect(bg).not.toBe('rgba(0, 0, 0, 0)');
+  expect(borderStyle).toBe('solid');
+});
+
+test('filter buttons are styled, not browser-default', async ({ page }) => {
+  await page.goto('/lab/site-inventory/');
+  const btn = page.locator('.si-filter-btn').first();
+  await expect(btn).toBeVisible();
+  const bg = await btn.evaluate((el) => getComputedStyle(el).backgroundColor);
+  const padding = await btn.evaluate((el) => getComputedStyle(el).paddingTop);
+  const fontFamily = await btn.evaluate((el) => getComputedStyle(el).fontFamily);
+  expect(bg).not.toBe('rgba(0, 0, 0, 0)');
+  expect(parseFloat(padding)).toBeGreaterThan(0);
+  expect(fontFamily).toContain('Fira Code');
+});
+
+test('search input receives intended sizing and styling', async ({ page }) => {
+  await page.goto('/lab/site-inventory/');
+  const search = page.locator('.si-search');
+  await expect(search).toBeVisible();
+  const minWidth = await search.evaluate((el) => getComputedStyle(el).minWidth);
+  const bg = await search.evaluate((el) => getComputedStyle(el).backgroundColor);
+  expect(parseFloat(minWidth)).toBeGreaterThanOrEqual(100);
+  expect(bg).not.toBe('rgba(0, 0, 0, 0)');
+});
+
+test('inventory table has styled header with background', async ({ page }) => {
+  await page.goto('/lab/site-inventory/');
+  const th = page.locator('.si-table th').first();
+  await expect(th).toBeVisible();
+  const bg = await th.evaluate((el) => getComputedStyle(el).backgroundColor);
+  const fontWeight = await th.evaluate((el) => getComputedStyle(el).fontWeight);
+  expect(bg).not.toBe('rgba(0, 0, 0, 0)');
+  expect(parseInt(fontWeight, 10)).toBeGreaterThanOrEqual(600);
+});
+
+test('details toggle receives its designed styling', async ({ page }) => {
+  await page.goto('/lab/site-inventory/');
+  // The About page has a canonical, so it has a Details toggle.
+  await page.locator('.si-search').fill('/about');
+  const toggle = page.locator('.si-details-toggle').first();
+  await expect(toggle).toBeVisible();
+  const fontFamily = await toggle.evaluate((el) => getComputedStyle(el).fontFamily);
+  const cursor = await toggle.evaluate((el) => getComputedStyle(el).cursor);
+  expect(fontFamily).toContain('Fira Code');
+  expect(cursor).toBe('pointer');
+  // Expand and verify the details block is revealed.
+  await toggle.click();
+  const hidden = await toggle
+    .locator('xpath=following-sibling::dl[1]')
+    .evaluate((el) => el.hasAttribute('hidden'));
+  expect(hidden).toBe(false);
+});
+
+test('no horizontal viewport overflow at narrow widths', async ({ page }) => {
+  for (const width of [375, 481, 600]) {
+    await page.setViewportSize({ width, height: 812 });
+    await page.goto('/lab/site-inventory/');
+    await expect(page.locator('.si-table tbody tr').first()).toBeVisible();
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+    expect(overflow, `overflow at ${width}px`).toBe(false);
+  }
 });
