@@ -11,19 +11,26 @@ import { DOMParser } from 'linkedom';
 
 // ─── Configuration ─────────────────────────────────────────────────────────
 
+const SITE_ORIGIN = 'https://ericcarlisle.com';
+
 /** Route/prefix patterns excluded from specific warning checks. */
 export const EXCEPTIONS = {
-  /** Pages that are intentionally noindex (Lab pages, 404). */
-  intentionallyNoindex: ['/lab/', '/404.html/'],
   /** Routes not expected to have inbound internal links. */
   noInternalLinksExpected: ['/404.html/', '/lab/', '/search/', '/tags/'],
   /** Routes not expected to be in the XML sitemap. */
   notInSitemapExpected: ['/lab/', '/404.html/', '/tags/'],
-  /** Non-page files/directories inside dist/ that are not actual routes. */
-  skipFiles: ['pagefind/', '~partytown/', '_astro/', 'design-system/lab/', 'icons/'],
-  /** Sitemap index files inside dist/. */
-  sitemapFiles: ['sitemap-index.xml'],
+  /** Path prefixes inside dist/ that are not normal site pages. */
+  skipFiles: ['pagefind/', '~partytown/', '_astro/', 'icons/'],
+  /**
+   * Known legacy redirect route patterns. Astro generates a meta-refresh
+   * document for these; this list documents them explicitly as well.
+   */
+  legacyRedirectRoutes: ['/posts/'],
 };
+
+/** Asset file extensions (checked against the resolved pathname). */
+const ASSET_EXT_RE =
+  /\.(js|css|png|jpg|jpeg|gif|svg|webp|ico|avif|woff2?|ttf|eot|pdf|zip|xml|json|map|txt)$/i;
 
 // ─── HTML / XML Parsing (linkedom) ────────────────────────────────────────
 
@@ -39,15 +46,24 @@ export function parseXML(xml) {
 
 // ─── Route Normalization ──────────────────────────────────────────────────
 
-/** Normalize a URL or path to a canonical site route. */
+/**
+ * Normalize a URL or path to a canonical site route.
+ * Handles full URLs, path-only inputs, query strings, and fragments.
+ */
 export function normalizeRoute(input) {
-  let path = String(input).trim();
+  let path = String(input ?? '').trim();
+  if (!path) return '/';
 
-  // Strip protocol/host/port when a full URL is provided.
-  try {
-    path = new URL(path).pathname;
-  } catch {
-    // Already a path.
+  // Full URL: use its pathname (query/fragment already stripped).
+  if (/^https?:\/\//i.test(path)) {
+    try {
+      path = new URL(path).pathname;
+    } catch {
+      return '/';
+    }
+  } else {
+    // Path-only input: strip fragment and query manually.
+    path = path.split('#')[0].split('?')[0];
   }
 
   // Remove a trailing index.html (including a bare "index.html").
@@ -62,17 +78,12 @@ export function normalizeRoute(input) {
   return path;
 }
 
-/** Check whether a route matches any exception prefix in a list. */
-export function matchesException(route, exceptionList) {
-  return exceptionList.some((prefix) => route.startsWith(prefix));
-}
-
 // ─── Link Resolution ──────────────────────────────────────────────────────
 
 /**
  * Resolve an anchor href against the source page route.
  * Returns a normalized internal route, or null when the link is external,
- * a non-page URL, an asset, a fragment, or a self-link is handled by caller.
+ * a non-page URL, an asset, or a fragment-only link.
  */
 export function resolveInternalLink(href, baseRoute) {
   const hrefStr = String(href ?? '').trim();
@@ -91,32 +102,23 @@ export function resolveInternalLink(href, baseRoute) {
   // Fragment-only link.
   if (hrefStr.startsWith('#')) return null;
 
-  // Asset URL (file extension).
-  if (
-    /\.(js|css|png|jpg|jpeg|gif|svg|webp|ico|avif|woff2?|ttf|eot|pdf|zip|xml|json|map|txt)$/i.test(
-      hrefStr,
-    )
-  ) {
+  // Resolve against the source page URL (site origin as base) so relative
+  // links, absolute same-origin URLs, protocol-relative URLs, and query
+  // strings / fragments all resolve to a concrete URL.
+  const base = new URL(baseRoute, SITE_ORIGIN);
+  let resolved;
+  try {
+    resolved = new URL(hrefStr, base);
+  } catch {
     return null;
   }
 
-  // Protocol-relative (//host/path). Only same-origin hosts count as internal.
-  if (hrefStr.startsWith('//')) {
-    const url = new URL(hrefStr, 'https://ericcarlisle.com' + baseRoute);
-    if (url.hostname !== 'ericcarlisle.com') return null;
-    return normalizeRoute(url.pathname);
-  }
+  // Same-origin only.
+  if (resolved.hostname !== new URL(SITE_ORIGIN).hostname) return null;
 
-  // Absolute http(s) URLs. Same-origin hosts count as internal; others excluded.
-  if (hrefStr.startsWith('http://') || hrefStr.startsWith('https://')) {
-    const url = new URL(hrefStr);
-    if (url.hostname !== 'ericcarlisle.com') return null;
-    return normalizeRoute(url.pathname);
-  }
+  // Asset URL — check the resolved pathname extension (query included).
+  if (ASSET_EXT_RE.test(resolved.pathname)) return null;
 
-  // Resolve relative to the source page URL using the site origin as base.
-  const base = new URL(baseRoute, 'https://ericcarlisle.com');
-  const resolved = new URL(hrefStr, base);
   return normalizeRoute(resolved.pathname);
 }
 
@@ -133,7 +135,7 @@ export function extractInternalLinks(html, baseRoute) {
 
 // ─── Metadata Extraction ──────────────────────────────────────────────────
 
-/** Extract metadata from HTML using the DOM. */
+/** Extract metadata and redirect evidence from HTML using the DOM. */
 export function extractMeta(html) {
   const doc = parseHTML(html);
 
@@ -148,6 +150,23 @@ export function extractMeta(html) {
   const robotsEl = doc.querySelector('meta[name="robots"]');
   const robots = robotsEl?.getAttribute('content') ?? null;
 
+  // Redirect evidence: Astro emits a meta-refresh for configured redirects.
+  // content="0;url=/target/" (attribute order and casing vary).
+  let redirectTarget = null;
+  for (const metaEl of doc.querySelectorAll('meta[http-equiv], meta[httpEquiv]')) {
+    const equiv = (
+      metaEl.getAttribute('http-equiv') ||
+      metaEl.getAttribute('httpEquiv') ||
+      ''
+    ).toLowerCase();
+    if (equiv === 'refresh') {
+      const content = metaEl.getAttribute('content') ?? '';
+      const urlMatch = content.match(/url\s*=\s*(.+)$/i);
+      if (urlMatch) redirectTarget = urlMatch[1].trim();
+      break;
+    }
+  }
+
   const h1s = Array.from(doc.querySelectorAll('h1'));
   const h1Texts = h1s
     .map((h1) =>
@@ -158,7 +177,15 @@ export function extractMeta(html) {
     )
     .filter(Boolean);
 
-  return { title, description, canonical, robots, h1Count: h1Texts.length, h1Texts };
+  return {
+    title,
+    description,
+    canonical,
+    robots,
+    h1Count: h1Texts.length,
+    h1Texts,
+    redirectTarget,
+  };
 }
 
 // ─── Sitemap Parsing ──────────────────────────────────────────────────────
@@ -193,17 +220,22 @@ export function parseSitemapIndexXML(xml) {
  * Classify a page. Types:
  * - normal        : indexable, expected in sitemap, expected to have links
  * - noindex       : robots noindex, not expected in sitemap
- * - redirect      : canonical points to a different internal route
+ * - redirect      : has actual redirect evidence (meta-refresh or legacy route)
  * - '404'         : the 404 page (not indexable, not in sitemap)
  * - lab           : /lab/* diagnostic pages
- * - external      : non-HTML artifact that was not built as a page
+ * - external      : explicitly registered external artifact (e.g. Storybook)
+ *
+ * Redirect classification relies on redirect evidence, never on canonical
+ * mismatch alone.
  */
 export function classifyPage(route, page) {
   const isLab = route.startsWith('/lab/');
   const is404 = route === '/404.html/';
-  const isExternal = route.startsWith('/design-system/lab/');
+  const isExternal = route === '/design-system/lab/';
   const isNoindex = Boolean(page.robots?.toLowerCase().includes('noindex'));
-  const isRedirect = Boolean(page.canonical && normalizeRoute(page.canonical) !== route);
+  const isLegacyRedirect = EXCEPTIONS.legacyRedirectRoutes.some((p) => route.startsWith(p));
+  const hasRedirectEvidence = Boolean(page.redirectTarget);
+  const isRedirect = hasRedirectEvidence || isLegacyRedirect;
   const noLinksExpected = EXCEPTIONS.noInternalLinksExpected.some((p) => route.startsWith(p));
   const noSitemapExpected = EXCEPTIONS.notInSitemapExpected.some((p) => route.startsWith(p));
 
@@ -226,7 +258,7 @@ export function classifyPage(route, page) {
       type: 'redirect',
       isIndexable: false,
       expectInSitemap: !noSitemapExpected,
-      expectInternalLinks: !noLinksExpected,
+      expectInternalLinks: false,
     };
   }
   if (isNoindex) {
@@ -255,7 +287,9 @@ export function classifyPage(route, page) {
 export function detectWarnings(route, page, builtRoutes, sitemapRoutes) {
   const warnings = [];
   const cls = classifyPage(route, page);
-  const isBuilt = builtRoutes.has(route);
+  // Use the record's built field (accounts for merged external artifacts);
+  // fall back to the built-route set for callers that omit it.
+  const isBuilt = page.built === true || builtRoutes.has(route);
   const inSitemap = sitemapRoutes.has(route);
 
   // Built page missing from sitemap — only for indexable pages that expect it.
@@ -274,8 +308,9 @@ export function detectWarnings(route, page, builtRoutes, sitemapRoutes) {
     });
   }
 
-  // Orphaned page (no inbound links).
-  if (isBuilt && page.inboundCount === 0 && cls.expectInternalLinks) {
+  // Orphaned page — an indexable page, expected to have inbound links,
+  // with none.
+  if (isBuilt && cls.isIndexable && cls.expectInternalLinks && page.inboundCount === 0) {
     warnings.push({
       code: 'ORPHANED_PAGE',
       message: 'No internal links point to this page. It may be unreachable from navigation.',
@@ -299,13 +334,13 @@ export function detectWarnings(route, page, builtRoutes, sitemapRoutes) {
   if (page.canonical) {
     const canonRoute = normalizeRoute(page.canonical);
     // The 404 page's canonical points to /404/ (its natural URL) while the
-    // built file is /404.html — this is an intentional Astro convention.
+    // built file is /404.html — an intentional Astro convention.
     if (cls.type === '404' && canonRoute === '/404/') {
       // intentional, no warning
     } else if (canonRoute !== route) {
       if (cls.type === 'redirect') {
-        // Intentional: the page redirects to the canonical target.
-        // Only warn if the canonical target does not exist as a built page.
+        // The page redirects to its canonical target. Only warn if the
+        // target does not exist as a built page.
         if (!builtRoutes.has(canonRoute)) {
           warnings.push({
             code: 'CANONICAL_TARGET_MISSING',
@@ -395,8 +430,7 @@ export function detectDuplicateMetadata(pages) {
 
 /**
  * Build a deterministic inventory output object.
- * `provenance` is provided by the CLI (git sha, build timestamp); when
- * omitted, `provenance` is an empty object so output stays byte-stable.
+ * `provenance` is provided by the CLI (currently the git commit SHA only).
  */
 export function createInventoryOutput({ pages, summary, provenance = {} }) {
   return {

@@ -329,78 +329,32 @@ const DATA_URL = '/lab/site-inventory/data.json';
         (function () {
           var root = document.getElementById('inventory-root');
           var DATA_URL = '/lab/site-inventory/data.json';
-          var state: { pages: unknown[]; filter: string; query: string; data?: any } = { pages: [], filter: 'all', query: '' };
+          var state = { data: null, filter: 'all', query: '' };
 
-          function esc(s: string): string {
-            return String(s ?? '').replace(/[&<>"']/g, function (c) {
+          function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
               return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
             });
           }
 
-          function badge(ok: boolean, text: string, missing: boolean): string {
+          function badge(ok, text, missing) {
             var cls = missing ? 'si-badge--missing' : ok ? 'si-badge--ok' : 'si-badge--warn';
             return '<span class="si-badge ' + cls + '">' + esc(text) + '</span>';
           }
 
-          function render() {
-            var data = state.data;
-            if (!data) return;
-            var pages = data.pages;
-            var query = state.query.toLowerCase();
-            var shown = pages.filter(function (p) {
-              var matchFilter = true;
-              if (state.filter === 'warnings') matchFilter = p.warnings.length > 0;
-              else if (state.filter === 'missing-sitemap') matchFilter = p.built && !p.inSitemap && p.warnings.some(function (w) { return w.code === 'MISSING_FROM_SITEMAP'; });
-              else if (state.filter === 'missing-page') matchFilter = !p.built;
-              else if (state.filter === 'orphaned') matchFilter = p.built && p.inboundCount === 0 && p.warnings.some(function (w) { return w.code === 'ORPHANED_PAGE'; });
-              else if (state.filter === 'noindex') matchFilter = (p.robots || '').toLowerCase().indexOf('noindex') >= 0;
-              if (!matchFilter) return false;
-              if (query && p.route.toLowerCase().indexOf(query) < 0) return false;
-              return true;
-            });
+          function stat(value, label, warn) {
+            return '<div class="si-stat"><div class="si-stat__value' + (warn ? ' si-stat__value--warn' : '') + '">' +
+              value + '</div><div class="si-stat__label">' + esc(label) + '</div></div>';
+          }
 
-            var rows = shown.map(function (p) {
-              var warnings = p.warnings.map(function (w) {
-                return '<li><span class="si-warn-code">[' + esc(w.code) + ']</span> ' + esc(w.message) + '</li>';
-              }).join('');
-              var warnHtml = warnings
-                ? '<ul class="si-warn-list">' + warnings + '</ul>'
-                : '<span style="color:var(--text-muted)">—</span>';
+          function filterBtn(value, label, ariaLabel) {
+            var pressed = state.filter === value ? 'true' : 'false';
+            return '<button type="button" class="si-filter-btn" data-filter="' + value +
+              '" aria-pressed="' + pressed + '" aria-label="' + esc(ariaLabel) + '">' + esc(label) + '</button>';
+          }
 
-              var details = [];
-              if (p.canonical) details.push('<dt>Canonical</dt><dd>' + esc(p.canonical) + '</dd>');
-              if (p.description) details.push('<dt>Description</dt><dd>' + esc(p.description) + '</dd>');
-              if (p.robots) details.push('<dt>Robots</dt><dd>' + esc(p.robots) + '</dd>');
-              if (p.sitemapLastmod) details.push('<dt>Last modified</dt><dd>' + esc(p.sitemapLastmod) + '</dd>');
-              if (p.size) details.push('<dt>Size</dt><dd>' + p.size + ' bytes</dd>');
-              if (p.file) details.push('<dt>File</dt><dd>' + esc(p.file) + '</dd>');
-
-              var detailsHtml = details.length
-                ? '<button type="button" class="si-details-toggle" aria-expanded="false" data-route="' + esc(p.route) + '">Details</button>' +
-                  '<dl class="si-details" hidden>' + details.join('') + '</dl>'
-                : '';
-
-              var routeCell = p.built
-                ? '<a class="si-route-link" href="' + esc(p.route) + '">' + esc(p.route) + '</a>'
-                : '<span class="si-route-link" style="color:var(--text-muted)">' + esc(p.route) + '</span>';
-
-              var titleCell = p.title
-                ? esc(p.title)
-                : '<span style="color:var(--text-muted)">—</span>';
-
-              return '<tr class="' + (p.warnings.length ? 'si-row--warn' : '') + '" data-route="' + esc(p.route) + '">' +
-                '<td>' + routeCell + '</td>' +
-                '<td>' + badge(p.built, p.built ? 'Yes' : 'No', !p.built) + '</td>' +
-                '<td>' + badge(p.inSitemap, p.inSitemap ? 'Yes' : 'No', false) + '</td>' +
-                '<td>' + titleCell + '</td>' +
-                '<td>' + (p.h1Count ? esc(p.h1Count) : '<span style="color:var(--text-muted)">—</span>') + '</td>' +
-                '<td>' + p.inboundCount + '</td>' +
-                '<td>' + warnHtml + '</td>' +
-                '<td>' + detailsHtml + '</td>' +
-                '</tr>';
-            }).join('');
-
-            if (!root) return;
+          /** Build the static shell once. Controls are NOT recreated on filter. */
+          function buildShell(data) {
             root.innerHTML =
               '<div class="si-summary">' +
               stat(data.summary.totalUrls, 'Total URLs', false) +
@@ -420,64 +374,125 @@ const DATA_URL = '/lab/site-inventory/data.json';
               '</div>' +
               '<input type="search" class="si-search" placeholder="Filter by route…" aria-label="Filter by URL route" />' +
               '</div>' +
-              '<p id="si-status" class="si-status" aria-live="polite" role="status">' + shown.length + ' of ' + pages.length + ' routes</p>' +
+              '<p id="si-status" class="si-status" aria-live="polite" role="status"></p>' +
               '<div class="si-table-wrap"><table class="si-table"><thead><tr>' +
               '<th>Route</th><th>Built</th><th>Sitemap</th><th>Title</th><th>H1</th><th>Links in</th><th>Warnings</th><th></th>' +
-              '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-              (pages.length === 0 ? '<p class="si-state">No pages found.</p>' : '');
+              '</tr></thead><tbody></tbody></table></div>';
 
-            // Wire up event listeners
+            // Attach listeners ONCE to the persistent controls.
             var search = root.querySelector('.si-search');
-            if (search) {
-              search.addEventListener('input', function () {
-                state.query = search.value;
-                render();
-              });
-            }
+            search.addEventListener('input', function () {
+              state.query = search.value;
+              renderResults();
+            });
             root.querySelectorAll('.si-filter-btn').forEach(function (btn) {
               btn.addEventListener('click', function () {
                 state.filter = btn.getAttribute('data-filter');
                 root.querySelectorAll('.si-filter-btn').forEach(function (b) {
                   b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
                 });
-                render();
+                renderResults();
               });
             });
-            root.querySelectorAll('.si-details-toggle').forEach(function (btn) {
-              btn.addEventListener('click', function () {
-                var dl = btn.nextElementSibling;
-                var expanded = btn.getAttribute('aria-expanded') === 'true';
-                btn.setAttribute('aria-expanded', String(!expanded));
-                if (dl) (dl as HTMLElement).hidden = expanded;
-              });
+            // Details toggles are recreated per row; delegate from the tbody.
+            var tbody = root.querySelector('tbody');
+            tbody.addEventListener('click', function (event) {
+              var target = event.target;
+              var toggle = target.closest ? target.closest('.si-details-toggle') : null;
+              if (!toggle) return;
+              var dl = toggle.nextElementSibling;
+              var expanded = toggle.getAttribute('aria-expanded') === 'true';
+              toggle.setAttribute('aria-expanded', String(!expanded));
+              if (dl) dl.hidden = expanded;
             });
+
+            renderResults();
           }
 
-          function stat(value: number, label: string, warn: boolean): string {
-            return '<div class="si-stat"><div class="si-stat__value' + (warn ? ' si-stat__value--warn' : '') + '">' +
-              value + '</div><div class="si-stat__label">' + esc(label) + '</div></div>';
+          /** Update only the results table body and status text. */
+          function renderResults() {
+            var data = state.data;
+            if (!data) return;
+            var pages = data.pages;
+            var query = (state.query || '').toLowerCase();
+            var shown = pages.filter(function (p) {
+              var matchFilter = true;
+              if (state.filter === 'warnings') matchFilter = p.warnings.length > 0;
+              else if (state.filter === 'missing-sitemap') matchFilter = p.built && !p.inSitemap && p.warnings.some(function (w) { return w.code === 'MISSING_FROM_SITEMAP'; });
+              else if (state.filter === 'missing-page') matchFilter = !p.built;
+              else if (state.filter === 'orphaned') matchFilter = p.built && p.inboundCount === 0 && p.warnings.some(function (w) { return w.code === 'ORPHANED_PAGE'; });
+              else if (state.filter === 'noindex') matchFilter = (p.robots || '').toLowerCase().indexOf('noindex') >= 0;
+              if (!matchFilter) return false;
+              if (query && p.route.toLowerCase().indexOf(query) < 0) return false;
+              return true;
+            });
+
+            var status = document.getElementById('si-status');
+            if (status) {
+              status.textContent = shown.length + ' of ' + pages.length + ' routes';
+            }
+
+            var rows = shown.map(function (p) {
+              var warnings = (p.warnings || []).map(function (w) {
+                return '<li><span class="si-warn-code">[' + esc(w.code) + ']</span> ' + esc(w.message) + '</li>';
+              }).join('');
+              var warnHtml = warnings
+                ? '<ul class="si-warn-list">' + warnings + '</ul>'
+                : '<span style="color:var(--text-muted)">—</span>';
+
+              var details = [];
+              if (p.classification) details.push('<dt>Classification</dt><dd>' + esc(p.classification) + '</dd>');
+              if (p.canonical) details.push('<dt>Canonical</dt><dd>' + esc(p.canonical) + '</dd>');
+              if (p.redirectTarget) details.push('<dt>Redirects to</dt><dd>' + esc(p.redirectTarget) + '</dd>');
+              if (p.description) details.push('<dt>Description</dt><dd>' + esc(p.description) + '</dd>');
+              if (p.robots) details.push('<dt>Robots</dt><dd>' + esc(p.robots) + '</dd>');
+              if (p.sitemapLastmod) details.push('<dt>Last modified</dt><dd>' + esc(p.sitemapLastmod) + '</dd>');
+              if (p.size) details.push('<dt>Size</dt><dd>' + p.size + ' bytes</dd>');
+              if (p.file) details.push('<dt>File</dt><dd>' + esc(p.file) + '</dd>');
+
+              var detailsHtml = details.length
+                ? '<button type="button" class="si-details-toggle" aria-expanded="false">Details</button>' +
+                  '<dl class="si-details" hidden>' + details.join('') + '</dl>'
+                : '';
+
+              var routeCell = p.built
+                ? '<a class="si-route-link" href="' + esc(p.route) + '">' + esc(p.route) + '</a>'
+                : '<span class="si-route-link" style="color:var(--text-muted)">' + esc(p.route) + '</span>';
+
+              var titleCell = p.title
+                ? esc(p.title)
+                : '<span style="color:var(--text-muted)">—</span>';
+
+              return '<tr class="' + (p.warnings && p.warnings.length ? 'si-row--warn' : '') + '" data-route="' + esc(p.route) + '">' +
+                '<td>' + routeCell + '</td>' +
+                '<td>' + badge(p.built, p.built ? 'Yes' : 'No', !p.built) + '</td>' +
+                '<td>' + badge(p.inSitemap, p.inSitemap ? 'Yes' : 'No', false) + '</td>' +
+                '<td>' + titleCell + '</td>' +
+                '<td>' + (p.h1Count ? esc(p.h1Count) : '<span style="color:var(--text-muted)">—</span>') + '</td>' +
+                '<td>' + p.inboundCount + '</td>' +
+                '<td>' + warnHtml + '</td>' +
+                '<td>' + detailsHtml + '</td>' +
+                '</tr>';
+            }).join('');
+
+            var tbody = root.querySelector('tbody');
+            tbody.innerHTML = rows + (pages.length === 0 ? '<tr><td colspan="8" class="si-state">No pages found.</td></tr>' : '');
           }
 
-          function filterBtn(value: string, label: string, ariaLabel: string): string {
-            var pressed = state.filter === value ? 'true' : 'false';
-            return '<button type="button" class="si-filter-btn" data-filter="' + value +
-              '" aria-pressed="' + pressed + '" aria-label="' + esc(ariaLabel) + '">' + esc(label) + '</button>';
-          }
-
-          // Fetch and render
+          // Fetch and build the shell once.
           fetch(DATA_URL)
             .then(function (res) {
               if (!res.ok) throw new Error('HTTP ' + res.status);
               return res.json();
             })
             .then(function (data) {
-              state.data = data;
               if (!data.pages || !data.summary) throw new Error('Malformed inventory data');
-              render();
+              state.data = data;
+              buildShell(data);
             })
             .catch(function (err) {
               if (!root) return;
-            root.innerHTML = '<div class="si-state si-state--error">' +
+              root.innerHTML = '<div class="si-state si-state--error">' +
                 '<p>Could not load inventory data.</p>' +
                 '<p>' + esc(err.message || String(err)) + '</p>' +
                 '<p>Run <code>pnpm build && pnpm inventory:generate</code> to generate the inventory.</p>' +

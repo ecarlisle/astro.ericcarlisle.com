@@ -28,7 +28,6 @@ import {
   EXCEPTIONS,
   extractInternalLinks,
   extractMeta,
-  matchesException,
   normalizeRoute,
   parseSitemapIndexXML,
   parseSitemapXML,
@@ -37,6 +36,19 @@ import {
 const ROOT = join(import.meta.dirname, '..');
 const DIST = process.env.INVENTORY_DIST || join(ROOT, 'dist');
 const OUT_FILE = join(DIST, 'lab', 'site-inventory', 'data.json');
+
+/**
+ * Explicitly registered external artifacts. Each entry is represented as a
+ * single inventory route; internal generated files under the artifact are
+ * not inventoried as normal pages.
+ */
+const EXTERNAL_ARTIFACTS = [
+  {
+    route: '/design-system/lab/',
+    // dist file that proves the artifact was built/copied.
+    evidenceFile: 'design-system/lab/index.html',
+  },
+];
 
 /** Walk a directory recursively, yielding relative paths. */
 function* walk(dir, prefix = '') {
@@ -87,10 +99,13 @@ export async function generateInventory(distDir = DIST) {
   }
 
   // ── 1. Built pages ──────────────────────────────────────────────────────
+  // Normal site HTML pages (excluding generated tool files and the internal
+  // files of explicitly registered external artifacts).
   const builtRoutes = new Set();
   const filesByRoute = new Map();
   for (const file of walk(distDir)) {
     if (EXCEPTIONS.skipFiles.some((p) => file.startsWith(p))) continue;
+    if (EXTERNAL_ARTIFACTS.some((a) => file.startsWith(a.route.slice(1)))) continue;
     if (!file.endsWith('.html')) continue;
     const route = normalizeRoute(file);
     builtRoutes.add(route);
@@ -124,7 +139,7 @@ export async function generateInventory(distDir = DIST) {
     pageMeta.set(route, { route, file, ...meta, internalLinks: links });
   }
 
-  // Build the page records.
+  // ── 4. Build the page records ───────────────────────────────────────────
   const pages = [];
   const allRoutes = new Set([...builtRoutes, ...sitemapRoutes]);
 
@@ -144,29 +159,64 @@ export async function generateInventory(distDir = DIST) {
       robots: meta.robots ?? null,
       h1Count: meta.h1Count ?? 0,
       h1Texts: meta.h1Texts ?? [],
+      redirectTarget: meta.redirectTarget ?? null,
       inboundCount: inboundLinks.get(route)?.size ?? 0,
       warnings: [],
     };
+    record.classification = classifyPage(record.route, record).type;
     pages.push(record);
   }
 
-  // ── 4. Warning detection ────────────────────────────────────────────────
+  // ── 5. External artifacts ───────────────────────────────────────────────
+  // Represent each registered artifact as a single route, using its
+  // evidence file to determine whether it was built in this deployment.
+  for (const artifact of EXTERNAL_ARTIFACTS) {
+    const evidencePath = join(distDir, artifact.evidenceFile);
+    const built = existsSync(evidencePath);
+    const meta = built ? extractMeta(readFileSync(evidencePath, 'utf-8')) : {};
+    const existing = pages.find((p) => p.route === artifact.route);
+    const record = {
+      route: artifact.route,
+      file: built ? artifact.evidenceFile : null,
+      size: built ? statSync(evidencePath).size : null,
+      built,
+      inSitemap: sitemapRoutes.has(artifact.route),
+      sitemapLastmod: sitemapLastmod.get(artifact.route) ?? null,
+      title: meta.title ?? null,
+      description: meta.description ?? null,
+      canonical: meta.canonical ?? null,
+      robots: meta.robots ?? null,
+      h1Count: meta.h1Count ?? 0,
+      h1Texts: meta.h1Texts ?? [],
+      redirectTarget: null,
+      inboundCount: 0,
+      warnings: [],
+    };
+    record.classification = classifyPage(record.route, record).type;
+    if (existing) {
+      Object.assign(existing, record);
+    } else {
+      pages.push(record);
+    }
+  }
+
+  // ── 6. Warning detection ────────────────────────────────────────────────
   const pageByRoute = new Map(pages.map((p) => [p.route, p]));
   for (const page of pages) {
     page.warnings = detectWarnings(page.route, page, builtRoutes, sitemapRoutes);
   }
 
-  // ── 5. Duplicate metadata detection ─────────────────────────────────────
+  // ── 7. Duplicate metadata detection ─────────────────────────────────────
   const dupWarnings = detectDuplicateMetadata(pages);
   for (const w of dupWarnings) {
     const page = pageByRoute.get(w.route);
     if (page) page.warnings.push({ code: w.code, message: w.message });
   }
 
-  // ── 6. Summary ──────────────────────────────────────────────────────────
+  // ── 8. Summary ──────────────────────────────────────────────────────────
   const normalIndexable = pages.filter((p) => {
     const cls = classifyPage(p.route, p);
-    return cls.isIndexable && p.built;
+    return cls.isIndexable && cls.expectInternalLinks && p.built;
   });
   const summary = {
     totalUrls: pages.length,

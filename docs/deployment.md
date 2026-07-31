@@ -194,7 +194,10 @@ developer/owner tool, not a public sitemap or a guarantee of search indexing.
 **What it measures.** The generator cross-references three independent inputs
 produced from the same `dist/` build:
 
-1. **Generated HTML pages** — every `.html` file in `dist/`
+1. **Generated HTML pages** — normal site HTML pages plus explicitly
+   registered external artifacts. Generated tool files (Pagefind, Partytown,
+   `_astro/` assets, icons) and the internal files of external artifacts are
+   not inventoried as normal pages.
 2. **The XML sitemap** — parsed from the generated `sitemap-index.xml` and
    sitemap files
 3. **Internal links** — `<a href>` anchors extracted from the generated HTML
@@ -230,19 +233,31 @@ Storybook copy so the measured artifact matches the uploaded artifact.
 
 **Classifications and intentional exceptions.** Pages are classified as
 normal, `noindex`, redirect, 404, lab (`/lab/*`), or external artifact
-(`/design-system/lab/`). Exceptions are centralized in
-`scripts/site-inventory-core.mjs`:
+(`/design-system/lab/`). Redirects are identified from actual redirect
+evidence — Astro's generated `<meta http-equiv="refresh">` markup — and from
+an explicit legacy route list (`/posts/*`). A canonical that differs from the
+route is **not** treated as redirect evidence; a normal page with a mismatched
+canonical remains a normal page and receives `CANONICAL_MISMATCH`. Exceptions
+are centralized in `scripts/site-inventory-core.mjs`:
 
 - `/lab/*`, `/404.html/`, `/search/`, `/tags/` — no inbound links expected
 - `/lab/*`, `/404.html/`, `/tags/` — not expected in the sitemap
 - The 404 page's canonical (`/404/`) is an intentional Astro convention
-- Redirect pages (canonical points elsewhere, e.g. `/posts/*` → `/blog/*`)
-  are non-indexable; their canonical target existence is checked instead
-- Storybook at `/design-system/lab/` is an external artifact, not a normal page
+- `ORPHANED_PAGE` is only emitted for indexable pages; non-indexable
+  redirects and `noindex` pages never receive orphan warnings
+- Redirect pages are non-indexable; their canonical target existence is
+  checked instead
+- Storybook at `/design-system/lab/` is a single external artifact,
+  represented by `dist/design-system/lab/index.html` as build evidence.
+  Its internal HTML files are not inventoried as normal pages. A local build
+  without Storybook reports it as not built (`NO_BUILT_PAGE`); the CI
+  deployment copies Storybook before regenerating the inventory, so the
+  final artifact reports it as built and in the sitemap.
 
-The sitemap configuration (`astro.config.mjs`) excludes `/lab/*`, `/posts/*`,
-and `/portfolio/design-system/` — these are `noindex` or redirect pages and
-should not be submitted for indexing.
+The sitemap configuration (`astro.config.mjs`) uses a pathname-aware filter
+that excludes root `/lab/*` routes, `/posts/*` redirects, and
+`/portfolio/design-system/` (noindex), while preserving
+`/design-system/lab/` (Storybook), which is declared via `customPages`.
 
 **Deterministic output.** Running the generator twice against identical input
 produces byte-identical JSON. The output carries git commit provenance, not a

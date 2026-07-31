@@ -39,10 +39,17 @@ export default defineConfig({
     pagefind(),
     sitemap({
       customPages: ['https://ericcarlisle.com/design-system/lab/'],
-      filter: (page) =>
-        !page.includes('/lab/') &&
-        !page.includes('/posts/') &&
-        !page.includes('/portfolio/design-system/'),
+      // Pathname-aware: exclude root /lab/* diagnostic routes, /posts/*
+      // legacy redirects, and /portfolio/design-system/ (noindex), while
+      // preserving /design-system/lab/ (Storybook) added via customPages.
+      filter: (page) => {
+        const pathname = new URL(page).pathname;
+        return (
+          !pathname.startsWith('/lab/') &&
+          !pathname.startsWith('/posts/') &&
+          !pathname.startsWith('/portfolio/design-system/')
+        );
+      },
     }),
   ],
   vite: {
