@@ -1,6 +1,7 @@
 ---
 import siteQuality from '../../generated/site-quality.json';
 import Layout from '../../layouts/BlogPost.astro';
+import { lighthousePath } from '../../lib/site-quality';
 
 const {
   generatedAt,
@@ -63,10 +64,12 @@ function formatMs(val: number | null | undefined) {
 >
   <header class="page-intro">
     <p class="lede">
-      This page reports reproducible measurements for the live site and its
-      component development system. Every number comes from generated build
-      output, test results, or metadata — not fabricated values or historical
-      reports.
+      This page reports reproducible measurements for the deployable
+      production build and its component development system. Every number
+      comes from generated build output, test results, or metadata — not
+      fabricated values or historical reports. Performance figures are lab
+      measurements of the built static output; they are not production Core
+      Web Vitals or live-network measurements.
     </p>
     <dl class="measurement-meta">
       <div><dt>Measurement date</dt><dd>{dateStr} at {timeStr}</dd></div>
@@ -148,14 +151,17 @@ function formatMs(val: number | null | undefined) {
     {siteQuality.lighthouse !== null && (siteQuality.lighthouse as unknown as any[]).length > 0 ? (
       <>
         <p>
-          Lighthouse measurements taken locally against the built static output
-          served by a plain HTTP server. These are lab measurements, not
-          production Core Web Vitals.
+          Lighthouse measures the deployable production build (the static
+          output in <code>dist/</code>) by serving it through a temporary
+          local server during the build pipeline. The route labels below are
+          paths on that built site. These are lab measurements of the
+          deployment candidate, not production Core Web Vitals and not
+          live-network performance.
         </p>
 
         {(siteQuality.lighthouse as unknown as any[]).map((lh: any) => (
           <div class="lh-route-block">
-            <h3><code>{lh.url}</code></h3>
+            <h3><code>{lighthousePath(lh.url)}</code></h3>
             <p class="methodology-note">
               Measured: {lh.fetchedAt ? new Date(lh.fetchedAt).toLocaleString() : 'unknown'}
               · Device: {lh.device} · Throttling: {lh.throttling}
