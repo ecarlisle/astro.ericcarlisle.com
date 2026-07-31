@@ -2,7 +2,7 @@
  * Load and validate the generated site inventory artifact.
  */
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { type SiteInventory, validateSiteInventory } from './schema.js';
@@ -16,16 +16,36 @@ export class InventoryLoadError extends Error {
 }
 
 /**
+ * Walk upward from `startDir` to find the repository root, identified by the
+ * presence of `pnpm-workspace.yaml`. This is independent of the caller's
+ * current working directory and of the package's compiled output depth.
+ * Returns null when no repository root is found before the filesystem root.
+ */
+export function findRepoRoot(startDir: string): string | null {
+  let dir = startDir;
+  for (;;) {
+    if (existsSync(join(dir, 'pnpm-workspace.yaml'))) {
+      return dir;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) {
+      return null;
+    }
+    dir = parent;
+  }
+}
+
+/**
  * Resolve the inventory artifact path.
  *
  * Priority:
  *  1. `SITE_INTELLIGENCE_INVENTORY_PATH` env override (resolved against cwd).
- *  2. A path resolved relative to this package's location inside the
- *     repository (`packages/site-intelligence-mcp/dist/…` → repo root
- *     `dist/lab/site-inventory/data.json`). This does not depend on the
- *     caller's working directory.
- *  3. Fallback to `<cwd>/dist/lab/site-inventory/data.json` for convenience
- *     when launched from the repository root (e.g. via a root pnpm script).
+ *  2. The repository root found by walking upward from this module's own
+ *     compiled location, then `<repo>/dist/lab/site-inventory/data.json`.
+ *     This does not depend on the caller's working directory, so it works
+ *     when an MCP client launches the server with an unrelated cwd.
+ *  3. Fallback to `<cwd>/dist/lab/site-inventory/data.json` as a convenience
+ *     when launched from the repository root via a root pnpm script.
  */
 export function defaultInventoryPath(): string {
   const override = process.env.SITE_INTELLIGENCE_INVENTORY_PATH;
@@ -33,18 +53,10 @@ export function defaultInventoryPath(): string {
     return resolve(override);
   }
 
-  // Compiled module lives at packages/site-intelligence-mcp/dist/<file>.
   const here = dirname(fileURLToPath(import.meta.url));
-  const repoRootFromPackage = resolve(here, '..', '..', '..');
-  const packageRelative = resolve(
-    repoRootFromPackage,
-    'dist',
-    'lab',
-    'site-inventory',
-    'data.json',
-  );
-  if (existsSync(packageRelative)) {
-    return packageRelative;
+  const repoRoot = findRepoRoot(here);
+  if (repoRoot) {
+    return resolve(repoRoot, 'dist', 'lab', 'site-inventory', 'data.json');
   }
 
   return resolve(process.cwd(), 'dist', 'lab', 'site-inventory', 'data.json');

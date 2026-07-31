@@ -74,10 +74,13 @@ The server resolves the inventory path in this order:
 
 1. `SITE_INTELLIGENCE_INVENTORY_PATH` environment variable (absolute, or
    relative to the current working directory)
-2. A path computed from the package's own location inside the repository
-   (`dist/lab/site-inventory/data.json`), independent of the caller's cwd
-3. `<cwd>/dist/lab/site-inventory/data.json` as a convenience when launched
-   from the repository root
+2. The repository root found by walking upward from the compiled module's
+   own location (looking for `pnpm-workspace.yaml`), then
+   `<repo>/dist/lab/site-inventory/data.json`. This is independent of the
+   caller's cwd, so it works when an MCP client launches the server's
+   absolute path with an unrelated working directory.
+3. `<cwd>/dist/lab/site-inventory/data.json` as a convenience only when the
+   repository-root walk cannot find a `pnpm-workspace.yaml` ancestor.
 
 ## How to run the tests
 
