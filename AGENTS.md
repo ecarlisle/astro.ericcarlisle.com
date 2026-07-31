@@ -115,10 +115,14 @@ If a task appears to require changes to a protected file, stop and ask first.
 
 ## Skill Routing
 
-For implementation work, always consult [agent-safe-change](.agents/skills/agent-safe-change/SKILL.md). Load other skills only when the task matches their scope:
+For implementation work, always consult [agent-safe-change](.agents/skills/agent-safe-change/SKILL.md)
+and [engineering-preferences](.agents/skills/engineering-preferences/SKILL.md). Apply engineering
+preferences only where the current task and repository guidance are silent. Load other skills only
+when the task matches their scope:
 
 | Task | Skill |
 |---|---|
+| Implement or review code, resolve Git divergence, write TypeScript, handle errors, or add tests | [engineering-preferences](.agents/skills/engineering-preferences/SKILL.md) |
 | Modify Astro pages, layouts, components, routes, or rendered static output | [astro-static-implementation](.agents/skills/astro-static-implementation/SKILL.md) |
 | Change dependencies, client JavaScript, images, fonts, embeds, search, analytics, animation, data fetching, interactive UI, resource loading, or bundle/build output | [performance-budget](.agents/skills/performance-budget/SKILL.md) |
 | Add, change, or review UI semantics, keyboard behavior, focus, contrast, motion, forms, or navigation | [accessibility](.agents/skills/accessibility/SKILL.md) |
