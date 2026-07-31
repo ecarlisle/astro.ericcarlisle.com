@@ -11,9 +11,7 @@ applies_to:
   - testing
 triggers:
   - implement
-  - review code
   - resolve Git divergence
-  - write TypeScript
   - add tests
 priority: high
 version: 1
