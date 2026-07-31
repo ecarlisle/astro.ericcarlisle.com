@@ -2,6 +2,8 @@
 #
 # Search engines may crawl this site for search indexing.
 # AI training and AI-input use are not granted by this file.
+#
+# Algolia-Crawler-Verif: 61309F33E608E6F4
 
 User-agent: *
 Allow: /
