@@ -186,6 +186,81 @@ pnpm lighthouse:report    # build → audit → generate scores
 
 Full reports appear in `lh-reports/`. The generated score data lives at `src/generated/lighthouse-scores.json` but is not committed (it is deployment-specific).
 
+### Site Inventory
+
+`/lab/site-inventory/` is a post-build inventory of the generated site. It is a
+developer/owner tool, not a public sitemap or a guarantee of search indexing.
+
+**What it measures.** The generator cross-references three independent inputs
+produced from the same `dist/` build:
+
+1. **Generated HTML pages** — every `.html` file in `dist/`
+2. **The XML sitemap** — parsed from the generated `sitemap-index.xml` and
+   sitemap files
+3. **Internal links** — `<a href>` anchors extracted from the generated HTML
+
+For each URL it records whether a page was built, whether it is in the sitemap,
+title/description/canonical/robots metadata, H1 count, inbound-link count,
+sitemap `lastmod`, and any warnings.
+
+**Build/data flow.**
+
+```text
+pnpm build                         # Astro build → dist/
+  └─ postbuild                     # node scripts/generate-site-inventory.mjs
+       └─ dist/lab/site-inventory/data.json   (deployment-specific JSON)
+```
+
+The Astro page at `/lab/site-inventory/` loads `data.json` at runtime, so the
+deployed page always reflects the same final build that produced it — including
+post-build additions such as the Storybook copy at `/design-system/lab/`. No
+generated inventory data is committed under `src/`; `data.json` is written only
+into `dist/`. The CI workflow regenerates the inventory after the final
+Storybook copy so the measured artifact matches the uploaded artifact.
+
+**Warnings.** The generator emits machine-readable warning codes:
+
+- `MISSING_FROM_SITEMAP` — indexable built page not in the sitemap
+- `NO_BUILT_PAGE` — sitemap URL with no generated HTML file
+- `ORPHANED_PAGE` — indexable page with zero inbound internal links
+- `NOINDEX_IN_SITEMAP` — `noindex` page included in the sitemap
+- `MISSING_CANONICAL` / `CANONICAL_MISMATCH` / `CANONICAL_TARGET_MISSING`
+- `MISSING_TITLE` / `MISSING_DESCRIPTION` / `MISSING_H1` / `MULTIPLE_H1S`
+- `DUPLICATE_TITLE` / `DUPLICATE_DESCRIPTION`
+
+**Classifications and intentional exceptions.** Pages are classified as
+normal, `noindex`, redirect, 404, lab (`/lab/*`), or external artifact
+(`/design-system/lab/`). Exceptions are centralized in
+`scripts/site-inventory-core.mjs`:
+
+- `/lab/*`, `/404.html/`, `/search/`, `/tags/` — no inbound links expected
+- `/lab/*`, `/404.html/`, `/tags/` — not expected in the sitemap
+- The 404 page's canonical (`/404/`) is an intentional Astro convention
+- Redirect pages (canonical points elsewhere, e.g. `/posts/*` → `/blog/*`)
+  are non-indexable; their canonical target existence is checked instead
+- Storybook at `/design-system/lab/` is an external artifact, not a normal page
+
+The sitemap configuration (`astro.config.mjs`) excludes `/lab/*`, `/posts/*`,
+and `/portfolio/design-system/` — these are `noindex` or redirect pages and
+should not be submitted for indexing.
+
+**Deterministic output.** Running the generator twice against identical input
+produces byte-identical JSON. The output carries git commit provenance, not a
+wall-clock timestamp.
+
+**Running locally.**
+
+```sh
+pnpm build                        # runs the inventory as postbuild
+# or explicitly:
+pnpm build && pnpm inventory:generate
+```
+
+**Limits.** The inventory describes the generated build and its internal
+consistency. It does not measure live availability, whether the sitemap has
+been submitted or crawled, or search indexing status. A healthy inventory does
+not guarantee that a page is indexed or live.
+
 ### Required Repository Settings
 
 1. **GitHub Pages** enabled:

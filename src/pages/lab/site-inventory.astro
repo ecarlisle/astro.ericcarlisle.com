@@ -1,12 +1,9 @@
 ---
 import '../../styles/global.css';
 
-interface Warning {
-  code: string;
-  message: string;
-}
+type Warning = { code: string; message: string };
 
-interface PageEntry {
+type PageEntry = {
   route: string;
   file: string | null;
   size: number | null;
@@ -21,10 +18,10 @@ interface PageEntry {
   h1Texts: string[];
   inboundCount: number;
   warnings: Warning[];
-}
+};
 
-interface InventoryData {
-  generatedAt: string;
+type InventoryData = {
+  provenance: { commitSha?: string };
   summary: {
     totalUrls: number;
     builtPages: number;
@@ -34,16 +31,12 @@ interface InventoryData {
     totalWarnings: number;
   };
   pages: PageEntry[];
-}
+};
 
-let data: InventoryData | null = null;
-let loadError: string | null = null;
-try {
-  data = (await import('../../generated/site-inventory.json')).default;
-} catch (e) {
-  loadError =
-    'Inventory data not found. Run the production build and site-inventory generator first.';
-}
+// The deployment-specific JSON is written to dist/lab/site-inventory/data.json
+// by scripts/generate-site-inventory.mjs after the final build. The page loads
+// it client-side so the deployed artifact always reflects the same build.
+const DATA_URL = '/lab/site-inventory/data.json';
 ---
 
 <!doctype html>
@@ -54,7 +47,6 @@ try {
     <title>Site Inventory — Eric Carlisle</title>
     <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="stylesheet" href="/_astro/global.*.css" />
     <style>
       .si-page {
         max-width: var(--layout-rail-page, 72rem);
@@ -136,16 +128,22 @@ try {
         background: var(--bg-surface);
         color: var(--text-secondary);
         cursor: pointer;
-        transition: all var(--transition-fast);
+        transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
       }
       .si-filter-btn:hover {
         border-color: var(--color-link);
         color: var(--color-link);
       }
-      .si-filter-btn--active {
+      .si-filter-btn[aria-pressed='true'] {
         background: var(--color-link);
         color: var(--bg-main);
         border-color: var(--color-link);
+      }
+      .si-filter-btn:focus-visible,
+      .si-search:focus-visible,
+      .si-details-toggle:focus-visible {
+        outline: 2px dashed var(--color-focus);
+        outline-offset: 2px;
       }
       .si-search {
         font-family: var(--font-mono);
@@ -158,9 +156,11 @@ try {
         flex: 1;
         min-width: 200px;
       }
-      .si-search:focus {
-        outline: 2px dashed var(--color-focus);
-        outline-offset: 2px;
+      .si-status {
+        font-size: var(--type-size-small);
+        color: var(--text-muted);
+        min-height: 1.4em;
+        margin-bottom: var(--space-sm);
       }
       .si-table-wrap {
         overflow-x: auto;
@@ -262,20 +262,26 @@ try {
       }
       .si-details dd {
         margin: 0;
+        word-break: break-word;
       }
-      .si-empty {
+      .si-state {
         text-align: center;
         padding: var(--space-xl);
         color: var(--text-muted);
       }
-      .si-error {
-        text-align: center;
-        padding: var(--space-xl);
+      .si-state--error {
         color: #ef4444;
       }
-      .si-404-link {
-        display: inline-block;
-        margin-top: var(--space-sm);
+      .si-sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+        border: 0;
       }
       @media (max-width: 720px) {
         .si-summary {
@@ -308,212 +314,177 @@ try {
         <strong>What this is:</strong> A post-build inventory that cross-references
         generated HTML pages, the XML sitemap, and internal links to find missing
         or inconsistent metadata, orphaned pages, and sitemap discrepancies.
-        This is a developer tool — it does not measure live availability,
-        search indexing, or Core Web Vitals. See
-        <a href="/portfolio/site-quality/">Site Quality</a> for Lighthouse scores
-        and performance measurements.
+        This is a developer tool — it measures the generated build and its
+        internal consistency, not live availability, sitemap submission status,
+        or search indexing. See
+        <a href="/portfolio/site-quality/">Site Quality</a> for Lighthouse scores.
       </div>
 
-      {
-        loadError ? (
-          <div class="si-error">
-            <p>{loadError}</p>
-            <p>Run <code>pnpm build && node scripts/generate-site-inventory.mjs</code> to generate the inventory.</p>
-          </div>
-        ) : data ? (
-          <>
-            <!-- Summary -->
-            <div class="si-summary">
-              <div class="si-stat">
-                <div class="si-stat__value">{data.summary.totalUrls}</div>
-                <div class="si-stat__label">Total URLs</div>
-              </div>
-              <div class="si-stat">
-                <div class="si-stat__value">{data.summary.builtPages}</div>
-                <div class="si-stat__label">Built pages</div>
-              </div>
-              <div class="si-stat">
-                <div class="si-stat__value">{data.summary.sitemapUrls}</div>
-                <div class="si-stat__label">Sitemap URLs</div>
-              </div>
-              <div class="si-stat">
-                <div class="si-stat__value">{data.summary.orphanedPages}</div>
-                <div class="si-stat__label">Orphaned pages</div>
-                <div class="si-page__meta">No internal links</div>
-              </div>
-              <div class="si-stat">
-                <div class={`si-stat__value ${data.summary.pagesWithWarnings > 0 ? 'si-stat__value--warn' : ''}`}>{data.summary.pagesWithWarnings}</div>
-                <div class="si-stat__label">Pages with warnings</div>
-              </div>
-            </div>
+      <div id="inventory-root">
+        <div class="si-state" id="loading-state">Loading inventory data…</div>
+      </div>
 
-            <!-- Controls -->
-            <div class="si-controls">
-              <div class="si-filter-group" role="group" aria-label="Filter inventory">
-                <button class="si-filter-btn si-filter-btn--active" data-filter="all" type="button">All</button>
-                <button class="si-filter-btn" data-filter="warnings" type="button">Warnings</button>
-                <button class="si-filter-btn" data-filter="missing-sitemap" type="button">Missing from sitemap</button>
-                <button class="si-filter-btn" data-filter="missing-page" type="button">No built page</button>
-                <button class="si-filter-btn" data-filter="orphaned" type="button">Orphaned</button>
-                <button class="si-filter-btn" data-filter="noindex" type="button">Noindex</button>
-              </div>
-              <input class="si-search" type="search" placeholder="Filter by route…" aria-label="Filter by URL route" />
-            </div>
+      <script>
+        // @ts-nocheck — client-side UI script; checked at runtime by tests
+        (function () {
+          var root = document.getElementById('inventory-root');
+          var DATA_URL = '/lab/site-inventory/data.json';
+          var state: { pages: unknown[]; filter: string; query: string; data?: any } = { pages: [], filter: 'all', query: '' };
 
-            <!-- Table -->
-            <div class="si-table-wrap">
-              <table class="si-table" id="inventory-table">
-                <thead>
-                  <tr>
-                    <th>Route</th>
-                    <th>Built</th>
-                    <th>Sitemap</th>
-                    <th>Title</th>
-                    <th>H1</th>
-                    <th>Links in</th>
-                    <th>Warnings</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="inventory-body">
-                  {data.pages.map((page) => (
-                    <tr class={page.warnings.length > 0 ? 'si-row--warn' : ''} data-route={page.route}>
-                      <td>
-                        {page.built ? (
-                          <a href={page.route} class="si-route-link">{page.route}</a>
-                        ) : (
-                          <span class="si-route-link" style="color:var(--text-muted)">{page.route}</span>
-                        )}
-                      </td>
-                      <td>
-                        {page.built
-                          ? <span class="si-badge si-badge--ok">Yes</span>
-                          : <span class="si-badge si-badge--missing">No</span>}
-                      </td>
-                      <td>
-                        {page.inSitemap
-                          ? <span class="si-badge si-badge--ok">Yes</span>
-                          : <span class="si-badge si-badge--warn">No</span>}
-                      </td>
-                      <td>{page.title ?? <span style="color:var(--text-muted)">—</span>}</td>
-                      <td>
-                        {page.h1Count > 0
-                          ? <span title={page.h1Texts.join(' | ')}>{page.h1Count}</span>
-                          : <span style="color:var(--text-muted)">—</span>}
-                      </td>
-                      <td>{page.inboundCount}</td>
-                      <td>
-                        {page.warnings.length > 0 ? (
-                          <ul class="si-warn-list">
-                            {page.warnings.slice(0, 3).map((w) => (
-                              <li><span class="si-warn-code">[{w.code}]</span> {w.message}</li>
-                            ))}
-                            {page.warnings.length > 3 && (
-                              <li>… and {page.warnings.length - 3} more</li>
-                            )}
-                          </ul>
-                        ) : (
-                          <span style="color:var(--text-muted)">—</span>
-                        )}
-                      </td>
-                      <td>
-                        {page.description || page.canonical || page.robots ? (
-                          <>
-                            <button class="si-details-toggle" type="button" aria-expanded="false" data-toggle={page.route}>Details</button>
-                            <div class="si-details" id={`details-${page.route}`} hidden>
-                              {page.canonical && <><dt>Canonical</dt><dd>{page.canonical}</dd></>}
-                              {page.description && <><dt>Description</dt><dd>{page.description}</dd></>}
-                              {page.robots && <><dt>Robots</dt><dd>{page.robots}</dd></>}
-                              {page.sitemapLastmod && <><dt>Last modified</dt><dd>{page.sitemapLastmod}</dd></>}
-                              {page.size && <><dt>Size</dt><dd>{page.size} bytes</dd></>}
-                              {page.file && <><dt>File</dt><dd>{page.file}</dd></>}
-                            </div>
-                          </>
-                        ) : null}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          function esc(s: string): string {
+            return String(s ?? '').replace(/[&<>"']/g, function (c) {
+              return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+          }
 
-            {data.pages.length === 0 && (
-              <div class="si-empty">No pages found.</div>
-            )}
+          function badge(ok: boolean, text: string, missing: boolean): string {
+            var cls = missing ? 'si-badge--missing' : ok ? 'si-badge--ok' : 'si-badge--warn';
+            return '<span class="si-badge ' + cls + '">' + esc(text) + '</span>';
+          }
 
-            <script>
-              (function() {
-                var table = document.getElementById('inventory-table');
-                var body = document.getElementById('inventory-body');
-                var searchInput = document.querySelector('.si-search');
-                var filterBtns = document.querySelectorAll('.si-filter-btn');
-                if (!body) return;
+          function render() {
+            var data = state.data;
+            if (!data) return;
+            var pages = data.pages;
+            var query = state.query.toLowerCase();
+            var shown = pages.filter(function (p) {
+              var matchFilter = true;
+              if (state.filter === 'warnings') matchFilter = p.warnings.length > 0;
+              else if (state.filter === 'missing-sitemap') matchFilter = p.built && !p.inSitemap && p.warnings.some(function (w) { return w.code === 'MISSING_FROM_SITEMAP'; });
+              else if (state.filter === 'missing-page') matchFilter = !p.built;
+              else if (state.filter === 'orphaned') matchFilter = p.built && p.inboundCount === 0 && p.warnings.some(function (w) { return w.code === 'ORPHANED_PAGE'; });
+              else if (state.filter === 'noindex') matchFilter = (p.robots || '').toLowerCase().indexOf('noindex') >= 0;
+              if (!matchFilter) return false;
+              if (query && p.route.toLowerCase().indexOf(query) < 0) return false;
+              return true;
+            });
 
-                var allRows = Array.from(body.querySelectorAll('tr'));
-                var activeFilter = 'all';
+            var rows = shown.map(function (p) {
+              var warnings = p.warnings.map(function (w) {
+                return '<li><span class="si-warn-code">[' + esc(w.code) + ']</span> ' + esc(w.message) + '</li>';
+              }).join('');
+              var warnHtml = warnings
+                ? '<ul class="si-warn-list">' + warnings + '</ul>'
+                : '<span style="color:var(--text-muted)">—</span>';
 
-                function applyFilter() {
-                  var query = (searchInput ? (searchInput as HTMLInputElement).value.toLowerCase() : '');
-                  allRows.forEach(function(row) {
-                    var route = row.getAttribute('data-route') || '';
-                    var warnings = row.querySelector('.si-warn-list');
-                    var built = row.querySelector('.si-badge--ok') !== null;
-                    var inSitemap = false;
-                    var sitemapCell = row.cells ? row.cells[2] : null;
-                    if (sitemapCell) inSitemap = sitemapCell.textContent.trim() === 'Yes';
-                    var noindex = false;
-                    var detailsDiv = row.querySelector('.si-details');
-                    if (detailsDiv && detailsDiv.textContent.indexOf('noindex') >= 0) noindex = true;
-                    var orphaned = row.cells ? (parseInt(row.cells[5].textContent, 10) === 0 && built) : false;
-                    var hasWarnings = warnings !== null;
+              var details = [];
+              if (p.canonical) details.push('<dt>Canonical</dt><dd>' + esc(p.canonical) + '</dd>');
+              if (p.description) details.push('<dt>Description</dt><dd>' + esc(p.description) + '</dd>');
+              if (p.robots) details.push('<dt>Robots</dt><dd>' + esc(p.robots) + '</dd>');
+              if (p.sitemapLastmod) details.push('<dt>Last modified</dt><dd>' + esc(p.sitemapLastmod) + '</dd>');
+              if (p.size) details.push('<dt>Size</dt><dd>' + p.size + ' bytes</dd>');
+              if (p.file) details.push('<dt>File</dt><dd>' + esc(p.file) + '</dd>');
 
-                    // Filter by category
-                    var show = true;
-                    if (activeFilter === 'warnings') show = hasWarnings;
-                    else if (activeFilter === 'missing-sitemap') show = built && !inSitemap;
-                    else if (activeFilter === 'missing-page') show = !built;
-                    else if (activeFilter === 'orphaned') show = orphaned;
-                    else if (activeFilter === 'noindex') show = noindex;
+              var detailsHtml = details.length
+                ? '<button type="button" class="si-details-toggle" aria-expanded="false" data-route="' + esc(p.route) + '">Details</button>' +
+                  '<dl class="si-details" hidden>' + details.join('') + '</dl>'
+                : '';
 
-                    // Filter by search query
-                    if (show && query) {
-                      show = route.indexOf(query) >= 0;
-                    }
+              var routeCell = p.built
+                ? '<a class="si-route-link" href="' + esc(p.route) + '">' + esc(p.route) + '</a>'
+                : '<span class="si-route-link" style="color:var(--text-muted)">' + esc(p.route) + '</span>';
 
-                    row.style.display = show ? '' : 'none';
-                  });
-                }
+              var titleCell = p.title
+                ? esc(p.title)
+                : '<span style="color:var(--text-muted)">—</span>';
 
-                // Search input
-                if (searchInput) {
-                  searchInput.addEventListener('input', applyFilter);
-                }
+              return '<tr class="' + (p.warnings.length ? 'si-row--warn' : '') + '" data-route="' + esc(p.route) + '">' +
+                '<td>' + routeCell + '</td>' +
+                '<td>' + badge(p.built, p.built ? 'Yes' : 'No', !p.built) + '</td>' +
+                '<td>' + badge(p.inSitemap, p.inSitemap ? 'Yes' : 'No', false) + '</td>' +
+                '<td>' + titleCell + '</td>' +
+                '<td>' + (p.h1Count ? esc(p.h1Count) : '<span style="color:var(--text-muted)">—</span>') + '</td>' +
+                '<td>' + p.inboundCount + '</td>' +
+                '<td>' + warnHtml + '</td>' +
+                '<td>' + detailsHtml + '</td>' +
+                '</tr>';
+            }).join('');
 
-                // Filter buttons
-                filterBtns.forEach(function(btn) {
-                  btn.addEventListener('click', function() {
-                    filterBtns.forEach(function(b) { b.classList.remove('si-filter-btn--active'); });
-                    btn.classList.add('si-filter-btn--active');
-                    activeFilter = btn.getAttribute('data-filter') || 'all';
-                    applyFilter();
-                  });
+            if (!root) return;
+            root.innerHTML =
+              '<div class="si-summary">' +
+              stat(data.summary.totalUrls, 'Total URLs', false) +
+              stat(data.summary.builtPages, 'Built pages', false) +
+              stat(data.summary.sitemapUrls, 'Sitemap URLs', false) +
+              stat(data.summary.orphanedPages, 'Orphaned pages', data.summary.orphanedPages > 0) +
+              stat(data.summary.pagesWithWarnings, 'Pages with warnings', data.summary.pagesWithWarnings > 0) +
+              '</div>' +
+              '<div class="si-controls">' +
+              '<div class="si-filter-group" role="group" aria-label="Filter inventory">' +
+              filterBtn('all', 'All', 'Show all routes') +
+              filterBtn('warnings', 'Warnings', 'Show routes with warnings') +
+              filterBtn('missing-sitemap', 'Missing from sitemap', 'Show indexable pages missing from the sitemap') +
+              filterBtn('missing-page', 'No built page', 'Show sitemap URLs without a built page') +
+              filterBtn('orphaned', 'Orphaned', 'Show pages with no inbound links') +
+              filterBtn('noindex', 'Noindex', 'Show noindex pages') +
+              '</div>' +
+              '<input type="search" class="si-search" placeholder="Filter by route…" aria-label="Filter by URL route" />' +
+              '</div>' +
+              '<p id="si-status" class="si-status" aria-live="polite" role="status">' + shown.length + ' of ' + pages.length + ' routes</p>' +
+              '<div class="si-table-wrap"><table class="si-table"><thead><tr>' +
+              '<th>Route</th><th>Built</th><th>Sitemap</th><th>Title</th><th>H1</th><th>Links in</th><th>Warnings</th><th></th>' +
+              '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+              (pages.length === 0 ? '<p class="si-state">No pages found.</p>' : '');
+
+            // Wire up event listeners
+            var search = root.querySelector('.si-search');
+            if (search) {
+              search.addEventListener('input', function () {
+                state.query = search.value;
+                render();
+              });
+            }
+            root.querySelectorAll('.si-filter-btn').forEach(function (btn) {
+              btn.addEventListener('click', function () {
+                state.filter = btn.getAttribute('data-filter');
+                root.querySelectorAll('.si-filter-btn').forEach(function (b) {
+                  b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
                 });
+                render();
+              });
+            });
+            root.querySelectorAll('.si-details-toggle').forEach(function (btn) {
+              btn.addEventListener('click', function () {
+                var dl = btn.nextElementSibling;
+                var expanded = btn.getAttribute('aria-expanded') === 'true';
+                btn.setAttribute('aria-expanded', String(!expanded));
+                if (dl) (dl as HTMLElement).hidden = expanded;
+              });
+            });
+          }
 
-                // Details toggles
-                body.addEventListener('click', function(e: MouseEvent) {
-                  var toggle = (e.target as HTMLElement).closest('.si-details-toggle');
-                  if (!toggle) return;
-                  var details = toggle.parentElement ? toggle.parentElement.querySelector('.si-details') : null;
-                  if (!details) return;
-                  var expanded = toggle.getAttribute('aria-expanded') === 'true';
-                  toggle.setAttribute('aria-expanded', String(!expanded));
-                  (details as HTMLElement).hidden = expanded;
-                });
-              })();
-            </script>
-          </>
-        ) : null
-      }
+          function stat(value: number, label: string, warn: boolean): string {
+            return '<div class="si-stat"><div class="si-stat__value' + (warn ? ' si-stat__value--warn' : '') + '">' +
+              value + '</div><div class="si-stat__label">' + esc(label) + '</div></div>';
+          }
+
+          function filterBtn(value: string, label: string, ariaLabel: string): string {
+            var pressed = state.filter === value ? 'true' : 'false';
+            return '<button type="button" class="si-filter-btn" data-filter="' + value +
+              '" aria-pressed="' + pressed + '" aria-label="' + esc(ariaLabel) + '">' + esc(label) + '</button>';
+          }
+
+          // Fetch and render
+          fetch(DATA_URL)
+            .then(function (res) {
+              if (!res.ok) throw new Error('HTTP ' + res.status);
+              return res.json();
+            })
+            .then(function (data) {
+              state.data = data;
+              if (!data.pages || !data.summary) throw new Error('Malformed inventory data');
+              render();
+            })
+            .catch(function (err) {
+              if (!root) return;
+            root.innerHTML = '<div class="si-state si-state--error">' +
+                '<p>Could not load inventory data.</p>' +
+                '<p>' + esc(err.message || String(err)) + '</p>' +
+                '<p>Run <code>pnpm build && pnpm inventory:generate</code> to generate the inventory.</p>' +
+                '</div>';
+            });
+        })();
+      </script>
     </div>
   </body>
 </html>

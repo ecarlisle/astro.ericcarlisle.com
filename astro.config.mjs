@@ -39,6 +39,10 @@ export default defineConfig({
     pagefind(),
     sitemap({
       customPages: ['https://ericcarlisle.com/design-system/lab/'],
+      filter: (page) =>
+        !page.includes('/lab/') &&
+        !page.includes('/posts/') &&
+        !page.includes('/portfolio/design-system/'),
     }),
   ],
   vite: {
