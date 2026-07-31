@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "site-intelligence": {
+      "command": "node",
+      "args": ["<REPOSITORY_ROOT>/packages/site-intelligence-mcp/dist/src/server.js"]
+    }
+  }
+}

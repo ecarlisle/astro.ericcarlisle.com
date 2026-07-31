@@ -7,6 +7,7 @@ import {
   loadSiteInventory,
 } from '../graph/load-graph.js';
 import type { SiteInventory } from '../graph/schema.js';
+import type { ToolContentResult } from './types.js';
 
 export type SiteOverview = {
   source: string;
@@ -19,11 +20,6 @@ export type SiteOverview = {
   totalWarnings: number;
   categories: Record<string, number>;
   warningsByCode: Record<string, number>;
-};
-
-export type ToolContentResult = {
-  content: { type: 'text'; text: string }[];
-  isError?: boolean;
 };
 
 /**

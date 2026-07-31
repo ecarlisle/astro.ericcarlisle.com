@@ -1,0 +1,157 @@
+#!/usr/bin/env node
+/**
+ * Developer CLI for the Site Intelligence MCP server.
+ *
+ * Launches the compiled local server over stdio and talks to it through the
+ * official MCP TypeScript SDK client — it never imports or calls server
+ * implementation functions directly. Intended for manual inspection and
+ * debugging; AI clients keep launching the MCP server themselves.
+ *
+ * Usage:
+ *   pnpm mcp:site-intelligence:call --list
+ *   pnpm mcp:site-intelligence:call <tool-name>
+ */
+import { existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types.js';
+
+/** Compiled server entry, relative to this CLI's own compiled location. */
+const SERVER_PATH = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'server.js');
+
+const USAGE = `Usage:
+  pnpm mcp:site-intelligence:call --list
+  pnpm mcp:site-intelligence:call <tool-name>
+
+Options:
+  --list          List available tools
+  -h, --help      Show this help
+
+Run \`pnpm mcp:site-intelligence:prepare\` first to build the server and CLI.`;
+
+function inheritableEnv(): Record<string, string> {
+  const env: Record<string, string> = {};
+  for (const [key, value] of Object.entries(process.env)) {
+    if (value !== undefined) env[key] = value;
+  }
+  return env;
+}
+
+function printToolResult(result: CallToolResult): boolean {
+  const text = result.content
+    .filter((block) => block.type === 'text')
+    .map((block) => block.text)
+    .join('\n');
+  if (text !== '') {
+    process.stdout.write(`${text}\n`);
+  } else {
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+  }
+  return result.isError === true;
+}
+
+async function main(): Promise<number> {
+  const args = process.argv.slice(2);
+  const first = args[0];
+
+  if (first === undefined) {
+    process.stderr.write(`${USAGE}\n`);
+    return 2;
+  }
+  if (first === '-h' || first === '--help') {
+    process.stdout.write(`${USAGE}\n`);
+    return 0;
+  }
+  if (args.length > 1) {
+    process.stderr.write(`${USAGE}\n`);
+    return 2;
+  }
+
+  const toolName = first;
+
+  if (!existsSync(SERVER_PATH)) {
+    process.stderr.write(
+      `Compiled MCP server not found at "${SERVER_PATH}".\n` +
+        'Run `pnpm mcp:site-intelligence:prepare` first.\n',
+    );
+    return 1;
+  }
+
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [SERVER_PATH],
+    env: inheritableEnv(),
+    stderr: 'inherit',
+  });
+  const client = new Client({
+    name: 'site-intelligence-call',
+    version: '0.1.0',
+  });
+
+  let exitCode = 0;
+  try {
+    await client.connect(transport);
+    const { tools } = await client.listTools();
+
+    if (toolName === '--list') {
+      for (const tool of tools) {
+        process.stdout.write(`${tool.name}\n`);
+        if (tool.description) {
+          process.stdout.write(`  ${tool.description}\n`);
+        }
+      }
+      return 0;
+    }
+
+    const known = tools.some((tool) => tool.name === toolName);
+    if (!known) {
+      const available = tools.map((tool) => tool.name).join(', ');
+      process.stderr.write(`Unknown tool "${toolName}".\nAvailable tools: ${available}\n`);
+      return 1;
+    }
+
+    const raw = await client.callTool({ name: toolName, arguments: {} }, CallToolResultSchema);
+
+    // The SDK types callTool as a union of the modern content shape and the
+    // legacy (2024-10-07) toolResult shape. Both members carry an index
+    // signature, so the union cannot be narrowed by `in` — guard the shape at
+    // runtime, then treat the modern shape as the result: this SDK server
+    // always answers with it.
+    if (!('content' in raw) || !Array.isArray(raw.content)) {
+      process.stderr.write(`Unexpected tool result shape: ${JSON.stringify(raw, null, 2)}\n`);
+      exitCode = 1;
+    } else {
+      if (printToolResult(raw as CallToolResult)) {
+        exitCode = 1;
+      }
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`Error: ${message}\n`);
+    exitCode = 1;
+  } finally {
+    try {
+      await client.close();
+    } catch {
+      // Connection may already be closed after an error.
+    }
+    try {
+      await transport.close();
+    } catch {
+      // Child process may already have exited.
+    }
+  }
+
+  return exitCode;
+}
+
+main()
+  .then((code) => process.exit(code))
+  .catch((error: unknown) => {
+    process.stderr.write(`Error: ${error instanceof Error ? error.message : String(error)}\n`);
+    process.exit(1);
+  });

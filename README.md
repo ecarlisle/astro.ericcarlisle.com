@@ -4,7 +4,7 @@ Astro 7 static site with vanilla CSS (OKLCH tokens), MDX content, pnpm, and Biom
 
 ## Quick Start
 
-**Prerequisites:** Node >=22.12.0, pnpm 10.34.4
+**Prerequisites:** Node >=22.19.0, pnpm 10.34.4
 
 ```bash
 git clone <repo>
