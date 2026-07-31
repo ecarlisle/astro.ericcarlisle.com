@@ -28,6 +28,9 @@ pnpm-debug.log*
 .env.*
 !.env.example
 
+# Local MCP client configuration (machine-specific; see .mcp.example.json)
+.mcp.json
+
 # macOS / OS files
 .DS_Store
 Thumbs.db

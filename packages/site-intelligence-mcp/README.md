@@ -159,8 +159,10 @@ The server resolves the inventory path in this order:
 ## Developer tooling: inspect and call tools manually
 
 AI clients (Pi, Claude Desktop, editors) launch the MCP server automatically
-from the `.mcp.json` config and need none of the commands below. The commands
-in this section are for local development and debugging.
+from the local `.mcp.json` config (see
+[Local MCP client configuration](#local-mcp-client-configuration)) and need
+none of the commands below. The commands in this section are for local
+development and debugging.
 
 ### Inspect with the MCP Inspector
 
@@ -228,26 +230,52 @@ cd packages/site-intelligence-mcp && pnpm test
 Tests use Node's built-in test runner (`node:test`) with temporary fixture
 files. They are deterministic and require no MCP host or LLM.
 
-## Example local MCP client configuration
+## Local MCP client configuration
 
-Claude Desktop (`claude_desktop_config.json`):
+`.mcp.json` is intentionally **not** tracked: it contains developer-specific,
+machine-specific configuration (absolute local paths). A portable template is
+committed as `.mcp.example.json`.
 
-```json
-{
-  "mcpServers": {
-    "site-intelligence": {
-      "command": "node",
-      "args": [
-        "/absolute/path/to/astro.ericcarlisle.com/packages/site-intelligence-mcp/dist/src/server.js"
-      ]
-    }
-  }
-}
+To wire up an MCP client (Pi, Claude Desktop, editors):
 
-Run `pnpm mcp:site-intelligence:prepare` first so the compiled entrypoint and
-the `dist/lab/site-inventory/data.json` artifact exist before the client
-launches the server.
-```
+1. Prepare the server and the generated inventory:
+
+   ```sh
+   pnpm mcp:site-intelligence:prepare
+   ```
+
+2. Copy the template to your local config:
+
+   ```sh
+   cp .mcp.example.json .mcp.json
+   ```
+
+3. Replace the `<REPOSITORY_ROOT>` placeholder with the absolute path to your
+   local checkout:
+
+   ```json
+   {
+     "mcpServers": {
+       "site-intelligence": {
+         "command": "node",
+         "args": [
+           "/absolute/path/to/astro.ericcarlisle.com/packages/site-intelligence-mcp/dist/src/server.js"
+         ]
+       }
+     }
+   }
+   ```
+
+4. Point your MCP client at that local `.mcp.json` (or copy the server entry
+   into the client's own config, e.g. Claude Desktop's
+   `claude_desktop_config.json`).
+
+The compiled entrypoint and the `dist/lab/site-inventory/data.json` artifact
+must exist before the client launches the server — run
+`pnpm mcp:site-intelligence:prepare` first.
+
+Because `.mcp.json` is git-ignored, it will not be committed accidentally;
+changes you make to it are local to your machine.
 
 ## Security limitations
 
