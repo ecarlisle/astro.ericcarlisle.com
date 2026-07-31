@@ -25,7 +25,7 @@ export function normalizeRouteInput(input: string): string {
     try {
       path = new URL(path).pathname;
     } catch {
-      return '/';
+      throw new InvalidRouteInputError('Invalid absolute URL.');
     }
   } else {
     // Path-only: strip fragment and query

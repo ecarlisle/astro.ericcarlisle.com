@@ -6,7 +6,12 @@ import { test } from 'node:test';
 
 import type { InventoryPage, SiteInventory } from '../src/graph/schema.js';
 import { buildPageLinksResult, getPageLinksToolHandler } from '../src/tools/get-page-links.js';
-import { isPageOrphaned } from '../src/tools/page-lookup.js';
+import {
+  InvalidRouteInputError,
+  isPageOrphaned,
+  normalizeRouteInput,
+  RouteNotFoundError,
+} from '../src/tools/page-lookup.js';
 import { createFixtureDir, VALID_INVENTORY } from './fixtures.js';
 
 function firstPage(inventory: SiteInventory): InventoryPage {
@@ -88,6 +93,17 @@ test('isPageOrphaned: false for non-normal classification', () => {
 test('isPageOrphaned: false for unbuilt page', () => {
   const p = page('/test/', { inboundCount: 0, classification: 'normal', built: false });
   assert.equal(isPageOrphaned(p), false);
+});
+
+test('normalizeRouteInput: rejects malformed absolute URL', () => {
+  assert.throws(() => normalizeRouteInput('https://%'), {
+    name: 'InvalidRouteInputError',
+    message: 'Invalid absolute URL.',
+  });
+  assert.throws(() => normalizeRouteInput('http://'), {
+    name: 'InvalidRouteInputError',
+    message: 'Invalid absolute URL.',
+  });
 });
 
 test('buildPageLinksResult returns all link fields', () => {
@@ -230,6 +246,21 @@ test('getPageLinksToolHandler returns error for empty route', async () => {
     const result = await getPageLinksToolHandler({ route: '' });
     assert.equal(result.isError, true);
     assert.match(result.content[0]?.text ?? '', /Route must be a non-empty string/);
+  } finally {
+    if (prev === undefined) delete process.env.SITE_INTELLIGENCE_INVENTORY_PATH;
+    else process.env.SITE_INTELLIGENCE_INVENTORY_PATH = prev;
+    cleanup();
+  }
+});
+
+test('getPageLinksToolHandler returns error for malformed absolute URL', async () => {
+  const { filePath, cleanup } = createFixtureDir(JSON.stringify(VALID_INVENTORY));
+  const prev = process.env.SITE_INTELLIGENCE_INVENTORY_PATH;
+  process.env.SITE_INTELLIGENCE_INVENTORY_PATH = filePath;
+  try {
+    const result = await getPageLinksToolHandler({ route: 'https://%' });
+    assert.equal(result.isError, true);
+    assert.match(result.content[0]?.text ?? '', /Invalid route: Invalid absolute URL/);
   } finally {
     if (prev === undefined) delete process.env.SITE_INTELLIGENCE_INVENTORY_PATH;
     else process.env.SITE_INTELLIGENCE_INVENTORY_PATH = prev;

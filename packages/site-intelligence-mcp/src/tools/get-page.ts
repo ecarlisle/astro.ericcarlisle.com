@@ -1,8 +1,8 @@
 /**
  * The `get_page` MCP tool.
  *
- * Returns the exact page record for a normalized route, using only fields
- * supported by the generated inventory.
+ * Returns selected page metadata, build state, headings, and warnings
+ * for a normalized route, using only fields supported by the generated inventory.
  */
 import {
   defaultInventoryPath,

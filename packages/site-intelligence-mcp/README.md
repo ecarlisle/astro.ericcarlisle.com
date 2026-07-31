@@ -45,8 +45,7 @@ tool call.
   - `get_site_warnings` returns the individual warning records already present
     in the inventory: one entry per warning with its code, route, page title,
     and message, plus a total count and the generated commit.
-  - `get_page` returns the complete page record for a single route: metadata,
-    build state, headings, and warnings.
+  - `get_page` returns selected page metadata, build state, headings, and warnings for a single route.
   - `get_page_links` returns incoming and outgoing internal route relationships
     for a single page, with counts and an orphaned flag.
 - **Transport:** local `stdio` only.
@@ -116,7 +115,7 @@ returns a clear `Error:` message (no stack traces), matching
 
 ### get_page
 
-Returns the complete page record for a single normalized route.
+Returns selected page metadata, build state, headings, and warnings for a single normalized route.
 
 **Input:**
 

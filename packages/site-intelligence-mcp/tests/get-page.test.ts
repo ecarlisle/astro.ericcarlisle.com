@@ -81,6 +81,17 @@ test('normalizeRouteInput: handles full URL', () => {
   assert.equal(normalizeRouteInput('https://ericcarlisle.com/tags/'), '/tags/');
 });
 
+test('normalizeRouteInput: rejects malformed absolute URL', () => {
+  assert.throws(() => normalizeRouteInput('https://%'), {
+    name: 'InvalidRouteInputError',
+    message: 'Invalid absolute URL.',
+  });
+  assert.throws(() => normalizeRouteInput('http://'), {
+    name: 'InvalidRouteInputError',
+    message: 'Invalid absolute URL.',
+  });
+});
+
 test('normalizeRouteInput: empty or whitespace input', () => {
   assert.equal(normalizeRouteInput(''), '/');
   assert.equal(normalizeRouteInput('   '), '/');
@@ -208,6 +219,21 @@ test('getPageToolHandler returns error for empty route', async () => {
     const result = await getPageToolHandler({ route: '' });
     assert.equal(result.isError, true);
     assert.match(result.content[0]?.text ?? '', /Route must be a non-empty string/);
+  } finally {
+    if (prev === undefined) delete process.env.SITE_INTELLIGENCE_INVENTORY_PATH;
+    else process.env.SITE_INTELLIGENCE_INVENTORY_PATH = prev;
+    cleanup();
+  }
+});
+
+test('getPageToolHandler returns error for malformed absolute URL', async () => {
+  const { filePath, cleanup } = createFixtureDir(JSON.stringify(VALID_INVENTORY));
+  const prev = process.env.SITE_INTELLIGENCE_INVENTORY_PATH;
+  process.env.SITE_INTELLIGENCE_INVENTORY_PATH = filePath;
+  try {
+    const result = await getPageToolHandler({ route: 'https://%' });
+    assert.equal(result.isError, true);
+    assert.match(result.content[0]?.text ?? '', /Invalid route: Invalid absolute URL/);
   } finally {
     if (prev === undefined) delete process.env.SITE_INTELLIGENCE_INVENTORY_PATH;
     else process.env.SITE_INTELLIGENCE_INVENTORY_PATH = prev;
