@@ -5,8 +5,8 @@ A local, **read-only** [Model Context Protocol](https://modelcontextprotocol.io)
 `ericcarlisle.com` site inventory to MCP-capable clients (e.g. Claude Desktop,
 code editors with MCP support).
 
-**Version 3 scope:** four read-only tools — `get_site_overview`,
-`get_site_warnings`, `get_page`, and `get_page_links` — over `stdio`. No
+**Version 4 scope:** five read-only tools — `get_site_overview`,
+`get_site_warnings`, `get_page`, `get_page_links`, and `search_pages` — over `stdio`. No
 network, no authentication, no write access, no shell execution.
 
 ## Purpose
@@ -37,8 +37,8 @@ tool call.
 
 ## Current scope
 
-- **Tools:** `get_site_overview`, `get_site_warnings`, `get_page`, and
-  `get_page_links`.
+- **Tools:** `get_site_overview`, `get_site_warnings`, `get_page`,
+  `get_page_links`, and `search_pages`.
   - `get_site_overview` returns a compact structured overview: source artifact,
     generated commit, indexed-page counts, sitemap/orphan/warning totals, route
     categories, and warning codes.
@@ -48,6 +48,8 @@ tool call.
   - `get_page` returns selected page metadata, build state, headings, and warnings for a single route.
   - `get_page_links` returns incoming and outgoing internal route relationships
     for a single page, with counts and an orphaned flag.
+  - `search_pages` searches the inventory for pages matching a query string and
+    returns a ranked list of matching pages with scores.
 - **Transport:** local `stdio` only.
 - **Permissions:** read-only. No filesystem-write, shell, Git, or network
   operations are performed.
@@ -216,6 +218,115 @@ Returns incoming and outgoing internal route relationships for a single page.
 **Route normalization:** Same behavior as `get_page`. Empty, whitespace-only,
 and unknown routes return clear errors.
 
+### search_pages
+
+Searches the site inventory for pages matching a query string. Returns a
+ranked list of matching pages with scores.
+
+**Purpose:**
+
+Lets an agent discover relevant pages by topic before inspecting individual
+pages with `get_page` or understanding connectivity with `get_page_links`.
+
+**Input:**
+
+```json
+{
+  "query": "context"
+}
+```
+
+**Output (text content, shown parsed):**
+
+```json
+{
+  "generatedCommit": "ef2d0e6",
+  "query": "context",
+  "resultCount": 2,
+  "results": [
+    {
+      "route": "/lab/context/",
+      "title": "Context Health: EricCarlisle.com",
+      "description": "An experimental static assessment of coding-agent context readiness, with observed performance reported separately.",
+      "classification": "lab",
+      "score": 2800
+    },
+    {
+      "route": "/blog/better-agent-results-start-with-better-context/",
+      "title": "Better Agent Results Start With Better Context | Eric Carlisle",
+      "description": "Better agent results depend on more than better prompts. They need carefully shaped context that makes project knowledge and developer judgment easier to follow.",
+      "classification": "normal",
+      "score": 2000
+    }
+  ]
+}
+```
+
+**Fields searched:**
+
+The search scores pages against the query using these inventory fields:
+
+- `title`
+- `route`
+- `description`
+- `h1Texts` (heading text)
+- `classification`
+- Tag extracted from route (e.g., `/tags/3d-printing/` → "3d-printing")
+
+**Fields NOT searched:**
+
+- Article body content (the full HTML body is not indexed)
+- Repository source files (only the generated inventory artifact is used)
+- Front-matter fields not listed above
+
+**Scoring and ranking:**
+
+Scores are cumulative. A page may receive points from multiple matching
+fields and match types:
+
+1. Exact title match: +1000
+2. Exact route match: +900
+3. Title prefix: +800
+4. Route prefix: +700
+5. Title substring (all query tokens present): +600
+6. Description substring (all query tokens present): +500
+7. Heading match (all query tokens present in `h1Texts`): +400
+8. Tag match (query token matches tag from route): +300
+9. Token match in individual fields (title, description, heading, route, classification): +25–200 each
+
+A page matching multiple criteria accumulates points from each matching
+signal, so result scores can exceed any single weight in the table above.
+
+**Deterministic ordering:**
+
+Results are sorted by:
+
+1. Higher score first
+2. Title alphabetically (case-insensitive)
+3. Route alphabetically
+
+No randomness, embeddings, or fuzzy spelling correction is used.
+
+**Query normalization:**
+
+- Leading/trailing whitespace trimmed
+- Repeated whitespace collapsed to a single space
+- Case folded to lowercase
+
+**Empty and whitespace-only queries:**
+
+Rejected with `Error: Query must be a non-empty string.`
+
+**Non-string input:**
+
+Rejected with `Error: Query must be a string.`
+
+**Inventory fields:**
+
+The search operates only on the generated inventory artifact at
+`dist/lab/site-inventory/data.json`. It does not read source files or crawl
+the repository.
+
 ## How to generate the underlying site data
 
 ```sh
@@ -305,6 +416,7 @@ pnpm mcp:site-intelligence:call get_site_overview
 pnpm mcp:site-intelligence:call get_site_warnings
 pnpm mcp:site-intelligence:call get_page --args '{"route":"/tags/"}'
 pnpm mcp:site-intelligence:call get_page_links --args '{"route":"/tags/"}'
+pnpm mcp:site-intelligence:call search_pages --args '{"query":"context"}'
 ```
 
 The CLI prints the tool's text result and exits `0` on success; it exits
@@ -327,9 +439,10 @@ An agent can explore the site inventory systematically:
    categories, warning totals).
 2. **Call `get_site_warnings`** to see individual warning records and identify
    flagged routes.
-3. **Call `get_page`** for a flagged route to see its full metadata, build
+3. **Call `search_pages`** to discover relevant pages by topic.
+4. **Call `get_page`** for a discovered route to see its full metadata, build
    state, headings, and warnings.
-4. **Call `get_page_links`** for the same route to understand its connectivity
+5. **Call `get_page_links`** for the same route to understand its connectivity
    — which pages link to it, which pages it links to, and whether it's orphaned.
 
 Notes:
