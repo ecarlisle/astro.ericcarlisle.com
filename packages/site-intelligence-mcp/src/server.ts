@@ -2,19 +2,26 @@
  * Site Intelligence MCP server.
  *
  * Local, read-only, stdio-transport MCP server exposing read-only tools over
- * the generated site inventory: `get_site_overview` (compact summary) and
- * `get_site_warnings` (individual warning records).
+ * the generated site inventory: `get_site_overview` (compact summary),
+ * `get_site_warnings` (individual warning records), `get_page` (page metadata),
+ * and `get_page_links` (page connectivity).
  */
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-
+import { z } from 'zod';
+import { getPageToolHandler } from './tools/get-page.js';
+import { getPageLinksToolHandler } from './tools/get-page-links.js';
 import { getSiteOverviewToolHandler } from './tools/get-site-overview.js';
 import { getSiteWarningsToolHandler } from './tools/get-site-warnings.js';
 
 const SERVER_NAME = 'site-intelligence';
 const SERVER_VERSION = '0.1.0';
+
+const RouteInputSchema = z.object({
+  route: z.string().describe('Site route to inspect (e.g., "/tags/")'),
+});
 
 export function createServer(): McpServer {
   const server = new McpServer({
@@ -45,6 +52,30 @@ export function createServer(): McpServer {
         'Read-only; no arguments.',
     },
     getSiteWarningsToolHandler,
+  );
+
+  server.registerTool(
+    'get_page',
+    {
+      title: 'Get page',
+      description:
+        "Inspect one route's metadata, build state, headings, and warnings. " +
+        'Requires a route argument (e.g., "/tags/"). Read-only.',
+      inputSchema: RouteInputSchema.shape,
+    },
+    getPageToolHandler,
+  );
+
+  server.registerTool(
+    'get_page_links',
+    {
+      title: 'Get page links',
+      description:
+        'Inspect incoming and outgoing internal route relationships for one page. ' +
+        'Requires a route argument (e.g., "/tags/"). Read-only.',
+      inputSchema: RouteInputSchema.shape,
+    },
+    getPageLinksToolHandler,
   );
 
   return server;

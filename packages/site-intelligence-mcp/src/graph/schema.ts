@@ -26,6 +26,8 @@ export type InventoryPage = {
   h1Texts: string[];
   redirectTarget: string | null;
   inboundCount: number;
+  incoming: string[];
+  outgoing: string[];
   warnings: InventoryWarning[];
   classification?: string;
 };
@@ -82,6 +84,12 @@ export function validateSiteInventory(raw: unknown): ValidationResult {
   for (const [index, page] of raw.pages.entries()) {
     if (!isRecord(page) || typeof page.route !== 'string' || !page.route.startsWith('/')) {
       return { ok: false, error: `pages[${index}].route is missing or not a "/"-prefixed string.` };
+    }
+    if (!Array.isArray(page.incoming) || !page.incoming.every((r) => typeof r === 'string')) {
+      return { ok: false, error: `pages[${index}].incoming is missing or not a string array.` };
+    }
+    if (!Array.isArray(page.outgoing) || !page.outgoing.every((r) => typeof r === 'string')) {
+      return { ok: false, error: `pages[${index}].outgoing is missing or not a string array.` };
     }
   }
 

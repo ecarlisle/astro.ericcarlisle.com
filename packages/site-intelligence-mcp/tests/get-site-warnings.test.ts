@@ -30,6 +30,8 @@ function page(
     h1Texts: [],
     redirectTarget: null,
     inboundCount: 0,
+    incoming: [],
+    outgoing: [],
     warnings,
   };
 }
