@@ -36,7 +36,9 @@
     "validate:site-quality-lighthouse": "node scripts/validate-site-quality-lighthouse.mjs",
     "test:page-quality-build": "node scripts/test-page-quality-build.mjs",
     "inventory:generate": "node scripts/generate-site-inventory.mjs",
-    "postbuild": "node scripts/generate-site-inventory.mjs"
+    "postbuild": "node scripts/generate-site-inventory.mjs",
+    "mcp:site-intelligence": "pnpm --filter @ericcarlisle/site-intelligence-mcp build && pnpm --filter @ericcarlisle/site-intelligence-mcp start",
+    "test:mcp": "pnpm --filter @ericcarlisle/site-intelligence-mcp test"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
