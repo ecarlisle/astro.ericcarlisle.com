@@ -1,14 +1,10 @@
 {
   "mcpServers": {
-    "figma-desktop": {
-      "url": "http://127.0.0.1:3845/mcp"
-    },
-    "figma": {
-      "url": "https://mcp.figma.com/mcp",
-      "auth": "oauth",
-      "lifecycle": "lazy",
-      "exposeResources": true,
-      "directTools": false
+    "site-intelligence": {
+      "command": "node",
+      "args": [
+        "/Users/eric/repos/astro.ericcarlisle.com/packages/site-intelligence-mcp/dist/src/server.js"
+      ]
     }
   }
 }

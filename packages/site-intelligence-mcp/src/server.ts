@@ -1,8 +1,9 @@
 /**
  * Site Intelligence MCP server.
  *
- * Local, read-only, stdio-transport MCP server exposing a single tool:
- * `get_site_overview` — a compact overview of the generated site inventory.
+ * Local, read-only, stdio-transport MCP server exposing read-only tools over
+ * the generated site inventory: `get_site_overview` (compact summary) and
+ * `get_site_warnings` (individual warning records).
  */
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,6 +11,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
 import { getSiteOverviewToolHandler } from './tools/get-site-overview.js';
+import { getSiteWarningsToolHandler } from './tools/get-site-warnings.js';
 
 const SERVER_NAME = 'site-intelligence';
 const SERVER_VERSION = '0.1.0';
@@ -30,6 +32,19 @@ export function createServer(): McpServer {
         'Read-only; no arguments.',
     },
     getSiteOverviewToolHandler,
+  );
+
+  server.registerTool(
+    'get_site_warnings',
+    {
+      title: 'Get site warnings',
+      description:
+        'Return the individual warning records present in the generated ' +
+        "ericcarlisle.com site inventory: each warning's code, route, page " +
+        'title, and message, plus a total count and the generated commit. ' +
+        'Read-only; no arguments.',
+    },
+    getSiteWarningsToolHandler,
   );
 
   return server;

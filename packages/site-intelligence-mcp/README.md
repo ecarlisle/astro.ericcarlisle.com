@@ -5,16 +5,17 @@ A local, **read-only** [Model Context Protocol](https://modelcontextprotocol.io)
 `ericcarlisle.com` site inventory to MCP-capable clients (e.g. Claude Desktop,
 code editors with MCP support).
 
-**Version 1 scope:** one tool, `get_site_overview`, over `stdio`. No network,
-no authentication, no write access, no shell execution.
+**Version 2 scope:** two read-only tools — `get_site_overview` and
+`get_site_warnings` — over `stdio`. No network, no authentication, no write
+access, no shell execution.
 
 ## Purpose
 
 This is the first piece of a planned "Site Intelligence" system. It lets an
 agent answer questions like *"How many pages does the site have, what categories
-exist, and are there any inventory warnings?"* without crawling the repository
-or reading large JSON files — the data is derived from the already-generated
-site inventory artifact.
+exist, are there any inventory warnings, and which pages are affected?"*
+without crawling the repository or reading large JSON files — the data is
+derived from the already-generated site inventory artifact.
 
 ## Architecture and data source
 
@@ -36,13 +37,77 @@ tool call.
 
 ## Current scope
 
-- **Tools:** `get_site_overview` only.
-  Returns a compact structured overview: source artifact, generated commit,
-  indexed-page counts, sitemap/orphan/warning totals, route categories, and
-  warning codes.
+- **Tools:** `get_site_overview` and `get_site_warnings`.
+  - `get_site_overview` returns a compact structured overview: source artifact,
+    generated commit, indexed-page counts, sitemap/orphan/warning totals, route
+    categories, and warning codes.
+  - `get_site_warnings` returns the individual warning records already present
+    in the inventory: one entry per warning with its code, route, page title,
+    and message, plus a total count and the generated commit.
 - **Transport:** local `stdio` only.
 - **Permissions:** read-only. No filesystem-write, shell, Git, or network
   operations are performed.
+
+## Tools
+
+### get_site_overview
+
+Returns a compact structured overview of the site inventory. See
+[Current scope](#current-scope) above.
+
+### get_site_warnings
+
+Complements `get_site_overview()`: the overview reports warning **totals** and
+codes, while this tool exposes the individual **warning records** so an agent
+can see exactly which pages are affected and why.
+
+Takes no arguments. Read-only. Uses the same validated inventory artifact and
+path resolution as `get_site_overview`.
+
+Example request:
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "get_site_warnings",
+    "arguments": {}
+  }
+}
+```
+
+Example response (text content, shown parsed):
+
+```json
+{
+  "generatedCommit": "edac175",
+  "warningCount": 2,
+  "warnings": [
+    {
+      "code": "ORPHANED_PAGE",
+      "route": "/tags/",
+      "title": "Tags | Eric Carlisle",
+      "message": "No internal links point to this page. It may be unreachable from navigation."
+    },
+    {
+      "code": "NO_BUILT_PAGE",
+      "route": "/design-system/lab/",
+      "title": null,
+      "message": "Sitemap references \"/design-system/lab/\" but no corresponding HTML file was generated."
+    }
+  ]
+}
+```
+
+`warningCount` is always the length of `warnings`, so the two can never
+disagree. Only fields backed by the generated inventory are returned: the
+artifact records warnings with `code` and `message` (and pages carry `route`
+and `title`), but it carries no per-warning severity and no generated-at
+timestamp, so `severity` and `generatedAt` are intentionally **not** fabricated.
+
+When the inventory is missing, malformed, or structurally invalid, the tool
+returns a clear `Error:` message (no stack traces), matching
+`get_site_overview`'s error behavior.
 
 ## How to generate the underlying site data
 
@@ -137,7 +202,7 @@ launches the server.
 ## Explicitly deferred
 
 - Graph refresh as an MCP tool
-- Additional tools (page lookup, warnings detail, metrics, etc.)
+- Additional tools (page lookup, metrics, etc.)
 - Remote transports (HTTP/SSE)
 - Authentication / authorization
 - Graph database or SQLite persistence
