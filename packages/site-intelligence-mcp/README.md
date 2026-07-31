@@ -156,6 +156,67 @@ The server resolves the inventory path in this order:
 3. `<cwd>/dist/lab/site-inventory/data.json` as a convenience only when the
    repository-root walk cannot find a `pnpm-workspace.yaml` ancestor.
 
+## Developer tooling: inspect and call tools manually
+
+AI clients (Pi, Claude Desktop, editors) launch the MCP server automatically
+from the `.mcp.json` config and need none of the commands below. The commands
+in this section are for local development and debugging.
+
+### Inspect with the MCP Inspector
+
+Launch the official MCP Inspector web UI against the compiled local server:
+
+```sh
+pnpm mcp:site-intelligence:inspect
+```
+
+This starts the Inspector (a root `devDependency`, `@modelcontextprotocol/inspector`)
+on `http://localhost:6274`, configured to connect to
+`node packages/site-intelligence-mcp/dist/src/server.js` over stdio. From the
+web UI you can list tools, inspect schemas, and invoke tools. The Inspector is
+developer-only — it is never part of the server runtime.
+
+### Call tools directly
+
+`pnpm mcp:site-intelligence:call` spawns the compiled server over stdio and
+talks to it through the official MCP TypeScript SDK client (it never imports
+server implementation functions directly). Print available tools:
+
+```sh
+pnpm mcp:site-intelligence:call --list
+```
+
+Invoke a tool by name (both current tools take no arguments):
+
+```sh
+pnpm mcp:site-intelligence:call get_site_overview
+pnpm mcp:site-intelligence:call get_site_warnings
+```
+
+The CLI prints the tool's text result and exits `0` on success; it exits
+non-zero for unknown tools, usage errors, and protocol failures.
+`pnpm mcp:site-intelligence:call --help` prints usage.
+
+### Expected workflow
+
+```sh
+pnpm mcp:site-intelligence:prepare                # build site inventory + MCP server/CLI
+pnpm mcp:site-intelligence:inspect                # interactive Inspector web UI
+pnpm mcp:site-intelligence:call get_site_warnings # one-off manual tool call
+```
+
+Notes:
+
+- `@modelcontextprotocol/inspector` is a root `devDependency`, used only by
+  `mcp:site-intelligence:inspect`. pnpm reports that its `postinstall` script
+  is not run — that script installs client sources for a fresh Inspector
+  clone; the published package ships prebuilt clients, so skipping it is
+  intentional and safe.
+- The call CLI forwards its environment to the server, so
+  `SITE_INTELLIGENCE_INVENTORY_PATH` overrides work as usual.
+- The Inspector spawns the MCP server lazily when the browser connects; stop
+  the Inspector with Ctrl-C when done.
+
 ## How to run the tests
 
 ```sh

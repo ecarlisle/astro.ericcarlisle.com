@@ -38,6 +38,8 @@
     "inventory:generate": "node scripts/generate-site-inventory.mjs",
     "postbuild": "node scripts/generate-site-inventory.mjs",
     "mcp:site-intelligence": "node packages/site-intelligence-mcp/dist/src/server.js",
+    "mcp:site-intelligence:inspect": "mcp-inspector --web -- node packages/site-intelligence-mcp/dist/src/server.js",
+    "mcp:site-intelligence:call": "node packages/site-intelligence-mcp/dist/src/cli/call.js",
     "test:mcp": "pnpm --filter @ericcarlisle/site-intelligence-mcp test",
     "mcp:site-intelligence:prepare": "pnpm build && pnpm --filter @ericcarlisle/site-intelligence-mcp build"
   },
@@ -56,6 +58,7 @@
     "@axe-core/playwright": "^4.12.1",
     "@biomejs/biome": "^2.5.0",
     "@fontsource-variable/fira-code": "^5.2.7",
+    "@modelcontextprotocol/inspector": "^2.0.0",
     "@playwright/test": "^1.61.1",
     "@sentry/astro": "10.65.0",
     "@storybook-astro/framework": "1.9.0",
