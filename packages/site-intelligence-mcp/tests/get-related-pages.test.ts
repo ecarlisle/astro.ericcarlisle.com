@@ -6,7 +6,7 @@ import { test } from 'node:test';
 
 import type { InventoryPage, SiteInventory } from '../src/graph/schema.js';
 import { getRelatedPagesToolHandler } from '../src/tools/get-related-pages.js';
-import { calculateRelatedPages } from '../src/tools/related-pages.js';
+import { calculateRelatedPages, RELATED_PAGES_WEIGHTS } from '../src/tools/related-pages.js';
 import { createFixtureDir, VALID_INVENTORY } from './fixtures.js';
 
 function page(route: string, overrides: Partial<InventoryPage> = {}): InventoryPage {
@@ -117,21 +117,39 @@ test('calculateRelatedPages: shared outgoing neighbor', () => {
   assert.ok(b.reasons.includes('shared outgoing neighbor: /c/'));
 });
 
-test('calculateRelatedPages: shared classification', () => {
+test('calculateRelatedPages: shared classification normal has reduced weight', () => {
   const inventory = inventoryWith([
-    page('/a/', { classification: 'normal' }),
-    page('/b/', { classification: 'normal' }),
-    page('/c/', { classification: 'lab' }),
+    page('/a/', { title: 'Alpha', description: 'A', h1Texts: ['Alpha'], classification: 'normal' }),
+    page('/b/', { title: 'Beta', description: 'B', h1Texts: ['Beta'], classification: 'normal' }),
   ]);
   const results = calculateRelatedPages(inventory, '/a/');
-  assert.equal(results.length, 2); // Both /b/ and /c/ share classification, but /c/ is 'lab' not 'normal'
-  // Actually /b/ has 'normal', /c/ has 'lab', source is 'normal' so only /b/ matches
-  const normalResults = results.filter((r) => r.route === '/b/');
-  assert.equal(normalResults.length, 1);
-  const normal = normalResults[0];
-  assert.ok(normal);
-  assert.ok(normal.score >= 200);
-  assert.ok(normal.reasons.includes('shared classification: normal'));
+  assert.equal(results.length, 1);
+  assert.equal(results[0]?.route, '/b/');
+  // "normal" is shared by most pages, so it is a weak signal.
+  assert.equal(results[0]?.score, RELATED_PAGES_WEIGHTS.sharedClassificationNormal);
+  assert.ok(results[0]?.reasons.includes('shared classification: normal'));
+});
+
+test('calculateRelatedPages: shared classification lab retains distinctive weight', () => {
+  const inventory = inventoryWith([
+    page('/a/', { title: 'Alpha', description: 'A', h1Texts: ['Alpha'], classification: 'lab' }),
+    page('/b/', { title: 'Beta', description: 'B', h1Texts: ['Beta'], classification: 'lab' }),
+  ]);
+  const results = calculateRelatedPages(inventory, '/a/');
+  assert.equal(results.length, 1);
+  assert.equal(results[0]?.route, '/b/');
+  // Distinctive classifications keep a stronger relationship signal.
+  assert.equal(results[0]?.score, RELATED_PAGES_WEIGHTS.sharedClassificationDistinctive);
+  assert.ok(results[0]?.reasons.includes('shared classification: lab'));
+});
+
+test('calculateRelatedPages: shared classification does not fire on mismatched classes', () => {
+  const inventory = inventoryWith([
+    page('/a/', { title: 'Alpha', description: 'A', h1Texts: ['Alpha'], classification: 'lab' }),
+    page('/b/', { title: 'Beta', description: 'B', h1Texts: ['Beta'], classification: 'normal' }),
+  ]);
+  const results = calculateRelatedPages(inventory, '/a/');
+  assert.deepEqual(results, []);
 });
 
 test('calculateRelatedPages: shared title token', () => {
@@ -180,6 +198,145 @@ test('calculateRelatedPages: shared heading token', () => {
   assert.ok(context.reasons.some((r) => r.includes('shared heading token')));
 });
 
+test('calculateRelatedPages: shared incoming neighbor score is capped', () => {
+  // The shared neighbors are route strings only; they do not need to exist as
+  // pages (the real inventory references routes the same way).
+  const shared = ['/n1/', '/n2/', '/n3/', '/n4/', '/n5/'];
+  const inventory = inventoryWith([
+    page('/a/', {
+      title: 'Alpha',
+      description: 'A',
+      h1Texts: ['Alpha'],
+      classification: 'lab',
+      incoming: shared,
+    }),
+    page('/b/', {
+      title: 'Beta',
+      description: 'B',
+      h1Texts: ['Beta'],
+      classification: 'normal',
+      incoming: shared,
+    }),
+  ]);
+  const results = calculateRelatedPages(inventory, '/a/');
+  const b = results.find((r) => r.route === '/b/');
+  assert.ok(b);
+  // 5 shared incoming neighbors, but only 3 are counted: 3 * 300 = 900.
+  assert.equal(b.score, 900);
+  // The reason still reports the actual (uncapped) count.
+  assert.ok(b.reasons.includes('5 shared incoming neighbors'));
+});
+
+test('calculateRelatedPages: shared outgoing neighbor score is capped', () => {
+  const shared = ['/n1/', '/n2/', '/n3/', '/n4/', '/n5/'];
+  const inventory = inventoryWith([
+    page('/a/', {
+      title: 'Alpha',
+      description: 'A',
+      h1Texts: ['Alpha'],
+      classification: 'lab',
+      outgoing: shared,
+    }),
+    page('/b/', {
+      title: 'Beta',
+      description: 'B',
+      h1Texts: ['Beta'],
+      classification: 'normal',
+      outgoing: shared,
+    }),
+  ]);
+  const results = calculateRelatedPages(inventory, '/a/');
+  const b = results.find((r) => r.route === '/b/');
+  assert.ok(b);
+  // 5 shared outgoing neighbors, but only 3 are counted: 3 * 300 = 900.
+  assert.equal(b.score, 900);
+  // The reason still reports the actual (uncapped) count.
+  assert.ok(b.reasons.includes('5 shared outgoing neighbors'));
+});
+
+test('calculateRelatedPages: stop words do not create matches', () => {
+  const inventory = inventoryWith([
+    page('/a/', {
+      title: 'Alpha',
+      description: 'with for from the to',
+      h1Texts: ['Alpha'],
+      classification: 'lab',
+    }),
+    page('/b/', {
+      title: 'Beta',
+      description: 'with for from the to',
+      h1Texts: ['Beta'],
+      classification: 'normal',
+    }),
+  ]);
+  const results = calculateRelatedPages(inventory, '/a/');
+  assert.deepEqual(results, []);
+});
+
+test('calculateRelatedPages: with does not create a relationship', () => {
+  const inventory = inventoryWith([
+    page('/a/', { title: 'Alpha', description: 'with', h1Texts: ['Alpha'], classification: 'lab' }),
+    page('/b/', {
+      title: 'Beta',
+      description: 'with',
+      h1Texts: ['Beta'],
+      classification: 'normal',
+    }),
+  ]);
+  const results = calculateRelatedPages(inventory, '/a/');
+  assert.deepEqual(results, []);
+});
+
+test('calculateRelatedPages: eric and carlisle do not create title similarity', () => {
+  const inventory = inventoryWith([
+    page('/a/', {
+      title: 'Alpha | Eric Carlisle',
+      description: 'A',
+      h1Texts: ['Alpha'],
+      classification: 'lab',
+    }),
+    page('/b/', {
+      title: 'Beta | Eric Carlisle',
+      description: 'B',
+      h1Texts: ['Beta'],
+      classification: 'normal',
+    }),
+  ]);
+  const results = calculateRelatedPages(inventory, '/a/');
+  assert.deepEqual(results, []);
+});
+
+test('calculateRelatedPages: direct links remain strong signals', () => {
+  const inventory = inventoryWith([
+    page('/a/', {
+      title: 'Alpha',
+      description: 'A',
+      h1Texts: ['Alpha'],
+      classification: 'normal',
+      outgoing: ['/b/'],
+    }),
+    page('/b/', {
+      title: 'Beta',
+      description: 'B',
+      h1Texts: ['Beta'],
+      classification: 'normal',
+      incoming: ['/a/'],
+    }),
+    page('/c/', {
+      title: 'Alpha Theme',
+      description: 'Alpha description',
+      h1Texts: ['Alpha'],
+      classification: 'normal',
+    }),
+  ]);
+  const results = calculateRelatedPages(inventory, '/a/');
+  const first = results[0];
+  assert.ok(first);
+  assert.equal(first.route, '/b/');
+  // A direct link outweighs token-only similarity.
+  assert.ok(first.score > (results[1]?.score ?? 0));
+});
+
 test('calculateRelatedPages: same tag', () => {
   const inventory = inventoryWith([
     page('/tags/context/page1/', { title: 'Page 1' }),
@@ -214,9 +371,9 @@ test('calculateRelatedPages: cumulative scoring', () => {
   const results = calculateRelatedPages(inventory, '/a/');
   assert.equal(results.length, 1);
   assert.equal(results[0]?.route, '/b/');
-  // directOutgoing (1000) + directIncoming (1000) + sharedClassification (200)
-  // + sharedTitleToken 'context' (150) = 2350
-  assert.equal(results[0]?.score, 2350);
+  // directOutgoing (1000) + directIncoming (1000) + sharedClassification
+  // normal (50) + sharedTitleToken 'context' (150) = 2200
+  assert.equal(results[0]?.score, 2200);
   assert.ok(results[0]?.reasons.includes('linked directly'));
   assert.ok(results[0]?.reasons.includes('linked from this page'));
   assert.ok(results[0]?.reasons.includes('shared classification: normal'));

@@ -17,23 +17,46 @@ export type RelatedPageResult = {
   reasons: string[];
 };
 
-/** Configuration for related pages scoring weights. */
+/**
+ * Configuration for related pages scoring weights.
+ *
+ * Scores are cumulative: a page accumulates points from every matching
+ * signal, so result scores can exceed any single weight.
+ */
 export const RELATED_PAGES_WEIGHTS = {
   /** Direct outgoing link from source to target. */
   directOutgoing: 1000,
   /** Direct incoming link from target to source. */
   directIncoming: 1000,
-  /** Shared incoming neighbor (both linked from same page). */
+  /** Per shared incoming neighbor (both pages linked from the same route). */
   sharedIncomingNeighbor: 300,
-  /** Shared outgoing neighbor (both link to same page). */
+  /** Per shared outgoing neighbor (both pages link to the same route). */
   sharedOutgoingNeighbor: 300,
-  /** Same classification (e.g., both "normal", both "lab"). */
-  sharedClassification: 200,
-  /** Shared title token (normalized). */
+  /**
+   * Maximum shared incoming neighbors counted toward the score. The reasons
+   * array still reports the actual shared count.
+   */
+  maxSharedIncomingNeighbors: 3,
+  /**
+   * Maximum shared outgoing neighbors counted toward the score. The reasons
+   * array still reports the actual shared count.
+   */
+  maxSharedOutgoingNeighbors: 3,
+  /**
+   * Shared classification weight for broad classifications (e.g. "normal")
+   * that most pages share, so their relationship signal is weak.
+   */
+  sharedClassificationNormal: 50,
+  /**
+   * Shared classification weight for distinctive classifications (e.g. "lab")
+   * that carry topical meaning.
+   */
+  sharedClassificationDistinctive: 200,
+  /** Shared title token (normalized, stop words excluded). */
   sharedTitleToken: 150,
-  /** Shared description token (normalized). */
+  /** Shared description token (normalized, stop words excluded). */
   sharedDescriptionToken: 100,
-  /** Shared heading token (from h1Texts). */
+  /** Shared heading token from h1Texts (normalized, stop words excluded). */
   sharedHeadingToken: 100,
   /** Shared tag-route token (e.g., both under /tags/3d-printing/). */
   sharedTagToken: 200,
@@ -42,15 +65,57 @@ export const RELATED_PAGES_WEIGHTS = {
 /** Default maximum number of related pages to return. */
 export const RELATED_PAGES_LIMIT = 5;
 
+/**
+ * Low-information tokens excluded from title, description, and heading
+ * matching. Includes common English stop words plus the repeated site-title
+ * boilerplate (e.g., "Blog | Eric Carlisle").
+ */
+export const RELATED_PAGES_STOP_WORDS: ReadonlySet<string> = new Set([
+  'a',
+  'an',
+  'and',
+  'are',
+  'as',
+  'at',
+  'be',
+  'by',
+  'for',
+  'from',
+  'in',
+  'is',
+  'it',
+  'of',
+  'on',
+  'or',
+  'that',
+  'the',
+  'this',
+  'to',
+  'with',
+  'your',
+  // Repeated site-title boilerplate
+  'eric',
+  'carlisle',
+]);
+
 /** Extract tag from route (e.g., /tags/3d-printing/ -> "3d-printing"). */
 function extractTag(route: string): string | null {
   const match = route.match(/\/tags\/([^/]+)\//);
   return match?.[1] ?? null;
 }
 
-/** Get normalized tokens from a string. */
+/**
+ * Keep only tokens that carry meaning: non-stop-words containing at least one
+ * letter or digit. Drops punctuation-only tokens such as "|" or "—" that are
+ * part of the site-title boilerplate pattern.
+ */
+function meaningfulTokens(tokens: string[]): string[] {
+  return tokens.filter((t) => !RELATED_PAGES_STOP_WORDS.has(t) && /[a-z0-9]/.test(t));
+}
+
+/** Get normalized, stop-word-filtered tokens from a string. */
 function getTokens(text: string): string[] {
-  return tokenize(text);
+  return meaningfulTokens(tokenize(text));
 }
 
 /** Get all tokens from a page's searchable fields. */
@@ -59,21 +124,38 @@ function getPageTokens(page: InventoryPage): {
   description: string[];
   headings: string[];
   tag: string | null;
-  classification: string[];
 } {
   return {
     title: getTokens(page.title ?? ''),
     description: getTokens(page.description ?? ''),
     headings: page.h1Texts.flatMap((h) => getTokens(h)),
     tag: extractTag(page.route),
-    classification: page.classification ? [page.classification.toLowerCase()] : [],
   };
 }
 
-/** Find shared tokens between two token arrays. */
+/**
+ * Find unique shared tokens between two token arrays. Both sides are
+ * deduplicated so repeated words (e.g. repeated h1 headings) do not inflate
+ * the shared-token count.
+ */
 function findSharedTokens(a: string[], b: string[]): string[] {
   const setA = new Set(a);
-  return b.filter((t) => setA.has(t));
+  const seen = new Set<string>();
+  const shared: string[] = [];
+  for (const token of b) {
+    if (setA.has(token) && !seen.has(token)) {
+      seen.add(token);
+      shared.push(token);
+    }
+  }
+  return shared;
+}
+
+/** Shared classification weight for a given classification value. */
+function sharedClassificationWeight(classification: string): number {
+  return classification === 'normal'
+    ? RELATED_PAGES_WEIGHTS.sharedClassificationNormal
+    : RELATED_PAGES_WEIGHTS.sharedClassificationDistinctive;
 }
 
 /** Calculate related pages for a given route. */
@@ -112,10 +194,14 @@ export function calculateRelatedPages(
       reasons.push('linked from this page');
     }
 
-    // Shared incoming neighbors
+    // Shared incoming neighbors (score capped; reason reports the actual count)
     const sharedIncoming = page.incoming.filter((r) => sourceIncoming.has(r));
     if (sharedIncoming.length > 0) {
-      score += sharedIncoming.length * RELATED_PAGES_WEIGHTS.sharedIncomingNeighbor;
+      const counted = Math.min(
+        sharedIncoming.length,
+        RELATED_PAGES_WEIGHTS.maxSharedIncomingNeighbors,
+      );
+      score += counted * RELATED_PAGES_WEIGHTS.sharedIncomingNeighbor;
       if (sharedIncoming.length === 1) {
         reasons.push(`shared incoming neighbor: ${sharedIncoming[0]}`);
       } else {
@@ -123,10 +209,14 @@ export function calculateRelatedPages(
       }
     }
 
-    // Shared outgoing neighbors
+    // Shared outgoing neighbors (score capped; reason reports the actual count)
     const sharedOutgoing = page.outgoing.filter((r) => sourceOutgoing.has(r));
     if (sharedOutgoing.length > 0) {
-      score += sharedOutgoing.length * RELATED_PAGES_WEIGHTS.sharedOutgoingNeighbor;
+      const counted = Math.min(
+        sharedOutgoing.length,
+        RELATED_PAGES_WEIGHTS.maxSharedOutgoingNeighbors,
+      );
+      score += counted * RELATED_PAGES_WEIGHTS.sharedOutgoingNeighbor;
       if (sharedOutgoing.length === 1) {
         reasons.push(`shared outgoing neighbor: ${sharedOutgoing[0]}`);
       } else {
@@ -134,10 +224,13 @@ export function calculateRelatedPages(
       }
     }
 
-    // Shared classification
+    // Shared classification (broad vs distinctive weight)
     if (page.classification && page.classification === sourcePage.classification) {
-      score += RELATED_PAGES_WEIGHTS.sharedClassification;
-      reasons.push(`shared classification: ${page.classification}`);
+      const weight = sharedClassificationWeight(page.classification);
+      if (weight > 0) {
+        score += weight;
+        reasons.push(`shared classification: ${page.classification}`);
+      }
     }
 
     // Shared title tokens
