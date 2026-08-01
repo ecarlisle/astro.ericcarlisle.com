@@ -13,6 +13,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import { getPageToolHandler } from './tools/get-page.js';
 import { getPageLinksToolHandler } from './tools/get-page-links.js';
+import { getRelatedPagesToolHandler } from './tools/get-related-pages.js';
 import { getSiteOverviewToolHandler } from './tools/get-site-overview.js';
 import { getSiteWarningsToolHandler } from './tools/get-site-warnings.js';
 import { searchPagesToolHandler } from './tools/search-pages.js';
@@ -94,6 +95,19 @@ export function createServer(): McpServer {
       inputSchema: SearchInputSchema.shape,
     },
     searchPagesToolHandler,
+  );
+
+  server.registerTool(
+    'get_related_pages',
+    {
+      title: 'Get related pages',
+      description:
+        'Return a ranked list of pages related to the given route, with scores ' +
+        'and deterministic reasons explaining why each page is considered related. ' +
+        'Requires a route argument (e.g., "/tags/"). Read-only.',
+      inputSchema: RouteInputSchema.shape,
+    },
+    getRelatedPagesToolHandler,
   );
 
   return server;
