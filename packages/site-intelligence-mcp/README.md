@@ -356,9 +356,9 @@ repository or consulting an external knowledge source.
 
 ```json
 {
-  "generatedCommit": "66ff7b9",
+  "generatedCommit": "b5fc9a2",
   "route": "/lab/context/",
-  "resultCount": 5,
+  "resultCount": 3,
   "results": [
     {
       "route": "/blog/better-agent-results-start-with-better-context/",
@@ -374,6 +374,13 @@ repository or consulting an external knowledge source.
     {
       "route": "/lab/site-inventory/",
       "title": "Site Inventory — Eric Carlisle",
+      "classification": "lab",
+      "score": 200,
+      "reasons": ["shared classification: lab"]
+    },
+    {
+      "route": "/lab/youtube-facade-test/",
+      "title": "YouTube Facade Test — Eric Carlisle",
       "classification": "lab",
       "score": 200,
       "reasons": ["shared classification: lab"]
@@ -398,9 +405,9 @@ signals, and each positive signal contributes an explanatory entry to
 
 1. Direct outgoing link (page links to the source route): +1000 — `linked directly`
 2. Direct incoming link (page is linked from the source route): +1000 — `linked from this page`
-3. Shared incoming neighbor (both pages are linked from the same route): +300 each
-4. Shared outgoing neighbor (both pages link to the same route): +300 each
-5. Shared classification (e.g. both `normal`, both `lab`): +200
+3. Shared incoming neighbor (both pages are linked from the same route): +300 each, max 3 counted
+4. Shared outgoing neighbor (both pages link to the same route): +300 each, max 3 counted
+5. Shared classification: +50 for broad classes such as `normal`, +200 for distinctive classes such as `lab`
 6. Shared tag from route (both under the same `/tags/<tag>/`): +200
 7. Shared title token: +150 each
 8. Shared description token: +100 each
@@ -409,6 +416,25 @@ signals, and each positive signal contributes an explanatory entry to
 Token comparisons use the same normalization as `search_pages` (lowercase,
 whitespace-collapsed). A page matching multiple signals accumulates points
 from each, so result scores can exceed any single weight above.
+
+**Shared-neighbor caps:**
+
+The first 3 shared incoming neighbors and the first 3 shared outgoing
+neighbors count toward the score (`maxSharedIncomingNeighbors` /
+`maxSharedOutgoingNeighbors`). This keeps hub pages that share large parts of
+the site navigation from dominating. The `reasons` entry always reports the
+**actual** shared count (e.g. `10 shared outgoing neighbors`), even when only
+3 of those neighbors contribute points.
+
+**Stop-word filtering:**
+
+Low-information English stop words are excluded from title, description, and
+heading token matching, so words like `with`, `for`, and `the` do not create
+unrelated matches. The excluded set also covers the repeated site-title
+boilerplate (`eric`, `carlisle`) and drops punctuation-only tokens such as `|`
+from the ` | Eric Carlisle` title pattern. The stop-word set is centralized in
+`RELATED_PAGES_STOP_WORDS`. No fuzzy matching, stemming, or language-model
+logic is applied.
 
 **Deterministic ordering:**
 
