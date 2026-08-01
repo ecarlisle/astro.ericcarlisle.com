@@ -194,8 +194,10 @@ export function calculateRelatedPages(
       reasons.push('linked from this page');
     }
 
-    // Shared incoming neighbors (score capped; reason reports the actual count)
-    const sharedIncoming = page.incoming.filter((r) => sourceIncoming.has(r));
+    // Shared incoming neighbors (score capped; reason reports the actual count).
+    // Deduplicate so repeated routes in a page's incoming collection do not
+    // inflate the score, count, or reasons.
+    const sharedIncoming = [...new Set(page.incoming.filter((r) => sourceIncoming.has(r)))];
     if (sharedIncoming.length > 0) {
       const counted = Math.min(
         sharedIncoming.length,
@@ -209,8 +211,10 @@ export function calculateRelatedPages(
       }
     }
 
-    // Shared outgoing neighbors (score capped; reason reports the actual count)
-    const sharedOutgoing = page.outgoing.filter((r) => sourceOutgoing.has(r));
+    // Shared outgoing neighbors (score capped; reason reports the actual count).
+    // Deduplicate so repeated routes in a page's outgoing collection do not
+    // inflate the score, count, or reasons.
+    const sharedOutgoing = [...new Set(page.outgoing.filter((r) => sourceOutgoing.has(r)))];
     if (sharedOutgoing.length > 0) {
       const counted = Math.min(
         sharedOutgoing.length,

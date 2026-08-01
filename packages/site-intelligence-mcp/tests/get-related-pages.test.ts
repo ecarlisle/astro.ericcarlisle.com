@@ -227,6 +227,85 @@ test('calculateRelatedPages: shared incoming neighbor score is capped', () => {
   assert.ok(b.reasons.includes('5 shared incoming neighbors'));
 });
 
+test('calculateRelatedPages: duplicate incoming routes are deduplicated', () => {
+  const inventory = inventoryWith([
+    page('/a/', {
+      title: 'Alpha',
+      description: 'A',
+      h1Texts: ['Alpha'],
+      classification: 'lab',
+      incoming: ['/n1/', '/n1/', '/n2/', '/n2/', '/n2/'],
+    }),
+    page('/b/', {
+      title: 'Beta',
+      description: 'B',
+      h1Texts: ['Beta'],
+      classification: 'normal',
+      incoming: ['/n1/', '/n1/', '/n2/', '/n2/', '/n2/'],
+    }),
+  ]);
+  const results = calculateRelatedPages(inventory, '/a/');
+  const b = results.find((r) => r.route === '/b/');
+  assert.ok(b);
+  // 2 unique shared incoming neighbors (the raw count of 5 is not used):
+  // 2 * 300 = 600.
+  assert.equal(b.score, 600);
+  assert.ok(b.reasons.includes('2 shared incoming neighbors'));
+  assert.ok(!b.reasons.some((r) => r.includes('5 shared incoming neighbors')));
+});
+
+test('calculateRelatedPages: duplicate outgoing routes are deduplicated', () => {
+  const inventory = inventoryWith([
+    page('/a/', {
+      title: 'Alpha',
+      description: 'A',
+      h1Texts: ['Alpha'],
+      classification: 'lab',
+      outgoing: ['/n1/', '/n1/', '/n2/', '/n2/', '/n2/'],
+    }),
+    page('/b/', {
+      title: 'Beta',
+      description: 'B',
+      h1Texts: ['Beta'],
+      classification: 'normal',
+      outgoing: ['/n1/', '/n1/', '/n2/', '/n2/', '/n2/'],
+    }),
+  ]);
+  const results = calculateRelatedPages(inventory, '/a/');
+  const b = results.find((r) => r.route === '/b/');
+  assert.ok(b);
+  // 2 unique shared outgoing neighbors (the raw count of 5 is not used):
+  // 2 * 300 = 600.
+  assert.equal(b.score, 600);
+  assert.ok(b.reasons.includes('2 shared outgoing neighbors'));
+  assert.ok(!b.reasons.some((r) => r.includes('5 shared outgoing neighbors')));
+});
+
+test('calculateRelatedPages: unique routes keep unchanged scoring', () => {
+  const inventory = inventoryWith([
+    page('/a/', {
+      title: 'Alpha',
+      description: 'A',
+      h1Texts: ['Alpha'],
+      classification: 'lab',
+      incoming: ['/n1/', '/n2/', '/n3/'],
+    }),
+    page('/b/', {
+      title: 'Beta',
+      description: 'B',
+      h1Texts: ['Beta'],
+      classification: 'normal',
+      incoming: ['/n1/', '/n2/', '/n3/'],
+    }),
+  ]);
+  const results = calculateRelatedPages(inventory, '/a/');
+  const b = results.find((r) => r.route === '/b/');
+  assert.ok(b);
+  // 3 unique shared incoming neighbors, no duplicates to strip: 3 * 300 = 900.
+  assert.equal(b.score, 900);
+  assert.ok(b.reasons.includes('3 shared incoming neighbors'));
+});
+
 test('calculateRelatedPages: shared outgoing neighbor score is capped', () => {
   const shared = ['/n1/', '/n2/', '/n3/', '/n4/', '/n5/'];
   const inventory = inventoryWith([

@@ -432,7 +432,7 @@ Low-information English stop words are excluded from title, description, and
 heading token matching, so words like `with`, `for`, and `the` do not create
 unrelated matches. The excluded set also covers the repeated site-title
 boilerplate (`eric`, `carlisle`) and drops punctuation-only tokens such as `|`
-from the ` | Eric Carlisle` title pattern. The stop-word set is centralized in
+from the `| Eric Carlisle` title pattern. The stop-word set is centralized in
 `RELATED_PAGES_STOP_WORDS`. No fuzzy matching, stemming, or language-model
 logic is applied.
 
