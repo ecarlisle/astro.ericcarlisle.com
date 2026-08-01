@@ -7,7 +7,11 @@
 import { InventoryLoadError } from '../graph/load-graph.js';
 import type { SiteInventory } from '../graph/schema.js';
 import { getInventory, lookupPage, validateRouteInput } from './page-lookup.js';
-import { calculateRelatedPages, RELATED_PAGES_LIMIT } from './related-pages.js';
+import {
+  calculateRelatedPages,
+  RELATED_PAGES_LIMIT,
+  type RelatedPageResult,
+} from './related-pages.js';
 import type { ToolContentResult } from './types.js';
 
 export type GetRelatedPagesInput = {
@@ -18,13 +22,7 @@ export type GetRelatedPagesResult = {
   generatedCommit?: string;
   route: string;
   resultCount: number;
-  results: Array<{
-    route: string;
-    title: string | null;
-    classification: string | null;
-    score: number;
-    reasons: string[];
-  }>;
+  results: RelatedPageResult[];
 };
 
 /**
@@ -32,13 +30,7 @@ export type GetRelatedPagesResult = {
  */
 function buildRelatedPagesResult(
   inventory: SiteInventory,
-  results: Array<{
-    route: string;
-    title: string | null;
-    classification: string | null;
-    score: number;
-    reasons: string[];
-  }>,
+  results: RelatedPageResult[],
   route: string,
 ): GetRelatedPagesResult {
   return {
