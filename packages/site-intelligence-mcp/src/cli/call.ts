@@ -30,7 +30,7 @@ const USAGE = `Usage:
 
 Options:
   --list          List available tools
-  --args '<json>' JSON object with tool arguments (required for get_page, get_page_links, search_pages)
+  --args '<json>' JSON object with tool arguments (required for get_page, get_page_links, search_pages, get_related_pages)
   -h, --help      Show this help
 
 Run \`pnpm mcp:site-intelligence:prepare\` first to build the server and CLI.
@@ -41,7 +41,8 @@ Examples:
   pnpm mcp:site-intelligence:call get_site_warnings
   pnpm mcp:site-intelligence:call get_page --args '{"route":"/tags/"}'
   pnpm mcp:site-intelligence:call get_page_links --args '{"route":"/tags/"}'
-  pnpm mcp:site-intelligence:call search_pages --args '{"query":"context"}'`;
+  pnpm mcp:site-intelligence:call search_pages --args '{"query":"context"}'
+  pnpm mcp:site-intelligence:call get_related_pages --args '{"route":"/lab/context/"}'`;
 
 function inheritableEnv(): Record<string, string> {
   const env: Record<string, string> = {};

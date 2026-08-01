@@ -5,9 +5,10 @@ A local, **read-only** [Model Context Protocol](https://modelcontextprotocol.io)
 `ericcarlisle.com` site inventory to MCP-capable clients (e.g. Claude Desktop,
 code editors with MCP support).
 
-**Version 4 scope:** five read-only tools — `get_site_overview`,
-`get_site_warnings`, `get_page`, `get_page_links`, and `search_pages` — over `stdio`. No
-network, no authentication, no write access, no shell execution.
+**Version 4 scope:** six read-only tools — `get_site_overview`,
+`get_site_warnings`, `get_page`, `get_page_links`, `search_pages`, and
+`get_related_pages` — over `stdio`. No network, no authentication, no write
+access, no shell execution.
 
 ## Purpose
 
@@ -38,7 +39,7 @@ tool call.
 ## Current scope
 
 - **Tools:** `get_site_overview`, `get_site_warnings`, `get_page`,
-  `get_page_links`, and `search_pages`.
+  `get_page_links`, `search_pages`, and `get_related_pages`.
   - `get_site_overview` returns a compact structured overview: source artifact,
     generated commit, indexed-page counts, sitemap/orphan/warning totals, route
     categories, and warning codes.
@@ -50,6 +51,9 @@ tool call.
     for a single page, with counts and an orphaned flag.
   - `search_pages` searches the inventory for pages matching a query string and
     returns a ranked list of matching pages with scores.
+  - `get_related_pages` returns a ranked list of pages related to a given
+    route, scored from inventory-backed signals (link graph, shared tokens,
+    classification) with deterministic reasons for each match.
 - **Transport:** local `stdio` only.
 - **Permissions:** read-only. No filesystem-write, shell, Git, or network
   operations are performed.
@@ -327,6 +331,133 @@ The search operates only on the generated inventory artifact at
 `dist/lab/site-inventory/data.json`. It does not read source files or crawl
 the repository.
 
+### get_related_pages
+
+Returns a ranked list of pages related to a given route, scored from
+inventory-backed signals (link graph, shared tokens, classification) with a
+deterministic `reasons` array explaining every match.
+
+**Purpose:**
+
+Lets an agent discover pages topically or structurally related to a page it
+already cares about — e.g. "which pages connect to `/lab/context/`, share its
+classification, or overlap with its vocabulary?" — without crawling the
+repository or consulting an external knowledge source.
+
+**Input:**
+
+```json
+{
+  "route": "/lab/context/"
+}
+```
+
+**Output (text content, shown parsed):**
+
+```json
+{
+  "generatedCommit": "b5fc9a2",
+  "route": "/lab/context/",
+  "resultCount": 3,
+  "results": [
+    {
+      "route": "/blog/better-agent-results-start-with-better-context/",
+      "title": "Better Agent Results Start With Better Context | Eric Carlisle",
+      "classification": "normal",
+      "score": 350,
+      "reasons": [
+        "shared title token: context",
+        "shared description token: context",
+        "shared heading token: context"
+      ]
+    },
+    {
+      "route": "/lab/site-inventory/",
+      "title": "Site Inventory — Eric Carlisle",
+      "classification": "lab",
+      "score": 200,
+      "reasons": ["shared classification: lab"]
+    },
+    {
+      "route": "/lab/youtube-facade-test/",
+      "title": "YouTube Facade Test — Eric Carlisle",
+      "classification": "lab",
+      "score": 200,
+      "reasons": ["shared classification: lab"]
+    }
+  ]
+}
+```
+
+**Fields:**
+
+- `route`: The normalized input route.
+- `generatedCommit`: The commit the inventory artifact was generated from.
+- `resultCount`: Number of results returned (bounded by the limit below).
+- `results`: Ranked list, each with `route`, `title`, `classification`,
+  `score`, and `reasons`.
+
+**Signals (weights):**
+
+Scores are cumulative. A page may receive points from multiple matching
+signals, and each positive signal contributes an explanatory entry to
+`reasons`:
+
+1. Direct outgoing link (page links to the source route): +1000 — `linked directly`
+2. Direct incoming link (page is linked from the source route): +1000 — `linked from this page`
+3. Shared incoming neighbor (both pages are linked from the same route): +300 each, max 3 counted
+4. Shared outgoing neighbor (both pages link to the same route): +300 each, max 3 counted
+5. Shared classification: +50 for broad classes such as `normal`, +200 for distinctive classes such as `lab`
+6. Shared tag from route (both under the same `/tags/<tag>/`): +200
+7. Shared title token: +150 each
+8. Shared description token: +100 each
+9. Shared heading token (from `h1Texts`): +100 each
+
+Token comparisons use the same normalization as `search_pages` (lowercase,
+whitespace-collapsed). A page matching multiple signals accumulates points
+from each, so result scores can exceed any single weight above.
+
+**Shared-neighbor caps:**
+
+The first 3 shared incoming neighbors and the first 3 shared outgoing
+neighbors count toward the score (`maxSharedIncomingNeighbors` /
+`maxSharedOutgoingNeighbors`). This keeps hub pages that share large parts of
+the site navigation from dominating. The `reasons` entry always reports the
+**actual** shared count (e.g. `10 shared outgoing neighbors`), even when only
+3 of those neighbors contribute points.
+
+**Stop-word filtering:**
+
+Low-information English stop words are excluded from title, description, and
+heading token matching, so words like `with`, `for`, and `the` do not create
+unrelated matches. The excluded set also covers the repeated site-title
+boilerplate (`eric`, `carlisle`) and drops punctuation-only tokens such as `|`
+from the `| Eric Carlisle` title pattern. The stop-word set is centralized in
+`RELATED_PAGES_STOP_WORDS`. No fuzzy matching, stemming, or language-model
+logic is applied.
+
+**Deterministic ordering:**
+
+Results are sorted by:
+
+1. Higher score first
+2. Title alphabetically (case-insensitive)
+3. Route alphabetically
+
+Results are bounded to the top 5 by default (`RELATED_PAGES_LIMIT`). There is
+no pagination or configuration. No randomness, embeddings, or LLM inference is
+used — everything derives from the generated inventory artifact.
+
+**Route normalization and errors:**
+
+Same normalization and error behavior as `get_page`: variants such as
+`/lab/context/`, `lab/context`, and `https://ericcarlisle.com/lab/context/` all
+resolve to `/lab/context/`. Unknown routes return
+`Error: Invalid route: Route "..." not found in site inventory.`; empty or
+whitespace-only input returns `Error: Invalid route: Route must be a non-empty
+string.`; non-string input is rejected by the tool schema; malformed absolute
+URLs return `Error: Invalid route: Invalid absolute URL.`
+
 ## How to generate the underlying site data
 
 ```sh
@@ -417,6 +548,7 @@ pnpm mcp:site-intelligence:call get_site_warnings
 pnpm mcp:site-intelligence:call get_page --args '{"route":"/tags/"}'
 pnpm mcp:site-intelligence:call get_page_links --args '{"route":"/tags/"}'
 pnpm mcp:site-intelligence:call search_pages --args '{"query":"context"}'
+pnpm mcp:site-intelligence:call get_related_pages --args '{"route":"/lab/context/"}'
 ```
 
 The CLI prints the tool's text result and exits `0` on success; it exits
@@ -442,8 +574,11 @@ An agent can explore the site inventory systematically:
 3. **Call `search_pages`** to discover relevant pages by topic.
 4. **Call `get_page`** for a discovered route to see its full metadata, build
    state, headings, and warnings.
-5. **Call `get_page_links`** for the same route to understand its connectivity
-   — which pages link to it, which pages it links to, and whether it's orphaned.
+5. **Call `get_related_pages`** for the same route to surface topically or
+   structurally related pages, with reasons.
+6. **Call `get_page_links`** for any interesting route to understand its
+   connectivity — which pages link to it, which pages it links to, and whether
+   it's orphaned.
 
 Notes:
 

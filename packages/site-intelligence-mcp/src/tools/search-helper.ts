@@ -33,7 +33,7 @@ export function validateSearchQuery(input: unknown): string {
 }
 
 /** Tokenize a string into searchable terms. */
-function tokenize(text: string): string[] {
+export function tokenize(text: string): string[] {
   return text
     .toLowerCase()
     .split(/\s+/)
