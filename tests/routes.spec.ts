@@ -102,11 +102,21 @@ test('portfolio fragment ids are unique and anchor the right titles', async ({ p
     const heading = page.locator(`${level}#${id}`);
     await expect(heading).toHaveCount(1);
     await expect(heading).toContainText(title);
+
+    // Each title has a sibling permalink pointing at its own fragment.
+    const permalink = heading.locator('..').locator('a.permalink');
+    await expect(permalink).toHaveCount(1);
+    await expect(permalink).toHaveAttribute('href', `#${id}`);
+    await expect(permalink).toHaveAttribute('aria-label', `Link to ${title}`);
+    await expect(permalink.locator('svg[aria-hidden="true"]')).toHaveCount(1);
   }
 
   // Duplicate ids on the page would break fragment navigation.
   const ids = await page.locator('h2[id], h3[id]').evaluateAll((els) => els.map((el) => el.id));
   expect(new Set(ids).size).toBe(ids.length);
+
+  // Permalinks are sibling anchors — never nested inside another link.
+  await expect(page.locator('a a')).toHaveCount(0);
 });
 
 for (const { id, title, level } of portfolioFragments) {
@@ -128,6 +138,49 @@ for (const { id, title, level } of portfolioFragments) {
     expect(box?.y).toBeGreaterThanOrEqual(headerHeight - 1);
   });
 }
+
+test('portfolio permalinks are keyboard-reachable with a visible focus treatment', async ({
+  page,
+}) => {
+  await page.goto('/portfolio/');
+  const permalink = page.locator('a.permalink[href="#kiss-design-system"]');
+  await expect(permalink).toHaveCount(1);
+
+  // Drive focus with real keyboard navigation until the permalink receives it.
+  for (let i = 0; i < 80; i++) {
+    await page.keyboard.press('Tab');
+    const focusedHref = await page.evaluate(() =>
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement.getAttribute('href')
+        : null,
+    );
+    if (focusedHref === '#kiss-design-system') break;
+  }
+  await expect(permalink).toBeFocused();
+
+  // Keyboard focus must be visually identified (dashed focus ring).
+  const outlineStyle = await permalink.evaluate((el) =>
+    getComputedStyle(el).getPropertyValue('outline-style'),
+  );
+  expect(outlineStyle).not.toBe('none');
+  await expect(permalink).toBeInViewport();
+});
+
+test('portfolio title permalinks stay tappable at mobile viewport width', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/portfolio/');
+
+  // Longest title: the permalink must remain visible and on-screen.
+  const permalink = page.locator('a.permalink[href="#interactive-decision-experiences"]');
+  await expect(permalink).toBeVisible();
+  const box = await permalink.boundingBox();
+  if (!box) throw new Error('permalink has no bounding box');
+
+  // Reasonable touch target without spilling off the viewport.
+  expect(box.width).toBeGreaterThanOrEqual(40);
+  expect(box.height).toBeGreaterThanOrEqual(40);
+  expect(box.x + box.width).toBeLessThanOrEqual(375);
+});
 
 test('the about page links to selected talks without loading video code', async ({ page }) => {
   const response = await page.goto('/about/');
