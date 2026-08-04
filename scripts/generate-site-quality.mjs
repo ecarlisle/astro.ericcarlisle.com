@@ -45,7 +45,7 @@ const REPRESENTATIVE_ROUTES = [
   '/portfolio/',
   '/portfolio/design-system/',
   '/portfolio/site-quality/',
-  '/blog/good-agent-context-is-carved-not-copied/',
+  '/blog/better-agent-results-start-with-better-context/',
   '/search/',
   '/contact/',
 ];

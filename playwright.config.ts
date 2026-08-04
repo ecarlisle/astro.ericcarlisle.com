@@ -28,7 +28,7 @@ export default defineConfig({
 
   webServer: {
     command:
-      'pnpm build && mkdir -p dist/design-system/lab && cp -r storybook-static/* dist/design-system/lab/ && node scripts/static-server.mjs dist 4321',
+      'pnpm build && node scripts/patch-storybook-noindex.mjs && mkdir -p dist/design-system/lab && cp -r storybook-static/* dist/design-system/lab/ && node scripts/static-server.mjs dist 4321',
     url: 'http://localhost:4321',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

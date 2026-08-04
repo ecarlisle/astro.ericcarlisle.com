@@ -21,13 +21,19 @@ export async function getStaticPaths() {
 const { tag } = Astro.params;
 const allPosts = (await getSortedPosts()).filter((p) => p.data.tags?.includes(tag ?? ''));
 
+// A single-entry tag archive merely repeats one article card without unique
+// context, so it is not indexed (and is excluded from the sitemap by
+// scripts/seo-policy.mjs). Multi-entry archives remain indexable.
+const singleEntry = allPosts.length === 1;
+const robots = singleEntry ? 'noindex, follow' : 'index, follow';
+
 const title = `Tagged: ${tag}`;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead title={title} description={`Posts tagged with "${tag}"`} pageType="collection" />
+    <BaseHead title={title} description={`Posts tagged with "${tag}"`} pageType="collection" robots={robots} />
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>

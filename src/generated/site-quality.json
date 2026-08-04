@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-20T05:28:29.827Z",
-  "commit": "6e24ab9",
+  "generatedAt": "2026-08-04T20:20:25.830Z",
+  "commit": "d0d28b2",
   "environment": {
     "node": "v24.15.0",
     "platform": "darwin",
@@ -8,14 +8,14 @@
     "measurementType": "Static analysis of build output, HTML inspection, and test-result parsing. Not real-user monitoring."
   },
   "routes": {
-    "totalGenerated": 21,
+    "totalGenerated": 27,
     "representativeRoutes": [
       "/",
       "/blog/",
       "/portfolio/",
       "/portfolio/design-system/",
       "/portfolio/site-quality/",
-      "/blog/good-agent-context-is-carved-not-copied/",
+      "/blog/better-agent-results-start-with-better-context/",
       "/search/",
       "/contact/"
     ]
@@ -23,79 +23,98 @@
   "lighthouse": [
     {
       "url": "http://localhost:4321/404.html/",
-      "fetchedAt": "2026-07-20T04:29:49.773Z",
+      "fetchedAt": "2026-07-30T13:51:16.128Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 87,
+        "performance": 98,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 66
       },
       "metrics": {
-        "lcp": 3155.7581,
+        "lcp": 1955.5173,
         "cls": 0.01287283314885897,
-        "tbt": 106,
-        "fcp": 3155.7581
+        "tbt": null,
+        "fcp": 1880.5173
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/404.html.report.json"
     },
     {
       "url": "http://localhost:4321/about/",
-      "fetchedAt": "2026-07-20T04:30:02.074Z",
+      "fetchedAt": "2026-07-30T13:51:28.248Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 88,
+        "performance": 98,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3004.4379,
-        "cls": 0.0724136856087791,
-        "tbt": 56,
-        "fcp": 3004.4379
+        "lcp": 1953.5574,
+        "cls": 0.03654410885808502,
+        "tbt": null,
+        "fcp": 1953.5574
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/about.report.json"
     },
     {
       "url": "http://localhost:4321/blog/",
-      "fetchedAt": "2026-07-20T04:30:39.308Z",
+      "fetchedAt": "2026-07-30T13:52:01.348Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 85,
+        "performance": 97,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3396.3307999999997,
-        "cls": 0.01039120152233601,
-        "tbt": 3.5,
-        "fcp": 3154.8308
+        "lcp": 2256.71565,
+        "cls": 0.008671813905288775,
+        "tbt": null,
+        "fcp": 1806.71565
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/blog.report.json"
     },
     {
       "url": "http://localhost:4321/blog/250mm-trading-card-box/",
-      "fetchedAt": "2026-07-20T04:30:14.770Z",
+      "fetchedAt": "2026-07-30T13:51:39.078Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 85,
+        "performance": 94,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3400.0266999999994,
-        "cls": 0.01039120152233601,
+        "lcp": 2629.1394,
+        "cls": 0.007957878581527697,
         "tbt": null,
-        "fcp": 3304.0266999999994
+        "fcp": 2254.1394
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/blog_250mm-trading-card-box.report.json"
+    },
+    {
+      "url": "http://localhost:4321/blog/better-agent-results-start-with-better-context/",
+      "fetchedAt": "2026-07-30T13:51:50.497Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 95,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 2553.9008999999996,
+        "cls": 0.007957878581527697,
+        "tbt": null,
+        "fcp": 2103.9009
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/blog_better-agent-results-start-with-better-context.report.json"
     },
     {
       "url": "http://localhost:4321/blog/good-agent-context-is-carved-not-copied/",
@@ -118,280 +137,356 @@
     },
     {
       "url": "http://localhost:4321/blog/why-do-i-need-all-this-usb-and-sd-media-holder/",
-      "fetchedAt": "2026-07-20T04:30:51.834Z",
+      "fetchedAt": "2026-07-30T13:52:11.995Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 85,
+        "performance": 96,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3377.2641000000003,
-        "cls": 0.01039120152233601,
-        "tbt": 27,
-        "fcp": 3302.2641000000003
+        "lcp": 2403.01815,
+        "cls": 0.0001241670469558705,
+        "tbt": null,
+        "fcp": 2028.0181499999999
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/blog_why-do-i-need-all-this-usb-and-sd-media-holder.report.json"
     },
     {
       "url": "http://localhost:4321/contact/",
-      "fetchedAt": "2026-07-20T04:31:04.424Z",
+      "fetchedAt": "2026-07-30T13:52:22.795Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 89,
+        "performance": 97,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3019.5739000000003,
+        "lcp": 2103.66765,
         "cls": 0.01039120152233601,
-        "tbt": 2.5,
-        "fcp": 3002.5739000000003
+        "tbt": null,
+        "fcp": 1953.6676499999999
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/contact.report.json"
     },
     {
       "url": "http://localhost:4321/",
-      "fetchedAt": "2026-07-20T04:31:16.791Z",
+      "fetchedAt": "2026-07-30T13:52:33.585Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 84,
+        "performance": 97,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3622.5214000000005,
-        "cls": 0.01039120152233601,
-        "tbt": 10.5,
-        "fcp": 3153.5214000000005
+        "lcp": 2254.8032999999996,
+        "cls": 0.008290198110333068,
+        "tbt": null,
+        "fcp": 1804.8033
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/index.report.json"
     },
     {
-      "url": "http://localhost:4321/portfolio/",
-      "fetchedAt": "2026-07-20T04:31:41.893Z",
+      "url": "http://localhost:4321/lab/context/",
+      "fetchedAt": "2026-07-30T13:52:44.277Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 82,
+        "performance": 98,
         "accessibility": 100,
+        "best-practices": 100,
+        "seo": 63
+      },
+      "metrics": {
+        "lcp": 1953.8925,
+        "cls": 0.01148572765820577,
+        "tbt": null,
+        "fcp": 1953.8925
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/lab_context.report.json"
+    },
+    {
+      "url": "http://localhost:4321/lab/youtube-facade-test/",
+      "fetchedAt": "2026-07-30T13:52:54.890Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 100,
+        "accessibility": 98,
         "best-practices": 96,
+        "seo": 54
+      },
+      "metrics": {
+        "lcp": 1730.83815,
+        "cls": null,
+        "tbt": null,
+        "fcp": 1280.83815
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/lab_youtube-facade-test.report.json"
+    },
+    {
+      "url": "http://localhost:4321/portfolio/",
+      "fetchedAt": "2026-07-30T13:53:16.404Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 94,
+        "accessibility": 100,
+        "best-practices": 100,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3402.3614000000002,
-        "cls": 0.09788656156283891,
+        "lcp": 2403.0489,
+        "cls": 0.058888575011237385,
         "tbt": null,
-        "fcp": 3302.8614000000002
+        "fcp": 2403.0489
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/portfolio.report.json"
     },
     {
       "url": "http://localhost:4321/portfolio/design-system/",
-      "fetchedAt": "2026-07-20T04:31:29.046Z",
+      "fetchedAt": "2026-07-30T13:53:05.380Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 82,
+        "performance": 96,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 66
       },
       "metrics": {
-        "lcp": 3633.8589999999995,
-        "cls": 0.04140244356555756,
-        "tbt": 38,
-        "fcp": 3603.3589999999995
+        "lcp": 2254.2147,
+        "cls": 0.012707940251161018,
+        "tbt": null,
+        "fcp": 2254.2147
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/portfolio_design-system.report.json"
     },
     {
       "url": "http://localhost:4321/portfolio/site-quality/",
-      "fetchedAt": "2026-07-20T04:31:54.343Z",
+      "fetchedAt": "2026-07-30T13:53:27.281Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 71,
+        "performance": 93,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3638.2249999999995,
-        "cls": 0.2243973663463398,
-        "tbt": 44,
-        "fcp": 3603.7249999999995
+        "lcp": 2555.361,
+        "cls": 0.01626296593111016,
+        "tbt": null,
+        "fcp": 2555.361
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/portfolio_site-quality.report.json"
     },
     {
       "url": "http://localhost:4321/posts/3d-printing/250mm-trading-card-box/",
-      "fetchedAt": "2026-07-20T04:32:07.075Z",
+      "fetchedAt": "2026-07-30T13:53:38.896Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 89,
+        "performance": 92,
         "accessibility": 100,
         "best-practices": 96,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3776.6766,
-        "cls": 0.01039120152233601,
-        "tbt": 2,
-        "fcp": 903.7844
+        "lcp": 2929.9744,
+        "cls": 0.0001241670469558705,
+        "tbt": null,
+        "fcp": 2479.9744
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/posts_3d-printing_250mm-trading-card-box.report.json"
     },
     {
       "url": "http://localhost:4321/posts/3d-printing/why-do-i-need-all-this-usb-and-sd-media-holder/",
-      "fetchedAt": "2026-07-20T04:32:19.608Z",
+      "fetchedAt": "2026-07-30T13:53:49.885Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 89,
+        "performance": 94,
         "accessibility": 100,
         "best-practices": 96,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3848.62965,
-        "cls": 0.01039120152233601,
-        "tbt": 5,
-        "fcp": 903.7530999999999
+        "lcp": 2780.1942,
+        "cls": 0.0001241670469558705,
+        "tbt": null,
+        "fcp": 2105.1942
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/posts_3d-printing_why-do-i-need-all-this-usb-and-sd-media-holder.report.json"
     },
     {
       "url": "http://localhost:4321/search/",
-      "fetchedAt": "2026-07-20T04:32:31.740Z",
+      "fetchedAt": "2026-07-30T13:54:00.608Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 82,
+        "performance": 94,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3918.7434999999996,
-        "cls": 0.008371503561669928,
-        "tbt": 7,
-        "fcp": 3076.7434999999996
+        "lcp": 2852.3822,
+        "cls": 0.002428198138556435,
+        "tbt": null,
+        "fcp": 2103.5733
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/search.report.json"
     },
     {
-      "url": "http://localhost:4321/tags/",
-      "fetchedAt": "2026-07-20T04:33:18.372Z",
+      "url": "http://localhost:4321/speaking/",
+      "fetchedAt": "2026-07-30T13:54:11.231Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 87,
+        "performance": 96,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3167.4188000000004,
-        "cls": 0.008533275485703862,
-        "tbt": 15,
-        "fcp": 3151.9188000000004
+        "lcp": 2404.3591499999998,
+        "cls": 0.024701371264315243,
+        "tbt": null,
+        "fcp": 1954.3591499999998
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/speaking.report.json"
+    },
+    {
+      "url": "http://localhost:4321/tags/",
+      "fetchedAt": "2026-07-30T13:55:04.545Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 98,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 1803.3435,
+        "cls": 0.014090798328462856,
+        "tbt": null,
+        "fcp": 1803.3435
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/tags.report.json"
     },
     {
       "url": "http://localhost:4321/tags/3d-printing/",
-      "fetchedAt": "2026-07-20T04:32:43.345Z",
+      "fetchedAt": "2026-07-30T13:54:22.022Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 85,
+        "performance": 97,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3394.8417999999997,
-        "cls": 0.01039120152233601,
-        "tbt": 1.5,
-        "fcp": 3152.3417999999997
+        "lcp": 2252.8284000000003,
+        "cls": 0.0001241670469558705,
+        "tbt": null,
+        "fcp": 1802.8284
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/tags_3d-printing.report.json"
     },
     {
-      "url": "http://localhost:4321/tags/ai/",
-      "fetchedAt": "2026-07-20T04:32:55.038Z",
+      "url": "http://localhost:4321/tags/ai-agents/",
+      "fetchedAt": "2026-07-30T13:54:43.277Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 86,
+        "performance": 99,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3318.012,
-        "cls": 0.01039120152233601,
+        "lcp": 2103.39915,
+        "cls": 0.007957878581527697,
         "tbt": null,
-        "fcp": 3152.012
+        "fcp": 1052.2661
+      },
+      "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/tags_ai-agents.report.json"
+    },
+    {
+      "url": "http://localhost:4321/tags/ai/",
+      "fetchedAt": "2026-07-30T13:54:32.628Z",
+      "device": "mobile",
+      "throttling": "simulate",
+      "scores": {
+        "performance": 98,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 2103.42945,
+        "cls": 0.0001241670469558705,
+        "tbt": null,
+        "fcp": 1803.42945
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/tags_ai.report.json"
     },
     {
       "url": "http://localhost:4321/tags/documentation/",
-      "fetchedAt": "2026-07-20T04:33:06.705Z",
+      "fetchedAt": "2026-07-30T13:54:53.887Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 86,
+        "performance": 97,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3317.8964000000005,
-        "cls": 0.01039120152233601,
+        "lcp": 2252.92845,
+        "cls": 0.007957878581527697,
         "tbt": null,
-        "fcp": 3151.8964000000005
+        "fcp": 1802.9284499999999
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/tags_documentation.report.json"
     },
     {
       "url": "http://localhost:4321/tags/software-development/",
-      "fetchedAt": "2026-07-20T04:33:29.952Z",
+      "fetchedAt": "2026-07-30T13:55:15.107Z",
       "device": "mobile",
       "throttling": "simulate",
       "scores": {
-        "performance": 86,
+        "performance": 99,
         "accessibility": 100,
-        "best-practices": 96,
+        "best-practices": 100,
         "seo": 100
       },
       "metrics": {
-        "lcp": 3318.8743999999997,
-        "cls": 0.01039120152233601,
+        "lcp": 2103.5303999999996,
+        "cls": 0.007957878581527697,
         "tbt": null,
-        "fcp": 3152.3743999999997
+        "fcp": 1052.3536
       },
       "source": "/Users/eric/repos/astro.ericcarlisle.com/lh-reports/tags_software-development.report.json"
     }
   ],
   "staticDeployment": {
     "totalJavaScript": {
-      "bytes": 9002054,
-      "gzipBytes": 2327814,
-      "fileCount": 55
+      "bytes": 9201843,
+      "gzipBytes": 2337705,
+      "fileCount": 63
     },
     "totalCss": {
-      "bytes": 180995,
-      "fileCount": 12
+      "bytes": 200547,
+      "fileCount": 15
     },
     "largestJavaScriptAsset": {
       "name": "/design-system/lab/sb-manager/globals-runtime.js",
@@ -400,8 +495,8 @@
     "categories": [
       {
         "name": "Astro page scripts",
-        "bytes": 8464386,
-        "files": 45
+        "bytes": 8664175,
+        "files": 53
       },
       {
         "name": "Pagefind search index and UI",
@@ -423,15 +518,10 @@
           "url": "https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3",
           "bytes": 0,
           "category": "core"
-        },
-        {
-          "url": "/_astro/page.E_TAu5vm.js",
-          "bytes": 270675,
-          "category": "core"
         }
       ],
-      "totalBytes": 270675,
-      "inlineBytes": 6743,
+      "totalBytes": 0,
+      "inlineBytes": 5945,
       "features": []
     },
     "/blog/": {
@@ -440,15 +530,10 @@
           "url": "https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3",
           "bytes": 0,
           "category": "core"
-        },
-        {
-          "url": "/_astro/page.E_TAu5vm.js",
-          "bytes": 270675,
-          "category": "core"
         }
       ],
-      "totalBytes": 270675,
-      "inlineBytes": 6913,
+      "totalBytes": 0,
+      "inlineBytes": 6083,
       "features": []
     },
     "/portfolio/": {
@@ -459,13 +544,13 @@
           "category": "core"
         },
         {
-          "url": "/_astro/page.E_TAu5vm.js",
-          "bytes": 270675,
+          "url": "/_astro/YouTubeFacade.astro_astro_type_script_index_0_lang.BKBlQNWG.js",
+          "bytes": 1192,
           "category": "core"
         }
       ],
-      "totalBytes": 270675,
-      "inlineBytes": 8641,
+      "totalBytes": 1192,
+      "inlineBytes": 6262,
       "features": []
     },
     "/portfolio/design-system/": {
@@ -474,15 +559,10 @@
           "url": "https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3",
           "bytes": 0,
           "category": "core"
-        },
-        {
-          "url": "/_astro/page.E_TAu5vm.js",
-          "bytes": 270675,
-          "category": "core"
         }
       ],
-      "totalBytes": 270675,
-      "inlineBytes": 8891,
+      "totalBytes": 0,
+      "inlineBytes": 6359,
       "features": []
     },
     "/portfolio/site-quality/": {
@@ -491,18 +571,13 @@
           "url": "https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3",
           "bytes": 0,
           "category": "core"
-        },
-        {
-          "url": "/_astro/page.E_TAu5vm.js",
-          "bytes": 270675,
-          "category": "core"
         }
       ],
-      "totalBytes": 270675,
-      "inlineBytes": 8874,
+      "totalBytes": 0,
+      "inlineBytes": 6342,
       "features": []
     },
-    "/blog/good-agent-context-is-carved-not-copied/": {
+    "/blog/better-agent-results-start-with-better-context/": {
       "assets": [
         {
           "url": "https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3",
@@ -510,13 +585,13 @@
           "category": "core"
         },
         {
-          "url": "/_astro/page.E_TAu5vm.js",
-          "bytes": 270675,
+          "url": "/_astro/ec.0vx5m.js",
+          "bytes": 2523,
           "category": "core"
         }
       ],
-      "totalBytes": 270675,
-      "inlineBytes": 10413,
+      "totalBytes": 2523,
+      "inlineBytes": 9325,
       "features": []
     },
     "/search/": {
@@ -525,15 +600,10 @@
           "url": "https://www.googletagmanager.com/gtag/js?id=G-70E1BWCFJ3",
           "bytes": 0,
           "category": "core"
-        },
-        {
-          "url": "/_astro/page.E_TAu5vm.js",
-          "bytes": 270675,
-          "category": "core"
         }
       ],
-      "totalBytes": 270675,
-      "inlineBytes": 8674,
+      "totalBytes": 0,
+      "inlineBytes": 6142,
       "features": []
     },
     "/contact/": {
@@ -544,18 +614,13 @@
           "category": "core"
         },
         {
-          "url": "/_astro/page.E_TAu5vm.js",
-          "bytes": 270675,
-          "category": "core"
-        },
-        {
           "url": "https://challenges.cloudflare.com/turnstile/v0/api.js",
           "bytes": 0,
           "category": "turnstile"
         }
       ],
-      "totalBytes": 270675,
-      "inlineBytes": 11037,
+      "totalBytes": 0,
+      "inlineBytes": 8505,
       "features": ["turnstile"]
     }
   },
@@ -580,10 +645,10 @@
     }
   },
   "componentLab": {
-    "totalJavaScriptBytes": 8191188,
-    "totalJavaScriptGzipBytes": 2096342,
-    "totalBytes": 8232211,
-    "fileCount": 45,
+    "totalJavaScriptBytes": 7901818,
+    "totalJavaScriptGzipBytes": 1998938,
+    "totalBytes": 7942895,
+    "fileCount": 46,
     "largestChunks": [
       {
         "name": "/sb-manager/globals-runtime.js",
@@ -596,19 +661,19 @@
         "label": "manager UI"
       },
       {
-        "name": "/_astro/iframe-DlauUKwZ.js",
-        "bytes": 826660,
+        "name": "/_astro/iframe-Dp_aNTwC.js",
+        "bytes": 826626,
         "label": "iframe bundle"
       },
       {
-        "name": "/_astro/components-BjMOIicu.js",
-        "bytes": 618759,
-        "label": "other"
+        "name": "/_astro/axe-CU0zJHZz.js",
+        "bytes": 579134,
+        "label": "a11y addon (axe-core)"
       },
       {
-        "name": "/_astro/axe-DcqmkbmI.js",
-        "bytes": 579916,
-        "label": "a11y addon (axe-core)"
+        "name": "/_astro/components-D8UZQlBS.js",
+        "bytes": 571496,
+        "label": "other"
       },
       {
         "name": "/sb-addons/storybook-core-server-presets-0/common-manager-bundle.js",
@@ -616,43 +681,43 @@
         "label": "other"
       },
       {
-        "name": "/_astro/DocsRenderer-JROSPFPF-CJus0p9j.js",
-        "bytes": 371522,
+        "name": "/_astro/DocsRenderer-JROSPFPF-C8nAC1L3.js",
+        "bytes": 414764,
         "label": "docs addon"
       },
       {
-        "name": "/_astro/page-B0bqjnX9.js",
-        "bytes": 277970,
-        "label": "page script"
-      },
-      {
-        "name": "/_astro/syntaxhighlighter-YFXUGROL-aQGnfoOr.js",
-        "bytes": 76291,
+        "name": "/_astro/syntaxhighlighter-YFXUGROL-BRQe4hhw.js",
+        "bytes": 75855,
         "label": "syntax highlighter"
       },
       {
         "name": "/sb-addons/a11y-1/manager-bundle.js",
         "bytes": 66572,
         "label": "other"
+      },
+      {
+        "name": "/sb-addons/docs-2/manager-bundle.js",
+        "bytes": 66061,
+        "label": "other"
       }
     ],
     "source": "storybook-static/ directory analysis"
   },
   "stories": {
-    "total": 30,
-    "componentStories": 27,
+    "total": 31,
+    "componentStories": 28,
     "foundationStories": 3,
     "source": "/Users/eric/repos/astro.ericcarlisle.com/storybook-static/index.json"
   },
   "accessibility": {
-    "totalTests": 55,
-    "passedTests": 55,
+    "totalTests": 294,
+    "passedTests": 294,
     "failedTests": 0,
     "skippedTests": 0,
-    "storybookTests": 27,
-    "storybookPassed": 27,
-    "routeTests": 7,
-    "routePassed": 7,
+    "storybookTests": 28,
+    "storybookPassed": 28,
+    "routeTests": 8,
+    "routePassed": 8,
     "tools": ["axe-core (via @axe-core/playwright)"],
     "dataSource": "/Users/eric/repos/astro.ericcarlisle.com/test-results/test-results.json",
     "status": "parsed from Playwright JSON report",
@@ -712,8 +777,8 @@
     "Inline script bytes are estimated from HTML content. They exclude server-rendered JSON-LD and inline styles."
   ],
   "provenance": {
-    "generatedAt": "2026-07-20T05:28:29.827Z",
-    "commit": "6e24ab9",
+    "generatedAt": "2026-08-04T20:20:25.830Z",
+    "commit": "d0d28b2",
     "measurements": [
       {
         "group": "staticDeployment",

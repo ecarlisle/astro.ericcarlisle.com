@@ -36,6 +36,7 @@
     "validate:site-quality-lighthouse": "node scripts/validate-site-quality-lighthouse.mjs",
     "test:page-quality-build": "node scripts/test-page-quality-build.mjs",
     "inventory:generate": "node scripts/generate-site-inventory.mjs",
+    "validate:seo": "node scripts/validate-seo.mjs",
     "postbuild": "node scripts/generate-site-inventory.mjs",
     "mcp:site-intelligence": "node packages/site-intelligence-mcp/dist/src/server.js",
     "mcp:site-intelligence:inspect": "mcp-inspector --web -- node packages/site-intelligence-mcp/dist/src/server.js",

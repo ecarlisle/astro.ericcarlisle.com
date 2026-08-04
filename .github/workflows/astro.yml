@@ -85,6 +85,9 @@ jobs:
       - name: Build Storybook
         run: pnpm build:storybook
 
+      - name: Patch Storybook noindex
+        run: node scripts/patch-storybook-noindex.mjs
+
       - name: Copy Storybook to dist
         run: |
           mkdir -p dist/design-system/lab
@@ -136,6 +139,9 @@ jobs:
 
       - name: Generate Site Inventory
         run: pnpm inventory:generate
+
+      - name: Validate SEO hygiene
+        run: pnpm validate:seo
 
       - name: Verify contact endpoint in built output
         run: |

@@ -66,7 +66,7 @@ function minimalAstroBuild() {
     'dist/portfolio/index.html': `<html><head></head><body><script src="/_astro/page.DGY5I_Vn.js"></script></body></html>`,
     'dist/portfolio/design-system/index.html': `<html><head></head><body><script src="/_astro/page.DGY5I_Vn.js"></script></body></html>`,
     'dist/portfolio/site-quality/index.html': `<html><head></head><body><script src="/_astro/page.DGY5I_Vn.js"></script></body></html>`,
-    'dist/blog/good-agent-context-is-carved-not-copied/index.html': `<html><head></head><body><script src="/_astro/page.DGY5I_Vn.js"></script></body></html>`,
+    'dist/blog/better-agent-results-start-with-better-context/index.html': `<html><head></head><body><script src="/_astro/page.DGY5I_Vn.js"></script></body></html>`,
     'dist/search/index.html': `<html><head></head><body><script src="/_astro/page.DGY5I_Vn.js"></script></body></html>`,
     'dist/contact/index.html': `<html><head></head><body><script src="/_astro/page.DGY5I_Vn.js"></script></body></html>`,
   };
@@ -515,7 +515,7 @@ tests.push({
       '/portfolio/',
       '/portfolio/design-system/',
       '/portfolio/site-quality/',
-      '/blog/good-agent-context-is-carved-not-copied/',
+      '/blog/better-agent-results-start-with-better-context/',
       '/search/',
       '/contact/',
     ];

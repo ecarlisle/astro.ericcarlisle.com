@@ -243,7 +243,7 @@ export function classifyPage(route, page) {
     return {
       type: 'external-artifact',
       isIndexable: false,
-      expectInSitemap: true,
+      expectInSitemap: false,
       expectInternalLinks: false,
     };
   }
@@ -325,6 +325,15 @@ export function detectWarnings(route, page, builtRoutes, sitemapRoutes) {
     });
   }
 
+  // Redirect page included in sitemap — redirect URLs must never be indexed
+  // or advertised in the sitemap.
+  if (cls.type === 'redirect' && inSitemap) {
+    warnings.push({
+      code: 'REDIRECT_IN_SITEMAP',
+      message: 'Redirect URL is included in the sitemap.',
+    });
+  }
+
   // Missing canonical — only for indexable pages.
   if (cls.isIndexable && !page.canonical) {
     warnings.push({ code: 'MISSING_CANONICAL', message: 'No canonical URL specified.' });
@@ -399,13 +408,62 @@ export function detectWarnings(route, page, builtRoutes, sitemapRoutes) {
   return warnings;
 }
 
-/** Detect duplicate titles and descriptions across pages. */
+/**
+ * Detect internal links that resolve to no existing page.
+ * `validRoutes` is the set of routes with a built HTML page (including
+ * redirect aliases) plus any registered external artifact routes.
+ * Returns BROKEN_INTERNAL_LINK warnings with source-page and target info.
+ */
+export function detectBrokenInternalLinks(pages, validRoutes) {
+  const warnings = [];
+  const valid = new Set([...validRoutes]);
+  for (const page of pages) {
+    if (!page.built) continue;
+    for (const target of page.outgoing ?? []) {
+      if (!valid.has(target)) {
+        warnings.push({
+          route: page.route,
+          code: 'BROKEN_INTERNAL_LINK',
+          message: `Internal link on "${page.route}" targets "${target}", which has no generated page, redirect, or asset.`,
+          target,
+        });
+      }
+    }
+  }
+  return warnings;
+}
+
+/**
+ * Extract image alternative text that starts with a redundant prefix such as
+ * "Image:" (case-insensitive). Returns [{ tag, alt }] for offenders.
+ */
+export function findRedundantAltPrefixes(html) {
+  const doc = parseHTML(html);
+  const offenders = [];
+  for (const el of doc.querySelectorAll('[alt]')) {
+    const alt = el.getAttribute('alt') ?? '';
+    if (/^image\s*:/i.test(alt.trim())) {
+      offenders.push({ tag: el.tagName.toLowerCase(), alt });
+    }
+  }
+  return offenders;
+}
+
+/** Detect duplicate titles, descriptions, and canonical URLs across pages. */
 export function detectDuplicateMetadata(pages) {
   const warnings = [];
   const titleMap = new Map();
   const descMap = new Map();
+  const canonMap = new Map();
+
+  // Redirect and noindex aliases intentionally reuse the destination's title,
+  // description, and canonical (they resolve to the canonical page), so they
+  // never count as duplicate-content conflicts.
+  const isAlias = (p) =>
+    Boolean(p.redirectTarget) || (p.robots ?? '').toLowerCase().includes('noindex');
 
   for (const page of pages) {
+    if (isAlias(page)) continue;
     if (page.title) {
       if (!titleMap.has(page.title)) titleMap.set(page.title, []);
       titleMap.get(page.title).push(page.route);
@@ -413,6 +471,10 @@ export function detectDuplicateMetadata(pages) {
     if (page.description) {
       if (!descMap.has(page.description)) descMap.set(page.description, []);
       descMap.get(page.description).push(page.route);
+    }
+    if (page.canonical) {
+      if (!canonMap.has(page.canonical)) canonMap.set(page.canonical, []);
+      canonMap.get(page.canonical).push(page.route);
     }
   }
 
@@ -435,6 +497,18 @@ export function detectDuplicateMetadata(pages) {
           route,
           code: 'DUPLICATE_DESCRIPTION',
           message: `Description is also used by: ${routes.filter((r) => r !== route).join(', ')}`,
+        });
+      }
+    }
+  }
+
+  for (const [canonical, routes] of canonMap) {
+    if (routes.length > 1) {
+      for (const route of routes) {
+        warnings.push({
+          route,
+          code: 'DUPLICATE_CANONICAL',
+          message: `Canonical "${canonical}" is also used by: ${routes.filter((r) => r !== route).join(', ')}`,
         });
       }
     }

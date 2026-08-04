@@ -6,6 +6,7 @@ import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import expressiveCode from 'astro-expressive-code';
 import pagefind from 'astro-pagefind';
+import { excludeFromSitemap } from './scripts/seo-policy.mjs';
 
 // https://astro.build/config
 export default defineConfig({
@@ -38,17 +39,15 @@ export default defineConfig({
     mdx(),
     pagefind(),
     sitemap({
-      customPages: ['https://ericcarlisle.com/design-system/lab/'],
-      // Pathname-aware: exclude root /lab/* diagnostic routes, /posts/*
-      // legacy redirects, and /portfolio/design-system/ (noindex), while
-      // preserving /design-system/lab/ (Storybook) added via customPages.
+      // The @astrojs/sitemap integration discovers every static page it builds.
+      // The shared SEO policy (scripts/seo-policy.mjs) decides inclusion:
+      //   - excludes /search/ (noindex), single-entry /tags/* (noindex),
+      //     /posts/* legacy redirects, /lab/* diagnostics, and the Storybook
+      //     /design-system/lab/ application (noindex)
+      //   - includes /portfolio/design-system/ (now indexable)
       filter: (page) => {
         const pathname = new URL(page).pathname;
-        return (
-          !pathname.startsWith('/lab/') &&
-          !pathname.startsWith('/posts/') &&
-          !pathname.startsWith('/portfolio/design-system/')
-        );
+        return !excludeFromSitemap(pathname);
       },
     }),
   ],

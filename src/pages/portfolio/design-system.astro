@@ -9,21 +9,27 @@ import ThemeToggle from '../../components/ThemeToggle.astro';
 import { AUTHOR_NAME } from '../../consts';
 import Layout from '../../layouts/BlogPost.astro';
 
+// The Design System Companion is a living reference for the tokens and
+// components implemented across this site. It is indexable so teams searching
+// for these patterns can find this page.
 const title = 'Design System Companion';
 const description =
   'A curated reference for the typography, spacing, color, layout, components, and accessibility decisions implemented across ericcarlisle.com.';
 const pageUrl = 'https://ericcarlisle.com/portfolio/design-system/';
 
 const sampleDate = new Date('2024-06-15');
-const sampleTags = ['Astro', 'CSS', 'Accessibility'];
+// Sample tag data uses the site's real lowercase tag routes so every demo
+// link resolves to an actual blog archive page.
+const sampleTags = ['3d-printing', 'ai'];
 
 const tagData = {
-  allTags: ['Astro', 'CSS', 'Accessibility', 'Performance'],
+  allTags: ['3d-printing', 'ai', 'ai-agents', 'documentation', 'software-development'],
   tagCounts: {
-    Astro: 3,
-    CSS: 5,
-    Accessibility: 2,
-    Performance: 1,
+    '3d-printing': 2,
+    ai: 1,
+    'ai-agents': 1,
+    documentation: 1,
+    'software-development': 1,
   },
 };
 
@@ -147,7 +153,7 @@ const knownGaps = [
   title={title}
   {description}
   pageType="portfolio"
-  robots="noindex, follow"
+  robots="index, follow"
   breadcrumbs={[
     { name: 'Home', item: 'https://ericcarlisle.com/' },
     { name: 'Portfolio', item: 'https://ericcarlisle.com/portfolio/' },
@@ -545,7 +551,7 @@ const knownGaps = [
         <h3 id="tag-chip">Tag / Chip</h3>
         <p class="ds-source">src/styles/components.css</p>
         <div class="demo-row">
-          <a href="/tags/astro/" class="tag">Astro</a>
+          <a href="/tags/3d-printing/" class="tag">3d-printing</a>
           <span class="chip">static chip</span>
         </div>
       </div>
@@ -709,7 +715,9 @@ const knownGaps = [
       </li>
       <li>
         This page is intentionally omitted from the main navigation and uses
-        <code>noindex, follow</code> metadata.
+        <code>index, follow</code> metadata so search engines can index this
+        living reference. Its placement in the sitemap is governed by
+        <code>scripts/seo-policy.mjs</code>.
       </li>
     </ul>
   </section>
