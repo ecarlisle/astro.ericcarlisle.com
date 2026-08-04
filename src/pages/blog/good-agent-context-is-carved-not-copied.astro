@@ -1,0 +1,15 @@
+---
+// Compatibility redirect for the old article slug.
+//
+// This article was retitled and re-slugged from "Good Agent Context Is Carved,
+// Not Copied" to "Better Agent Results Start With Better Context". The old URL
+// had been linked from the homepage and external sources, so keep it working.
+//
+// GitHub Pages cannot serve real HTTP 301 redirects, so Astro renders this as
+// a static meta-refresh document that:
+//   - auto-redirects visitors to the new URL
+//   - carries robots="noindex, follow" so search engines do not index the alias
+//   - declares the canonical to the destination
+//   - offers a direct fallback link for clients without meta-refresh support
+return Astro.redirect('/blog/better-agent-results-start-with-better-context/', 301);
+---

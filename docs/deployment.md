@@ -152,6 +152,26 @@ The Worker also has environment-specific names configured in `wrangler.toml`:
 10. **Upload artifact** — `actions/upload-pages-artifact@v4`
 11. **Deploy** — `actions/deploy-pages@v4`
 
+### SEO hygiene gate and Storybook isolation
+
+Two indexing-related steps run in CI:
+
+1. After `build:storybook`, `node scripts/patch-storybook-noindex.mjs` injects
+   `robots="noindex, follow"` into `storybook-static/index.html` and `iframe.html` so the
+   `/design-system/lab/` application never appears in search results.
+2. Near the end of the build, `pnpm validate:seo` runs the deterministic SEO gate against the
+   finished `dist/` (which includes the Storybook copy under `/design-system/lab/`). Any broken
+   internal link, missing/duplicated metadata or canonical, indexable page missing from the sitemap,
+   `noindex` page in the sitemap, redirect in the sitemap, redundant `Image:` alt prefix, or policy
+   regression fails the build.
+
+### Hosting limitation: no real HTTP redirects
+
+GitHub Pages serves only static files and cannot issue true HTTP `301`/`308` redirects. Legacy and
+renamed route aliases therefore use Astro's static `Astro.redirect(...)` output: a `meta-refresh`
+document that is already `noindex`, declares its canonical to the destination, and offers a direct
+link. This is the documented, verified pattern for this site.
+
 ### Page Quality Footer
 
 Every page includes a compact line in the footer reporting Lighthouse lab scores:
@@ -227,9 +247,17 @@ Storybook copy so the measured artifact matches the uploaded artifact.
 - `NO_BUILT_PAGE` — sitemap URL with no generated HTML file
 - `ORPHANED_PAGE` — indexable page with zero inbound internal links
 - `NOINDEX_IN_SITEMAP` — `noindex` page included in the sitemap
+- `REDIRECT_IN_SITEMAP` — redirect alias included in the sitemap
 - `MISSING_CANONICAL` / `CANONICAL_MISMATCH` / `CANONICAL_TARGET_MISSING`
 - `MISSING_TITLE` / `MISSING_DESCRIPTION` / `MISSING_H1` / `MULTIPLE_H1S`
-- `DUPLICATE_TITLE` / `DUPLICATE_DESCRIPTION`
+- `DUPLICATE_TITLE` / `DUPLICATE_DESCRIPTION` / `DUPLICATE_CANONICAL`
+
+**The deterministic SEO gate** (`pnpm validate:seo`, `scripts/validate-seo.mjs`) turns the
+inventory warnings that matter for indexing into hard failures and adds three checks the inventory
+itself does not produce: broken internal links (`BROKEN_INTERNAL_LINK`, resolved against built
+routes plus registered external artifacts), redundant `Image:` alt prefixes
+(`REDUNDANT_ALT_PREFIX`), and policy assertions (`SEARCH_NOINDEX`, `DESIGN_SYSTEM_INDEXABLE`,
+`STORYBOOK_NOINDEX`).
 
 **Classifications and intentional exceptions.** Pages are classified as
 normal, `noindex`, redirect, 404, lab (`/lab/*`), or external artifact
@@ -240,8 +268,8 @@ route is **not** treated as redirect evidence; a normal page with a mismatched
 canonical remains a normal page and receives `CANONICAL_MISMATCH`. Exceptions
 are centralized in `scripts/site-inventory-core.mjs`:
 
-- `/lab/*`, `/404.html/`, `/search/`, `/tags/` — no inbound links expected
-- `/lab/*`, `/404.html/`, `/tags/` — not expected in the sitemap
+- `/lab/*`, `/404.html/` — no inbound links expected
+- `/lab/*`, `/404.html/` — not expected in the sitemap
 - The 404 page's canonical (`/404/`) is an intentional Astro convention
 - `ORPHANED_PAGE` is only emitted for indexable pages; non-indexable
   redirects and `noindex` pages never receive orphan warnings
@@ -249,10 +277,22 @@ are centralized in `scripts/site-inventory-core.mjs`:
   checked instead
 - Storybook at `/design-system/lab/` is a single external artifact,
   represented by `dist/design-system/lab/index.html` as build evidence.
-  Its internal HTML files are not inventoried as normal pages. A local build
-  without Storybook reports it as not built (`NO_BUILT_PAGE`); the CI
-  deployment copies Storybook before regenerating the inventory, so the
-  final artifact reports it as built and in the sitemap.
+  Its internal HTML files are not inventoried as normal pages. It is
+  `noindex` (patched into the built Storybook by
+  `scripts/patch-storybook-noindex.mjs`) and excluded from the sitemap by
+  the shared policy in `scripts/seo-policy.mjs`.
+
+**Indexing and sitemap decisions** are not hardcoded in the Astro config or
+in the validator. `scripts/seo-policy.mjs` is the single source of truth,
+shared by the `@astrojs/sitemap` filter and `pnpm validate:seo`:
+
+- `/portfolio/design-system/` is indexable and included in the sitemap
+- `/search/` is `noindex, follow` and excluded
+- `/design-system/lab/` is `noindex, follow` and excluded
+- single-entry `/tags/<tag>/` archives are `noindex, follow` and excluded
+  (derived from blog content, so they become indexable at two posts)
+- redirect aliases (`/posts/*` and pages calling `Astro.redirect`) are
+  excluded from the sitemap
 
 The sitemap configuration (`astro.config.mjs`) uses a pathname-aware filter
 that excludes root `/lab/*` routes, `/posts/*` redirects, and
@@ -558,7 +598,7 @@ After deploying, verify these items:
 
 - [ ] Homepage loads at `https://ericcarlisle.com`
 - [ ] Representative blog article renders (`/blog/[slug]/`)
-- [ ] Previously drafted article returns 404 (`/blog/good-agent-context-is-carved-not-copied/`)
+- [ ] Previously drafted article redirects to new URL (`/blog/good-agent-context-is-carved-not-copied/` → `/blog/better-agent-results-start-with-better-context/`)
 - [ ] RSS feed valid at `/rss.xml`
 - [ ] Sitemap present at `/sitemap-index.xml`
 - [ ] `robots.txt` present (if configured)

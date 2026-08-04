@@ -45,7 +45,7 @@ const pages: MetadataExpectations[] = [
   },
   {
     path: '/portfolio/',
-    titlePattern: /Portfolio [|\u2014] Eric Carlisle/,
+    titlePattern: /Frontend Engineering & UX Portfolio [|\u2014] Eric Carlisle/,
     descriptionNonEmpty: true,
     hasCanonical: true,
     hasOgTitle: true,
@@ -108,3 +108,59 @@ for (const {
     }
   });
 }
+
+// ─── Indexing policy (noindex / indexable) ───────────────────────────────
+
+test('/portfolio/design-system/ is indexable', async ({ page }) => {
+  await page.goto('/portfolio/design-system/');
+  const robots = await page.locator('meta[name="robots"]').getAttribute('content');
+  expect(robots).toMatch(/index/);
+});
+
+test('/search/ is noindex, follow', async ({ page }) => {
+  await page.goto('/search/');
+  const robots = await page.locator('meta[name="robots"]').getAttribute('content');
+  expect(robots).toMatch(/noindex/);
+  expect(robots).toMatch(/follow/);
+});
+
+test('single-entry tag archive is noindex', async ({ page }) => {
+  await page.goto('/tags/ai/');
+  const robots = await page.locator('meta[name="robots"]').getAttribute('content');
+  expect(robots).toMatch(/noindex/);
+});
+
+test('multi-entry tag archive stays indexable', async ({ page }) => {
+  await page.goto('/tags/3d-printing/');
+  const robots = await page.locator('meta[name="robots"]').getAttribute('content');
+  expect(robots).toMatch(/index/);
+});
+
+test('Storybook lab is noindex', async ({ page }) => {
+  await page.goto('/design-system/lab/');
+  const robots = await page.locator('meta[name="robots"]').getAttribute('content');
+  expect(robots).toMatch(/noindex/);
+});
+
+// ─── Legacy alias redirect ───────────────────────────────────────────────
+
+test('old article slug serves a noindex redirect to the current URL', async ({ request }) => {
+  const res = await request.get('/blog/good-agent-context-is-carved-not-copied/');
+  expect(res.ok()).toBeTruthy();
+  const html = (await res.text()).toLowerCase();
+  expect(html).toContain('http-equiv="refresh"');
+  expect(html).toContain('/blog/better-agent-results-start-with-better-context/');
+  expect(html).toContain('noindex');
+});
+
+// ─── Homepage link hygiene ───────────────────────────────────────────────
+
+test('homepage links to the current article slug, never the archived alias', async ({ page }) => {
+  await page.goto('/');
+  await expect(
+    page.locator('a[href="/blog/better-agent-results-start-with-better-context/"]'),
+  ).toHaveCount(1);
+  await expect(
+    page.locator('a[href^="/blog/good-agent-context-is-carved-not-copied"]'),
+  ).toHaveCount(0);
+});
