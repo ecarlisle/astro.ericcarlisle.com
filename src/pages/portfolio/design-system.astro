@@ -280,6 +280,130 @@ const knownGaps = [
   </section>
 
   <section class="ds-section">
+    <h2>Heading Permalinks</h2>
+    <p>
+      Content-section titles that deserve a stable, shareable URL get a visible
+      chain-link permalink as a sibling <em>after</em> the heading. The pattern is
+      native fragment navigation — an <code>aria-hidden</code> link-chain SVG inside
+      an <code>a.permalink</code> whose <code>href</code> matches the heading's
+      explicit, lowercase kebab-case <code>id</code>, with
+      <code>aria-label="Link to &lt;Visible Title&gt;"</code>. No clipboard and no
+      runtime JavaScript.
+    </p>
+    <ul class="ds-permalink-rules">
+      <li>
+        <strong>Inclusion</strong> — add to content-section headings that deserve a
+        stable deep link (e.g. portfolio case-study titles and the “How I work”
+        section). Do not add to article-prose headings or to headings already
+        covered by the article table of contents.
+      </li>
+      <li>
+        <strong>Stable-ID contract</strong> — each heading carries a unique,
+        explicit, lowercase kebab-case <code>id</code>, never slugified from the
+        visible title at runtime. Treat the IDs as permanent public URLs.
+      </li>
+      <li>
+        <strong>Structure</strong> — the permalink is a sibling anchor (never nested
+        inside the heading or another link).
+      </li>
+      <li>
+        <strong>Accessibility</strong> — 44px touch target, visible dashed
+        <code>:focus-visible</code> outline, and
+        <code>scroll-margin-top: calc(var(--header-height, 4.5rem) + var(--space-component))</code>
+        so a fragment lands clear of the fixed header. A restrained
+        <code>:target</code> highlight marks the landing; under
+        <code>prefers-reduced-motion</code> it becomes a static inset accent bar and
+        permalink transitions are disabled.
+      </li>
+      <li>
+        <strong>Responsive wrapping</strong> — the heading and its permalink share one
+        inline text flow, bound by a trailing non-breaking space, so the icon always
+        sits beside the title's final word and never orphaned onto its own row.
+      </li>
+      <li>
+        <strong>Tokens</strong> — uses only existing tokens; no new tokens are
+        introduced.
+      </li>
+    </ul>
+    <p class="ds-source">
+      Canonical implementation: <code>src/pages/portfolio.astro</code>. Live use:
+      <a href="/portfolio/#kiss-design-system">/portfolio/#kiss-design-system</a>.
+    </p>
+
+    <h3>Dark theme</h3>
+    <div class="ds-permalink-demo" data-theme="dark">
+      <div class="portfolio-title">
+        <h2 id="ds-permalink-h2">Designing section landmarks</h2>
+        <a class="permalink" href="#ds-permalink-h2" aria-label="Link to Designing section landmarks">
+          <svg viewBox="0 0 24 24" width="1.05em" height="1.05em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </a>
+      </div>
+      <div class="portfolio-title">
+        <h3 id="ds-permalink-h3">Reengineering enterprise commerce performance</h3>
+        <a class="permalink" href="#ds-permalink-h3" aria-label="Link to Reengineering enterprise commerce performance">
+          <svg viewBox="0 0 24 24" width="1.05em" height="1.05em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </a>
+      </div>
+      <div class="portfolio-title portfolio-title--wrapped">
+        <h3 id="ds-permalink-h3-wrapped">Building integration layers for product teams across many releases</h3>
+        <a class="permalink" href="#ds-permalink-h3-wrapped" aria-label="Link to Building integration layers for product teams across many releases">
+          <svg viewBox="0 0 24 24" width="1.05em" height="1.05em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </a>
+      </div>
+      <p class="ds-permalink-caption">
+        Default / hover / keyboard-focus (Tab to the link) / targeted (choose the
+        permalink): the narrow example shows the icon wrapping with the final title
+        word instead of orphaning.
+      </p>
+    </div>
+
+    <h3>Light theme</h3>
+    <div class="ds-permalink-demo" data-theme="light" style="background: var(--bg-main); color: var(--text-primary);">
+      <div class="portfolio-title">
+        <h2 id="ds-permalink-h2-light">Designing section landmarks</h2>
+        <a class="permalink" href="#ds-permalink-h2-light" aria-label="Link to Designing section landmarks">
+          <svg viewBox="0 0 24 24" width="1.05em" height="1.05em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </a>
+      </div>
+      <div class="portfolio-title">
+        <h3 id="ds-permalink-h3-light">Reengineering enterprise commerce performance</h3>
+        <a class="permalink" href="#ds-permalink-h3-light" aria-label="Link to Reengineering enterprise commerce performance">
+          <svg viewBox="0 0 24 24" width="1.05em" height="1.05em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </a>
+      </div>
+      <div class="portfolio-title portfolio-title--wrapped">
+        <h3 id="ds-permalink-h3-wrapped-light">Building integration layers for product teams across many releases</h3>
+        <a class="permalink" href="#ds-permalink-h3-wrapped-light" aria-label="Link to Building integration layers for product teams across many releases">
+          <svg viewBox="0 0 24 24" width="1.05em" height="1.05em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </a>
+      </div>
+      <p class="ds-permalink-caption">
+        Same pattern rendered in the light theme via a <code>data-theme="light"</code>
+        container; the semantic tokens (<code>--color-link</code>, focus, surface)
+        re-map automatically.
+      </p>
+    </div>
+  </section>
+
+  <section class="ds-section">
     <h2>Color Tokens</h2>
     <p>
       The default theme is dark. A light theme is applied via
@@ -534,6 +658,7 @@ const knownGaps = [
       <li><strong>Skip link</strong> — keyboard users can jump to main content.</li>
       <li><strong>Focus states</strong> — visible dashed outline with offset.</li>
       <li><strong>Touch targets</strong> — minimum 44px for buttons and icon links.</li>
+      <li><strong>Heading permalinks</strong> — sibling anchors beside headings with a visible focus ring, accessible labels, and a reduced-motion-safe <code>:target</code> highlight.</li>
       <li><strong>Color contrast</strong> — palettes are chosen for both dark and light modes.</li>
       <li><strong>Semantic HTML</strong> — native elements before ARIA.</li>
       <li><strong>Reduced motion</strong> — transitions and animations respect user preference.</li>
@@ -939,6 +1064,127 @@ const knownGaps = [
   @media (max-width: 720px) {
     .ds-form-row {
       grid-template-columns: 1fr;
+    }
+  }
+
+  /* ── Heading permalink demo ──
+     Mirrors the canonical pattern in src/pages/portfolio.astro. The heading and
+     its sibling permalink share one inline text flow; a trailing non-breaking
+     space binds the icon to the title's final word so it wraps with that word
+     and never orphans. */
+  .ds-permalink-rules {
+    margin: var(--space-sm) 0 var(--space-component);
+    padding-left: 1.25rem;
+  }
+
+  .ds-permalink-rules li {
+    margin-bottom: var(--space-xs);
+  }
+
+  .ds-permalink-caption {
+    margin: 0;
+    font-size: var(--type-size-small);
+    color: var(--text-muted);
+  }
+
+  .ds-permalink-demo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-component);
+    padding: var(--space-component);
+    background: var(--bg-surface);
+    border: var(--size-border-pixel) solid var(--border-main);
+    border-radius: var(--radius-lg);
+    margin: var(--space-sm) 0 var(--space-component);
+    /* Re-derive the link-derived tokens inside each demo block so the block's
+       own data-theme attribute (not just the page root) drives the accent
+       colors. The production page sets the theme on <html>, so this is a
+       demo-only redeclaration. */
+    --color-link: var(--brand-primary);
+    --color-link-hover: var(--brand-accent);
+    --color-focus: var(--color-link);
+  }
+
+  .ds-permalink-demo h2,
+  .ds-permalink-demo h3 {
+    margin: 0;
+  }
+
+  .portfolio-title {
+    display: block;
+  }
+
+  .portfolio-title h2,
+  .portfolio-title h3 {
+    display: inline;
+  }
+
+  .portfolio-title--wrapped {
+    max-width: 30ch;
+  }
+
+  .permalink {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    min-width: var(--size-touch-target-min);
+    min-height: var(--size-touch-target-min);
+    border-radius: var(--radius-md);
+    color: var(--color-link);
+    opacity: 0.6;
+    text-decoration: none;
+    line-height: 0;
+    transition:
+      opacity var(--transition-fast),
+      background-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .portfolio-title :is(h2, h3)::after {
+    content: '\00a0';
+  }
+
+  .permalink svg {
+    width: 1.05em;
+    height: 1.05em;
+  }
+
+  .portfolio-title:hover .permalink,
+  .permalink:hover,
+  .permalink:focus-visible {
+    opacity: 1;
+    color: var(--color-link-hover);
+    background-color: var(--bg-surface);
+  }
+
+  .permalink:focus-visible {
+    outline: var(--size-border-pixel) dashed var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  .portfolio-title :is(h2, h3):target {
+    border-radius: var(--radius-sm);
+    animation: portfolio-target-flash var(--transition-slow) ease-out;
+  }
+
+  @keyframes portfolio-target-flash {
+    from {
+      background-color: color-mix(in srgb, var(--brand-accent) 22%, transparent);
+    }
+    to {
+      background-color: transparent;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .portfolio-title :is(h2, h3):target {
+      animation: none;
+      box-shadow: inset 3px 0 0 var(--brand-accent);
+    }
+
+    .permalink {
+      transition: none;
     }
   }
 

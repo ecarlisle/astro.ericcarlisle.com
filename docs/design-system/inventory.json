@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft-2020-12/schema",
   "title": "Eric Carlisle Design System Inventory",
   "description": "Machine-readable inventory of reusable design-system patterns implemented across ericcarlisle.com. This is a personal blog site, not a published component library. The inventory documents patterns that exist in the codebase for agent-assisted development.",
-  "lastUpdated": "2026-07-09",
+  "lastUpdated": "2026-08-04",
   "patterns": [
     {
       "name": "Header",
@@ -394,6 +394,19 @@
       "whenNotToUse": "Do not use for single-card layouts or non-card content.",
       "accessibilityNotes": "Grid is purely visual layout. Semantic structure comes from child elements. Responsive: single column at 720px.",
       "relatedPatterns": ["Card", "PostGrid"],
+      "status": "stable"
+    },
+    {
+      "name": "Heading Permalink",
+      "kind": "typography pattern",
+      "source": "src/pages/portfolio.astro",
+      "styleSources": ["src/pages/portfolio.astro"],
+      "canonicalExample": "/portfolio/#kiss-design-system",
+      "purpose": "Visible chain-link anchor beside a content-section heading that gives the heading a stable, shareable fragment URL. Currently applied to portfolio case-study titles (h3) and the \"How I work\" section heading (h2).",
+      "whenToUse": "Content-section headings (h2/h3) that deserve a stable deep link, when the surrounding titles form a uniform row. See the canonical portfolio page for the inclusion pattern.",
+      "whenNotToUse": "Do not add to article-prose headings (the article table of contents already provides section navigation), navigation links, or headings inside another link. Do not add to every heading on a page indiscriminately.",
+      "accessibilityNotes": "The permalink is a sibling <a class=\"permalink\"> immediately after the heading (never nested inside the heading's link or another anchor); href matches the heading's explicit lowercase kebab-case id. The SVG icon is aria-hidden=\"true\" and the anchor has aria-label=\"Link to <Visible Title>\". Minimum 44px touch target (--size-touch-target-min). Visible dashed :focus-visible outline in --color-focus. scroll-margin-top: calc(var(--header-height, 4.5rem) + var(--space-component)) keeps fragment landings clear of the fixed header. A restrained :target highlight marks the destination; under prefers-reduced-motion it becomes a static inset accent bar and permalink transitions are disabled. The heading and permalink share an inline text flow bound by a trailing non-breaking space so the icon wraps with the final title word and never orphans. Native fragment navigation; no runtime JavaScript. Uses only existing tokens; no new tokens.",
+      "relatedPatterns": ["Prose", "TOC Sidebar"],
       "status": "stable"
     }
   ]

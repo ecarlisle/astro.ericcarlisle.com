@@ -683,14 +683,14 @@
         "score": null,
         "evidenceMaturity": "structurally-verified",
         "evidenceMaturityReason": "The generator deterministically measures the declared full-file set; it does not observe actual runtime retrieval or model input.",
-        "interpretation": "The declared full-file context contains 41,766 characters (~10,442 estimated tokens).",
+        "interpretation": "The declared full-file context contains 42,686 characters (~10,672 estimated tokens).",
         "limitations": [
           "This is a declared full-file estimate, not actual model input, retrieved context, or tokenizer output.",
           "No universal token threshold is applied; useful ranges depend on the task, retrieval strategy, model, and outcome."
         ],
         "details": {
-          "characters": 41766,
-          "estimatedTokens": 10442,
+          "characters": 42686,
+          "estimatedTokens": 10672,
           "measuredFiles": [
             {
               "path": "AGENTS.md",
@@ -702,7 +702,7 @@
             },
             {
               "path": "docs/performance-seo-accessibility.md",
-              "characters": 1243
+              "characters": 1726
             },
             {
               "path": "docs/testing.md",
@@ -710,7 +710,7 @@
             },
             {
               "path": "docs/design-system/agent-guide.md",
-              "characters": 4384
+              "characters": 4403
             },
             {
               "path": ".agents/skills/agent-safe-change/SKILL.md",
@@ -726,7 +726,7 @@
             },
             {
               "path": ".agents/skills/accessibility/SKILL.md",
-              "characters": 4923
+              "characters": 5341
             },
             {
               "path": ".agents/skills/design-system-css/SKILL.md",

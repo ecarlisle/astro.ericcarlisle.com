@@ -69,6 +69,7 @@ This site supports dark and light themes via CSS custom properties. The default 
 - Minimum 44px touch targets for buttons and icon links.
 - Reduced-motion support: transitions and animations respect `prefers-reduced-motion: reduce`.
 - Semantic HTML: native elements before ARIA, correct heading hierarchy, one `h1` per page.
+- Heading permalinks: content-section titles that deserve a stable deep link get a sibling chain-link anchor with a visible focus ring, an accessible label, an `aria-hidden` icon, and a reduced-motion-safe `:target` highlight (see the [Heading Permalink pattern](inventory.json) and live use at [`/portfolio/#kiss-design-system`](/portfolio/#kiss-design-system)).
 
 For detailed quality standards, see `docs/performance-seo-accessibility.md`.
 

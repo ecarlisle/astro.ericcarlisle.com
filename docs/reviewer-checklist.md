@@ -64,6 +64,7 @@ Check for:
 
 - Semantic HTML
 - Clear heading hierarchy
+- Heading permalinks (unique explicit IDs, sibling non-nested anchors, accessible labels, visible focus, fragment lands clear of the fixed header, reduced-motion-safe `:target`, no runtime JavaScript)
 - Keyboard navigation
 - Focus-visible states
 - Reduced-motion behavior

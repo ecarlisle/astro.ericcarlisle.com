@@ -95,7 +95,7 @@ Many canonical examples use anchors (e.g., `/portfolio/design-system/#card`) to 
 | navigation pattern | 2 | Header, Footer |
 | content pattern | 7 | Button, Tag / Chip, Callout, TOC Sidebar, Stats Grid, Reading Progress Bar, Skip Link, Card Grid |
 | form pattern | 1 | Contact Form |
-| typography pattern | 3 | Prose, Code Block, Blockquote |
+| typography pattern | 4 | Prose, Code Block, Blockquote, Heading Permalink |
 | metadata pattern | 2 | BaseHead, SchemaOrg |
 
 > Note: Counts are approximate; some patterns span multiple categories.
