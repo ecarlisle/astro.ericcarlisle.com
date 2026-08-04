@@ -2,6 +2,11 @@ import { AxeBuilder } from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 const stories = [
+  // Heading Permalinks
+  {
+    name: 'Heading Permalinks - Default and states',
+    url: 'patterns-heading-permalinks--heading-permalinks',
+  },
   // Card
   { name: 'Card - Default', url: 'components-card--default' },
   { name: 'Card - WithoutLink', url: 'components-card--without-link' },

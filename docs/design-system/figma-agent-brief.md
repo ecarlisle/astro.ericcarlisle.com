@@ -96,6 +96,25 @@ Create these pages in order:
 - Margin: `0` (specific spacing applied per element)
 - `h1`, `h2`, `h3` use `text-wrap: balance`
 
+### Heading permalinks
+
+Content-section titles that deserve a stable deep link carry an explicit lowercase
+kebab-case `id` and a sibling chain-link permalink anchor (`a.permalink`) beside the
+heading (see the [Heading Permalink](inventory.json) pattern and the canonical example
+at `/portfolio/#kiss-design-system`). Model the following heading states in Figma for
+each of `H2` and `H3`:
+
+- **Default** — heading plus the muted (opacity ~0.6) chain-link icon, `--color-link`.
+- **Hover** — icon at full opacity in `--color-link-hover` on a `--bg-surface` chip.
+- **Keyboard focus** — same as hover plus a dashed `--color-focus` outline (offset 3px).
+- **Targeted** — a restrained accent highlight along the heading when reached via its fragment URL; becomes a static inset accent bar under reduced motion.
+- **Wrapped** — at narrow widths the icon stays on the heading's final word (bound by a non-breaking space) and never orphans onto its own row.
+- **Theme** — render once in dark and once in light; only semantic tokens (`--color-link`, focus, surface) change.
+
+No new tokens. The anchor is a sibling (never nested), the icon is `aria-hidden`, the
+label is `aria-label="Link to <Visible Title>"`, and the target is 44px minimum — all
+consistent with the site accessibility conventions.
+
 ### Suggested Figma text styles
 
 Name each style `Desktop / ...` and `Mobile / ...` using the reference sizes above.

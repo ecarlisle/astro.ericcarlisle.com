@@ -55,3 +55,4 @@ Preserve:
 - Keyboard-accessible navigation
 - Meaningful alt text
 - Minimum touch target sizes
+- Heading permalinks: content-section headings with a stable deep link carry an explicit lowercase kebab-case `id` and a sibling, non-nested chain-link anchor (`aria-hidden` icon + `aria-label`), a visible `:focus-visible` ring, 44px touch target, `scroll-margin-top` so fragments clear the fixed header, a `:target` highlight that becomes a static inset accent bar under reduced motion, and icon binding to the final title word so it never orphans — all with no runtime JavaScript.

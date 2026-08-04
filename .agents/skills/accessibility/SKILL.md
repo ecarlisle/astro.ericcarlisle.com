@@ -40,6 +40,7 @@ Core Requirements
 * Preserve logical heading order.
 * Every interactive control must have an accessible name.
 * Every icon-only control must have an accessible name, either through visible text, visually hidden text, or an appropriate aria-label.
+* Heading permalinks: a permalink anchor beside a heading is a sibling (never nested inside the heading's link), carries an accessible name (e.g. `aria-label="Link to <Visible Title>"`), keeps the decorative SVG `aria-hidden`, has a visible `:focus-visible` ring, is at least 44px, leaves fragment targets clear of any fixed header (`scroll-margin-top`), and its `:target` highlight respects `prefers-reduced-motion`.
 * Interactive elements must be reachable and usable by keyboard.
 * Keyboard focus must be visible and not hidden or removed.
 * Do not use positive tabindex values.
