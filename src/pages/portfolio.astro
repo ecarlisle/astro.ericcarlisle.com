@@ -31,7 +31,7 @@ import Layout from '../layouts/BlogPost.astro';
 
     <article class="case-study">
       <div class="case-study-overview">
-        <h3>Astro Blog Design System</h3>
+        <h3 id="kiss-design-system">Astro Blog Design System</h3>
         <p class="meta">
           <strong>Principal Frontend Engineer &amp; UX Architect</strong>
           ericcarlisle.com &middot; Frontend Architecture / Design Systems &middot; 2025-2026
@@ -82,7 +82,7 @@ import Layout from '../layouts/BlogPost.astro';
 
     <article class="case-study">
       <div class="case-study-overview">
-        <h3>Scaling Multi-Tenant Frontend Systems</h3>
+        <h3 id="multi-tenant-frontend-systems">Scaling Multi-Tenant Frontend Systems</h3>
         <p class="meta">
           <strong>Principal Software Engineer</strong>
           Arc XP &middot; Digital Media / Publishing Platform &middot; 2018-2022
@@ -147,7 +147,7 @@ import Layout from '../layouts/BlogPost.astro';
 
     <article class="case-study">
       <div class="case-study-overview">
-        <h3>Reengineering Enterprise Commerce Performance</h3>
+        <h3 id="enterprise-commerce-performance">Reengineering Enterprise Commerce Performance</h3>
         <p class="meta">
           <strong>Senior UX Engineer</strong>
           Under Armour &middot; Retail / Digital Commerce &middot; 2011-2013
@@ -186,7 +186,7 @@ import Layout from '../layouts/BlogPost.astro';
 
     <article class="case-study">
       <div class="case-study-overview">
-        <h3>Building Integration Layers for Product Teams</h3>
+        <h3 id="product-team-integration-layers">Building Integration Layers for Product Teams</h3>
         <p class="meta">
           <strong>Full Stack Engineer</strong>
           Blue Cross NC &middot; Healthcare &middot; 2024-2025
@@ -236,7 +236,7 @@ import Layout from '../layouts/BlogPost.astro';
 
     <article class="case-study">
       <div class="case-study-overview">
-        <h3>Designing Interactive Decision Experiences</h3>
+        <h3 id="interactive-decision-experiences">Designing Interactive Decision Experiences</h3>
         <p class="meta">
           <strong>Frontend Engineer / UX Architect</strong>
           Aspida &middot; Financial Services / Insurance &middot; 2025-2026
@@ -275,7 +275,7 @@ import Layout from '../layouts/BlogPost.astro';
   </section>
 
   <section class="work-method">
-    <h2>How I work</h2>
+    <h2 id="how-i-work">How I work</h2>
     <p>
       The common thread across these engagements is not a specific framework or
       language. I focus on identifying constraints, simplifying complexity,
@@ -408,6 +408,16 @@ import Layout from '../layouts/BlogPost.astro';
 
   .case-study h3 {
     max-width: 30ch;
+  }
+
+  /* ── Fragment targets ──
+     The fixed header must clear headings reached via fragment URLs. */
+  .case-studies,
+  .case-study h3,
+  .work-method h2,
+  .speaking-feature h2,
+  .supporting-artifacts h2 {
+    scroll-margin-top: calc(var(--header-height, 4.5rem) + var(--space-component));
   }
 
   .case-study-details {

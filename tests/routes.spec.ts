@@ -65,6 +65,70 @@ test('the portfolio page renders case study content', async ({ page }) => {
   await expect(caseStudies.first()).toBeVisible();
 });
 
+// ─── Portfolio fragment anchors ────────────────────────────────────────
+// Case-study titles carry permanent, human-readable fragment ids (e.g.
+// /portfolio/#kiss-design-system). These are public URLs, so the ids are
+// explicit in the template and must not drift from the titles they anchor.
+
+const portfolioFragments = [
+  { id: 'kiss-design-system', title: 'Astro Blog Design System', level: 'h3' },
+  {
+    id: 'multi-tenant-frontend-systems',
+    title: 'Scaling Multi-Tenant Frontend Systems',
+    level: 'h3',
+  },
+  {
+    id: 'enterprise-commerce-performance',
+    title: 'Reengineering Enterprise Commerce Performance',
+    level: 'h3',
+  },
+  {
+    id: 'product-team-integration-layers',
+    title: 'Building Integration Layers for Product Teams',
+    level: 'h3',
+  },
+  {
+    id: 'interactive-decision-experiences',
+    title: 'Designing Interactive Decision Experiences',
+    level: 'h3',
+  },
+  { id: 'how-i-work', title: 'How I work', level: 'h2' },
+] as const;
+
+test('portfolio fragment ids are unique and anchor the right titles', async ({ page }) => {
+  await page.goto('/portfolio/');
+
+  for (const { id, title, level } of portfolioFragments) {
+    const heading = page.locator(`${level}#${id}`);
+    await expect(heading).toHaveCount(1);
+    await expect(heading).toContainText(title);
+  }
+
+  // Duplicate ids on the page would break fragment navigation.
+  const ids = await page.locator('h2[id], h3[id]').evaluateAll((els) => els.map((el) => el.id));
+  expect(new Set(ids).size).toBe(ids.length);
+});
+
+for (const { id, title, level } of portfolioFragments) {
+  test(`/#${id} fragment lands on the ${title} case study`, async ({ page }) => {
+    await page.goto(`/portfolio/#${id}`);
+
+    const heading = page.locator(`${level}#${id}`);
+    await expect(heading).toContainText(title);
+    await expect(heading).toBeInViewport();
+
+    // The fixed header must not obscure the target: the heading should rest
+    // at or below the header's measured height (scroll-margin-top clears it).
+    const box = await heading.boundingBox();
+    const headerHeight =
+      (await page.evaluate(() =>
+        parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-height')),
+      )) || 72;
+    expect(box).not.toBeNull();
+    expect(box?.y).toBeGreaterThanOrEqual(headerHeight - 1);
+  });
+}
+
 test('the about page links to selected talks without loading video code', async ({ page }) => {
   const response = await page.goto('/about/');
   expect(response?.ok()).toBe(true);
