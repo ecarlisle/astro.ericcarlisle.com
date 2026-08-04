@@ -71,7 +71,7 @@ test('the portfolio page renders case study content', async ({ page }) => {
 // explicit in the template and must not drift from the titles they anchor.
 
 const portfolioFragments = [
-  { id: 'kiss-design-system', title: 'Astro Blog Design System', level: 'h3' },
+  { id: 'kiss-design-system', title: 'KISS Design System', level: 'h3' },
   {
     id: 'multi-tenant-frontend-systems',
     title: 'Scaling Multi-Tenant Frontend Systems',

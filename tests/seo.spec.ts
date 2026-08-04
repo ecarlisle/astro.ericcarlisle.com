@@ -164,3 +164,43 @@ test('homepage links to the current article slug, never the archived alias', asy
     page.locator('a[href^="/blog/good-agent-context-is-carved-not-copied"]'),
   ).toHaveCount(0);
 });
+
+// ─── KISS Design System naming ───────────────────────────────────────────
+
+test('/portfolio/design-system/ uses the KISS Design System name and title', async ({ page }) => {
+  await page.goto('/portfolio/design-system/');
+  const h1 = page.locator('h1');
+  await expect(h1).toContainText('KISS Design System');
+
+  // KISS is always capitalized in the displayed name.
+  const titleText = await h1.innerText();
+  expect(titleText).toContain('KISS Design System');
+  expect(titleText).not.toMatch(/[Kk]iss(?!-)/);
+
+  await expect(page).toHaveTitle(/KISS Design System [|\u2014] Eric Carlisle/);
+  const desc = page.locator('meta[name="description"]');
+  await expect(desc).toHaveAttribute('content', /KISS Design System/);
+});
+
+test('/portfolio/design-system/ explains the KISS expansion in body copy', async ({ page }) => {
+  await page.goto('/portfolio/design-system/');
+  await expect(page.getByText('Keep It Stunningly Simple')).toBeVisible();
+});
+
+test('/portfolio/ presents the KISS Design System case study and artifact', async ({ page }) => {
+  await page.goto('/portfolio/');
+  await expect(page.locator('h3#kiss-design-system')).toContainText('KISS Design System');
+  const artifact = page.locator('a.artifact-card .artifact-title');
+  await expect(artifact.first()).toContainText('KISS Design System');
+});
+
+test('/portfolio/ and the reference page avoid the retired design-system names', async ({
+  request,
+}) => {
+  for (const path of ['/portfolio/', '/portfolio/design-system/']) {
+    const res = await request.get(path);
+    const html = await res.text();
+    expect(html).not.toContain('Design System Companion');
+    expect(html).not.toContain('Astro Blog Design System');
+  }
+});

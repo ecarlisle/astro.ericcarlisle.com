@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft-2020-12/schema",
-  "title": "Eric Carlisle Design System Inventory",
-  "description": "Machine-readable inventory of reusable design-system patterns implemented across ericcarlisle.com. This is a personal blog site, not a published component library. The inventory documents patterns that exist in the codebase for agent-assisted development.",
+  "title": "KISS Design System Inventory",
+  "description": "Machine-readable inventory of reusable design-system patterns in the KISS Design System implemented across ericcarlisle.com. This is a personal blog site, not a published component library. The inventory documents patterns that exist in the codebase for agent-assisted development.",
   "lastUpdated": "2026-08-04",
   "patterns": [
     {

@@ -10,9 +10,11 @@ This project uses `pnpm` as its package manager. All commands assume `pnpm`.
 - `pnpm validate:seo` — Runs the deterministic SEO hygiene gate (`node scripts/validate-seo.mjs`)
   after a build. It reuses the site-inventory core to fail on broken internal links, missing or
   duplicated metadata/canonicals, indexable pages missing from the sitemap, `noindex` pages in the
-  sitemap, redirect aliases in the sitemap, redundant `Image:` alt prefixes, and policy regressions
+  sitemap, redirect aliases in the sitemap, redundant `Image:` alt prefixes, policy regressions
   (`/search/` must stay `noindex`, the design-system page must stay indexable, Storybook must carry
-  `noindex` when present).
+  `noindex` when present), and KISS Design System naming consistency (the reference page and the
+  portfolio must render `KISS Design System` and never fall back to the retired names
+  `Design System Companion` or `Astro Blog Design System`).
 - `pnpm validate:content` — Scans blog MDX/MD files for top-level h1 headings (layout already renders the title).
 - `pnpm validate:agent-docs` — Validates local links and documented package-script names in agent-facing documentation.
 - `pnpm lighthouse:all` — Runs Lighthouse audits across project routes via

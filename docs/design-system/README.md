@@ -1,6 +1,6 @@
-# Design System
+# KISS Design System
 
-The application design system for ericcarlisle.com. It supports visual and behavioral consistency across the blog, portfolio, and supporting pages. It is not a public component library or npm package.
+The KISS Design System is the application design system for ericcarlisle.com. It supports visual and behavioral consistency across the blog, portfolio, and supporting pages. It is not a public component library or npm package.
 
 The design system includes tokens, shared styles, Astro components, layouts, patterns, accessibility conventions, and reference examples.
 
@@ -40,7 +40,7 @@ A new reusable pattern is generally justified when:
 
 Avoid premature abstraction. If a pattern appears in only one or two places, inline implementation is usually simpler and easier to change.
 
-## Updating the Design System
+## Updating the KISS Design System
 
 When changing a design-system element, review the related materials together:
 
@@ -73,7 +73,7 @@ This site supports dark and light themes via CSS custom properties. The default 
 
 For detailed quality standards, see `docs/performance-seo-accessibility.md`.
 
-## Design System Maintenance Map
+## KISS Design System Maintenance Map
 
 | Change | Review or update |
 |--------|-----------------|
