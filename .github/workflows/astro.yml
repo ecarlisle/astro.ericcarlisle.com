@@ -85,7 +85,7 @@ jobs:
       - name: Build Storybook
         run: pnpm build:storybook
 
-      - name: Patch Storybook noindex
+      - name: Patch Storybook output (noindex + branding)
         run: node scripts/patch-storybook-noindex.mjs
 
       - name: Copy Storybook to dist

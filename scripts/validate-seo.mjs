@@ -143,11 +143,60 @@ export async function runSeoValidation(distDir = DIST) {
   if (designSystem && (designSystem.robots ?? '').toLowerCase().includes('noindex')) {
     push({
       code: 'DESIGN_SYSTEM_INDEXABLE',
-      message:
-        '/portfolio/design-system/ is noindex; the Design System Companion must be indexable.',
+      message: '/portfolio/design-system/ is noindex; the KISS Design System must be indexable.',
       route: '/portfolio/design-system/',
       target: null,
     });
+  }
+
+  // 5b. KISS Design System naming consistency. The site's design system is
+  //      formally named "KISS Design System" (KISS = Keep It Stunningly
+  //      Simple). The two built pages must use that name and never fall back
+  //      to the retired aliases "Design System Companion" or
+  //      "Astro Blog Design System". These exact aliases have no legitimate
+  //      generic meaning, so their presence is a regression.
+  const RETIRED_DESIGN_SYSTEM_NAMES = ['Design System Companion', 'Astro Blog Design System'];
+  const namingPages = ['/portfolio/design-system/', '/portfolio/'];
+  for (const route of namingPages) {
+    const page = pageByRoute.get(route);
+    if (!page?.built || !page.file) continue;
+    const html = readFileSync(join(distDir, page.file), 'utf-8');
+    for (const alias of RETIRED_DESIGN_SYSTEM_NAMES) {
+      if (html.includes(alias)) {
+        push({
+          code: 'DESIGN_SYSTEM_NONSTANDARD_NAME',
+          message: `"${route}" still uses the retired design-system name "${alias}"; use "KISS Design System".`,
+          route,
+          target: alias,
+        });
+      }
+    }
+  }
+  // The reference page must present the formal name and, on first use,
+  // its expansion.
+  const dsHtml = (() => {
+    const page = pageByRoute.get('/portfolio/design-system/');
+    if (!page?.built || !page.file) return null;
+    return readFileSync(join(distDir, page.file), 'utf-8');
+  })();
+  if (dsHtml) {
+    if (!dsHtml.includes('KISS Design System')) {
+      push({
+        code: 'DESIGN_SYSTEM_NAME_MISSING',
+        message: '/portfolio/design-system/ does not render the title "KISS Design System".',
+        route: '/portfolio/design-system/',
+        target: null,
+      });
+    }
+    if (!dsHtml.includes('Keep It Stunningly Simple')) {
+      push({
+        code: 'DESIGN_SYSTEM_EXPANSION_MISSING',
+        message:
+          'The reference page does not explain that KISS stands for "Keep It Stunningly Simple".',
+        route: '/portfolio/design-system/',
+        target: null,
+      });
+    }
   }
 
   // 6. Storybook lab noindex (manager + iframe). Skipped when the lab was not

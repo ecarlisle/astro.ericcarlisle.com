@@ -158,7 +158,9 @@ Two indexing-related steps run in CI:
 
 1. After `build:storybook`, `node scripts/patch-storybook-noindex.mjs` injects
    `robots="noindex, follow"` into `storybook-static/index.html` and `iframe.html` so the
-   `/design-system/lab/` application never appears in search results.
+   `/design-system/lab/` application never appears in search results. It also sets the Storybook
+   manager browser title to `KISS Design System — Storybook` so the lab identifies the design
+   system it documents.
 2. Near the end of the build, `pnpm validate:seo` runs the deterministic SEO gate against the
    finished `dist/` (which includes the Storybook copy under `/design-system/lab/`). Any broken
    internal link, missing/duplicated metadata or canonical, indexable page missing from the sitemap,

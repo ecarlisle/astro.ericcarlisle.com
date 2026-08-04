@@ -1,8 +1,8 @@
-# Figma Design-System Companion Brief
+# Figma Brief: KISS Design System
 
 > **Figma file:** [KISS Design System](https://www.figma.com/design/fWzDrhAPBnnpGRVyKSMp1Q/KISS-Design-System?node-id=0-1&t=oeon7nje8gUrMHyP-1)
 >
-> Paste this brief into a Figma agent to generate a companion design-system file for the Astro implementation of ericcarlisle.com.
+> Paste this brief into a Figma agent to generate a design-system file for the KISS Design System (the Astro implementation of the site at ericcarlisle.com), mirroring what is implemented.
 > The Astro implementation is the source of truth. Do not redesign — mirror what is implemented.
 
 ---
@@ -11,7 +11,7 @@
 
 - **Site:** Eric Carlisle personal site (Astro 7 static site)
 - **Source of truth:** The Astro implementation in `src/styles/`, `src/components/`, `src/layouts/`, and `src/pages/`.
-- **Goal for Figma:** Create a companion design-system file that documents the implemented tokens, typography, spacing, colors, components, and page templates so designers can reference and extend the system without drifting from the code.
+- **Goal for Figma:** Create a design-system file for the KISS Design System that documents the implemented tokens, typography, spacing, colors, components, and page templates so designers can reference and extend the system without drifting from the code.
 - **Design feel:** Fast, thoughtful, human, technical, accessible, professional without being sterile.
 
 ---
@@ -553,7 +553,8 @@ Create these frames/artboards using the components above.
 > Paste the following directly into the Figma agent prompt.
 
 ```
-Create a Figma design-system companion file for the Astro site ericcarlisle.com using the brief above.
+Create a Figma design-system file for the KISS Design System (the Astro implementation at
+ericcarlisle.com) using the brief above.
 
 Rules:
 1. Use the Astro implementation as the source of truth. Do not redesign colors, type, or spacing.

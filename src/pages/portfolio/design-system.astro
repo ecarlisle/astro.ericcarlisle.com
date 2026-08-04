@@ -9,12 +9,13 @@ import ThemeToggle from '../../components/ThemeToggle.astro';
 import { AUTHOR_NAME } from '../../consts';
 import Layout from '../../layouts/BlogPost.astro';
 
-// The Design System Companion is a living reference for the tokens and
-// components implemented across this site. It is indexable so teams searching
-// for these patterns can find this page.
-const title = 'Design System Companion';
+// The KISS Design System is the design system implemented across this site.
+// It is indexable so teams searching for these patterns can find this page.
+// KISS stands for "Keep It Stunningly Simple" — explained once in the
+// Overview section, not repeated in metadata.
+const title = 'KISS Design System';
 const description =
-  'A curated reference for the typography, spacing, color, layout, components, and accessibility decisions implemented across ericcarlisle.com.';
+  'The KISS Design System implemented across ericcarlisle.com — typography, spacing, color, layout, components, and accessibility decisions.';
 const pageUrl = 'https://ericcarlisle.com/portfolio/design-system/';
 
 const sampleDate = new Date('2024-06-15');
@@ -157,12 +158,12 @@ const knownGaps = [
   breadcrumbs={[
     { name: 'Home', item: 'https://ericcarlisle.com/' },
     { name: 'Portfolio', item: 'https://ericcarlisle.com/portfolio/' },
-    { name: 'Design System Companion', item: pageUrl },
+    { name: 'KISS Design System', item: pageUrl },
   ]}
 >
 <div data-pagefind-ignore>
   <div class="ds-hero">
-    <p class="ds-hero-subtitle">Astro design system reference</p>
+    <p class="ds-hero-subtitle">The design system implemented across ericcarlisle.com</p>
     <div class="ds-hero-meta">
       <span class="ds-hero-badge">Astro + vanilla CSS</span>
       <span class="ds-hero-badge">Living reference</span>
@@ -179,6 +180,10 @@ const knownGaps = [
       CSS custom properties, components, and layout patterns shown here are the
       source of truth; the page renders and explains what is already in
       production.
+    </p>
+    <p>
+      KISS stands for Keep It Stunningly Simple, which is the working rule
+      behind the decisions documented here.
     </p>
     <p>
       It is intended as a personal reference and may later be shared with

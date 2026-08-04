@@ -1,33 +1,47 @@
 #!/usr/bin/env node
 /**
- * Inject robots="noindex, follow" into the built Storybook application.
+ * Patch the built Storybook application for the KISS Design System.
  *
- * Storybook is a development lab, not an SEO surface, and GitHub Pages
- * cannot serve HTTP redirects, so noindex is the only way to keep it out of
- * search results. The patch targets the two static documents crawlers load:
+ * Two static patches are applied to the Storybook build so it is treated as
+ * the site's development lab and branded consistently:
  *
- *   - index.html   (Storybook manager)
- *   - iframe.html  (the actual preview document)
+ *   1. Inject robots="noindex, follow" into the two static documents crawlers
+ *      load — index.html (manager) and iframe.html (preview). Storybook is a
+ *      development lab, not an SEO surface, and GitHub Pages cannot serve
+ *      HTTP redirects, so noindex is the only reliable way to keep it out of
+ *      search results.
+ *   2. Set the manager browser title to "KISS Design System — Storybook" so
+ *      the lab identifies the design system it documents (Storybook itself is
+ *      not renamed).
  *
- * The script is idempotent: if the tag is already present it is left alone.
+ * Both patches are idempotent: existing values are left alone.
  *
  * Usage: node scripts/patch-storybook-noindex.mjs [storybook-static-dir]
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { isAbsolute, join } from 'node:path';
 
 const ROOT = join(import.meta.dirname, '..');
 const DEFAULT_SOURCE = join(ROOT, 'storybook-static');
-const SOURCE = process.argv[2] ? join(process.cwd(), process.argv[2]) : DEFAULT_SOURCE;
+const arg = process.argv[2];
+const SOURCE = arg ? (isAbsolute(arg) ? arg : join(process.cwd(), arg)) : DEFAULT_SOURCE;
 
 const META = '<meta name="robots" content="noindex, follow" />';
+const MANAGER_TITLE = 'KISS Design System — Storybook';
 const TARGETS = ['index.html', 'iframe.html'];
 
-/** Inject the noindex meta right after <head> if it is missing. */
+/** Inject the noindex meta right after <head>, or leave an existing tag alone. */
 export function patchNoindex(html) {
   if (/<meta name="robots"[^>]*>/i.test(html)) return html;
   return html.replace('<head>', `<head>\n    ${META}`);
+}
+
+/** Replace the document <title> with the KISS Design System manager title. */
+export function patchManagerTitle(html) {
+  const match = html.match(/<title>[\s\S]*?<\/title>/i);
+  if (!match) return html;
+  return html.replace(match[0], `<title>${MANAGER_TITLE}</title>`);
 }
 
 function main() {
@@ -36,28 +50,39 @@ function main() {
     process.exit(1);
   }
 
-  let patched = 0;
+  let changed = 0;
   for (const file of TARGETS) {
     const path = join(SOURCE, file);
     if (!existsSync(path)) {
       console.warn(`  (skip) ${file} not present in ${SOURCE}`);
       continue;
     }
-    const before = readFileSync(path, 'utf-8');
-    const after = patchNoindex(before);
-    if (after !== before) {
-      writeFileSync(path, after);
-      patched++;
+    let html = readFileSync(path, 'utf-8');
+    const before = html;
+    const patched = patchNoindex(html);
+    if (patched !== html) {
+      html = patched;
       console.log(`  ✓ noindex added to ${file}`);
     } else {
       console.log(`  = ${file} already carries robots noindex`);
     }
+    if (file === 'index.html') {
+      const titled = patchManagerTitle(html);
+      if (titled !== html) {
+        html = titled;
+        console.log(`  ✓ manager title set to "${MANAGER_TITLE}"`);
+      }
+    }
+    if (html !== before) {
+      writeFileSync(path, html);
+      changed++;
+    }
   }
 
-  if (patched === 0 && !TARGETS.every((f) => existsSync(join(SOURCE, f)))) {
+  if (changed === 0 && !TARGETS.every((f) => existsSync(join(SOURCE, f)))) {
     process.exit(1);
   }
-  console.log(`✓ Storybook noindex patch complete (${patched} file(s) updated).`);
+  console.log(`✓ Storybook patch complete (${changed} file(s) updated).`);
 }
 
 main();

@@ -1,7 +1,7 @@
-# Agent Guide: Design System Inventory
+# Agent Guide: KISS Design System Inventory
 
-This directory contains a machine-readable inventory of the reusable design patterns
-implemented across `ericcarlisle.com`.
+This directory contains the machine-readable inventory of reusable design patterns in the
+KISS Design System implemented across `ericcarlisle.com`.
 
 For human-facing design-system documentation, see [README.md](README.md).
 
@@ -9,9 +9,9 @@ For human-facing design-system documentation, see [README.md](README.md).
 
 | File | Purpose |
 |------|---------|
-| `README.md` | Human-facing design-system documentation (entry point for developers and maintainers). |
+| `README.md` | Human-facing KISS Design System documentation (entry point for developers and maintainers). |
 | `inventory.json` | Structured JSON inventory of every reusable component, layout, content pattern, form pattern, typography pattern, and metadata pattern. |
-| `figma-agent-brief.md` | Detailed brief for generating a Figma companion file that mirrors the Astro implementation. |
+| `figma-agent-brief.md` | Detailed brief for generating a Figma companion file that mirrors the Astro implementation of the KISS Design System. |
 
 ## How agents should use inventory.json
 

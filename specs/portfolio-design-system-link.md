@@ -1,4 +1,4 @@
-# Portfolio Link to Design System Companion
+# Portfolio Link to KISS Design System
 
 ## Status
 
@@ -6,7 +6,7 @@ ready
 
 ## Context
 
-The site has a curated `Design System Companion` page at `/portfolio/design-system/` that documents the implemented typography, color tokens, spacing scale, layout rails, components, accessibility decisions, and implementation tradeoffs. The portfolio page is the natural place to surface this page as evidence of frontend architecture, design-system thinking, documentation quality, accessibility awareness, and implementation tradeoff awareness.
+The site has a curated `KISS Design System` page at `/portfolio/design-system/` that documents the implemented typography, color tokens, spacing scale, layout rails, components, accessibility decisions, and implementation tradeoffs. The portfolio page is the natural place to surface this page as evidence of frontend architecture, design-system thinking, documentation quality, accessibility awareness, and implementation tradeoff awareness.
 
 ## Goal
 
@@ -25,7 +25,7 @@ Add a subtle "Supporting Artifacts" section near the bottom of the portfolio pag
 1. Add a section titled "Supporting Artifacts" to `src/pages/portfolio.astro`.
 2. Place the section near the bottom of the page, after the main case-study content.
 3. Include introductory copy that frames the portfolio as a design-system exercise.
-4. Include a card or link block titled "Design System Companion" with a short description and a CTA.
+4. Include a card or link block titled "KISS Design System" with a short description and a CTA.
 5. Link to `/portfolio/design-system/`.
 6. Match the existing portfolio page style and token usage.
 7. Keep the section subtle and professional.

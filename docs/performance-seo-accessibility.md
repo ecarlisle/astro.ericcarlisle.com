@@ -45,7 +45,7 @@ the compiled sitemap and the check that audits it can never drift apart.
 
 | Route | Indexing | Sitemap | Rationale |
 |--------|----------|---------|-----------|
-| `/portfolio/design-system/` | `index, follow` | included | Living reference for site patterns |
+| `/portfolio/design-system/` | `index, follow` | included | Reference page for the site's KISS Design System |
 | `/search/` | `noindex, follow` | excluded | Search UI has no unique content |
 | `/design-system/lab/` | `noindex, follow` (patched into built Storybook) | excluded | Development lab, not an SEO surface |
 | `/tags/<tag>/` single-entry | `noindex, follow` | excluded by policy | Archive repeats one card; derived from content |
