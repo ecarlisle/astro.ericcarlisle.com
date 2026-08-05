@@ -182,17 +182,18 @@ contact Worker (see [Contact Worker Deployment](#contact-worker-deployment)). Ro
 stay **off**.
 
 **Why.** Rocket Loader rewrites Astro's generated `<script type="module">` tags into tokenized
-`<script type="<hex>-module">` scripts, injects `rocket-loader.min.js` with a `data-cf-settings`
-attribute, and drops the module preload links. This includes the Expressive Code runtime under
-`/_astro/` (e.g. `/_astro/ec.*.js`). Astro already controls module loading and dependency ordering;
-letting Cloudflare rewrite the modules invalidates preload reuse, which Chrome reports as
-"preloaded resource was not used because the eventual request uses a different credentials mode."
+`<script type="<hex>-module">` scripts and injects `rocket-loader.min.js` with a `data-cf-settings`
+attribute. This includes the Expressive Code runtime under `/_astro/` (e.g. `/_astro/ec.*.js`).
+Astro already controls module loading and dependency ordering; when Cloudflare rewrites or delays
+module execution the browser may not reuse a module preload because the eventual request has
+different fetch semantics — Chrome reports this as "preloaded resource was not used because the
+eventual request uses a different credentials mode."
 The separate `ERR_BLOCKED_BY_CLIENT` warning for `/cdn-cgi/zaraz/s.js` is caused by browser privacy
 blockers (e.g. Brave Shields) and is not an application failure.
 
 **How to disable.**
 
-1. Cloudflare Dashboard → select the `ericcarlisle.com` zone → **Speed → Optimization → Content
+1. Cloudflare Dashboard → select the `ericcarlisle.com` zone → **Speed → Settings → Content
    Optimization** → set **Rocket Loader** to **Off**.
 2. `www.ericcarlisle.com` redirects to the apex and shares the same zone, so one toggle covers both
    hostnames.
@@ -208,10 +209,11 @@ blockers (e.g. Brave Shields) and is not an application failure.
 
 `pnpm verify:no-rocket-loader` is an **opt-in production verification** (not part of CI — the
 repository has no post-deployment verification workflow). It fetches the live page and fails only
-when Rocket Loader markers are present: `rocket-loader.min.js`, `data-cf-settings`, or rewritten
-`<hex>-module` / `<hex>-text/javascript` script types. Network failures and non-2xx responses exit
-with a distinct "could not verify" code, and Zaraz or privacy-blocked analytics requests are never
-reported as failures.
+when genuine Rocket Loader markers appear on real `<script>` elements: a `rocket-loader.min.js`
+`src`, a `data-cf-settings` attribute, or rewritten `<hex>-module` / `<hex>-text/javascript` script
+types. Prose or code examples that merely mention the marker strings never fail the check. Exit
+codes: `0` clean, `1` Rocket Loader regression detected, `2` invalid invocation, `3` network or
+HTTP failure. Zaraz or privacy-blocked analytics requests are never reported as failures.
 
 ### Page Quality Footer
 
