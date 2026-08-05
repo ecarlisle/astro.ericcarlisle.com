@@ -26,6 +26,7 @@
     "test:e2e": "playwright test",
     "test:a11y": "playwright test tests/accessibility.spec.ts",
     "verify:storybook-isolation": "node scripts/verify-storybook-isolation.mjs",
+    "verify:no-rocket-loader": "node scripts/verify-no-rocket-loader.mjs",
     "quality:generate": "node scripts/generate-site-quality.mjs",
     "storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
