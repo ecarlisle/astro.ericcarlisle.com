@@ -174,6 +174,45 @@ renamed route aliases therefore use Astro's static `Astro.redirect(...)` output:
 document that is already `noindex`, declares its canonical to the destination, and offers a direct
 link. This is the documented, verified pattern for this site.
 
+### Cloudflare zone setting: Rocket Loader must remain disabled
+
+Rocket Loader is a **Cloudflare dashboard setting on the `ericcarlisle.com` zone**. It is not
+managed as code in this repository — the repo deploys only the static site (GitHub Pages) and the
+contact Worker (see [Contact Worker Deployment](#contact-worker-deployment)). Rocket Loader must
+stay **off**.
+
+**Why.** Rocket Loader rewrites Astro's generated `<script type="module">` tags into tokenized
+`<script type="<hex>-module">` scripts, injects `rocket-loader.min.js` with a `data-cf-settings`
+attribute, and drops the module preload links. This includes the Expressive Code runtime under
+`/_astro/` (e.g. `/_astro/ec.*.js`). Astro already controls module loading and dependency ordering;
+letting Cloudflare rewrite the modules invalidates preload reuse, which Chrome reports as
+"preloaded resource was not used because the eventual request uses a different credentials mode."
+The separate `ERR_BLOCKED_BY_CLIENT` warning for `/cdn-cgi/zaraz/s.js` is caused by browser privacy
+blockers (e.g. Brave Shields) and is not an application failure.
+
+**How to disable.**
+
+1. Cloudflare Dashboard → select the `ericcarlisle.com` zone → **Speed → Optimization → Content
+   Optimization** → set **Rocket Loader** to **Off**.
+2. `www.ericcarlisle.com` redirects to the apex and shares the same zone, so one toggle covers both
+   hostnames.
+3. Automation alternatives: the zone setting is `rocket_loader` (API:
+   `PATCH /zones/{zone_id}/settings/rocket_loader` with `{"value": "off"}`), or a Configuration
+   Rule if Rocket Loader appears in the rule's overridable settings list.
+4. After the change, purge the Cloudflare cache to propagate, then verify:
+
+   ```sh
+   pnpm verify:no-rocket-loader                  # homepage (default)
+   pnpm verify:no-rocket-loader https://ericcarlisle.com/blog/better-agent-results-start-with-better-context/
+   ```
+
+`pnpm verify:no-rocket-loader` is an **opt-in production verification** (not part of CI — the
+repository has no post-deployment verification workflow). It fetches the live page and fails only
+when Rocket Loader markers are present: `rocket-loader.min.js`, `data-cf-settings`, or rewritten
+`<hex>-module` / `<hex>-text/javascript` script types. Network failures and non-2xx responses exit
+with a distinct "could not verify" code, and Zaraz or privacy-blocked analytics requests are never
+reported as failures.
+
 ### Page Quality Footer
 
 Every page includes a compact line in the footer reporting Lighthouse lab scores:
