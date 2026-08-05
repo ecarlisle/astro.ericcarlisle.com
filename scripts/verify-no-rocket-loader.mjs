@@ -2,168 +2,295 @@
 /**
  * Production check: Cloudflare Rocket Loader must not rewrite Astro modules.
  *
- * Rocket Loader is a Cloudflare zone setting (Dashboard → Speed → Optimization →
+ * Rocket Loader is a Cloudflare zone setting (Dashboard → Speed → Settings →
  * Content Optimization). When enabled, it rewrites Astro's generated
  * `<script type="module">` tags (including the Expressive Code runtime under
- * `/_astro/`) into tokenized `<script type="<hex>-module">` scripts, injects
- * `rocket-loader.min.js` with a `data-cf-settings` attribute, and strips the
- * module preload links. That invalidates preload reuse, which Chrome reports
- * as "preloaded resource was not used because the eventual request uses a
+ * `/_astro/`) into tokenized `<script type="<hex>-module">` scripts and injects
+ * `rocket-loader.min.js` with a `data-cf-settings` attribute. Astro already
+ * controls module loading and dependency ordering; when Cloudflare rewrites or
+ * delays module execution the browser may not reuse a module preload because
+ * the eventual request has different fetch semantics — Chrome reports this as
+ * "preloaded resource was not used because the eventual request uses a
  * different credentials mode."
  *
- * This script fetches a live production page and fails only when Rocket Loader
- * markers are present. It deliberately does NOT treat Zaraz (`/cdn-cgi/zaraz/`)
- * or blocked analytics requests (e.g. a browser privacy blocker) as failures —
- * those are unrelated to Rocket Loader.
+ * This script fetches a live production page and fails only when genuine
+ * Rocket Loader markers are found on real <script> elements. Prose, escaped
+ * markup, or code examples that merely mention `rocket-loader.min.js` or
+ * `data-cf-settings` never fail the check. Zaraz (`/cdn-cgi/zaraz/`) and
+ * blocked analytics requests (e.g. a browser privacy blocker) are never
+ * treated as failures.
  *
  * OPT-IN SCRIPT — NOT part of CI. The repository has no post-deployment
  * verification workflow; run this manually after a Cloudflare dashboard change
  * or cache purge.
  *
  * Exit codes:
- *   0  PASS — no Rocket Loader markers in the fetched HTML.
+ *   0  PASS — no Rocket Loader markers on any script element.
  *   1  FAIL — Rocket Loader markers detected (configuration regression).
- *   2  ERROR — could not verify: invalid URL, network failure, or non-2xx
- *              response. Not a Rocket Loader regression.
+ *   2  USAGE — invalid invocation (bad option, empty value, multiple URLs,
+ *              or a non-http(s) target).
+ *   3  NETWORK — could not verify: fetch failure or non-2xx response.
  *
- * Usage:
- *   node scripts/verify-no-rocket-loader.mjs [url]
- *   node scripts/verify-no-rocket-loader.mjs --url=https://ericcarlisle.com/
- *   ROCKET_LOADER_URL=https://ericcarlisle.com node scripts/verify-no-rocket-loader.mjs
+ * Supported invocations:
+ *   node scripts/verify-no-rocket-loader.mjs
+ *   node scripts/verify-no-rocket-loader.mjs https://example.com/page/
+ *   node scripts/verify-no-rocket-loader.mjs --url https://example.com/page/
+ *   node scripts/verify-no-rocket-loader.mjs --url=https://example.com/page/
  *
  * Examples:
  *   pnpm verify:no-rocket-loader
  *   pnpm verify:no-rocket-loader https://ericcarlisle.com/blog/better-agent-results-start-with-better-context/
  */
 
-const DEFAULT_URL = 'https://ericcarlisle.com/';
-const FETCH_TIMEOUT_MS = 20000;
+import { pathToFileURL } from 'node:url';
+
+export const DEFAULT_URL = 'https://ericcarlisle.com/';
+export const FETCH_TIMEOUT_MS = 20000;
+
+export const EXIT = {
+  CLEAN: 0,
+  REGRESSION: 1,
+  USAGE: 2,
+  NETWORK: 3,
+};
 
 // Rocket Loader markers. The Cloudflare token is a variable-length lowercase
-// hex string (observed 24-32 chars), so the module-type regex must not assume
+// hex string (observed 24-32 chars), so the module-type check must not assume
 // a fixed length.
-const MARKERS = [
-  {
-    id: 'rocket-loader.min.js',
-    label: 'rocket-loader.min.js loader script',
-    regex: /rocket-loader\.min\.js/i,
-  },
-  {
-    id: 'data-cf-settings',
-    label: 'data-cf-settings attribute',
-    regex: /data-cf-settings\s*=/i,
-  },
-  {
-    id: 'rewritten-module-type',
-    label: 'rewritten module script type (<hex>-module)',
-    regex: /<script[^>]*type="[a-f0-9]{24,32}-module"/i,
-  },
-  {
-    id: 'rewritten-classic-type',
-    label: 'rewritten classic script type (<hex>-text/javascript)',
-    regex: /<script[^>]*type="[a-f0-9]{24,32}-text\/javascript"/i,
-  },
-];
+const REWRITTEN_MODULE_TYPE = /^[a-f0-9]{24,32}-module$/i;
+const REWRITTEN_CLASSIC_TYPE = /^[a-f0-9]{24,32}-text\/javascript$/i;
 
-function help() {
-  console.log(`Rocket Loader Production Check
-${'='.repeat(50)}
-Fetches a live ericcarlisle.com page and fails if Cloudflare Rocket Loader
-markers are present (rocket-loader.min.js, data-cf-settings, or rewritten
-script types such as <hex>-module). Rocket Loader rewrites Astro's module
-scripts and invalidates preload reuse; it must remain disabled.
+// ─── HTML script-element scanning ─────────────────────────────────────────
 
-Zaraz (/cdn-cgi/zaraz/) and privacy-blocked analytics are NOT failures.
-
-Options:
-  [url]                Page to check (default: ${DEFAULT_URL})
-  --url=URL            Same as positional URL
-  --help               Print this message
-
-Exit codes: 0 = pass, 1 = Rocket Loader detected, 2 = could not verify.
-
-Examples:
-  node scripts/verify-no-rocket-loader.mjs
-  node scripts/verify-no-rocket-loader.mjs https://ericcarlisle.com/blog/better-agent-results-start-with-better-context/
-`);
+/** Strip HTML comments so commented-out script tags are never treated as real elements. */
+export function stripHtmlComments(html) {
+  return html.replace(/<!--[\s\S]*?-->/g, '');
 }
 
-function parseArgs() {
-  const args = { url: process.env.ROCKET_LOADER_URL || DEFAULT_URL };
-  for (const arg of process.argv.slice(2)) {
-    if (arg === '--help' || arg === '-h') {
-      args.help = true;
-      continue;
-    }
-    const m = arg.match(/^--url=(.+)$/);
-    if (m) {
-      args.url = m[1];
-      continue;
-    }
-    if (arg.startsWith('--')) continue;
-    // First non-flag argument is the URL.
-    if (args.positional === undefined) args.positional = arg;
+/**
+ * Parse a single `<script ...>` open tag into an attribute map.
+ * Attribute names are lowercased; single-, double-quoted, and unquoted values
+ * are supported. Quoted '>' characters inside a value do not terminate a tag.
+ *
+ * @param {string} tag The raw script open tag, e.g. `<script type="module">`.
+ * @returns {Record<string, string>} Lowercased attribute name → value map.
+ */
+export function parseScriptTagAttributes(tag) {
+  const attrs = {};
+  const re = /([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g;
+  for (const m of tag.matchAll(re)) {
+    attrs[m[1].toLowerCase()] = m[2] ?? m[3] ?? m[4] ?? '';
   }
-  if (args.positional !== undefined) args.url = args.positional;
-  return args;
+  return attrs;
 }
 
-/** Detect Rocket Loader markers in rendered HTML. Returns a list of hits. */
+/**
+ * Extract every real `<script ...>` open tag from HTML, skipping comments.
+ * Returns the raw open-tag strings, including the closing '>'.
+ */
+export function extractScriptTags(html) {
+  const source = stripHtmlComments(html);
+  const tags = [];
+  for (const m of source.matchAll(/<script\b/gi)) {
+    let i = m.index + m[0].length;
+    let quote = null;
+    while (i < source.length) {
+      const ch = source[i];
+      if (quote) {
+        if (ch === quote) quote = null;
+      } else if (ch === '"' || ch === "'") {
+        quote = ch;
+      } else if (ch === '>') {
+        break;
+      }
+      i++;
+    }
+    tags.push(source.slice(m.index, Math.min(i + 1, source.length)));
+  }
+  return tags;
+}
+
+/**
+ * Detect genuine Cloudflare Rocket Loader markers on real <script> elements.
+ * Prose, escaped markup, or code examples that merely mention marker strings
+ * never match. Returns a list of { id, tag } findings.
+ */
 export function findRocketLoaderMarkers(html) {
-  const hits = [];
-  for (const marker of MARKERS) {
-    let count = 0;
-    let example = null;
-    const re = new RegExp(
-      marker.regex.source,
-      marker.regex.flags.includes('g') ? marker.regex.flags : `${marker.regex.flags}g`,
-    );
-    for (const match of html.matchAll(re)) {
-      count++;
-      if (!example) example = match[0].slice(0, 140);
+  const findings = [];
+  for (const tag of extractScriptTags(html)) {
+    const attrs = parseScriptTagAttributes(tag);
+    const src = (attrs.src || '').trim();
+    const type = (attrs.type || '').trim();
+    if (src.includes('rocket-loader.min.js')) {
+      findings.push({ id: 'rocket-loader-script', tag });
     }
-    if (count > 0) hits.push({ id: marker.id, label: marker.label, count, example });
+    if ('data-cf-settings' in attrs) {
+      findings.push({ id: 'data-cf-settings', tag });
+    }
+    if (REWRITTEN_MODULE_TYPE.test(type)) {
+      findings.push({ id: 'rewritten-module-type', tag });
+    }
+    if (REWRITTEN_CLASSIC_TYPE.test(type)) {
+      findings.push({ id: 'rewritten-classic-type', tag });
+    }
   }
-  return hits;
+  return findings;
 }
 
 /** Collect rewritten /_astro/ module srcs for the failure report. */
 function rewrittenAstroModules(html) {
   const srcs = new Set();
-  for (const m of html.matchAll(/<script[^>]*type="[a-f0-9]{24,32}-module"[^>]*src="([^"]+)"/gi)) {
-    srcs.add(m[1]);
+  for (const tag of extractScriptTags(html)) {
+    const attrs = parseScriptTagAttributes(tag);
+    if (REWRITTEN_MODULE_TYPE.test((attrs.type || '').trim()) && attrs.src) {
+      srcs.add(attrs.src);
+    }
   }
   return [...srcs].slice(0, 5);
 }
 
-async function main() {
-  const args = parseArgs();
-  if (args.help) {
-    help();
-    return;
-  }
+// ─── CLI parsing ──────────────────────────────────────────────────────────
 
+/**
+ * Parse process argv (excluding node + script path) into a URL choice.
+ *
+ * Supported forms:
+ *   []                              → DEFAULT_URL
+ *   [url]                           → url
+ *   ['--url', url]                  → url
+ *   ['--url=' + url]                → url
+ *
+ * Returns { url } on success, or { error, usageHint } for invalid invocations.
+ */
+export function parseArgs(argv) {
+  const positionals = [];
+  let url = null;
+  let help = false;
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '--help' || arg === '-h') {
+      help = true;
+      continue;
+    }
+    if (arg === '--url') {
+      const value = argv[i + 1];
+      if (value === undefined || value.startsWith('-')) {
+        return { error: '--url requires a value.' };
+      }
+      if (url !== null) {
+        return { error: 'Multiple URL arguments were given.' };
+      }
+      url = value;
+      i++;
+      continue;
+    }
+    if (arg.startsWith('--url=')) {
+      const value = arg.slice('--url='.length);
+      if (value === '') {
+        return { error: '--url requires a non-empty value.' };
+      }
+      if (url !== null) {
+        return { error: 'Multiple URL arguments were given.' };
+      }
+      url = value;
+      continue;
+    }
+    if (arg.startsWith('-')) {
+      return { error: `Unknown option: ${arg}` };
+    }
+    positionals.push(arg);
+  }
+  if (positionals.length > 1) {
+    return { error: 'Multiple URL arguments were given.' };
+  }
+  if (positionals.length === 1 && url !== null) {
+    return { error: 'Multiple URL arguments were given.' };
+  }
+  if (positionals.length === 1) url = positionals[0];
+  return { url: url ?? DEFAULT_URL, help };
+}
+
+/** Validate that the target is an HTTP(S) URL. Returns null or an error string. */
+export function validateTarget(url) {
   let parsed;
   try {
-    parsed = new URL(args.url);
+    parsed = new URL(url);
   } catch {
-    console.error(`  ✗ "${args.url}" is not a valid URL.`);
-    console.error(`  This is a usage error, not a Rocket Loader regression.`);
-    process.exit(2);
+    return `"${url}" is not a valid URL.`;
   }
   if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-    console.error(`  ✗ "${args.url}" must use http(s).`);
-    process.exit(2);
+    return `"${url}" must use http or https.`;
+  }
+  return null;
+}
+
+// ─── CLI output ───────────────────────────────────────────────────────────
+
+function helpText() {
+  return `Rocket Loader Production Check
+${'='.repeat(50)}
+Fetches a live ericcarlisle.com page and fails if Cloudflare Rocket Loader
+markers are present on real <script> elements (rocket-loader.min.js src,
+data-cf-settings, or rewritten script types such as <hex>-module). Rocket
+Loader rewrites or delays Astro's module scripts and can prevent the browser
+from reusing a module preload; it must remain disabled.
+
+Zaraz (/cdn-cgi/zaraz/) and privacy-blocked analytics are NOT failures.
+
+Usage:
+  node scripts/verify-no-rocket-loader.mjs
+  node scripts/verify-no-rocket-loader.mjs https://example.com/page/
+  node scripts/verify-no-rocket-loader.mjs --url https://example.com/page/
+  node scripts/verify-no-rocket-loader.mjs --url=https://example.com/page/
+
+Exit codes:
+  0  PASS — no Rocket Loader markers on any script element.
+  1  FAIL — Rocket Loader markers detected (configuration regression).
+  2  USAGE — invalid invocation (unknown option, empty --url, multiple URLs,
+             or a non-http(s) target).
+  3  NETWORK — could not verify: fetch failure or non-2xx response.
+
+Examples:
+  pnpm verify:no-rocket-loader
+  pnpm verify:no-rocket-loader https://ericcarlisle.com/blog/better-agent-results-start-with-better-context/
+`;
+}
+
+function printUsageError(message) {
+  console.error(`  ✗ ${message}`);
+  console.error(`
+  Usage: node scripts/verify-no-rocket-loader.mjs [--url=]<URL>`);
+  console.error(`  See --help for supported forms and exit codes.`);
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────
+
+async function main() {
+  const parsed = parseArgs(process.argv.slice(2));
+  if (parsed.help) {
+    console.log(helpText());
+    return;
+  }
+  if (parsed.error) {
+    printUsageError(parsed.error);
+    process.exit(EXIT.USAGE);
   }
 
+  const targetError = validateTarget(parsed.url);
+  if (targetError) {
+    printUsageError(targetError);
+    process.exit(EXIT.USAGE);
+  }
+
+  const target = new URL(parsed.url);
   console.log(`Rocket Loader Production Check
 ${'='.repeat(50)}
-URL:    ${parsed.href}
+URL:    ${target.href}
 `);
 
   let res;
   try {
-    res = await fetch(parsed, {
+    res = await fetch(target, {
       redirect: 'follow',
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
@@ -174,44 +301,55 @@ URL:    ${parsed.href}
         : err?.message || String(err);
     console.log(`  ✗ Could not verify: network failure (${reason}).`);
     console.log(`  This is a delivery/network issue, not a Rocket Loader regression.`);
-    console.log(`  Retry, or check DNS/availability for ${parsed.origin}.`);
-    process.exit(2);
+    console.log(`  Retry, or check DNS/availability for ${target.origin}.`);
+    process.exit(EXIT.NETWORK);
   }
 
   if (!res.ok) {
-    console.log(`  ✗ Could not verify: HTTP ${res.status} from ${parsed.href}.`);
+    console.log(`  ✗ Could not verify: HTTP ${res.status} from ${target.href}.`);
     console.log(`  This is a delivery issue, not a Rocket Loader regression.`);
-    process.exit(2);
+    process.exit(EXIT.NETWORK);
   }
 
   const html = await res.text();
   console.log(`Status: HTTP ${res.status} (${html.length.toLocaleString('en-US')} bytes)`);
 
-  const hits = findRocketLoaderMarkers(html);
-  if (hits.length === 0) {
+  const findings = findRocketLoaderMarkers(html);
+  if (findings.length === 0) {
     console.log(`  ✓ No Rocket Loader markers found. Astro module scripts are untouched.`);
-    process.exit(0);
+    process.exit(EXIT.CLEAN);
   }
 
-  console.log(`  ✗ Rocket Loader markers detected (${hits.length} marker type(s)): `);
-  for (const hit of hits) {
-    console.log(`    - ${hit.label}: ${hit.count} occurrence(s)`);
-    if (hit.example) console.log(`      e.g. ${hit.example}`);
+  const byId = new Map();
+  for (const finding of findings) {
+    const entry = byId.get(finding.id) ?? { id: finding.id, count: 0, example: null };
+    entry.count++;
+    if (!entry.example) entry.example = finding.tag.slice(0, 140);
+    byId.set(finding.id, entry);
+  }
+  console.log(`  ✗ Rocket Loader markers detected (${byId.size} marker type(s)): `);
+  for (const entry of byId.values()) {
+    console.log(`    - ${entry.id}: ${entry.count} occurrence(s)`);
+    if (entry.example) console.log(`      e.g. ${entry.example}`);
   }
   const astroModules = rewrittenAstroModules(html);
   if (astroModules.length > 0) {
     console.log(`    Rewritten /_astro/ module scripts: ${astroModules.join(', ')}`);
   }
   console.log(`
-  Cloudflare Rocket Loader is rewriting Astro's generated module scripts,
-  which invalidates preload reuse. Disable it in the Cloudflare Dashboard:
-  Speed → Optimization → Content Optimization → Rocket Loader = Off, for the
-  ericcarlisle.com zone (covers www via redirect), then purge the cache and
-  re-run this check.`);
-  process.exit(1);
+  Cloudflare Rocket Loader is rewriting Astro's generated module scripts, which
+  can prevent the browser from reusing a module preload. Disable it in the
+  Cloudflare Dashboard: Speed → Settings → Content Optimization → Rocket Loader
+  = Off, for the ericcarlisle.com zone (covers www via redirect), then purge
+  the cache and re-run this check.`);
+  process.exit(EXIT.REGRESSION);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(2);
-});
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isMain) {
+  main().catch((err) => {
+    console.error(`  ✗ Unexpected failure: ${err?.message || err}`);
+    process.exit(EXIT.NETWORK);
+  });
+}
