@@ -220,10 +220,23 @@ const posts = (await getSortedPosts()).slice(0, 6);
 
   /* ── Feed heading ── */
   .feed-heading {
+    position: relative;
     display: flex;
     align-items: end;
     justify-content: space-between;
     gap: var(--space-component);
+    padding-top: var(--space-component);
+    border-top: 1px solid var(--border-main);
+  }
+
+  .feed-heading::before {
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: min(8rem, 28%);
+    height: 3px;
+    content: '';
+    background: var(--brand-primary);
   }
 
   .feed-heading h2 {
@@ -233,6 +246,25 @@ const posts = (await getSortedPosts()).slice(0, 6);
 
   .feed-heading a {
     flex: none;
+  }
+
+  :global(.grid--featured-first > :first-child) {
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  :global(.grid--featured-first > :first-child::before) {
+    position: absolute;
+    z-index: -1;
+    top: -10rem;
+    right: -7rem;
+    width: 24rem;
+    height: 24rem;
+    content: '';
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--brand-primary) 15%, transparent);
+    filter: blur(72px);
+    pointer-events: none;
   }
 
   /* ── Tablet and below ── */

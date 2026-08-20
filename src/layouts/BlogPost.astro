@@ -165,8 +165,26 @@ const hasEnhancedHeader = pageType === 'about' || pageType === 'portfolio';
     }
 
     .page-header--article {
+      position: relative;
+      isolation: isolate;
       max-width: 1020px;
       margin-inline: auto;
+      padding: var(--space-component-lg) var(--space-component-lg) var(--space-component);
+    }
+
+    .page-header--article::before {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      content: '';
+      background-image:
+        linear-gradient(color-mix(in srgb, var(--border-main) 32%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--border-main) 32%, transparent) 1px, transparent 1px);
+      background-size: 28px 28px;
+      -webkit-mask-image: linear-gradient(to bottom, black 4%, transparent 96%);
+      mask-image: linear-gradient(to bottom, black 4%, transparent 96%);
+      opacity: 0.42;
+      pointer-events: none;
     }
 
     .page-header--portfolio {
@@ -188,6 +206,29 @@ const hasEnhancedHeader = pageType === 'about' || pageType === 'portfolio';
       gap: var(--space-inline);
       font-family: var(--font-mono);
 		}
+
+    .date-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6em;
+      color: var(--text-secondary);
+      font-size: 0.8125em;
+      font-weight: var(--font-weight-medium);
+      letter-spacing: var(--letter-spacing-wide);
+      text-transform: uppercase;
+    }
+
+    .date-status {
+      width: 0.55em;
+      height: 0.55em;
+      border-radius: 50%;
+      background: var(--brand-accent);
+    }
+
+    .date-label ~ * {
+      padding-left: var(--space-inline);
+      border-left: 1px solid var(--border-main);
+    }
 
     .article-tags {
       margin-top: var(--space-sm);
@@ -222,6 +263,10 @@ const hasEnhancedHeader = pageType === 'about' || pageType === 'portfolio';
           >
             {pageType === 'article' && pubDate && (
               <div class="date">
+                <span class="date-label">
+                  <span class="date-status" aria-hidden="true"></span>
+                  Published
+                </span>
                 <FormattedDate date={pubDate} />
                 {readingTimeMin > 0 && <span class="reading-time">{readingTimeMin} min read</span>}
               </div>
