@@ -13,6 +13,7 @@ The design system includes tokens, shared styles, Astro components, layouts, pat
 | `src/components/` | Astro components that compose the UI |
 | `src/layouts/BlogPost.astro` | Single site layout used by every page |
 | `inventory.json` | Machine-readable catalog of all reusable patterns |
+| `icons.md` | Cross-tool workflow for selecting, vendoring, implementing, and validating UI icons |
 | `src/pages/portfolio/design-system.astro` | Visual reference page with live component examples |
 | `agent-guide.md` | Agent-specific guide for pattern discovery and implementation |
 | `figma-agent-brief.md` | Brief for generating a Figma companion file |
@@ -88,6 +89,7 @@ For detailed quality standards, see `docs/performance-seo-accessibility.md`.
 ## Related References
 
 - [inventory.json](inventory.json) — Machine-readable pattern catalog
+- [Icon workflow](icons.md) — Cross-tool selection, local SVG, accessibility, and attribution guidance
 - [Visual reference page](/portfolio/design-system/) — Live component demos
 - [Agent guide](agent-guide.md) — Pattern discovery for coding agents
 - [Figma brief](figma-agent-brief.md) — Brief for Figma companion generation

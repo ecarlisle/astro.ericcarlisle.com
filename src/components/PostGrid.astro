@@ -8,12 +8,16 @@ interface Props {
   posts: CollectionEntry<'blog'>[];
   author: string;
   headingLevel?: 'h2' | 'h3' | 'h4';
+  featuredFirst?: boolean;
 }
 
-const { posts, author, headingLevel = 'h2' } = Astro.props;
+const { posts, author, headingLevel = 'h2', featuredFirst = false } = Astro.props;
 ---
 
-<ul class="grid grid--cards" id="post-grid">
+<ul
+  class:list={['grid', 'grid--cards', { 'grid--featured-first': featuredFirst }]}
+  id="post-grid"
+>
   {posts.map((post, i) => {
     const wc = getPostWordCount(post);
     return (

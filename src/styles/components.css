@@ -130,6 +130,13 @@
   font-size: var(--type-size-featured-card-title);
 }
 
+.grid--featured-first > :first-child .card-body > p:not(.meta) {
+  max-width: var(--layout-rail-prose);
+  font-size: var(--type-size-large);
+  color: var(--color-text-secondary);
+  -webkit-line-clamp: 4;
+}
+
 .collection-header {
   margin-bottom: var(--space-component-lg);
 }

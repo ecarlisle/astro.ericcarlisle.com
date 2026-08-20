@@ -24,6 +24,7 @@ type Props = {
     | 'about'
     | 'contact'
     | 'portfolio'
+    | 'privacy'
     | 'speaking'
     | 'article'
     | 'collection'
@@ -294,6 +295,17 @@ switch (type) {
       description,
       isPartOf: { '@id': `${siteUrl}/#website` },
       mainEntity: { '@id': `${siteUrl}/#person` },
+    });
+    break;
+
+  case 'privacy':
+    graphArray.push({
+      '@type': 'WebPage',
+      '@id': `${pageUrl}/#webpage`,
+      url,
+      name: title,
+      description,
+      isPartOf: { '@id': `${siteUrl}/#website` },
     });
     break;
 

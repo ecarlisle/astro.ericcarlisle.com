@@ -1,0 +1,111 @@
+---
+import Layout from '../layouts/BlogPost.astro';
+---
+
+<Layout
+  title="Privacy Policy"
+  description="How Eric Carlisle's website uses analytics, handles contact-form submissions, and protects the contact form from automated abuse."
+  pageType="privacy"
+>
+  <p><em>Effective August 20, 2026</em></p>
+
+  <p>
+    This policy explains what information this website collects, why it is used, and the choices
+    available to you.
+  </p>
+
+  <h2>Website analytics</h2>
+
+  <p>
+    This site uses Google Analytics to understand how visitors use the site. Its standard
+    measurement can collect information such as pages viewed, session activity, approximate
+    location, browser type, and device type. Google Analytics uses a first-party cookie named
+    <code>_ga</code> to distinguish visitors and sessions.
+  </p>
+
+  <p>
+    This information is used to understand the site&rsquo;s audience and improve its content and
+    experience. The site does not intentionally send names, email addresses, or contact-form
+    contents to Google Analytics. Learn more about{' '}<a
+      href="https://support.google.com/analytics/answer/11593727?hl=en"
+    >Google Analytics data collection</a>{' '}and read{' '}<a href="https://policies.google.com/privacy"
+    >Google&rsquo;s Privacy Policy</a>.
+  </p>
+
+  <h2>Contact-form submissions</h2>
+
+  <p>
+    When you use the <a href="/contact/">contact form</a>, the site collects the name, email
+    address, subject, and message you provide. That information is used to deliver your message and
+    respond to your inquiry. Please do not submit sensitive personal information through the form.
+  </p>
+
+  <p>
+    Contact submissions are processed by a Cloudflare Worker and delivered to the site owner by
+    email through Resend. The site code does not write contact messages to a separate application
+    database. Messages may remain in the site owner&rsquo;s inbox and the email provider&rsquo;s systems as
+    needed to respond to and manage the inquiry.
+  </p>
+
+  <h2>Spam and bot protection</h2>
+
+  <p>
+    The contact form uses Cloudflare Turnstile to help prevent spam and automated submissions.
+    Turnstile runs browser-based security challenges and processes limited browser, device, and
+    network signals needed to distinguish people from automated traffic. The contact-form service
+    also uses the connecting IP address for short-term rate limiting and sends it to Cloudflare with
+    the Turnstile verification token.
+  </p>
+
+  <p>
+    Cloudflare states that Turnstile does not access, store, or transmit form entries or other page
+    inputs. Learn more in the{' '}<a href="https://developers.cloudflare.com/turnstile/"
+    >Cloudflare Turnstile documentation</a>.
+  </p>
+
+  <h2>Cookies and your choices</h2>
+
+  <p>
+    Cookies are small text files that a website or service can place in your browser. This site uses
+    Google Analytics measurement, including its first-party analytics cookie. You can control or
+    delete cookies through your browser settings. Disabling analytics cookies may reduce the
+    accuracy of site-usage measurement.
+  </p>
+
+  <p>
+    Google also provides a{' '}<a href="https://tools.google.com/dlpage/gaoptout"
+    >Google Analytics opt-out browser add-on</a>.
+  </p>
+
+  <h2>How information is used</h2>
+
+  <p>Information described on this page is used to:</p>
+
+  <ul>
+    <li>Measure site usage and improve the site&rsquo;s content and experience.</li>
+    <li>Deliver and respond to contact-form submissions.</li>
+    <li>Protect the contact form from spam, bots, and abusive automated activity.</li>
+  </ul>
+
+  <h2>Service providers</h2>
+
+  <p>
+    Google Analytics, Cloudflare Turnstile, and Resend are service providers used for the site
+    functions described above. Their handling of information is also governed by their own terms
+    and privacy policies. Information may also be disclosed when required by applicable law.
+  </p>
+
+  <h2>Changes to this policy</h2>
+
+  <p>
+    This policy may be updated when the site&rsquo;s data practices or services change. The effective
+    date at the top of the page will be revised when an update is published.
+  </p>
+
+  <h2>Privacy questions</h2>
+
+  <p>
+    For privacy questions or requests, contact Eric Carlisle through the{' '}<a href="/contact/"
+    >contact form</a>.
+  </p>
+</Layout>

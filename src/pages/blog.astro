@@ -33,7 +33,7 @@ const tagData = computeTagData(allPosts);
 
         <TagFilterBar tagData={tagData} />
 
-        <PostGrid posts={posts} author={AUTHOR_NAME} />
+        <PostGrid posts={posts} author={AUTHOR_NAME} featuredFirst />
 
         {totalPages > 1 && (
           <PaginationNav next={{ url: '/blog/page/2', label: 'Next page →' }} />

@@ -1,4 +1,5 @@
 ---
+import CategoryTag from '@components/CategoryTag.astro';
 import type { TagData } from '@lib/blog-utils';
 
 interface Props {
@@ -18,12 +19,9 @@ const hasTags = tags && tags.length > 0;
     role="group"
     aria-label="Filter posts by tag"
   >
-    <a href="/blog">All</a>
+    <CategoryTag href="/blog" label="All" />
     {tagData.allTags.map((tag) => (
-      <a href={`/tags/${tag}`}>
-        {tag}
-        <sup>{tagData.tagCounts[tag]}</sup>
-      </a>
+      <CategoryTag href={`/tags/${tag}`} label={tag} count={tagData.tagCounts[tag]} />
     ))}
   </div>
 )}
@@ -31,10 +29,11 @@ const hasTags = tags && tags.length > 0;
 {hasTags && (
   <div class="filter-bar" role="group" aria-label="Post tags">
     {tags.map((tag) => (
-      <a href={`/tags/${tag}`}>
-        {tag}
-        {tagData?.tagCounts[tag] != null && <sup>{tagData.tagCounts[tag]}</sup>}
-      </a>
+      <CategoryTag
+        href={`/tags/${tag}`}
+        label={tag}
+        count={tagData?.tagCounts[tag]}
+      />
     ))}
   </div>
 )}
@@ -49,37 +48,4 @@ const hasTags = tags && tags.length > 0;
     justify-content: center;
   }
 
-  .filter-bar a {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3em;
-    padding: 0.3em 0.7em;
-    border-radius: 999px;
-    color: var(--text-muted);
-    font-size: var(--type-size-small);
-    text-decoration: none;
-    transition:
-      background var(--transition-fast),
-      color var(--transition-fast);
-    white-space: nowrap;
-  }
-
-  .filter-bar a:hover {
-    background: var(--bg-surface);
-    color: var(--color-link);
-  }
-
-  .filter-bar a:focus-visible {
-    outline: var(--size-border-pixel) dashed var(--color-focus);
-    outline-offset: 2px;
-  }
-
-  .filter-bar a sup {
-    font-size: 0.65em;
-    opacity: 0.5;
-  }
-
-  .filter-bar a:hover sup {
-    opacity: 0.8;
-  }
 </style>

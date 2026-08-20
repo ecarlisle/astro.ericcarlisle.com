@@ -47,8 +47,15 @@ import ThemeToggle from './ThemeToggle.astro';
     left: 0;
     right: 0;
     z-index: 100;
-    background: var(--bg-surface);
-    border-bottom: 1px solid var(--border-muted);
+    background-color: var(--bg-surface);
+    background-image: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--bg-surface-elevated) 22%, var(--bg-surface)),
+      var(--bg-surface) 68%
+    );
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--border-main) 84%, var(--brand-primary));
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--brand-primary) 7%, transparent);
     will-change: transform;
     transition: transform 0.3s ease-in-out;
     padding-block: 0;

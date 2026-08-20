@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import avatarImage from '@images/eric-carlisle.png';
 import BaseHead from '../components/BaseHead.astro';
 import Card from '../components/Card.astro';
+import CategoryTag from '../components/CategoryTag.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import '@styles/feed.css';
@@ -39,11 +40,11 @@ const posts = (await getSortedPosts()).slice(0, 6);
             <a href="/blog" class="button button--outline">Read the blog <span aria-hidden="true">→</span></a>
           </div>
           <ul class="home-hero-chips" aria-label="Areas of focus">
-            <li class="chip">Frontend architecture</li>
-            <li class="chip">Design systems</li>
-            <li class="chip">Accessibility</li>
-            <li class="chip">Performance</li>
-            <li class="chip">UX strategy</li>
+            <li><CategoryTag label="Frontend architecture" variant="chip" /></li>
+            <li><CategoryTag label="Design systems" variant="chip" /></li>
+            <li><CategoryTag label="Accessibility" variant="chip" /></li>
+            <li><CategoryTag label="Performance" variant="chip" /></li>
+            <li><CategoryTag label="UX strategy" variant="chip" /></li>
           </ul>
         </div>
         <div class="home-hero-avatar">
@@ -104,7 +105,7 @@ const posts = (await getSortedPosts()).slice(0, 6);
     grid-template-columns: 1fr auto;
     gap: var(--space-section) var(--space-section);
     align-items: center;
-    margin-bottom: var(--space-layout);
+    margin-bottom: var(--space-component-lg);
   }
 
   .home-hero-content {
@@ -190,7 +191,7 @@ const posts = (await getSortedPosts()).slice(0, 6);
     .home-hero {
       grid-template-columns: 1fr;
       gap: var(--space-component-lg);
-      margin-bottom: var(--space-section);
+      margin-bottom: var(--space-component-lg);
     }
 
     .home-hero-content {

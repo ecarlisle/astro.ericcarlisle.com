@@ -14,6 +14,7 @@ const routes = [
   { path: '/about/', expectedHeading: 'About Me' },
   { path: '/blog/', expectedHeading: 'Blog' },
   { path: '/portfolio/', expectedHeading: 'Portfolio' },
+  { path: '/privacy/', expectedHeading: 'Privacy Policy' },
   { path: '/speaking/', expectedHeading: 'Selected Talks' },
   { path: '/contact/', expectedHeading: 'Contact' },
   { path: '/search/', expectedHeading: 'Search' },
@@ -54,6 +55,47 @@ test('a representative blog post loads with a single accessible h1', async ({ pa
   );
   await expect(h1s).toHaveCount(1);
   await expect(h1s.first()).toContainText('250mm Trading Card Box');
+});
+
+test('blog features the newest article without a LOG byline label', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/blog/');
+
+  const grid = page.locator('#post-grid');
+  await expect(grid).toHaveClass(/grid--featured-first/);
+
+  const cards = grid.locator(':scope > .card');
+  expect(await cards.count()).toBeGreaterThan(1);
+
+  const firstBox = await cards.first().boundingBox();
+  const gridBox = await grid.boundingBox();
+  expect(firstBox).not.toBeNull();
+  expect(gridBox).not.toBeNull();
+  expect(Math.abs((firstBox?.width ?? 0) - (gridBox?.width ?? 0))).toBeLessThan(2);
+
+  await expect(grid.locator('.meta-label')).toHaveCount(0);
+  await expect(grid).not.toContainText(/\bLOG\b/);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileCardBox = await cards.first().boundingBox();
+  const mobileGridBox = await grid.boundingBox();
+  expect(mobileCardBox).not.toBeNull();
+  expect(mobileGridBox).not.toBeNull();
+  expect(Math.abs((mobileCardBox?.width ?? 0) - (mobileGridBox?.width ?? 0))).toBeLessThan(2);
+});
+
+test('footer has LinkedIn, GitHub, and Privacy text links', async ({ page }) => {
+  await page.goto('/');
+
+  const footerNav = page.getByRole('navigation', { name: 'Footer' });
+  const links = footerNav.getByRole('link');
+  await expect(links).toHaveCount(3);
+  await expect(links).toHaveText([/LinkedIn/, /GitHub/, 'Privacy']);
+  await expect(links.nth(0)).toHaveAttribute('href', 'https://linkedin.com/in/ericcarlisle');
+  await expect(links.nth(1)).toHaveAttribute('href', 'https://github.com/ecarlisle');
+  await expect(links.nth(2)).toHaveAttribute('href', '/privacy/');
+  await expect(footerNav.locator('.external-link-glyph')).toHaveCount(2);
+  await expect(links.nth(2).locator('.external-link-glyph')).toHaveCount(0);
 });
 
 test('the portfolio page renders case study content', async ({ page }) => {

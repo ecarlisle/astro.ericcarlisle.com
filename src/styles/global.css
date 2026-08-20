@@ -63,6 +63,14 @@
   --brand-accent: #38d9a9;
   --brand-highlight: #ffb86b;
 
+  /* Non-semantic category accents: compact labels and small glyphs only. */
+  --accent-category-blue: #82aee0;
+  --accent-category-violet: #a59ad6;
+  --accent-category-plum: #bd8fb4;
+  --accent-category-coral: #d59087;
+  --accent-category-slate: #8da2b8;
+  --accent-category-moss: #a6bd7d;
+
   --border-main: #26344d;
   --border-muted: #1a2638;
   --border-control: #52627a;
@@ -149,6 +157,12 @@
   --brand-primary: #005fcc;
   --brand-accent: #007a5a;
   --brand-highlight: #a14b00;
+  --accent-category-blue: #315f93;
+  --accent-category-violet: #6553a2;
+  --accent-category-plum: #854d78;
+  --accent-category-coral: #9b5149;
+  --accent-category-slate: #526a83;
+  --accent-category-moss: #526b32;
   --color-action-hover: #004799;
 
   --border-main: #cbd5e1;
@@ -171,6 +185,12 @@
     --brand-primary: #005fcc;
     --brand-accent: #007a5a;
     --brand-highlight: #a14b00;
+    --accent-category-blue: #315f93;
+    --accent-category-violet: #6553a2;
+    --accent-category-plum: #854d78;
+    --accent-category-coral: #9b5149;
+    --accent-category-slate: #526a83;
+    --accent-category-moss: #526b32;
     --color-action-hover: #004799;
 
     --border-main: #cbd5e1;
@@ -193,6 +213,12 @@
   --brand-primary: #5ea8ff;
   --brand-accent: #38d9a9;
   --brand-highlight: #ffb86b;
+  --accent-category-blue: #82aee0;
+  --accent-category-violet: #a59ad6;
+  --accent-category-plum: #bd8fb4;
+  --accent-category-coral: #d59087;
+  --accent-category-slate: #8da2b8;
+  --accent-category-moss: #a6bd7d;
   --color-action-hover: #3d8ee0;
 
   --border-main: #26344d;
