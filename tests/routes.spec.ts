@@ -98,6 +98,83 @@ test('footer has LinkedIn, GitHub, and Privacy text links', async ({ page }) => 
   await expect(links.nth(2).locator('.external-link-glyph')).toHaveCount(0);
 });
 
+test('About, Portfolio, and Blog share homepage header alignment without terminal labels', async ({
+  page,
+}) => {
+  const pages = ['/about/', '/portfolio/', '/blog/'] as const;
+
+  for (const viewport of [
+    { width: 1280, height: 900 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    const homepageHeadingBox = await page.locator('.home-hero h1').boundingBox();
+    const homepageSurfaceBox = await page.locator('.home-hero').boundingBox();
+
+    expect(homepageHeadingBox).not.toBeNull();
+    expect(homepageSurfaceBox).not.toBeNull();
+
+    for (const path of pages) {
+      await page.goto(path);
+
+      const header = page.locator('.page-intro.technical-surface');
+      const headingBox = await header.locator('h1').boundingBox();
+
+      await expect(header).toBeVisible();
+      await expect(header.locator('.terminal-eyebrow')).toHaveCount(0);
+      await expect(header.locator('h1')).toHaveCount(1);
+      expect(headingBox).not.toBeNull();
+      expect(Math.abs((headingBox?.x ?? 0) - (homepageHeadingBox?.x ?? 0))).toBeLessThan(2);
+
+      if (path === '/blog/' && viewport.width > 720) {
+        const headerBox = await header.boundingBox();
+
+        expect(headerBox).not.toBeNull();
+        expect(Math.abs((headerBox?.x ?? 0) - (homepageSurfaceBox?.x ?? 0))).toBeLessThan(2);
+      }
+    }
+  }
+});
+
+test('Contact content and form align with the heading on the readable rail', async ({ page }) => {
+  for (const viewport of [
+    { width: 1280, height: 900 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/contact/');
+
+    const headingBox = await page.locator('.page-header h1').boundingBox();
+    const contentBox = await page.locator('.contact-section').boundingBox();
+    const formBox = await page.locator('.contact-form').boundingBox();
+
+    expect(headingBox).not.toBeNull();
+    expect(contentBox).not.toBeNull();
+    expect(formBox).not.toBeNull();
+    expect(Math.abs((contentBox?.x ?? 0) - (headingBox?.x ?? 0))).toBeLessThan(2);
+    expect(Math.abs((formBox?.x ?? 0) - (headingBox?.x ?? 0))).toBeLessThan(2);
+    expect(formBox?.width ?? 0).toBeLessThanOrEqual(contentBox?.width ?? 0);
+  }
+});
+
+test('homepage labels its compact capability group with a modest action gap', async ({ page }) => {
+  await page.goto('/');
+
+  const actions = page.locator('.home-hero-actions');
+  const label = page.locator('#core-capabilities-label');
+  const chips = page.locator('.home-hero-chips');
+  const actionsBox = await actions.boundingBox();
+  const labelBox = await label.boundingBox();
+
+  await expect(label).toContainText('Core capabilities');
+  await expect(chips).toHaveAttribute('aria-labelledby', 'core-capabilities-label');
+  await expect(page.locator('.section-index')).toHaveText('>~/field_notes');
+  expect(actionsBox).not.toBeNull();
+  expect(labelBox).not.toBeNull();
+  expect((labelBox?.y ?? 0) - ((actionsBox?.y ?? 0) + (actionsBox?.height ?? 0))).toBeLessThan(32);
+});
+
 test('the portfolio page renders case study content', async ({ page }) => {
   await page.goto('/portfolio/');
 

@@ -63,6 +63,44 @@ test('speaking page does not overflow a narrow viewport', async ({ page }) => {
   await expect(page.locator('.yf-play').first()).toBeVisible();
 });
 
+test('archive talks use full-width compact rows on desktop and stack on mobile', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(SPEAKING);
+
+  const grid = page.locator('.talk-grid');
+  const cards = grid.locator('.talk-card');
+  const gridBox = await grid.boundingBox();
+
+  await expect(cards).toHaveCount(3);
+  expect(gridBox).not.toBeNull();
+
+  for (let index = 0; index < 3; index += 1) {
+    const card = cards.nth(index);
+    const cardBox = await card.boundingBox();
+    const titleBox = await card.getByRole('heading', { level: 3 }).boundingBox();
+    const playerBox = await card.locator('youtube-facade').boundingBox();
+
+    expect(cardBox).not.toBeNull();
+    expect(playerBox).not.toBeNull();
+    expect(Math.abs((cardBox?.width ?? 0) - (gridBox?.width ?? 0))).toBeLessThan(2);
+    expect(playerBox?.x ?? 0).toBeGreaterThan(titleBox?.x ?? 0);
+  }
+
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  const firstCard = cards.first();
+  const mobileDescriptionBox = await firstCard.locator(':scope > p:not(.talk-meta)').boundingBox();
+  const mobilePlayerBox = await firstCard.locator('youtube-facade').boundingBox();
+
+  expect(mobileDescriptionBox).not.toBeNull();
+  expect(mobilePlayerBox).not.toBeNull();
+  expect(mobilePlayerBox?.y ?? 0).toBeGreaterThan(
+    (mobileDescriptionBox?.y ?? 0) + (mobileDescriptionBox?.height ?? 0),
+  );
+});
+
 test('portfolio shows only the featured talk and links to the full archive', async ({ page }) => {
   await page.goto('/portfolio/');
 

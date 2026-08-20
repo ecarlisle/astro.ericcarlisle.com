@@ -4,6 +4,7 @@ import BaseHead from '@components/BaseHead.astro';
 import Footer from '@components/Footer.astro';
 import FormattedDate from '@components/FormattedDate.astro';
 import Header from '@components/Header.astro';
+import PageHeader from '@components/PageHeader.astro';
 import PaginationNav from '@components/PaginationNav.astro';
 import ShareStrip from '@components/ShareStrip.astro';
 import TagFilterBar from '@components/TagFilterBar.astro';
@@ -68,6 +69,7 @@ const {
 
 const readingTimeMin = Math.ceil(wordCount / 200);
 const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const hasEnhancedHeader = pageType === 'about' || pageType === 'portfolio';
 ---
 
 <html lang="en">
@@ -205,22 +207,29 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
         <a href="/blog" class="back-link">&larr; Back to all posts</a>
       )}
 			<article>
-        <header
-          class:list={[
-            'page-header',
-            pageType === 'article' ? 'page-header--article' : 'page-header--standard',
-            pageType === 'portfolio' && 'page-header--portfolio',
-          ]}
-        >
-          {pageType === 'article' && pubDate && (
-            <div class="date">
-              <FormattedDate date={pubDate} />
-              {readingTimeMin > 0 && <span class="reading-time">{readingTimeMin} min read</span>}
-            </div>
-          )}
-          <h1>{title}</h1>
-          <hr />
-        </header>
+        {hasEnhancedHeader ? (
+          <PageHeader
+            contentInset
+            title={title}
+            wide={pageType === 'portfolio'}
+          />
+        ) : (
+          <header
+            class:list={[
+              'page-header',
+              pageType === 'article' ? 'page-header--article' : 'page-header--standard',
+            ]}
+          >
+            {pageType === 'article' && pubDate && (
+              <div class="date">
+                <FormattedDate date={pubDate} />
+                {readingTimeMin > 0 && <span class="reading-time">{readingTimeMin} min read</span>}
+              </div>
+            )}
+            <h1>{title}</h1>
+            <hr />
+          </header>
+        )}
         {heroImage && (
           <div class="hero-image">
             <Image

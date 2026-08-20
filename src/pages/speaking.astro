@@ -145,14 +145,17 @@ const description =
 
   .talk-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-component-lg);
+    max-width: 1020px;
     margin-top: var(--space-component-lg);
   }
 
   .talk-card {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(16rem, 0.75fr) minmax(24rem, 1.25fr);
+    column-gap: var(--space-component-lg);
+    align-items: start;
     min-width: 0;
     padding: var(--space-component);
     border: var(--size-border-pixel) solid var(--border-main);
@@ -165,8 +168,22 @@ const description =
   }
 
   .talk-card :global(youtube-facade) {
-    margin-top: auto;
-    padding-top: var(--space-component);
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  @media (max-width: 800px) {
+    .talk-card {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .talk-card :global(youtube-facade) {
+      grid-column: 1;
+      grid-row: auto;
+      margin-top: var(--space-component);
+    }
   }
 
   @media (max-width: 720px) {

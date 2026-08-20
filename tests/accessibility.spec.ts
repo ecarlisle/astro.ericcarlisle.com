@@ -18,6 +18,7 @@ const globalDisabledRules = ['color-contrast'];
 
 const pages = [
   { name: 'homepage', path: '/' },
+  { name: 'about', path: '/about/' },
   { name: 'blog', path: '/blog/' },
   { name: 'portfolio', path: '/portfolio/' },
   { name: 'privacy', path: '/privacy/' },
