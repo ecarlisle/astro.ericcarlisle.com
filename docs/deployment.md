@@ -103,7 +103,8 @@ Variables prefixed with `PUBLIC_` are embedded in the built HTML and visible to 
 
 ### GitHub Actions Configuration
 
-The workflow (`.github/workflows/astro.yml`) uses **repository variables** (not secrets) for:
+The workflow (`.github/workflows/astro.yml`) uses **repository variables** for public contact
+configuration:
 
 | Variable | Type | Purpose |
 |----------|------|---------|
@@ -111,6 +112,17 @@ The workflow (`.github/workflows/astro.yml`) uses **repository variables** (not 
 | `PUBLIC_CONTACT_API_URL` | Repository variable | Passed to Astro build |
 
 These are set in: **GitHub repo → Settings → Secrets and variables → Actions → Variables**
+
+Live webmention fetching uses this optional **Actions secret**:
+
+| Secret | Required | Purpose |
+|--------|----------|---------|
+| `WEBMENTION_IO_TOKEN` | No | Fetches webmentions from webmention.io during Astro builds |
+
+Set it in: **GitHub repo → Settings → Secrets and variables → Actions → Secrets → New repository
+secret**. The workflow passes it only to the webmention configuration check and Astro build steps;
+it is never exposed as a public environment variable. If the secret is absent, deployment continues
+and production builds omit the webmention section.
 
 ### Cloudflare Worker Configuration
 
@@ -373,6 +385,9 @@ not guarantee that a page is indexed or live.
 2. **Repository variables** set:
    - `PUBLIC_TURNSTILE_SITE_KEY`
    - `PUBLIC_CONTACT_API_URL`
+
+3. **Optional Actions secret** for live webmentions:
+   - `WEBMENTION_IO_TOKEN` (deployment remains successful without it)
 
 ### Post-Deployment Verification
 

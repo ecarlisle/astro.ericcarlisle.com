@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, test } from 'vitest';
+import { expect, test } from '@playwright/test';
 import { getCategoryAccent, getCategoryIcon } from '../src/lib/category-accents';
 
 const globalCss = readFileSync(join(process.cwd(), 'src/styles/global.css'), 'utf8');
@@ -54,7 +54,7 @@ function contrastRatio(foreground: string, background: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-describe('category accent presentation', () => {
+test.describe('category accent presentation', () => {
   test('matches the homepage focus-area accent palette', () => {
     expect(getCategoryAccent('Frontend architecture')).toBe('blue');
     expect(getCategoryAccent('Design systems')).toBe('moss');
@@ -89,18 +89,17 @@ describe('category accent presentation', () => {
     expect(fallbackIcon).toBe(getCategoryIcon('Progressive enhancement'));
   });
 
-  test.each([
-    'light',
-    'dark',
-  ] as const)('%s category tokens meet normal-text contrast against the tag surface', (theme) => {
-    const block = getThemeBlock(theme);
-    const background = getHexToken(block, '--bg-surface-elevated');
+  for (const theme of ['light', 'dark'] as const) {
+    test(`${theme} category tokens meet normal-text contrast against the tag surface`, () => {
+      const block = getThemeBlock(theme);
+      const background = getHexToken(block, '--bg-surface-elevated');
 
-    for (const accent of categoryAccents) {
-      const foreground = getHexToken(block, `--accent-category-${accent}`);
-      expect(contrastRatio(foreground, background), `${theme} ${accent}`).toBeGreaterThanOrEqual(
-        4.5,
-      );
-    }
-  });
+      for (const accent of categoryAccents) {
+        const foreground = getHexToken(block, `--accent-category-${accent}`);
+        expect(contrastRatio(foreground, background), `${theme} ${accent}`).toBeGreaterThanOrEqual(
+          4.5,
+        );
+      }
+    });
+  }
 });
