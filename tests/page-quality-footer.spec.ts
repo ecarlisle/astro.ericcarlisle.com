@@ -736,6 +736,18 @@ test('desktop 1024px: abbreviations retain full accessible labels and link', asy
     'aria-label',
     /Performance: 96 out of 100/,
   );
+  await expect(footer.locator('.page-quality-metric').nth(1)).toHaveAttribute(
+    'aria-label',
+    /Accessibility: 100 out of 100/,
+  );
+  await expect(footer.locator('.page-quality-metric').nth(2)).toHaveAttribute(
+    'aria-label',
+    /Best practices: 100 out of 100/,
+  );
+  await expect(footer.locator('.page-quality-metric').nth(3)).toHaveAttribute(
+    'aria-label',
+    /SEO: 100 out of 100/,
+  );
   await expect(footer.locator('.page-quality-link')).toHaveAttribute(
     'href',
     '/portfolio/site-quality/',

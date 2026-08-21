@@ -58,24 +58,30 @@ function normalizeCategoryName(name: string): string {
   return name.trim().toLowerCase();
 }
 
-function stableCategoryIndex(name: string): number {
+function stableCategoryIndex(name: string, itemCount: number): number {
   let hash = 0;
 
   for (const character of name) {
     hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
   }
 
-  return hash % fallbackAccents.length;
+  return hash % itemCount;
 }
 
 export function getCategoryAccent(name: string): CategoryAccent {
   const normalizedName = normalizeCategoryName(name);
 
-  return categoryAccents[normalizedName] ?? fallbackAccents[stableCategoryIndex(normalizedName)];
+  return (
+    categoryAccents[normalizedName] ??
+    fallbackAccents[stableCategoryIndex(normalizedName, fallbackAccents.length)]
+  );
 }
 
 export function getCategoryIcon(name: string): CategoryIcon {
   const normalizedName = normalizeCategoryName(name);
 
-  return categoryIcons[normalizedName] ?? fallbackIcons[stableCategoryIndex(normalizedName)];
+  return (
+    categoryIcons[normalizedName] ??
+    fallbackIcons[stableCategoryIndex(normalizedName, fallbackIcons.length)]
+  );
 }

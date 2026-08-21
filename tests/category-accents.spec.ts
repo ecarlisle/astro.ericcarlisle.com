@@ -80,12 +80,13 @@ describe('category accent presentation', () => {
   });
 
   test('uses a stable fallback for unknown categories', () => {
+    const fallbackIcon = getCategoryIcon('Progressive enhancement');
+
     expect(getCategoryAccent('Progressive enhancement')).toBe(
       getCategoryAccent('Progressive enhancement'),
     );
-    expect(getCategoryIcon('Progressive enhancement')).toBe(
-      getCategoryIcon('Progressive enhancement'),
-    );
+    expect(fallbackIcon).toBeDefined();
+    expect(fallbackIcon).toBe(getCategoryIcon('Progressive enhancement'));
   });
 
   test.each([

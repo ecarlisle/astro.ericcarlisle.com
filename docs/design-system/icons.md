@@ -28,7 +28,7 @@ Approval applies to the specific icon and variant, not to the full Material cata
 Vendor only the approved SVG path data needed by the site. Do not add an icon package, icon font,
 complete SVG archive, external image URL, or runtime loader.
 
-For the current five-category use case:
+For the current five-icon use case:
 
 - Keep the selected paths in a small typed Astro component or local module.
 - Import that Astro icon component statically at the top of each consumer; select typed local path
@@ -47,7 +47,8 @@ does not justify a broader asset system.
 
 Use one geometry convention across a related icon set:
 
-- Preserve the source viewBox, normally `0 0 24 24` for Material Symbols.
+- Use the component's shared viewBox, `0 -960 960 960`, and normalize source paths to that
+  coordinate system.
 - Size compact tag icons consistently, typically with CSS relative units such as `1em`.
 - Preserve the approved source path rather than redrawing it ad hoc.
 - Use `fill="currentColor"` for filled Material paths. If an approved source genuinely uses strokes,
