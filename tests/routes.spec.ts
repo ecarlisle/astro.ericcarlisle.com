@@ -102,6 +102,7 @@ test('About, Portfolio, and Blog share homepage header alignment without termina
   page,
 }) => {
   const pages = ['/about/', '/portfolio/', '/blog/'] as const;
+  const alignmentTolerance = 2;
 
   for (const viewport of [
     { width: 1280, height: 900 },
@@ -125,13 +126,19 @@ test('About, Portfolio, and Blog share homepage header alignment without termina
       await expect(header.locator('.terminal-eyebrow')).toHaveCount(0);
       await expect(header.locator('h1')).toHaveCount(1);
       expect(headingBox).not.toBeNull();
-      expect(Math.abs((headingBox?.x ?? 0) - (homepageHeadingBox?.x ?? 0))).toBeLessThan(2);
+      expect(
+        Math.abs((headingBox?.x ?? 0) - (homepageHeadingBox?.x ?? 0)),
+        `${path} heading offset at ${viewport.width}px`,
+      ).toBeLessThanOrEqual(alignmentTolerance);
 
       if (path === '/blog/' && viewport.width > 720) {
         const headerBox = await header.boundingBox();
 
         expect(headerBox).not.toBeNull();
-        expect(Math.abs((headerBox?.x ?? 0) - (homepageSurfaceBox?.x ?? 0))).toBeLessThan(2);
+        expect(
+          Math.abs((headerBox?.x ?? 0) - (homepageSurfaceBox?.x ?? 0)),
+          `${path} surface offset at ${viewport.width}px`,
+        ).toBeLessThanOrEqual(alignmentTolerance);
       }
     }
   }
