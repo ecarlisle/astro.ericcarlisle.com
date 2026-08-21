@@ -98,6 +98,8 @@ These directories are produced during builds and automated processes. Never edit
 Use [agent-safe-change](.agents/skills/agent-safe-change/SKILL.md) for the full procedure. Always
 inspect the working tree, preserve unrelated user changes, make the smallest scoped change, run
 proportionate validation, and review the final diff. Commit or push only when the user authorizes it.
+Open pull requests as ready for review by default so automated reviewers such as CodeRabbit can run.
+Use a draft only when the owner explicitly requests one or the work is genuinely not ready for review.
 
 ## Protected Files
 
