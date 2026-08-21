@@ -1,0 +1,100 @@
+---
+import CategoryIcon from '@components/CategoryIcon.astro';
+import { getCategoryAccent, getCategoryIcon } from '@lib/category-accents';
+
+type Props = {
+  class?: string;
+  count?: number;
+  href?: string;
+  label: string;
+  variant?: 'chip' | 'tag';
+};
+
+const { class: className, count, href, label, variant = 'tag' } = Astro.props;
+
+const accent = getCategoryAccent(label);
+const icon = getCategoryIcon(label);
+const Element = href ? 'a' : 'span';
+---
+
+<Element
+  class:list={['category-tag', `category-tag--${variant}`, className]}
+  data-category-accent={accent}
+  href={href}
+>
+  <CategoryIcon icon={icon} />
+  <span>{label}</span>
+  {count != null && <sup>{count}</sup>}
+</Element>
+
+<style>
+  .category-tag {
+    --category-accent: var(--accent-category-slate);
+
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    min-height: 2rem;
+    padding: 0.25em 0.7em;
+    border: 1px solid color-mix(in srgb, var(--category-accent) 42%, var(--border-muted));
+    border-radius: 999px;
+    background: var(--bg-surface-elevated);
+    color: var(--category-accent);
+    font-family: var(--font-mono);
+    font-size: var(--type-size-small);
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .category-tag--chip {
+    padding-inline: 0.9em;
+  }
+
+  .category-tag[data-category-accent='blue'] {
+    --category-accent: var(--accent-category-blue);
+  }
+
+  .category-tag[data-category-accent='violet'] {
+    --category-accent: var(--accent-category-violet);
+  }
+
+  .category-tag[data-category-accent='plum'] {
+    --category-accent: var(--accent-category-plum);
+  }
+
+  .category-tag[data-category-accent='coral'] {
+    --category-accent: var(--accent-category-coral);
+  }
+
+  .category-tag[data-category-accent='moss'] {
+    --category-accent: var(--accent-category-moss);
+  }
+
+  :global(.category-icon) {
+    width: 1em;
+    height: 1em;
+    flex: none;
+    fill: currentColor;
+  }
+
+  a.category-tag {
+    transition: border-color var(--transition-fast);
+  }
+
+  a.category-tag:hover {
+    border-color: var(--category-accent);
+  }
+
+  a.category-tag:focus-visible {
+    outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+    outline-offset: 2px;
+  }
+
+  .category-tag sup {
+    color: var(--color-text-muted);
+    font-size: 0.65em;
+  }
+</style>

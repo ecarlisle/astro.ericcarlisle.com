@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import avatarImage from '@images/eric-carlisle.png';
 import BaseHead from '../components/BaseHead.astro';
 import Card from '../components/Card.astro';
+import CategoryTag from '../components/CategoryTag.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import '@styles/feed.css';
@@ -21,8 +22,12 @@ const posts = (await getSortedPosts()).slice(0, 6);
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <Header />
     <main id="main-content" tabindex="-1" data-pagefind-body>
-      <header class="home-hero">
+      <header class="home-hero technical-surface">
         <div class="home-hero-content">
+          <p class="terminal-eyebrow" aria-hidden="true">
+            <span class="terminal-eyebrow__prompt">&gt;</span>
+            <span class="terminal-eyebrow__path">~/profile</span>
+          </p>
           <h1>Hi, I&rsquo;m Eric Carlisle.</h1>
           <p class="home-hero-role">Principal Frontend Engineer &amp; UX Architect</p>
           <p class="home-hero-lede">
@@ -38,12 +43,13 @@ const posts = (await getSortedPosts()).slice(0, 6);
             <a href="/portfolio" class="button">View portfolio <span aria-hidden="true">→</span></a>
             <a href="/blog" class="button button--outline">Read the blog <span aria-hidden="true">→</span></a>
           </div>
-          <ul class="home-hero-chips" aria-label="Areas of focus">
-            <li class="chip">Frontend architecture</li>
-            <li class="chip">Design systems</li>
-            <li class="chip">Accessibility</li>
-            <li class="chip">Performance</li>
-            <li class="chip">UX strategy</li>
+          <p class="home-hero-capabilities-label" id="core-capabilities-label">Core capabilities</p>
+          <ul class="home-hero-chips" aria-labelledby="core-capabilities-label">
+            <li><CategoryTag label="Frontend architecture" variant="chip" /></li>
+            <li><CategoryTag label="Design systems" variant="chip" /></li>
+            <li><CategoryTag label="Accessibility" variant="chip" /></li>
+            <li><CategoryTag label="Performance" variant="chip" /></li>
+            <li><CategoryTag label="UX strategy" variant="chip" /></li>
           </ul>
         </div>
         <div class="home-hero-avatar">
@@ -63,7 +69,13 @@ const posts = (await getSortedPosts()).slice(0, 6);
       </header>
       <section class="feed" aria-labelledby="latest-writing">
         <header class="collection-header feed-heading">
-          <h2 id="latest-writing">Latest writing</h2>
+          <div>
+            <p class="terminal-eyebrow section-index" aria-hidden="true">
+              <span class="terminal-eyebrow__prompt">&gt;</span>
+              <span class="terminal-eyebrow__path">~/field_notes</span>
+            </p>
+            <h2 id="latest-writing">Latest writing</h2>
+          </div>
           <a href="/blog">Browse all articles <span aria-hidden="true">→</span></a>
         </header>
         <ul class="grid grid--cards grid--featured-first">
@@ -98,13 +110,21 @@ const posts = (await getSortedPosts()).slice(0, 6);
 </html>
 
 <style>
+  @media (min-width: 801px) {
+    main {
+      padding-top: var(--space-component-lg);
+    }
+  }
+
   /* ── Hero grid: two-column on desktop, stack on mobile ── */
   .home-hero {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: var(--space-section) var(--space-section);
     align-items: center;
-    margin-bottom: var(--space-layout);
+    padding: var(--space-section) var(--space-component-lg);
+    margin-inline: calc(-1 * var(--space-component-lg));
+    margin-bottom: var(--space-component-lg);
   }
 
   .home-hero-content {
@@ -113,6 +133,27 @@ const posts = (await getSortedPosts()).slice(0, 6);
 
   .home-hero h1 {
     margin-bottom: var(--space-xs);
+  }
+
+  .terminal-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.45em;
+    margin-bottom: var(--space-xs);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--type-size-small);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.02em;
+  }
+
+  .terminal-eyebrow__prompt {
+    color: var(--accent-category-blue);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .terminal-eyebrow__path {
+    color: var(--accent-category-moss);
   }
 
   /* ── Role/title eyebrow ── */
@@ -140,7 +181,16 @@ const posts = (await getSortedPosts()).slice(0, 6);
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-component);
-    margin-bottom: var(--space-component);
+    margin-bottom: var(--space-sm);
+  }
+
+  .home-hero-capabilities-label {
+    margin-bottom: var(--space-inline);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--type-size-small);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.02em;
   }
 
   /* ── Identity chips (uses shared .tag class) ── */
@@ -170,10 +220,23 @@ const posts = (await getSortedPosts()).slice(0, 6);
 
   /* ── Feed heading ── */
   .feed-heading {
+    position: relative;
     display: flex;
     align-items: end;
     justify-content: space-between;
     gap: var(--space-component);
+    padding-top: var(--space-component);
+    border-top: 1px solid var(--border-main);
+  }
+
+  .feed-heading::before {
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: min(8rem, 28%);
+    height: 3px;
+    content: '';
+    background: var(--brand-primary);
   }
 
   .feed-heading h2 {
@@ -185,12 +248,33 @@ const posts = (await getSortedPosts()).slice(0, 6);
     flex: none;
   }
 
+  :global(.grid--featured-first > :first-child) {
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  :global(.grid--featured-first > :first-child::before) {
+    position: absolute;
+    z-index: -1;
+    top: -10rem;
+    right: -7rem;
+    width: 24rem;
+    height: 24rem;
+    content: '';
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--brand-primary) 15%, transparent);
+    filter: blur(72px);
+    pointer-events: none;
+  }
+
   /* ── Tablet and below ── */
   @media (max-width: 800px) {
     .home-hero {
       grid-template-columns: 1fr;
       gap: var(--space-component-lg);
-      margin-bottom: var(--space-section);
+      padding: var(--space-component-lg) var(--space-component);
+      margin-inline: calc(-1 * var(--space-component));
+      margin-bottom: var(--space-component-lg);
     }
 
     .home-hero-content {

@@ -1,4 +1,6 @@
 ---
+import CategoryTag from '@components/CategoryTag.astro';
+
 type TagType = 'div' | 'article' | 'li';
 
 const {
@@ -67,7 +69,7 @@ const readingTimeMin = readingTime ? Math.ceil(readingTime / 200) : undefined;
     {tags && tags.length > 0 && (
       <p class="meta meta-tags">
         {tags.slice(0, 3).map((tag: string) => (
-          <a href={`/tags/${tag}/`} class="tag">{tag}</a>
+          <CategoryTag href={`/tags/${tag}/`} label={tag} />
         ))}
       </p>
     )}

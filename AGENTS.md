@@ -71,6 +71,7 @@ corpus. Use the standard development steps when workflow guidance is also needed
 | Change content schema or frontmatter fields | `src/content.config.ts` and [Blog Frontmatter](docs/content-model.md#blog-frontmatter) |
 | Change Astro architecture, pages, routes, layouts, components, or rendering | [Architecture](docs/architecture.md) |
 | Change styling, tokens, themes, or reusable visual patterns | [Design System Inventory Usage](docs/design-system/agent-guide.md#how-agents-should-use-inventoryjson); query only matching entries in `docs/design-system/inventory.json` |
+| Add or change UI icons | [Icon Workflow](docs/design-system/icons.md) |
 | Change accessibility or semantic UI behavior | [Accessibility Rules](docs/performance-seo-accessibility.md#accessibility-rules) |
 | Change client-side JavaScript, assets, loading, or performance behavior | [Performance Rules](docs/performance-seo-accessibility.md#performance-rules) |
 | Change page or post metadata or SEO | [SEO Rules](docs/performance-seo-accessibility.md#seo-rules) |

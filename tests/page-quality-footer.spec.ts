@@ -715,9 +715,9 @@ test('desktop 1024px: footer present, link+metrics on same line, no overflow', a
   const firstY = firstBox ? firstBox.y : 0;
   expect(Math.abs(linkY - firstY)).toBeLessThan(5);
 
-  // 4 metrics with correct labels
+  // 4 compact metrics with the approved abbreviations
   await expect(footer.locator('.page-quality-metric')).toHaveCount(4);
-  await expect(footer.locator('.page-quality-label').first()).toHaveText('Performance');
+  await expect(footer.locator('.page-quality-label').first()).toHaveText('Perf');
 
   // No overflow
   const scrollW = await footer.evaluate((el: HTMLElement) => el.scrollWidth);
@@ -725,26 +725,36 @@ test('desktop 1024px: footer present, link+metrics on same line, no overflow', a
   expect(scrollW).toBeLessThanOrEqual(clientW);
 });
 
-test('desktop 1024px: accessible labels, link, and no abbreviations', async ({ page }) => {
+test('desktop 1024px: abbreviations retain full accessible labels and link', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 800 });
   await page.goto('/');
   const footer = page.locator('.page-quality-footer');
   await expect(footer).toBeVisible();
 
   await expect(footer).toHaveAttribute('aria-label', /measured with Lighthouse/i);
-  await expect(footer.locator('.page-quality-score').first()).toHaveAttribute(
+  await expect(footer.locator('.page-quality-metric').first()).toHaveAttribute(
     'aria-label',
-    /84 out of 100/,
+    /Performance: 96 out of 100/,
+  );
+  await expect(footer.locator('.page-quality-metric').nth(1)).toHaveAttribute(
+    'aria-label',
+    /Accessibility: 100 out of 100/,
+  );
+  await expect(footer.locator('.page-quality-metric').nth(2)).toHaveAttribute(
+    'aria-label',
+    /Best practices: 100 out of 100/,
+  );
+  await expect(footer.locator('.page-quality-metric').nth(3)).toHaveAttribute(
+    'aria-label',
+    /SEO: 100 out of 100/,
   );
   await expect(footer.locator('.page-quality-link')).toHaveAttribute(
     'href',
     '/portfolio/site-quality/',
   );
 
-  const inner = await footer.innerHTML();
-  expect(inner).not.toContain('>P<');
-  expect(inner).not.toContain('>A<');
-  expect(inner).not.toContain('>BP<');
+  const labels = footer.locator('.page-quality-label');
+  await expect(labels).toHaveText(['Perf', 'A11y', 'BP', 'SEO']);
 });
 
 test('mobile 375px: label+score together, no overflow, exact values', async ({ page }) => {
@@ -766,18 +776,18 @@ test('mobile 375px: label+score together, no overflow, exact values', async ({ p
     expect(h).toBeLessThan(40);
   }
 
-  // Exact fixture values
+  // Exact approved labels and values
   const labels = footer.locator('.page-quality-label');
   await expect(labels).toHaveCount(4);
-  await expect(labels.nth(0)).toHaveText('Performance');
-  await expect(labels.nth(1)).toHaveText('Accessibility');
-  await expect(labels.nth(2)).toHaveText('Best practices');
+  await expect(labels.nth(0)).toHaveText('Perf');
+  await expect(labels.nth(1)).toHaveText('A11y');
+  await expect(labels.nth(2)).toHaveText('BP');
   await expect(labels.nth(3)).toHaveText('SEO');
 
   const scores = footer.locator('.page-quality-score');
-  await expect(scores.nth(0)).toHaveText('84');
+  await expect(scores.nth(0)).toHaveText('96');
   await expect(scores.nth(1)).toHaveText('100');
-  await expect(scores.nth(2)).toHaveText('96');
+  await expect(scores.nth(2)).toHaveText('100');
   await expect(scores.nth(3)).toHaveText('100');
 
   // No jank from separator artifacts

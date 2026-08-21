@@ -171,13 +171,14 @@ const showTurnstileDevWarning = import.meta.env.DEV && !turnstileSiteKey;
 <style>
   .contact-section {
     max-width: var(--layout-rail-prose);
-    margin: 0 auto;
+    margin-inline: 0;
   }
 
   .contact-form {
     display: flex;
     flex-direction: column;
     gap: var(--space-component);
+    max-width: var(--layout-rail-prose);
   }
 
   .contact-form label {

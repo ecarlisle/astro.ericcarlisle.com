@@ -1,10 +1,10 @@
 ---
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { AUTHOR_GITHUB, AUTHOR_LINKEDIN } from '../consts';
 import { findPageData } from '../lib/lighthouse-utils';
 import type { LighthousePageData, LighthouseScoresFile } from './lighthouse-scores';
 import PageQualityFooter from './PageQualityFooter.astro';
-import SocialLinks from './SocialLinks.astro';
 
 const today = new Date();
 
@@ -30,8 +30,16 @@ try {
 
 <footer class="site-frame" data-pagefind-ignore>
 		&copy; {today.getFullYear()} Eric Carlisle. All rights reserved.
-		<nav aria-label="Social links" class="social-links">
-			<SocialLinks />
+		<nav aria-label="Footer" class="footer-links">
+			<a href={AUTHOR_LINKEDIN} target="_blank" rel="noopener">
+				LinkedIn <span class="external-link-glyph" aria-hidden="true">↗</span>
+				<span class="sr-only"> (opens in new tab)</span>
+			</a>
+			<a href={AUTHOR_GITHUB} target="_blank" rel="me noopener">
+				GitHub <span class="external-link-glyph" aria-hidden="true">↗</span>
+				<span class="sr-only"> (opens in new tab)</span>
+			</a>
+			<a href="/privacy/">Privacy</a>
 		</nav>
 		<PageQualityFooter data={pageData} />
 </footer>
@@ -41,16 +49,26 @@ footer {
   color: var(--text-secondary);
 }
 
-/* social links layout only */
-.social-links {
+.footer-links {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: var(--space-inline);
+  gap: var(--space-inline-strong);
   margin-top: var(--space-component);
+  font-size: var(--type-size-small);
 }
 
-.social-links a {
-  text-decoration: none;
+.footer-links a {
   color: inherit;
+  text-underline-offset: 0.15em;
+}
+
+.footer-links a:hover {
+  color: var(--color-link);
+}
+
+.external-link-glyph {
+  margin-left: 0.15em;
+  font-family: var(--font-mono);
 }
 </style>

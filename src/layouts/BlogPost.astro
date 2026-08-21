@@ -4,6 +4,7 @@ import BaseHead from '@components/BaseHead.astro';
 import Footer from '@components/Footer.astro';
 import FormattedDate from '@components/FormattedDate.astro';
 import Header from '@components/Header.astro';
+import PageHeader from '@components/PageHeader.astro';
 import PaginationNav from '@components/PaginationNav.astro';
 import ShareStrip from '@components/ShareStrip.astro';
 import TagFilterBar from '@components/TagFilterBar.astro';
@@ -17,7 +18,7 @@ import type { Talk } from '../data/talks';
 interface Props {
   title: string;
   description: string;
-  pageType?: 'article' | 'about' | 'contact' | 'portfolio' | 'speaking' | 'search';
+  pageType?: 'article' | 'about' | 'contact' | 'portfolio' | 'privacy' | 'speaking' | 'search';
   pubDate?: Date;
   updatedDate?: Date;
   heroImage?: ImageMetadata;
@@ -68,6 +69,7 @@ const {
 
 const readingTimeMin = Math.ceil(wordCount / 200);
 const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const hasEnhancedHeader = pageType === 'about' || pageType === 'portfolio';
 ---
 
 <html lang="en">
@@ -163,8 +165,26 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
     }
 
     .page-header--article {
+      position: relative;
+      isolation: isolate;
       max-width: 1020px;
       margin-inline: auto;
+      padding: var(--space-component-lg) var(--space-component-lg) var(--space-component);
+    }
+
+    .page-header--article::before {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      content: '';
+      background-image:
+        linear-gradient(color-mix(in srgb, var(--border-main) 32%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--border-main) 32%, transparent) 1px, transparent 1px);
+      background-size: 28px 28px;
+      -webkit-mask-image: linear-gradient(to bottom, black 4%, transparent 96%);
+      mask-image: linear-gradient(to bottom, black 4%, transparent 96%);
+      opacity: 0.42;
+      pointer-events: none;
     }
 
     .page-header--portfolio {
@@ -187,6 +207,29 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
       font-family: var(--font-mono);
 		}
 
+    .date-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6em;
+      color: var(--text-secondary);
+      font-size: 0.8125em;
+      font-weight: var(--font-weight-medium);
+      letter-spacing: var(--letter-spacing-wide);
+      text-transform: uppercase;
+    }
+
+    .date-status {
+      width: 0.55em;
+      height: 0.55em;
+      border-radius: 50%;
+      background: var(--brand-accent);
+    }
+
+    .date-label ~ * {
+      padding-left: var(--space-inline);
+      border-left: 1px solid var(--border-main);
+    }
+
     .article-tags {
       margin-top: var(--space-sm);
       text-align: center;
@@ -205,22 +248,33 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
         <a href="/blog" class="back-link">&larr; Back to all posts</a>
       )}
 			<article>
-        <header
-          class:list={[
-            'page-header',
-            pageType === 'article' ? 'page-header--article' : 'page-header--standard',
-            pageType === 'portfolio' && 'page-header--portfolio',
-          ]}
-        >
-          {pageType === 'article' && pubDate && (
-            <div class="date">
-              <FormattedDate date={pubDate} />
-              {readingTimeMin > 0 && <span class="reading-time">{readingTimeMin} min read</span>}
-            </div>
-          )}
-          <h1>{title}</h1>
-          <hr />
-        </header>
+        {hasEnhancedHeader ? (
+          <PageHeader
+            contentInset
+            title={title}
+            wide={pageType === 'portfolio'}
+          />
+        ) : (
+          <header
+            class:list={[
+              'page-header',
+              pageType === 'article' ? 'page-header--article' : 'page-header--standard',
+            ]}
+          >
+            {pageType === 'article' && pubDate && (
+              <div class="date">
+                <span class="date-label">
+                  <span class="date-status" aria-hidden="true"></span>
+                  Published
+                </span>
+                <FormattedDate date={pubDate} />
+                {readingTimeMin > 0 && <span class="reading-time">{readingTimeMin} min read</span>}
+              </div>
+            )}
+            <h1>{title}</h1>
+            <hr />
+          </header>
+        )}
         {heroImage && (
           <div class="hero-image">
             <Image

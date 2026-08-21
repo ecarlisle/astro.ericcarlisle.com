@@ -1,0 +1,81 @@
+---
+type Props = {
+  contentInset?: boolean;
+  description?: string;
+  surfaceBleed?: boolean;
+  title: string;
+  wide?: boolean;
+};
+
+const {
+  contentInset = false,
+  description,
+  surfaceBleed = false,
+  title,
+  wide = false,
+} = Astro.props;
+---
+
+<header
+  class:list={[
+    'page-intro',
+    'technical-surface',
+    {
+      'page-intro--inset': contentInset,
+      'page-intro--surface-bleed': surfaceBleed,
+      'page-intro--wide': wide,
+    },
+  ]}
+>
+  <h1>{title}</h1>
+  {description && <p class="page-intro__description">{description}</p>}
+  <hr />
+</header>
+
+<style>
+  .page-intro {
+    max-width: var(--layout-rail-prose);
+    margin-bottom: var(--space-component-lg);
+    padding-block: var(--space-component-lg) var(--space-component);
+  }
+
+  .page-intro--wide {
+    max-width: none;
+  }
+
+  .page-intro--inset {
+    padding-inline-start: calc(var(--space-component-lg) + var(--rhythm) * 0.25);
+  }
+
+  .page-intro--surface-bleed {
+    margin-inline-start: calc(-1 * var(--space-component-lg));
+    padding-inline-start: var(--space-component-lg);
+  }
+
+  .page-intro h1 {
+    max-width: 20ch;
+    margin-bottom: var(--space-inline);
+    letter-spacing: 0.02em;
+  }
+
+  .page-intro__description {
+    max-width: var(--layout-rail-prose);
+    margin-bottom: var(--space-inline);
+    color: var(--color-text-secondary);
+  }
+
+  .page-intro hr {
+    margin-block: var(--space-component) 0;
+  }
+
+  @media (max-width: 720px) {
+    .page-intro--inset {
+      padding-inline-start: 0;
+    }
+
+    .page-intro--surface-bleed {
+      margin-inline-start: 0;
+      padding-inline-start: 0;
+    }
+  }
+</style>

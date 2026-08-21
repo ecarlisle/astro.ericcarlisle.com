@@ -130,6 +130,13 @@
   font-size: var(--type-size-featured-card-title);
 }
 
+.grid--featured-first > :first-child .card-body > p:not(.meta) {
+  max-width: var(--layout-rail-prose);
+  font-size: var(--type-size-large);
+  color: var(--color-text-secondary);
+  -webkit-line-clamp: 4;
+}
+
 .collection-header {
   margin-bottom: var(--space-component-lg);
 }
@@ -141,6 +148,46 @@
 .collection-description {
   margin-bottom: 0;
   color: var(--color-text-secondary);
+}
+
+/* ── Shared technical page-header surface and contextual eyebrow ── */
+.technical-surface {
+  position: relative;
+  isolation: isolate;
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--bg-surface) 28%, transparent),
+    transparent 76%
+  );
+}
+
+.technical-surface::before,
+.technical-surface::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+}
+
+.technical-surface::before {
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--border-main) 68%, transparent) 1px,
+    transparent 1.25px
+  );
+  background-size: 28px 28px;
+  -webkit-mask-image: linear-gradient(to bottom, black 8%, transparent 94%);
+  mask-image: linear-gradient(to bottom, black 8%, transparent 94%);
+  opacity: 0.72;
+}
+
+.technical-surface::after {
+  background: radial-gradient(
+    ellipse at 16% 6%,
+    color-mix(in srgb, var(--brand-primary) 10%, transparent),
+    transparent 58%
+  );
 }
 
 @media (max-width: 720px) {
