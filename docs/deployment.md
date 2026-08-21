@@ -147,22 +147,23 @@ The Worker also has environment-specific names configured in `wrangler.toml`:
 
 ### Triggers
 
-- **Push to `main`** — Automatic deployment
-- **Manual** — `workflow_dispatch` from GitHub UI
+- **Pull request targeting `main`** — Runs the full build and validation job without deploying
+- **Push to `main`** — Runs the build and deploys automatically
+- **Manual** — `workflow_dispatch` runs the build and deploys from the GitHub UI
 
 ### Build Process
 
 1. **Checkout** — `actions/checkout@v6`
 2. **Setup pnpm** — `pnpm/action-setup@v5` (version 10.34.4)
 3. **Setup Node** — `actions/setup-node@v6` (Node 24)
-4. **Configure Pages** — `actions/configure-pages@v6`
+4. **Configure Pages** — `actions/configure-pages@v6` (deployment runs only)
 5. **Install dependencies** — `pnpm install --frozen-lockfile`
 6. **Typecheck** — `pnpm typecheck`
 7. **Verify env vars** — Checks `PUBLIC_TURNSTILE_SITE_KEY` and `PUBLIC_CONTACT_API_URL` exist
 8. **Build** — `pnpm build` with environment variables injected
 9. **Verify contact endpoint** — Confirms Worker URL appears in built HTML
 10. **Upload artifact** — `actions/upload-pages-artifact@v5`
-11. **Deploy** — `actions/deploy-pages@v5`
+11. **Deploy** — `actions/deploy-pages@v5` (pushes to `main` and manual runs only)
 
 ### SEO hygiene gate and Storybook isolation
 
