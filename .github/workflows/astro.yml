@@ -64,13 +64,13 @@ jobs:
           PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
           PUBLIC_CONTACT_API_URL: ${{ vars.PUBLIC_CONTACT_API_URL }}
 
-      - name: Check Webmention token presence
+      - name: Report Webmention configuration
         run: |
-          test -n "$WEBMENTION_IO_TOKEN" || (
-            echo "Missing WEBMENTION_IO_TOKEN GitHub Actions secret"
-            exit 1
-          )
-          echo "Webmention API token present"
+          if test -n "$WEBMENTION_IO_TOKEN"; then
+            echo "Webmention fetching enabled"
+          else
+            echo "WEBMENTION_IO_TOKEN is not set — webmentions will be omitted"
+          fi
         env:
           WEBMENTION_IO_TOKEN: ${{ secrets.WEBMENTION_IO_TOKEN }}
 

@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+tone_instructions: >-
+  Be concise, direct, and high-signal. Report actionable defects with concrete impact and avoid
+  subjective style, preference, or editorial feedback.
+
+reviews:
+  profile: assertive
+  request_changes_workflow: false
+  high_level_summary: true
+  review_status: true
+  review_details: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_instructions:
+    - path: "**/*"
+      instructions: |
+        Prioritize issues that can cause incorrect behavior, failed builds or publishing, security
+        vulnerabilities, accessibility failures, broken navigation or links, responsive regressions,
+        invalid SEO metadata, accidental generated-file changes, avoidable asset performance costs,
+        or dependency risk. Only report findings that are supported by the diff and have a concrete
+        user, operational, or maintenance impact. Avoid subjective style nitpicks, speculative
+        refactors, and editorial or tone feedback unless they reveal a publishing or rendering issue.
+    - path: "src/**"
+      instructions: |
+        Review Astro, TypeScript, JavaScript, CSS, and component changes for real runtime, build, and
+        static-rendering defects. Check semantic HTML, keyboard and screen-reader behavior, focus,
+        contrast, responsive layout and overflow, route and link correctness, metadata and structured
+        data, unsafe handling of external input, and unnecessary client-side work or asset loading.
+        Treat changes under src/generated/ as generated artifacts: flag manual, stale, or unexplained
+        edits that are not accompanied by the appropriate source or generation workflow.
+    - path: "src/content/**"
+      instructions: |
+        Check frontmatter and content against the repository schema and publishing behavior. Flag
+        broken internal or external links, missing referenced media, invalid dates or slugs, heading
+        structures that break rendering or accessibility, and metadata problems that affect feeds,
+        routes, social previews, or search indexing. Do not critique writing style, voice, or subject
+        matter unless it creates a concrete publishing, accessibility, linking, or rendering defect.
+    - path: "public/**"
+      instructions: |
+        Verify that asset paths and references remain valid and portable. Flag exposed secrets,
+        unexpectedly generated artifacts, duplicate or unused large files, and images, fonts, models,
+        or other assets whose format or size creates a material loading or responsive-performance
+        regression. Avoid purely aesthetic feedback.
+    - path: "package.json"
+      instructions: |
+        Review dependency and script changes for install or build breakage, Node and Astro ecosystem
+        compatibility, known security or maintenance risk, incorrect dependency classification,
+        unnecessary packages, and material client bundle or asset-processing costs. Require a clear
+        reason for new dependencies and verify that version changes are consistent with the lockfile.
