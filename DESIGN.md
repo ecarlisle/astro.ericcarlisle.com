@@ -68,7 +68,7 @@ The palette should feel modern, technical, readable, and slightly energetic with
 Recommended semantic roles:
 - `--brand-primary`: primary blue for normal links, active navigation, buttons, and reading progress
 - `--brand-accent`: teal/green accent for hover states, focus, selected tags, and small interactive highlights
-- `--brand-highlight`: warm highlight used sparingly for special callouts, warnings, or unique metadata
+- `--brand-highlight`: warm highlight used sparingly for special callouts, warnings, or unique metadata. Implemented as `.callout--note` in `src/styles/components.css` (documented in the design-system reference) — this is the intended usage; avoid adding more `--brand-highlight` surfaces without a specific reason.
 - `--bg-main`, `--bg-surface`, `--bg-surface-elevated`: page and component surfaces
 - `--text-primary`, `--text-secondary`, `--text-muted`: text hierarchy
 - `--border-main`, `--border-muted`, `--border-control`: structure and controls
