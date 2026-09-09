@@ -60,6 +60,18 @@
   color: var(--color-text-primary);
 }
 
+/* ── Note variant: sparing use for asides, updates, or editorial notes.
+   Uses --brand-highlight so it reads distinctly from links/tags/buttons,
+   which all share --color-link. Reserve for genuinely noteworthy asides —
+   not a second default callout style. ── */
+.callout--note {
+  border-left-color: var(--brand-highlight);
+}
+
+.callout--note strong {
+  color: var(--brand-highlight);
+}
+
 .tag {
   display: inline-flex;
   align-items: center;
