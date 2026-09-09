@@ -115,7 +115,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Color tokens define the visual palette for dark and light themes. All colors use CSS custom properties defined in `src/styles/global.css`. Use the toolbar above to toggle themes.',
+          'Color tokens define the visual palette for dark and light themes. All colors use CSS custom properties defined in `packages/design-system/src/styles/tokens.css`. Use the toolbar above to toggle themes.',
       },
     },
   },

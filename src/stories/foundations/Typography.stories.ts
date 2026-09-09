@@ -109,7 +109,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Typography tokens define font families, sizes, weights, and line heights. All values use CSS custom properties defined in `src/styles/global.css`.',
+          'Typography tokens define font families, sizes, weights, and line heights. All values use CSS custom properties defined in `packages/design-system/src/styles/tokens.css`.',
       },
     },
   },
