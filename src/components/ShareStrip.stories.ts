@@ -1,4 +1,4 @@
-import ShareStrip from './ShareStrip.astro';
+import ShareStrip from '@ericcarlisle/design-system/components/ShareStrip.astro';
 
 const meta = {
   title: 'Sharing/ShareStrip',

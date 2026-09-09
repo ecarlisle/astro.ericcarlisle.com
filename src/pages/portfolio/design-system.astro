@@ -1,11 +1,11 @@
 ---
+import HeaderLink from '@ericcarlisle/design-system/components/HeaderLink.astro';
+import PaginationNav from '@ericcarlisle/design-system/components/PaginationNav.astro';
+import ShareStrip from '@ericcarlisle/design-system/components/ShareStrip.astro';
+import ThemeToggle from '@ericcarlisle/design-system/components/ThemeToggle.astro';
 import Card from '../../components/Card.astro';
-import HeaderLink from '../../components/HeaderLink.astro';
-import PaginationNav from '../../components/PaginationNav.astro';
-import ShareStrip from '../../components/ShareStrip.astro';
 import SocialLinks from '../../components/SocialLinks.astro';
 import TagFilterBar from '../../components/TagFilterBar.astro';
-import ThemeToggle from '../../components/ThemeToggle.astro';
 import { AUTHOR_NAME } from '../../consts';
 import Layout from '../../layouts/BlogPost.astro';
 
@@ -512,7 +512,7 @@ const knownGaps = [
     <div class="ds-component-group">
       <div class="ds-component-demo">
         <h4 id="headerlink">HeaderLink</h4>
-        <p class="ds-source">src/components/HeaderLink.astro</p>
+        <p class="ds-source">packages/design-system/src/components/HeaderLink.astro</p>
         <div class="demo-row">
           <HeaderLink href="/portfolio/design-system">Active</HeaderLink>
           <HeaderLink href="/blog">Inactive</HeaderLink>
@@ -525,7 +525,7 @@ const knownGaps = [
       </div>
       <div class="ds-component-demo">
         <h4 id="paginationnav">PaginationNav</h4>
-        <p class="ds-source">src/components/PaginationNav.astro</p>
+        <p class="ds-source">packages/design-system/src/components/PaginationNav.astro</p>
         <PaginationNav
           prev={{ url: '#', label: '← Previous', title: 'Previous article' }}
           next={{ url: '#', label: 'Next →', title: 'Next article' }}
@@ -586,7 +586,7 @@ const knownGaps = [
       </div>
       <div class="ds-component-demo">
         <h4 id="themetoggle">ThemeToggle</h4>
-        <p class="ds-source">src/components/ThemeToggle.astro</p>
+        <p class="ds-source">packages/design-system/src/components/ThemeToggle.astro</p>
         <div class="demo-row">
           <ThemeToggle />
         </div>
@@ -604,7 +604,7 @@ const knownGaps = [
     <div class="ds-component-group">
       <div class="ds-component-demo">
         <h4 id="sharestrip">ShareStrip</h4>
-        <p class="ds-source">src/components/ShareStrip.astro</p>
+        <p class="ds-source">packages/design-system/src/components/ShareStrip.astro</p>
         <ShareStrip title={title} {pageUrl} />
       </div>
       <div class="ds-component-demo">

@@ -61,7 +61,6 @@ export default defineConfig({
         '@images': '/src/assets/images',
         '@components': '/src/components',
         '@lib': '/src/lib',
-        '@design-system': '/packages/design-system/src',
       },
     },
   },

@@ -1,4 +1,4 @@
-import ThemeToggle from './ThemeToggle.astro';
+import ThemeToggle from '@ericcarlisle/design-system/components/ThemeToggle.astro';
 
 const meta = {
   title: 'Components/ThemeToggle',
