@@ -166,6 +166,7 @@ const knownGaps = [
     <p class="ds-hero-subtitle">The design system implemented across ericcarlisle.com</p>
     <div class="ds-hero-meta">
       <span class="ds-hero-badge">Astro + vanilla CSS</span>
+      <span class="ds-hero-badge">@ericcarlisle/design-system</span>
       <span class="ds-hero-badge">Living reference</span>
       <span class="ds-hero-badge">
         Updated {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -184,6 +185,10 @@ const knownGaps = [
     <p>
       KISS stands for Keep It Stunningly Simple, which is the working rule
       behind the decisions documented here.
+    </p>
+    <p>
+      The tokens, fonts, and the components with no site-specific content or
+      business logic — <code>PageHeader</code>, <code>HeaderLink</code>, <code>ThemeToggle</code>, <code>PaginationNav</code>, <code>ShareStrip</code>, <code>FormattedDate</code>, <code>CategoryTag</code>, <code>CategoryIcon</code> — live in the <code>@ericcarlisle/design-system</code> workspace package under <code>packages/design-system/</code>, so they can be reused by other projects without dragging this site's blog content model along. Every other component shown below stays in <code>src/components/</code> because it's coupled to this site's content — blog tag taxonomy, analytics, or copy that's specific to ericcarlisle.com.
     </p>
     <p>
       It is intended as a personal reference and may later be shared with
