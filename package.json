@@ -46,8 +46,7 @@
     "mcp:site-intelligence:prepare": "pnpm build && pnpm --filter @ericcarlisle/site-intelligence-mcp build"
   },
   "dependencies": {
-    "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
-    "@fontsource-variable/source-sans-3": "^5.2.9",
+    "@ericcarlisle/design-system": "workspace:*",
     "astro": "^7.2.4",
     "three": "^0.185.1"
   },
@@ -59,7 +58,6 @@
     "@astrojs/sitemap": "^3.7.3",
     "@axe-core/playwright": "^4.12.1",
     "@biomejs/biome": "^2.5.0",
-    "@fontsource-variable/fira-code": "^5.2.7",
     "@modelcontextprotocol/inspector": "^2.0.0",
     "@playwright/test": "^1.61.1",
     "@sentry/astro": "10.65.0",

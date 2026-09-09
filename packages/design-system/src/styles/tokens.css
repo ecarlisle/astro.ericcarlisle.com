@@ -1,0 +1,222 @@
+:root {
+  /* Fonts */
+  --font-copy: "Source Sans 3 Variable", system-ui, sans-serif;
+  --font-headers: "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-mono: "Fira Code Variable", ui-monospace, monospace;
+
+  /* Type sizes */
+  --type-size-body: clamp(1rem, calc(0.3vw + 0.94rem), 1.125rem); /* 16px -> 18px */
+  --type-size-small: clamp(0.8125rem, calc(0.2vw + 0.77rem), 0.9375rem); /* 13px -> 15px */
+  --type-size-h1: clamp(2rem, calc(3.64vw + 1.27rem), 4rem); /* 32px -> 64px */
+  --type-size-h2: clamp(1.625rem, calc(2.13vw + 1.2rem), 2.8rem); /* 26px -> 45px */
+  --type-size-h3: clamp(1.375rem, calc(1.14vw + 1.15rem), 2rem); /* 22px -> 32px */
+  --type-size-h4: clamp(1.125rem, calc(0.57vw + 1.07rem), 1.5rem); /* 18px -> 24px */
+  --type-size-h5: clamp(1rem, calc(0.28vw + 0.94rem), 1.1875rem); /* 16px -> 19px */
+  --type-size-base: var(--type-size-body);
+  --type-size-large: clamp(1.125rem, calc(0.35vw + 1.05rem), 1.375rem);
+  --type-size-card-title: clamp(1.375rem, calc(0.7vw + 1.2rem), 2rem);
+  --type-size-featured-card-title: clamp(1.75rem, calc(1.25vw + 1.45rem), 2.75rem);
+  --type-size-blockquote: 1.1em;
+
+  /* Line heights */
+  --line-height-body: 1.65;
+  --line-height-h1: 1.3;
+  --line-height-h2: 1.35;
+  --line-height-h3: 1.45;
+  --line-height-h4: 1.55;
+  --line-height-h5: 1.6;
+
+  /* Font weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+
+  /* Letter spacing */
+  --letter-spacing-tight: -0.03em;
+  --letter-spacing-label: 0.05em;
+  --letter-spacing-wide: 0.08em;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* ========================================================================
+     Blue Relay — blue-led technical palette
+     ======================================================================== */
+  --bg-main: #0b1020;
+  --bg-surface: #111a2e;
+  --bg-surface-elevated: #18243a;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  --brand-primary: #5ea8ff;
+  --brand-accent: #38d9a9;
+  --brand-highlight: #ffb86b;
+
+  /* Non-semantic category accents: compact labels and small glyphs only. */
+  --accent-category-blue: #82aee0;
+  --accent-category-violet: #a59ad6;
+  --accent-category-plum: #bd8fb4;
+  --accent-category-coral: #d59087;
+  --accent-category-slate: #8da2b8;
+  --accent-category-moss: #a6bd7d;
+
+  --border-main: #26344d;
+  --border-muted: #1a2638;
+  --border-control: #52627a;
+
+  /* Fluid vertical rhythm: 26.4px -> 33px. */
+  --rhythm: clamp(1.65rem, calc(0.75vw + 1.5rem), 2.0625rem);
+
+  /* Spacing — clean multiples of the baseline rhythm */
+  --space-xs: calc(var(--rhythm) * 0.5);
+  --space-sm: calc(var(--rhythm) * 0.75);
+  --space-md: calc(var(--rhythm) * 1);
+  --space-lg: calc(var(--rhythm) * 1.5);
+  --space-xl: calc(var(--rhythm) * 2);
+
+  /* Semantic spacing */
+  --space-inline: var(--space-xs);
+  --space-inline-strong: var(--space-sm);
+  --space-component: var(--space-md);
+  --space-component-lg: var(--space-lg);
+  --space-section: calc(var(--rhythm) * 2.5);
+  --space-layout: calc(var(--rhythm) * 3);
+
+  /* Semantic color roles */
+  --color-link: var(--brand-primary);
+  --color-link-hover: var(--brand-accent);
+  --color-action: var(--brand-primary);
+  --color-action-hover: #3d8ee0;
+  /* Focus-visible uses primary blue instead of brand-accent teal.
+     The teal --brand-accent is preserved for --color-link-hover and
+     --color-success where subtle green is intentional. */
+  --color-focus: var(--color-link);
+  --color-success: var(--brand-accent);
+
+  /* Semantic text roles */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  /* Semantic card roles */
+  --color-card-bg: var(--bg-surface);
+  --color-card-bg-elevated: var(--bg-surface-elevated);
+  --color-card-border: var(--border-main);
+
+  --focus-outline-width: var(--size-border-pixel);
+  --focus-outline-style: dashed;
+  --focus-outline-color: var(--color-focus);
+  --focus-outline-offset: 4px;
+
+  /* Transition & motion tokens */
+  --transition-fast: 0.15s ease-out;
+  --transition-normal: 0.25s ease-out;
+  --transition-slow: 0.4s ease-out;
+
+  /* Semantic shadow tokens */
+  --shadow-sm: 0 2px 8px oklch(0 0 0 / 0.15);
+  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.2);
+  --shadow-lg: 0 8px 24px oklch(0 0 0 / 0.22);
+
+  /* Structural sizing tokens */
+  --size-border-pixel: 2px;
+  --size-border-thick: 4px;
+  --size-touch-target-min: 44px;
+
+  /* Layout rails */
+  --layout-rail-prose: 68ch;
+  --layout-rail-page: 72rem;
+  --layout-rail-wide: 80rem;
+
+  /* Breakpoints */
+  --bp-mobile: 720px;
+}
+
+/* ========================================================================
+   Light theme: explicit user toggle.
+   ======================================================================== */
+[data-theme="light"] {
+  --bg-main: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #e8eef7;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #475569;
+
+  --brand-primary: #005fcc;
+  --brand-accent: #007a5a;
+  --brand-highlight: #a14b00;
+  --accent-category-blue: #315f93;
+  --accent-category-violet: #6553a2;
+  --accent-category-plum: #854d78;
+  --accent-category-coral: #9b5149;
+  --accent-category-slate: #526a83;
+  --accent-category-moss: #526b32;
+  --color-action-hover: #004799;
+
+  --border-main: #cbd5e1;
+  --border-muted: #e2e8f0;
+  --border-control: #64748b;
+  color-scheme: light;
+}
+
+/* --- Follow system light preference when no manual override  --- */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg-main: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-surface-elevated: #e8eef7;
+
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #475569;
+
+    --brand-primary: #005fcc;
+    --brand-accent: #007a5a;
+    --brand-highlight: #a14b00;
+    --accent-category-blue: #315f93;
+    --accent-category-violet: #6553a2;
+    --accent-category-plum: #854d78;
+    --accent-category-coral: #9b5149;
+    --accent-category-slate: #526a83;
+    --accent-category-moss: #526b32;
+    --color-action-hover: #004799;
+
+    --border-main: #cbd5e1;
+    --border-muted: #e2e8f0;
+    --border-control: #64748b;
+    color-scheme: light;
+  }
+}
+
+/* --- Explicit dark override (wins over system light) -- */
+[data-theme="dark"] {
+  --bg-main: #0b1020;
+  --bg-surface: #111a2e;
+  --bg-surface-elevated: #18243a;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  --brand-primary: #5ea8ff;
+  --brand-accent: #38d9a9;
+  --brand-highlight: #ffb86b;
+  --accent-category-blue: #82aee0;
+  --accent-category-violet: #a59ad6;
+  --accent-category-plum: #bd8fb4;
+  --accent-category-coral: #d59087;
+  --accent-category-slate: #8da2b8;
+  --accent-category-moss: #a6bd7d;
+  --color-action-hover: #3d8ee0;
+
+  --border-main: #26344d;
+  --border-muted: #1a2638;
+  --border-control: #52627a;
+  color-scheme: dark;
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@ericcarlisle/design-system",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared design tokens, fonts, and components for ericcarlisle.com properties.",
+  "exports": {
+    "./*": "./src/*",
+    "./*.css": "./src/*.css"
+  },
+  "dependencies": {
+    "@fontsource-variable/fira-code": "^5.2.7",
+    "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
+    "@fontsource-variable/source-sans-3": "^5.2.9"
+  }
+}
