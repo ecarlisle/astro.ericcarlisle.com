@@ -1,14 +1,15 @@
 ---
 import { Image } from 'astro:assets';
+import CategoryTag from '@ericcarlisle/design-system/components/CategoryTag.astro';
 import avatarImage from '@images/eric-carlisle.png';
 import BaseHead from '../components/BaseHead.astro';
 import Card from '../components/Card.astro';
-import CategoryTag from '../components/CategoryTag.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import '@styles/feed.css';
 import { AUTHOR_NAME } from '../consts';
 import { getSortedPosts } from '../lib/blog-utils';
+import { getCategoryAccent, getCategoryIcon } from '../lib/category-accents';
 
 const posts = (await getSortedPosts()).slice(0, 6);
 ---
@@ -45,11 +46,11 @@ const posts = (await getSortedPosts()).slice(0, 6);
           </div>
           <p class="home-hero-capabilities-label" id="core-capabilities-label">Core capabilities</p>
           <ul class="home-hero-chips" aria-labelledby="core-capabilities-label">
-            <li><CategoryTag label="Frontend architecture" variant="chip" /></li>
-            <li><CategoryTag label="Design systems" variant="chip" /></li>
-            <li><CategoryTag label="Accessibility" variant="chip" /></li>
-            <li><CategoryTag label="Performance" variant="chip" /></li>
-            <li><CategoryTag label="UX strategy" variant="chip" /></li>
+            <li><CategoryTag label="Frontend architecture" variant="chip" accent={getCategoryAccent('frontend architecture')} icon={getCategoryIcon('frontend architecture')} /></li>
+            <li><CategoryTag label="Design systems" variant="chip" accent={getCategoryAccent('design systems')} icon={getCategoryIcon('design systems')} /></li>
+            <li><CategoryTag label="Accessibility" variant="chip" accent={getCategoryAccent('accessibility')} icon={getCategoryIcon('accessibility')} /></li>
+            <li><CategoryTag label="Performance" variant="chip" accent={getCategoryAccent('performance')} icon={getCategoryIcon('performance')} /></li>
+            <li><CategoryTag label="UX strategy" variant="chip" accent={getCategoryAccent('ux strategy')} icon={getCategoryIcon('ux strategy')} /></li>
           </ul>
         </div>
         <div class="home-hero-avatar">

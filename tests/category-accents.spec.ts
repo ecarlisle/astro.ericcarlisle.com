@@ -3,7 +3,10 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import { getCategoryAccent, getCategoryIcon } from '../src/lib/category-accents';
 
-const globalCss = readFileSync(join(process.cwd(), 'src/styles/global.css'), 'utf8');
+const globalCss = readFileSync(
+  join(process.cwd(), 'packages/design-system/src/styles/tokens.css'),
+  'utf8',
+);
 const categoryAccents = ['blue', 'violet', 'plum', 'coral', 'slate', 'moss'] as const;
 
 function getThemeBlock(theme: 'light' | 'dark'): string {

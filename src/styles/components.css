@@ -162,46 +162,6 @@
   color: var(--color-text-secondary);
 }
 
-/* ── Shared technical page-header surface and contextual eyebrow ── */
-.technical-surface {
-  position: relative;
-  isolation: isolate;
-  background-image: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--bg-surface) 28%, transparent),
-    transparent 76%
-  );
-}
-
-.technical-surface::before,
-.technical-surface::after {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  content: "";
-  pointer-events: none;
-}
-
-.technical-surface::before {
-  background-image: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--border-main) 68%, transparent) 1px,
-    transparent 1.25px
-  );
-  background-size: 28px 28px;
-  -webkit-mask-image: linear-gradient(to bottom, black 8%, transparent 94%);
-  mask-image: linear-gradient(to bottom, black 8%, transparent 94%);
-  opacity: 0.72;
-}
-
-.technical-surface::after {
-  background: radial-gradient(
-    ellipse at 16% 6%,
-    color-mix(in srgb, var(--brand-primary) 10%, transparent),
-    transparent 58%
-  );
-}
-
 @media (max-width: 720px) {
   .grid--cards {
     grid-template-columns: 1fr;
@@ -255,60 +215,6 @@
   color: var(--color-action-hover);
   border-color: var(--color-action-hover);
   transform: translateY(-1px);
-}
-
-.post-nav {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-component);
-  margin-top: var(--space-xl);
-  padding-top: var(--space-component);
-  border-top: var(--size-border-pixel) solid var(--border-main);
-}
-
-.post-nav a {
-  padding: var(--space-inline) var(--space-inline-strong);
-  border-radius: var(--radius-md);
-  text-decoration: none;
-  color: var(--color-text-primary);
-  transition:
-    background var(--transition-fast),
-    color var(--transition-fast);
-}
-
-.post-nav a:hover {
-  background: var(--bg-surface);
-  color: var(--color-link);
-}
-
-.post-nav .post-nav-label {
-  display: block;
-  margin-bottom: var(--space-xs);
-  color: var(--color-text-muted);
-  font-size: var(--type-size-small);
-}
-
-.post-nav a:hover .post-nav-label {
-  color: var(--color-link);
-}
-
-.post-nav .post-nav-title {
-  font-family: var(--font-headers);
-  font-weight: var(--font-weight-bold);
-}
-
-.post-nav .post-nav-next {
-  text-align: right;
-}
-
-@media (max-width: 720px) {
-  .post-nav {
-    grid-template-columns: 1fr;
-  }
-
-  .post-nav .post-nav-next {
-    text-align: left;
-  }
 }
 
 .toc {

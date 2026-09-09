@@ -1,8 +1,10 @@
 ---
-import CategoryIcon from '@components/CategoryIcon.astro';
-import { getCategoryAccent, getCategoryIcon } from '@lib/category-accents';
+import CategoryIcon from './CategoryIcon.astro';
+import type { CategoryAccent, CategoryIconName } from './category-types';
 
 type Props = {
+  accent: CategoryAccent;
+  icon: CategoryIconName;
   class?: string;
   count?: number;
   href?: string;
@@ -10,10 +12,8 @@ type Props = {
   variant?: 'chip' | 'tag';
 };
 
-const { class: className, count, href, label, variant = 'tag' } = Astro.props;
+const { accent, icon, class: className, count, href, label, variant = 'tag' } = Astro.props;
 
-const accent = getCategoryAccent(label);
-const icon = getCategoryIcon(label);
 const Element = href ? 'a' : 'span';
 ---
 

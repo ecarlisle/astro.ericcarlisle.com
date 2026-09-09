@@ -116,7 +116,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Spacing tokens provide consistent vertical and horizontal rhythm throughout the KISS Design System. All spacing values are multiples of the base rhythm unit defined in `src/styles/global.css`.',
+          'Spacing tokens provide consistent vertical and horizontal rhythm throughout the KISS Design System. All spacing values are multiples of the base rhythm unit defined in `packages/design-system/src/styles/tokens.css`.',
       },
     },
   },

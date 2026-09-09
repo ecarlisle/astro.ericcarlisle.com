@@ -1,10 +1,12 @@
-export type CategoryAccent = 'blue' | 'violet' | 'plum' | 'coral' | 'slate' | 'moss';
-export type CategoryIcon =
-  | 'accessibility'
-  | 'architecture'
-  | 'performance'
-  | 'strategy'
-  | 'systems';
+export type {
+  CategoryAccent,
+  CategoryIconName as CategoryIcon,
+} from '@ericcarlisle/design-system/components/category-types';
+
+import type {
+  CategoryAccent,
+  CategoryIconName as CategoryIcon,
+} from '@ericcarlisle/design-system/components/category-types';
 
 const categoryAccents: Record<string, CategoryAccent> = {
   '3d-printing': 'coral',

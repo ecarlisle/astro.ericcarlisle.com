@@ -1,5 +1,6 @@
 ---
-import CategoryTag from '@components/CategoryTag.astro';
+import CategoryTag from '@ericcarlisle/design-system/components/CategoryTag.astro';
+import { getCategoryAccent, getCategoryIcon } from '@lib/category-accents';
 
 type TagType = 'div' | 'article' | 'li';
 
@@ -69,7 +70,12 @@ const readingTimeMin = readingTime ? Math.ceil(readingTime / 200) : undefined;
     {tags && tags.length > 0 && (
       <p class="meta meta-tags">
         {tags.slice(0, 3).map((tag: string) => (
-          <CategoryTag href={`/tags/${tag}/`} label={tag} />
+          <CategoryTag
+            href={`/tags/${tag}/`}
+            label={tag}
+            accent={getCategoryAccent(tag)}
+            icon={getCategoryIcon(tag)}
+          />
         ))}
       </p>
     )}

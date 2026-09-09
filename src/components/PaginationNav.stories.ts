@@ -1,4 +1,4 @@
-import PaginationNav from './PaginationNav.astro';
+import PaginationNav from '@ericcarlisle/design-system/components/PaginationNav.astro';
 
 const meta = {
   title: 'Navigation/PaginationNav',

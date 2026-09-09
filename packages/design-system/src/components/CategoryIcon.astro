@@ -1,8 +1,8 @@
 ---
-import type { CategoryIcon } from '@lib/category-accents';
+import type { CategoryIconName } from './category-types';
 
 type Props = {
-  icon: CategoryIcon;
+  icon: CategoryIconName;
 };
 
 const { icon } = Astro.props;
@@ -10,7 +10,7 @@ const { icon } = Astro.props;
 // Material Symbols Outlined, fill 0, weight 400, grade 0, optical size 24.
 // Upstream: Google Material Symbols (Apache-2.0).
 // Sources: https://github.com/google/material-design-icons/tree/master/symbols/web
-const iconPaths: Record<CategoryIcon, string> = {
+const iconPaths: Record<CategoryIconName, string> = {
   // accessibility_new: https://github.com/google/material-design-icons/tree/master/symbols/web/accessibility_new
   accessibility:
     'M480-720q-33 0-56.5-23.5T400-800q0-33 23.5-56.5T480-880q33 0 56.5 23.5T560-800q0 33-23.5 56.5T480-720ZM360-80v-520q-60-5-122-15t-118-25l20-80q78 21 166 30.5t174 9.5q86 0 174-9.5T820-720l20 80q-56 15-118 25t-122 15v520h-80v-240h-80v240h-80Z',

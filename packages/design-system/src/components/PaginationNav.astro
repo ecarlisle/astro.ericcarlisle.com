@@ -1,0 +1,74 @@
+---
+const { prev, next } = Astro.props;
+---
+
+<nav class="post-nav" aria-label="Pagination">
+  {prev ? (
+    <a href={prev.url} rel="prev">
+      <span class="post-nav-label">{prev.label}</span>
+      {prev.title && <span class="post-nav-title">{prev.title}</span>}
+    </a>
+  ) : <div />}
+  {next ? (
+    <a href={next.url} rel="next" class="post-nav-next">
+      <span class="post-nav-label">{next.label}</span>
+      {next.title && <span class="post-nav-title">{next.title}</span>}
+    </a>
+  ) : <div />}
+</nav>
+
+<style>
+  .post-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-component);
+    margin-top: var(--space-xl);
+    padding-top: var(--space-component);
+    border-top: var(--size-border-pixel) solid var(--border-main);
+  }
+
+  .post-nav a {
+    padding: var(--space-inline) var(--space-inline-strong);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--color-text-primary);
+    transition:
+      background var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .post-nav a:hover {
+    background: var(--bg-surface);
+    color: var(--color-link);
+  }
+
+  .post-nav .post-nav-label {
+    display: block;
+    margin-bottom: var(--space-xs);
+    color: var(--color-text-muted);
+    font-size: var(--type-size-small);
+  }
+
+  .post-nav a:hover .post-nav-label {
+    color: var(--color-link);
+  }
+
+  .post-nav .post-nav-title {
+    font-family: var(--font-headers);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .post-nav .post-nav-next {
+    text-align: right;
+  }
+
+  @media (max-width: 720px) {
+    .post-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .post-nav .post-nav-next {
+      text-align: left;
+    }
+  }
+</style>
