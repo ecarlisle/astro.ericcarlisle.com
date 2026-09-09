@@ -1,6 +1,7 @@
 ---
-import CategoryTag from '@components/CategoryTag.astro';
+import CategoryTag from '@ericcarlisle/design-system/components/CategoryTag.astro';
 import type { TagData } from '@lib/blog-utils';
+import { getCategoryAccent, getCategoryIcon } from '@lib/category-accents';
 
 interface Props {
   tagData?: TagData;
@@ -19,9 +20,15 @@ const hasTags = tags && tags.length > 0;
     role="group"
     aria-label="Filter posts by tag"
   >
-    <CategoryTag href="/blog" label="All" />
+    <CategoryTag href="/blog" label="All" accent={getCategoryAccent('all')} icon={getCategoryIcon('all')} />
     {tagData.allTags.map((tag) => (
-      <CategoryTag href={`/tags/${tag}`} label={tag} count={tagData.tagCounts[tag]} />
+      <CategoryTag
+        href={`/tags/${tag}`}
+        label={tag}
+        count={tagData.tagCounts[tag]}
+        accent={getCategoryAccent(tag)}
+        icon={getCategoryIcon(tag)}
+      />
     ))}
   </div>
 )}
@@ -33,6 +40,8 @@ const hasTags = tags && tags.length > 0;
         href={`/tags/${tag}`}
         label={tag}
         count={tagData?.tagCounts[tag]}
+        accent={getCategoryAccent(tag)}
+        icon={getCategoryIcon(tag)}
       />
     ))}
   </div>

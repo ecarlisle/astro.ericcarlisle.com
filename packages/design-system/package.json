@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Shared design tokens, fonts, and components for ericcarlisle.com properties.",
   "exports": {
+    "./components/category-types": "./src/components/category-types.ts",
     "./*": "./src/*",
     "./*.css": "./src/*.css"
   },
