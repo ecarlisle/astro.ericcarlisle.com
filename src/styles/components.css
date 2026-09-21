@@ -78,7 +78,7 @@
   padding: 0.2em 0.6em;
   font-family: var(--font-mono);
   font-size: var(--type-size-small);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--bg-surface-elevated);
   color: var(--color-text-secondary);
   text-decoration: none;
@@ -99,7 +99,7 @@
   padding: 0.5em 1em;
   font-family: var(--font-mono);
   font-size: var(--type-size-small);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--bg-surface-elevated);
   color: var(--color-text-secondary);
 }
@@ -220,7 +220,7 @@
   padding: var(--space-inline) var(--space-component);
   border-radius: var(--radius-md);
   background: var(--color-action);
-  color: var(--bg-surface);
+  color: var(--color-on-action);
   border: var(--size-border-pixel) solid transparent;
   text-decoration: none;
   font-size: var(--type-size-body);
@@ -235,8 +235,13 @@
 
 .button:hover {
   background: var(--color-action-hover);
-  color: var(--bg-surface);
+  color: var(--color-on-action);
   box-shadow: var(--shadow-md);
+}
+
+.button:active {
+  background: var(--color-action-active);
+  box-shadow: none;
 }
 
 .button--outline {

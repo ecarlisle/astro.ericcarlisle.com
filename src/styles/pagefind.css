@@ -226,7 +226,7 @@
 
 #search :where(.pagefind-ui__result-tag) {
   padding: 0.2em 0.6em;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-card-bg-elevated);
   color: var(--color-text-secondary);
   font-family: var(--font-mono);
