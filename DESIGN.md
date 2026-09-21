@@ -71,6 +71,7 @@ Recommended semantic roles:
 - `--brand-highlight`: warm highlight used sparingly for special callouts, warnings, or unique metadata. Implemented as `.callout--note` in `src/styles/components.css` (documented in the design-system reference) — this is the intended usage; avoid adding more `--brand-highlight` surfaces without a specific reason.
 - `--bg-main`, `--bg-surface`, `--bg-surface-elevated`: page and component surfaces
 - `--text-primary`, `--text-secondary`, `--text-muted`: text hierarchy
+- `--color-danger`, `--color-warning`: error and warning states (status only; `--brand-highlight` stays callout-only)
 - `--border-main`, `--border-muted`, `--border-control`: structure and controls
 
 Do not add many more hues. Prefer semantic roles and tonal steps over more color variety.
@@ -104,7 +105,7 @@ Suggested Blue Relay tokens:
   --color-focus: var(--brand-accent);
   --border-main: #26344D;
   --border-muted: #1A2638;
-  --border-control: #52627A;
+  --border-control: #61728B;
 }
 [data-theme="light"] {
   --bg-main: #F8FAFC;

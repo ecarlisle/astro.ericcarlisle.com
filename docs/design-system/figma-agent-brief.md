@@ -264,9 +264,11 @@ main {
 | `--brand-primary` | `#5ea8ff` | Links, actions, focus |
 | `--brand-accent` | `#38d9a9` | Link hover, success states |
 | `--brand-highlight` | `#ffb86b` | Highlights, marks |
+| `--color-danger` | `#ff8a8a` | Error and destructive states |
+| `--color-warning` | `#f5d35c` | Warning states |
 | `--border-main` | `#26344d` | Card borders, dividers |
 | `--border-muted` | `#1a2638` | Header border, subtle separators |
-| `--border-control` | `#52627a` | Form input borders |
+| `--border-control` | `#61728b` | Form input borders (3:1+ on all surfaces) |
 
 ### Light palette
 
@@ -281,6 +283,8 @@ main {
 | `--brand-primary` | `#005fcc` | Links, actions, focus |
 | `--brand-accent` | `#007a5a` | Link hover, success |
 | `--brand-highlight` | `#a14b00` | Highlights |
+| `--color-danger` | `#b42318` | Error and destructive states |
+| `--color-warning` | `#7a5b00` | Warning states |
 | `--border-main` | `#cbd5e1` | Card borders, dividers |
 | `--border-muted` | `#e2e8f0` | Header border |
 | `--border-control` | `#64748b` | Form input borders |
@@ -293,6 +297,8 @@ main {
 | `--color-link-hover` | `--brand-accent` | `--brand-accent` | Hovered links |
 | `--color-action` | `--brand-primary` | `--brand-primary` | Buttons, CTAs |
 | `--color-action-hover` | `#3d8ee0` | `#004799` | Button hover |
+| `--color-action-active` | `#3787d8` | `#003a7d` | Button pressed |
+| `--color-on-action` | `--bg-surface` | `--bg-surface` | Text/icons on `--color-action` |
 | `--color-focus` | `--color-link` | `--color-link` | Focus outlines |
 | `--color-success` | `--brand-accent` | `--brand-accent` | Success states |
 | `--color-text-primary` | `--text-primary` | `--text-primary` | Semantic text primary |
@@ -324,6 +330,9 @@ Create a `Colors` collection with modes `Dark` and `Light`:
 - `link/hover`
 - `focus`
 - `success`
+- `danger`
+- `warning`
+- `action/active`
 - `card/bg`
 - `card/bg-elevated`
 - `card/border`
@@ -399,7 +408,7 @@ Create a `Colors` collection with modes `Dark` and `Light`:
 
 - **Source:** `src/styles/components.css` (`.tag`, `.chip`)
 - **Purpose:** `.tag` is interactive (link). `.chip` is static.
-- **Container:** `display: inline-flex`, padding `0.2em 0.6em`, radius `999px`, background `--bg-surface-elevated`, color `--text-secondary`.
+- **Container:** `display: inline-flex`, padding `0.2em 0.6em`, radius `--radius-full`, background `--bg-surface-elevated`, color `--text-secondary`.
 - **Typography:** `--font-mono`, `--type-size-small`.
 - **States:** Tag hover uses `--color-action-hover` background and `--bg-main` text.
 - **Figma name:** `Tag`, `Chip`.
@@ -464,7 +473,7 @@ Create a `Colors` collection with modes `Dark` and `Light`:
 - **Source:** `src/components/TagFilterBar.astro`
 - **Purpose:** Tag filter list or post tags.
 - **Container:** Flex wrap, gap `--space-sm`, centered.
-- **Items:** Pill shape (`border-radius: 999px`), padding `0.3em 0.7em`, `--type-size-small`, `--text-muted`.
+- **Items:** Pill shape (`border-radius: var(--radius-full)`), padding `0.3em 0.7em`, `--type-size-small`, `--text-muted`.
 - **States:** Hover background `--bg-surface`, color `--color-link`.
 - **Figma name:** `Tag Filter Bar`.
 
