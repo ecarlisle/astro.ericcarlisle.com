@@ -2,9 +2,7 @@
 
 **Use when:** Planning a change, judging its scope, or deciding whether it needs discussion first.
 
-The project favors small, static-first, accessibility-aware changes. Changes to architecture,
-dependencies, the content schema, routing, or deployment get deliberate review because they ripple
-across the site. Review criteria are in the [Reviewer Checklist](reviewer-checklist.md).
+The project favors small, static-first, accessibility-aware changes. Changes to architecture, dependencies, the content schema, routing, or deployment get deliberate review because they ripple across the site. Review criteria are in the [Reviewer Checklist](reviewer-checklist.md).
 
 ## Changes that need care
 
@@ -31,6 +29,4 @@ These are fine when they stay within project conventions:
 
 ## Keep docs current
 
-When architecture, content conventions, scripts, deployment, styling, accessibility, or SEO behavior
-changes, update the one doc that owns that fact. Prefer editing an existing doc to creating a new
-one.
+When architecture, content conventions, scripts, deployment, styling, accessibility, or SEO behavior changes, update the one doc that owns that fact. Prefer editing an existing doc to creating a new one.

@@ -32,8 +32,7 @@
 
 - [ ] Mark placeholder/test posts clearly
 - [ ] Decide which placeholder posts to keep until real content replaces them
-- [ ] Decide whether `working-with-id-without-losing-ourselves.mdx` should be renamed to
-      `working-with-ai-without-losing-ourselves.mdx`
+- [ ] Decide whether `working-with-id-without-losing-ourselves.mdx` should be renamed to `working-with-ai-without-losing-ourselves.mdx`
 - [ ] Finalize About page copy
 - [ ] Finalize Portfolio page copy
 - [ ] Draft portfolio case study pages

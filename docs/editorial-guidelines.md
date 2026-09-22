@@ -1,10 +1,8 @@
 # Editorial Guidelines
 
-**Use when:** Writing, editing, or reviewing article prose. The detailed voice description is
-[the voice profile](../.agents/voice/profile.md).
+**Use when:** Writing, editing, or reviewing article prose. The detailed voice description is [the voice profile](../.agents/voice/profile.md).
 
-The blog should sound like an experienced software developer reflecting clearly on practical
-engineering work.
+The blog should sound like an experienced software developer reflecting clearly on practical engineering work.
 
 ## Preferred Voice
 

@@ -4,13 +4,9 @@
 
 Figma file: [KISS Design System](https://www.figma.com/design/fWzDrhAPBnnpGRVyKSMp1Q/KISS-Design-System?node-id=0-1&t=oeon7nje8gUrMHyP-1)
 
-To run a generation, paste this whole file into the Figma agent. It is a paste-in payload, so it is
-exempt from the 600-word limit (see [Writing Documentation](../documentation.md#length)).
+To run a generation, paste this whole file into the Figma agent. It is a paste-in payload, so it is exempt from the 600-word limit (see [Writing Documentation](../documentation.md#length)).
 
-The Astro implementation (`src/styles/`, `src/components/`, `src/layouts/`, `src/pages/`) is the
-source of truth. Figma mirrors it and never redesigns it. Reference values are copied from
-`src/styles/global.css` and the components, which win any conflict. When a token or component
-changes, update the matching Reference section.
+The Astro implementation (`src/styles/`, `src/components/`, `src/layouts/`, `src/pages/`) is the source of truth. Figma mirrors it and never redesigns it. Reference values are copied from `src/styles/global.css` and the components, which win any conflict. When a token or component changes, update the matching Reference section.
 
 ## Principles
 
@@ -20,8 +16,7 @@ changes, update the matching Reference section.
 4. **Fluid responsive design:** `clamp()` type and spacing, mobile-first breakpoints.
 5. **Content first:** a `68ch` prose measure, generous whitespace, clear hierarchy.
 
-The intended feel is fast, thoughtful, human, technical, accessible, and professional without
-being sterile.
+The intended feel is fast, thoughtful, human, technical, accessible, and professional without being sterile.
 
 ## Figma pages
 
@@ -76,11 +71,9 @@ Reference px values assume a 16px base.
 | `--font-headers` | `"Plus Jakarta Sans Variable", system-ui, sans-serif` | Plus Jakarta Sans |
 | `--font-mono` | `"Fira Code Variable", ui-monospace, monospace` | Fira Code |
 
-Weights: `--font-weight-normal` 400 (body), `-medium` 600 (tag names, result labels), `-bold` 700
-(headings, buttons, active nav, stats), `-black` 900 (site title).
+Weights: `--font-weight-normal` 400 (body), `-medium` 600 (tag names, result labels), `-bold` 700 (headings, buttons, active nav, stats), `-black` 900 (site title).
 
-Letter spacing: `--letter-spacing-tight` −0.03em (site title), `-label` 0.05em (uppercase labels),
-`-wide` 0.08em (404 label).
+Letter spacing: `--letter-spacing-tight` −0.03em (site title), `-label` 0.05em (uppercase labels), `-wide` 0.08em (404 label).
 
 | Token | Clamp | Mobile / desktop | Line height |
 |---|---|---|---|
@@ -98,13 +91,9 @@ Letter spacing: `--letter-spacing-tight` −0.03em (site title), `-label` 0.05em
 
 Headings use Plus Jakarta Sans 700, `text-primary`, margin 0; `h1`–`h3` use `text-wrap: balance`.
 
-**Text styles** (as `Desktop / …` and `Mobile / …`): Body, Body Small, Body Large, H1–H5, Card
-Title, Featured Card Title, Mono / Meta, Mono / Small, Tag / Chip, Button, and Eyebrow (uppercase,
-label spacing, small size).
+**Text styles** (as `Desktop / …` and `Mobile / …`): Body, Body Small, Body Large, H1–H5, Card Title, Featured Card Title, Mono / Meta, Mono / Small, Tag / Chip, Button, and Eyebrow (uppercase, label spacing, small size).
 
-**Prose:** `.prose p` and `li` max `68ch`. Inline `code` is mono 0.95em on `--bg-surface` with
-`--radius-sm`. `pre` has `--space-component` padding, `--bg-surface`, and `--border-main`.
-Uppercase labels are small, uppercase, label-spaced, and `--text-muted`.
+**Prose:** `.prose p` and `li` max `68ch`. Inline `code` is mono 0.95em on `--bg-surface` with `--radius-sm`. `pre` has `--space-component` padding, `--bg-surface`, and `--border-main`. Uppercase labels are small, uppercase, label-spaced, and `--text-muted`.
 
 **Heading permalink states** (for H2 and H3; no new tokens):
 
@@ -135,20 +124,13 @@ Name the Figma number variables after the tokens, using desktop values. A mobile
 
 ### Layout
 
-Rails: `--layout-rail-prose` `68ch` (~680px), `--layout-rail-page` `72rem` (1152px),
-`--layout-rail-wide` `80rem` (1280px, rarely used).
+Rails: `--layout-rail-prose` `68ch` (~680px), `--layout-rail-page` `72rem` (1152px), `--layout-rail-wide` `80rem` (1280px, rarely used).
 
-- **Main:** max width is the page rail, centered, padded `--space-layout` / `--space-component`.
-  At ≤720px, padding is `--space-component`.
-- **Header:** fixed, `--bg-surface`, `1px` bottom border in `--border-muted`, min height 4.5rem
-  (4rem on mobile). It hides on scroll down and reveals on scroll up. Mobile uses a hamburger menu
-  with a two-column dropdown.
-- **Footer:** centered, `--text-secondary`. Social links sit below with a `--space-inline` gap
-  and a `--space-component` top margin.
+- **Main:** max width is the page rail, centered, padded `--space-layout` / `--space-component`. At ≤720px, padding is `--space-component`.
+- **Header:** fixed, `--bg-surface`, `1px` bottom border in `--border-muted`, min height 4.5rem (4rem on mobile). It hides on scroll down and reveals on scroll up. Mobile uses a hamburger menu with a two-column dropdown.
+- **Footer:** centered, `--text-secondary`. Social links sit below with a `--space-inline` gap and a `--space-component` top margin.
 - **Site frame:** `.site-frame` wraps the header and footer with `--space-component` padding.
-- **Grid:** `.grid--cards` is `repeat(auto-fit, minmax(280px, 1fr))` with a `--space-component`
-  gap. `.grid--featured-first` makes the first card full width. At ≤720px, both collapse to a
-  single column.
+- **Grid:** `.grid--cards` is `repeat(auto-fit, minmax(280px, 1fr))` with a `--space-component` gap. `.grid--featured-first` makes the first card full width. At ≤720px, both collapse to a single column.
 
 | Breakpoint | Width | Effect |
 |---|---|---|
@@ -191,8 +173,7 @@ Rails: `--layout-rail-prose` `68ch` (~680px), `--layout-rail-page` `72rem` (1152
 | `--color-focus` | `--color-link` | same | Focus outlines |
 | `--color-success` | `--brand-accent` | same | Success |
 
-Text and card surfaces have no semantic alias. Use the `--text-*`, `--bg-surface*`, and
-`--border-main` tokens directly.
+Text and card surfaces have no semantic alias. Use the `--text-*`, `--bg-surface*`, and `--border-main` tokens directly.
 
 ### Z-index
 
@@ -209,15 +190,11 @@ Text and card surfaces have no semantic alias. Use the `--text-*`, `--bg-surface
 
 Create a `Colors` collection with `Dark` and `Light` modes:
 
-`bg/main` · `bg/surface` · `bg/surface-elevated` · `text/primary` · `text/secondary` ·
-`text/muted` · `brand/primary` · `brand/accent` · `brand/highlight` · `border/main` ·
-`border/muted` · `border/control` · `action/default` · `action/hover` · `action/active` ·
-`link/default` · `link/hover` · `focus` · `success` · `danger` · `warning`
+`bg/main` · `bg/surface` · `bg/surface-elevated` · `text/primary` · `text/secondary` · `text/muted` · `brand/primary` · `brand/accent` · `brand/highlight` · `border/main` · `border/muted` · `border/control` · `action/default` · `action/hover` · `action/active` · `link/default` · `link/hover` · `focus` · `success` · `danger` · `warning`
 
 ## Reference: Components
 
-Sources, purposes, and accessibility notes live in [inventory.json](inventory.json); this section
-holds only Figma names, tokens, and states.
+Sources, purposes, and accessibility notes live in [inventory.json](inventory.json); this section holds only Figma names, tokens, and states.
 
 | Figma name | Visual spec | States and variants |
 |---|---|---|

@@ -1,10 +1,8 @@
 # Testing
 
-**Use when:** Choosing or running validation, or changing test, lint, Playwright, or Storybook
-tooling.
+**Use when:** Choosing or running validation, or changing test, lint, Playwright, or Storybook tooling.
 
-This file is the single source for validation commands. `package.json` is the source of truth for
-exact script definitions. Use `pnpm` only.
+This file is the single source for validation commands. `package.json` is the source of truth for exact script definitions. Use `pnpm` only.
 
 ## When to Run Each Check
 
@@ -26,16 +24,11 @@ exact script definitions. Use `pnpm` only.
 
 ## Playwright
 
-`pnpm test:e2e` runs the full suite (routes, accessibility, SEO, Storybook) against the production
-build. `pnpm test:a11y` runs only `tests/accessibility.spec.ts`. Configuration lives in
-`playwright.config.ts`. CI runs the full suite on every build.
+`pnpm test:e2e` runs the full suite (routes, accessibility, SEO, Storybook) against the production build. `pnpm test:a11y` runs only `tests/accessibility.spec.ts`. Configuration lives in `playwright.config.ts`. CI runs the full suite on every build.
 
 ## Storybook
 
-Storybook is the internal component lab, deployed at `/design-system/lab/`. The public
-design-system page remains the curated portfolio presentation. Configuration lives in `.storybook/`.
-Stories are colocated as `src/**/*.stories.*` or kept in `src/components/story-fixtures/`. The
-preview imports production global styles and exposes light and dark themes.
+Storybook is the internal component lab, deployed at `/design-system/lab/`. The public design-system page remains the curated portfolio presentation. Configuration lives in `.storybook/`. Stories are colocated as `src/**/*.stories.*` or kept in `src/components/story-fixtures/`. The preview imports production global styles and exposes light and dark themes.
 
 | Command | Purpose |
 |---|---|
@@ -43,14 +36,11 @@ preview imports production global styles and exposes light and dark themes.
 | `pnpm build:storybook` | Builds `storybook-static/` |
 | `pnpm verify:storybook-isolation` | Confirms Storybook stays out of the production bundle |
 
-Storybook packages stay dev dependencies. Use plain-object story exports, because
-`@storybook-astro/framework` does not re-export `Meta` or `StoryObj`.
+Storybook packages stay dev dependencies. Use plain-object story exports, because `@storybook-astro/framework` does not re-export `Meta` or `StoryObj`.
 
 ## Tooling notes
 
-- **Biome** replaces ESLint and Prettier. `noUnusedVariables`, `noUnusedImports`, and
-  `noImportantStyles` are off in `biome.json`.
+- **Biome** replaces ESLint and Prettier. `noUnusedVariables`, `noUnusedImports`, and `noImportantStyles` are off in `biome.json`.
 - **Vitest** is installed but unused; there is no active unit-test runner.
-- **Lighthouse** (`pnpm lighthouse:all`) serves every generated page from a static server.
-  `lighthouserc.js` uses `npm run preview` as its start command.
+- **Lighthouse** (`pnpm lighthouse:all`) serves every generated page from a static server. `lighthouserc.js` uses `npm run preview` as its start command.
 - **Generated directories** are listed in [Architecture](architecture.md#generated-areas).

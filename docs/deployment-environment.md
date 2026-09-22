@@ -1,7 +1,6 @@
 # Environment Variables
 
-**Use when:** Adding, changing, or debugging environment variables, secrets, or local environment
-setup.
+**Use when:** Adding, changing, or debugging environment variables, secrets, or local environment setup.
 
 [`.env.example`](../.env.example) is the template. Copy it to `.env.local` for local development.
 
@@ -27,8 +26,7 @@ Astro load order (later wins): `.env` → `.env.local` → `.env.[mode]` → `.e
 
 `PUBLIC_` variables are embedded in built HTML. Never put secrets in them.
 
-For local development, use the Turnstile test site key `1x00000000000000000000AA` (see
-[Turnstile](deployment-contact-worker.md#turnstile)).
+For local development, use the Turnstile test site key `1x00000000000000000000AA` (see [Turnstile](deployment-contact-worker.md#turnstile)).
 
 ## GitHub Actions
 
@@ -51,8 +49,7 @@ Set these with `wrangler secret put <NAME> --env production`.
 | `RESEND_FROM_EMAIL` | Sender address; must be on a verified Resend domain |
 | `RESEND_TO_EMAIL` | Recipient address |
 
-`wrangler.toml` environments: `development` → `ericcarlisle-contact-dev`, `production` →
-`ericcarlisle-contact`.
+`wrangler.toml` environments: `development` → `ericcarlisle-contact-dev`, `production` → `ericcarlisle-contact`.
 
 ## Rotate compromised keys
 

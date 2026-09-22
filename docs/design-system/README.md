@@ -1,11 +1,8 @@
 # KISS Design System
 
-**Use when:** Changing tokens, themes, shared styles, components, or reusable visual patterns, or
-deciding whether a new pattern is justified.
+**Use when:** Changing tokens, themes, shared styles, components, or reusable visual patterns, or deciding whether a new pattern is justified.
 
-The KISS Design System is the application design system for ericcarlisle.com. It is not a public
-component library or package. Implementation files define behavior; these docs explain intent and
-usage.
+The KISS Design System is the application design system for ericcarlisle.com. It is not a public component library or package. Implementation files define behavior; these docs explain intent and usage.
 
 ## Sources of Truth
 
@@ -24,8 +21,7 @@ usage.
 
 1. Search `inventory.json` by `name`, `kind`, or `purpose`.
 2. Read the file in `source`.
-3. View the `canonicalExample`, often an anchor such as `/portfolio/design-system/#card`. A value
-   of `null` means the pattern has no demonstration yet.
+3. View the `canonicalExample`, often an anchor such as `/portfolio/design-system/#card`. A value of `null` means the pattern has no demonstration yet.
 4. Grep for the component import or CSS class to find real usage.
 5. Respect `accessibilityNotes`, `whenToUse`, and `whenNotToUse`.
 
@@ -46,8 +42,7 @@ Dark is the default. Light applies through `[data-theme="light"]` or `prefers-co
 - Every color pair meets WCAG AA in both themes.
 - Focus, hover, and interactive feedback are visible in both themes.
 
-Accessibility conventions (skip link, dashed focus outlines, 44px targets, reduced motion, heading
-permalinks) are defined in [Accessibility Rules](../performance-seo-accessibility.md#accessibility-rules).
+Accessibility conventions (skip link, dashed focus outlines, 44px targets, reduced motion, heading permalinks) are defined in [Accessibility Rules](../performance-seo-accessibility.md#accessibility-rules).
 
 ## Maintenance map
 

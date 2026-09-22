@@ -29,8 +29,7 @@ Full structure and integrations: [docs/architecture.md](docs/architecture.md).
 
 ## Documentation
 
-Each doc opens with a **Use when** line and owns its facts; others link to it. How to write docs
-here: [docs/documentation.md](docs/documentation.md).
+Each doc opens with a **Use when** line and owns its facts; others link to it. How to write docs here: [docs/documentation.md](docs/documentation.md).
 
 | Area | Entry Point |
 |------|-------------|
@@ -47,8 +46,7 @@ here: [docs/documentation.md](docs/documentation.md).
 
 ## Agent compatibility shims
 
-Instructions live once, in [AGENTS.md](AGENTS.md). Tools that expect their own file get a thin
-pointer, never a copy.
+Instructions live once, in [AGENTS.md](AGENTS.md). Tools that expect their own file get a thin pointer, never a copy.
 
 | Agent | Reads | Shim |
 |---|---|---|
@@ -66,8 +64,7 @@ Skills live once, under `.agents/skills/`. Tool-specific skill directories are s
 .codex/skills  -> ../.agents/skills
 ```
 
-When adding a tool that reads skills from its own directory, symlink that directory. Do not copy
-files into it.
+When adding a tool that reads skills from its own directory, symlink that directory. Do not copy files into it.
 
 ---
 

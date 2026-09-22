@@ -1,15 +1,12 @@
 # Performance, SEO, and Accessibility
 
-**Use when:** Changing client JavaScript, assets, metadata, indexing, or accessible UI behavior, or
-reviewing a change for those risks.
+**Use when:** Changing client JavaScript, assets, metadata, indexing, or accessible UI behavior, or reviewing a change for those risks.
 
-This file owns the site's performance, SEO, indexing, and accessibility rules. Validation commands
-are in [Testing](testing.md#when-to-run-each-check).
+This file owns the site's performance, SEO, indexing, and accessibility rules. Validation commands are in [Testing](testing.md#when-to-run-each-check).
 
 ## Performance Rules
 
-Before adding client-side JavaScript, check whether the behavior can be handled with Astro, HTML, or
-CSS.
+Before adding client-side JavaScript, check whether the behavior can be handled with Astro, HTML, or CSS.
 
 Avoid unnecessary hydration.
 
@@ -28,14 +25,11 @@ Every indexable page should have:
 - Sensible heading hierarchy
 - Internal links where useful
 
-Preserve structured data, RSS output, sitemap generation, and stable route URLs when changing page
-or content architecture.
+Preserve structured data, RSS output, sitemap generation, and stable route URLs when changing page or content architecture.
 
 ## Indexing and sitemap policy
 
-Indexing decisions live in one shared module, `scripts/seo-policy.mjs`, consumed by both the
-`@astrojs/sitemap` filter in `astro.config.mjs` and the deterministic `pnpm validate:seo` gate so
-the compiled sitemap and the check that audits it can never drift apart.
+Indexing decisions live in one shared module, `scripts/seo-policy.mjs`, consumed by both the `@astrojs/sitemap` filter in `astro.config.mjs` and the deterministic `pnpm validate:seo` gate so the compiled sitemap and the check that audits it can never drift apart.
 
 | Route | Indexing | Sitemap | Rationale |
 |--------|----------|---------|-----------|
@@ -49,13 +43,9 @@ the compiled sitemap and the check that audits it can never drift apart.
 | `/lab/*` diagnostics | `noindex, nofollow` | excluded | Internal diagnostics, not public content |
 | `/404.html` | `noindex` | — | Error page |
 
-Tag routing is deterministic: a tag becomes indexable the moment it contains more than one post, and
-returns to `noindex` if it drops back to one, because the tag page and the policy both read the same
-`src/content/blog/` frontmatter.
+Tag routing is deterministic: a tag becomes indexable the moment it contains more than one post, and returns to `noindex` if it drops back to one, because the tag page and the policy both read the same `src/content/blog/` frontmatter.
 
-Redirect aliases are static `Astro.redirect(...)` pages because GitHub Pages cannot send HTTP
-redirects (see [Redirects](deployment-static-site.md#redirects)). To add one, follow
-[Rename or move an article](content-authoring.md#rename-or-move-an-article).
+Redirect aliases are static `Astro.redirect(...)` pages because GitHub Pages cannot send HTTP redirects (see [Redirects](deployment-static-site.md#redirects)). To add one, follow [Rename or move an article](content-authoring.md#rename-or-move-an-article).
 
 ## Accessibility Rules
 

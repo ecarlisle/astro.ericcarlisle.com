@@ -1,7 +1,6 @@
 # Content Status
 
-**Use when:** Removing, replacing, or judging placeholder/test content, or deciding what content is
-real.
+**Use when:** Removing, replacing, or judging placeholder/test content, or deciding what content is real.
 
 This file is the single source for placeholder-content policy.
 
@@ -16,15 +15,13 @@ docs/author_profile.md
 
 ## Placeholder/Test Content
 
-Most current blog posts are placeholder or test content. Their presence does not mean the writing
-is final or ready to publish. They exercise:
+Most current blog posts are placeholder or test content. Their presence does not mean the writing is final or ready to publish. They exercise:
 
 - blog listings, pagination, and tag pages;
 - search indexing, RSS, and sitemap generation; and
 - post layout, hero images, typography, code blocks, and metadata rendering.
 
-Keep placeholder posts unless removal was requested. Before removing one, confirm which of those
-behaviors still have coverage.
+Keep placeholder posts unless removal was requested. Before removing one, confirm which of those behaviors still have coverage.
 
 ## Replacement Plan
 

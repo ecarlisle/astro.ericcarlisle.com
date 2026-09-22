@@ -1,31 +1,20 @@
 # AGENTS.md
 
-AstroBlog is Eric Carlisle's Astro 7 static site. This file routes coding agents to the one doc or
-skill that owns each task. [README.md](README.md) is the human overview. `package.json`, `src/`, and
-config files are the source of truth for exact behavior.
+AstroBlog is Eric Carlisle's Astro 7 static site. This file routes coding agents to the one doc or skill that owns each task. [README.md](README.md) is the human overview. `package.json`, `src/`, and config files are the source of truth for exact behavior.
 
 ## Working principles
 
-- Load only the routing rows that match the task. Load more only when investigation shows a
-  concrete need, and say why. Never skip a required source to save context.
+- Load only the routing rows that match the task. Load more only when investigation shows a concrete need, and say why. Never skip a required source to save context.
 - If a task references a feature, plan, or prior decision, read only the matching file in `specs/`.
-- For all implementation work, follow [agent-safe-change](.agents/skills/agent-safe-change/SKILL.md)
-  and [engineering-preferences](.agents/skills/engineering-preferences/SKILL.md). Apply engineering
-  preferences only where repository guidance is silent.
-- Make the smallest scoped change, preserve unrelated user changes, and run the checks in
-  [Testing](docs/testing.md#when-to-run-each-check).
+- For all implementation work, follow [agent-safe-change](.agents/skills/agent-safe-change/SKILL.md) and [engineering-preferences](.agents/skills/engineering-preferences/SKILL.md). Apply engineering preferences only where repository guidance is silent.
+- Make the smallest scoped change, preserve unrelated user changes, and run the checks in [Testing](docs/testing.md#when-to-run-each-check).
 - Never edit [generated directories](docs/architecture.md#generated-areas).
-- Commit or push only when the user authorizes it. Open pull requests ready for review so
-  automated reviewers such as CodeRabbit run. Use a draft only when the owner asks for one or the
-  work is not ready.
-- Each fact has one owning doc. Link to it instead of restating it, and update it when the fact
-  changes.
+- Commit or push only when the user authorizes it. Open pull requests ready for review so automated reviewers such as CodeRabbit run. Use a draft only when the owner asks for one or the work is not ready.
+- Each fact has one owning doc. Link to it instead of restating it, and update it when the fact changes.
 
 ## Protected files
 
-Get explicit user approval before editing `AGENTS.md`, `README.md`, `package.json`,
-`pnpm-lock.yaml`, `astro.config.mjs`, `biome.json`, `.env.example`, or any file under `docs/`. If a
-task needs one, stop and ask first.
+Get explicit user approval before editing `AGENTS.md`, `README.md`, `package.json`, `pnpm-lock.yaml`, `astro.config.mjs`, `biome.json`, `.env.example`, or any file under `docs/`. If a task needs one, stop and ask first.
 
 ## Task routing
 

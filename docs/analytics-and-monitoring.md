@@ -10,13 +10,11 @@
 
 ## GA4
 
-If events are missing, first rule out ad blockers, then check `GA_MEASUREMENT_ID`. Verify with GA
-DebugView and look for console errors.
+If events are missing, first rule out ad blockers, then check `GA_MEASUREMENT_ID`. Verify with GA DebugView and look for console errors.
 
 ## Sentry
 
-Sentry captures nothing and initializes no SDK. Builds warn about a missing `authToken`. That
-warning is expected.
+Sentry captures nothing and initializes no SDK. Builds warn about a missing `authToken`. That warning is expected.
 
 To enable Sentry:
 

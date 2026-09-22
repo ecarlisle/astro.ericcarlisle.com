@@ -2,9 +2,7 @@
 
 **Use when:** Reading or changing blog frontmatter fields or the content schema.
 
-Blog posts live in `src/content/blog/**/*.{md,mdx}`. The authoritative schema is
-[`src/content.config.ts`](../src/content.config.ts). The authoring workflow is in
-[Content Authoring](content-authoring.md).
+Blog posts live in `src/content/blog/**/*.{md,mdx}`. The authoritative schema is [`src/content.config.ts`](../src/content.config.ts). The authoring workflow is in [Content Authoring](content-authoring.md).
 
 ## Blog Frontmatter
 
@@ -24,8 +22,7 @@ Blog posts live in `src/content/blog/**/*.{md,mdx}`. The authoritative schema is
 | `twitterHandle` | string | No | Adds `twitter:creator` |
 | `share` | object | No | See below |
 
-Use `socialTitle`, `socialDescription`, and `socialImage` only when the social preview should
-differ from the page title, description, or hero image.
+Use `socialTitle`, `socialDescription`, and `socialImage` only when the social preview should differ from the page title, description, or hero image.
 
 `share` supports:
 
