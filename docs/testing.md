@@ -16,7 +16,7 @@ exact script definitions. Use `pnpm` only.
 | SEO, sitemap, metadata, links, navigation, content | `pnpm validate:seo` after a build with Storybook copied to `dist/design-system/lab/` ([details](site-inventory.md#seo-gate)) |
 | Blog Markdown/MDX | `pnpm validate:content` (rejects top-level `h1`; the layout renders the title) |
 | JSON-LD | `pnpm structured-data:report` ([details](structured-data.md)) |
-| `AGENTS.md`, `README.md`, docs, or skill routing | `pnpm validate:agent-docs` (checks local links and documented script names) |
+| `AGENTS.md`, `README.md`, docs, or skill routing | `pnpm validate:agent-docs` (checks links, heading anchors, and `pnpm` script names in `AGENTS.md`, `README.md`, all of `docs/`, and routed skills; not run in CI) |
 | Context Health report or its measured files | `pnpm context:health` to refresh sizes, then `pnpm context:health:validate` |
 | Significant layout, performance, or accessibility | `pnpm lighthouse:all` (thresholds in `lighthouserc.js`) |
 | Dead-code review (not run in CI) | `pnpm fallow:dead-code` |

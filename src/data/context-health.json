@@ -683,14 +683,14 @@
         "score": null,
         "evidenceMaturity": "structurally-verified",
         "evidenceMaturityReason": "The generator deterministically measures the declared full-file set; it does not observe actual runtime retrieval or model input.",
-        "interpretation": "The declared full-file context contains 37,069 characters (~9,268 estimated tokens).",
+        "interpretation": "The declared full-file context contains 37,155 characters (~9,289 estimated tokens).",
         "limitations": [
           "This is a declared full-file estimate, not actual model input, retrieved context, or tokenizer output.",
           "No universal token threshold is applied; useful ranges depend on the task, retrieval strategy, model, and outcome."
         ],
         "details": {
-          "characters": 37069,
-          "estimatedTokens": 9268,
+          "characters": 37155,
+          "estimatedTokens": 9289,
           "measuredFiles": [
             {
               "path": "AGENTS.md",
@@ -706,7 +706,7 @@
             },
             {
               "path": "docs/testing.md",
-              "characters": 2985
+              "characters": 3071
             },
             {
               "path": "docs/design-system/agent-guide.md",
