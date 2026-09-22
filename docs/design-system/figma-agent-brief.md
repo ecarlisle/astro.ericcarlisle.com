@@ -312,12 +312,13 @@ main {
 | `--color-on-action` | `--bg-surface` | `--bg-surface` | Text/icons on `--color-action` |
 | `--color-focus` | `--color-link` | `--color-link` | Focus outlines |
 | `--color-success` | `--brand-accent` | `--brand-accent` | Success states |
-| `--color-text-primary` | `--text-primary` | `--text-primary` | Semantic text primary |
-| `--color-text-secondary` | `--text-secondary` | `--text-secondary` | Semantic text secondary |
-| `--color-text-muted` | `--text-muted` | `--text-muted` | Semantic text muted |
-| `--color-card-bg` | `--bg-surface` | `--bg-surface` | Card backgrounds |
-| `--color-card-bg-elevated` | `--bg-surface-elevated` | `--bg-surface-elevated` | Elevated card backgrounds |
-| `--color-card-border` | `--border-main` | `--border-main` | Card borders |
+
+Text and card surfaces have no separate semantic alias — style them directly
+from `--text-primary` / `--text-secondary` / `--text-muted` and
+`--bg-surface` / `--bg-surface-elevated` / `--border-main`. (Earlier releases
+of this system had `--color-text-*` and `--color-card-*` aliases pointing at
+the same values; they were dropped as redundant — pick one name per
+concept.)
 
 ### Suggested Figma variable names
 
@@ -388,7 +389,7 @@ Create a `Colors` collection with modes `Dark` and `Light`:
 
 - **Source:** `src/components/Card.astro`
 - **Purpose:** Content card for posts, projects, or listings.
-- **Container:** `.card` — padding `--space-component`, background `--color-card-bg`, border `--size-border-pixel solid var(--color-card-border)`, radius `--radius-lg`.
+- **Container:** `.card` — padding `--space-component`, background `--bg-surface`, border `--size-border-pixel solid var(--border-main)`, radius `--radius-lg`.
 - **Typography:** Title uses `--type-size-card-title` (or `--type-size-featured-card-title` when first in featured grid), line-height `1.2`. Meta uses `--type-size-small` `--text-muted`.
 - **Spacing:** Stack children with `> * + *` margin-top `--space-inline-strong`. Image margin negative `--space-component` top/sides.
 - **States/variants:**
@@ -428,7 +429,7 @@ Create a `Colors` collection with modes `Dark` and `Light`:
 
 - **Source:** `src/styles/components.css` (`.callout`)
 - **Purpose:** Highlighted informational block.
-- **Container:** Padding `--space-component`, left border `--size-border-thick` (`4px`) solid `--color-link`, radius `--radius-md`, background `--color-card-bg`, color `--text-secondary`.
+- **Container:** Padding `--space-component`, left border `--size-border-thick` (`4px`) solid `--color-link`, radius `--radius-md`, background `--bg-surface`, color `--text-secondary`.
 - **Figma name:** `Callout`.
 
 ### Back Link
@@ -521,7 +522,7 @@ Create a `Colors` collection with modes `Dark` and `Light`:
 - **Source:** `src/styles/components.css` (`.stats-grid`, `.stat`)
 - **Purpose:** 4-column stat display.
 - **Container:** Grid `repeat(4, 1fr)`, gap `--space-component`, max-width `--layout-rail-prose`.
-- **Stat card:** padding `--space-component`, background `--color-card-bg`, border `--border-muted`, radius `--radius-md`, centered.
+- **Stat card:** padding `--space-component`, background `--bg-surface`, border `--border-muted`, radius `--radius-md`, centered.
 - **Typography:** Value `--type-size-h3`, `--font-mono`, `--color-action`; label `--type-size-small`, `--text-secondary`.
 - **Responsive:** `<=720px` becomes `repeat(2, 1fr)`.
 - **Figma name:** `Stats Grid`, `Stat Card`.

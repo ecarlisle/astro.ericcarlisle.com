@@ -66,23 +66,30 @@ const colorTokens = [
     light: '#e2e8f0',
     usage: 'Header border, subtle separators',
   },
-  { token: '--border-control', dark: '#52627a', light: '#64748b', usage: 'Form input borders' },
+  { token: '--border-control', dark: '#61728b', light: '#64748b', usage: 'Form input borders' },
+  {
+    token: '--color-danger',
+    dark: '#ff8a8a',
+    light: '#b42318',
+    usage: 'Error, destructive states',
+  },
+  { token: '--color-warning', dark: '#f5d35c', light: '#7a5b00', usage: 'Warning states' },
 ];
 
+// Card backgrounds, elevated surfaces and card borders are styled directly
+// from --bg-surface / --bg-surface-elevated / --border-main — no separate
+// --color-card-* alias. Text follows the same rule (--text-primary etc.):
+// one name per concept instead of a raw/semantic pair that only one of the
+// two ever gets used.
 const semanticColors = [
   { token: '--color-link', usage: 'Default links', darkSource: '--brand-primary' },
   { token: '--color-link-hover', usage: 'Hovered links', darkSource: '--brand-accent' },
   { token: '--color-action', usage: 'Buttons, CTAs', darkSource: '--brand-primary' },
   { token: '--color-action-hover', usage: 'Button hover', darkSource: '#3d8ee0' },
+  { token: '--color-action-active', usage: 'Button pressed', darkSource: '#3787d8' },
+  { token: '--color-on-action', usage: 'Text/icons on --color-action', darkSource: '--bg-surface' },
   { token: '--color-focus', usage: 'Focus outlines', darkSource: '--color-link' },
   { token: '--color-success', usage: 'Success states', darkSource: '--brand-accent' },
-  { token: '--color-card-bg', usage: 'Card backgrounds', darkSource: '--bg-surface' },
-  {
-    token: '--color-card-bg-elevated',
-    usage: 'Elevated card backgrounds',
-    darkSource: '--bg-surface-elevated',
-  },
-  { token: '--color-card-border', usage: 'Card borders', darkSource: '--border-main' },
 ];
 
 const spacingTokens = [
@@ -285,7 +292,7 @@ const knownGaps = [
     <pre><code>/* Example token usage */
 .card {'{'}
   padding: var(--space-component);
-  background: var(--color-card-bg);
+  background: var(--bg-surface);
   border-radius: var(--radius-lg);
 {'}'}</code></pre>
   </section>

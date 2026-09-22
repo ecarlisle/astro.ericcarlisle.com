@@ -56,10 +56,10 @@
    ======================================================================== */
 #search {
   --pagefind-ui-primary: var(--color-link);
-  --pagefind-ui-text: var(--color-text-primary);
-  --pagefind-ui-background: var(--color-card-bg);
-  --pagefind-ui-border: var(--color-card-border);
-  --pagefind-ui-tag: var(--color-card-bg-elevated);
+  --pagefind-ui-text: var(--text-primary);
+  --pagefind-ui-background: var(--bg-surface);
+  --pagefind-ui-border: var(--border-main);
+  --pagefind-ui-tag: var(--bg-surface-elevated);
   --pagefind-ui-border-width: var(--size-border-pixel);
   --pagefind-ui-border-radius: var(--radius-md);
   --pagefind-ui-image-border-radius: var(--radius-md);
@@ -67,14 +67,14 @@
 }
 
 #search :where(.pagefind-ui) {
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   font-family: var(--font-copy);
 }
 
 #search :where(.pagefind-ui__form)::before {
   top: 50%;
   left: var(--space-inline-strong);
-  background-color: var(--color-text-secondary);
+  background-color: var(--text-secondary);
   transform: translateY(-50%);
 }
 
@@ -84,13 +84,13 @@
   padding: var(--space-inline) 4.5rem var(--space-inline) calc(var(--space-inline-strong) + 1.75rem);
   border-color: var(--border-control);
   border-radius: var(--radius-md);
-  background: var(--color-card-bg);
-  color: var(--color-text-primary);
+  background: var(--bg-surface);
+  color: var(--text-primary);
   font: 600 var(--type-size-body) / 1.4 var(--font-copy);
 }
 
 #search :where(.pagefind-ui__search-input)::placeholder {
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   opacity: 1;
 }
 
@@ -123,7 +123,7 @@
 }
 
 #search :where(.pagefind-ui__search-clear):hover {
-  background: var(--color-card-bg-elevated);
+  background: var(--bg-surface-elevated);
   color: var(--color-link-hover);
 }
 
@@ -140,7 +140,7 @@
 #search :where(.pagefind-ui__message) {
   height: auto;
   padding: var(--space-inline) 0;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   font-size: var(--type-size-small);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-body);
@@ -150,13 +150,13 @@
   gap: var(--space-inline-strong);
   margin-bottom: var(--space-inline);
   padding: var(--space-component);
-  border: var(--size-border-pixel) solid var(--color-card-border);
+  border: var(--size-border-pixel) solid var(--border-main);
   border-radius: var(--radius-lg);
-  background: var(--color-card-bg);
+  background: var(--bg-surface);
 }
 
 #search :where(.pagefind-ui__result):last-of-type {
-  border-bottom: var(--size-border-pixel) solid var(--color-card-border);
+  border-bottom: var(--size-border-pixel) solid var(--border-main);
 }
 
 #search :where(.pagefind-ui__result-inner) {
@@ -165,7 +165,7 @@
 
 #search :where(.pagefind-ui__result-title) {
   margin: 0;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   font-family: var(--font-headers);
   font-size: var(--type-size-h5);
   font-weight: var(--font-weight-bold);
@@ -186,7 +186,7 @@
 #search :where(.pagefind-ui__result-excerpt) {
   min-width: 0;
   margin-top: var(--space-xs);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   font-family: var(--font-copy);
   font-size: var(--type-size-body);
   line-height: var(--line-height-body);
@@ -195,14 +195,14 @@
 #search :where(.pagefind-ui__result-excerpt mark) {
   padding: 0.08em 0.18em;
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--brand-highlight) 28%, var(--color-card-bg));
-  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--brand-highlight) 28%, var(--bg-surface));
+  color: var(--text-primary);
 }
 
 #search :where(.pagefind-ui__result-nested) {
   margin-top: var(--space-xs);
   padding-left: var(--space-inline-strong);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   font-size: var(--type-size-small);
   line-height: var(--line-height-body);
 }
@@ -211,7 +211,7 @@
   width: min(28%, 7rem);
   margin-top: 0;
   border-radius: var(--radius-md);
-  background: var(--color-card-bg-elevated);
+  background: var(--bg-surface-elevated);
   overflow: hidden;
 }
 
@@ -227,8 +227,8 @@
 #search :where(.pagefind-ui__result-tag) {
   padding: 0.2em 0.6em;
   border-radius: var(--radius-full);
-  background: var(--color-card-bg-elevated);
-  color: var(--color-text-secondary);
+  background: var(--bg-surface-elevated);
+  color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: var(--type-size-small);
 }

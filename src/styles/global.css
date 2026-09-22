@@ -110,15 +110,6 @@
   --color-focus: var(--color-link);
   --color-success: var(--brand-accent);
 
-  /* Semantic text roles */
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-text-muted: var(--text-muted);
-  /* Semantic card roles */
-  --color-card-bg: var(--bg-surface);
-  --color-card-bg-elevated: var(--bg-surface-elevated);
-  --color-card-border: var(--border-main);
-
   --focus-outline-width: var(--size-border-pixel);
   --focus-outline-style: dashed;
   --focus-outline-color: var(--color-focus);
