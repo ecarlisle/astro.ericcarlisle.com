@@ -5,13 +5,9 @@ comparing reports. Part of the [Context Health rubric](context-health-rubric.md)
 
 ## Evidence requirements
 
-Keep observation, interpretation, and recommendation separate. An observation says what the source
-contains. An interpretation explains why that affects the check. A recommendation proposes a
-future change.
-
-Repository-backed findings name their source file. Section- or claim-level findings link the
-narrowest practical line or range. Never add a repository link to an unsupported claim just for
-appearance.
+Keep observations (what the source says), interpretations (why it affects the check), and
+recommendations (future changes) separate. Repository-backed findings name their file and link the
+narrowest practical line or range. Never link an unsupported claim for appearance.
 
 Store evidence as structured metadata: `path`, optional `startLine`/`endLine`, and optional
 `section` (an exact, stable Markdown heading). The report root stores `repositoryRevision`, and the
@@ -58,10 +54,9 @@ evaluated:
 | Contact Worker changes | Not evaluated |
 | Pull-request review | Not evaluated |
 
-Do not infer cross-profile coverage. Version a profile when its requirements, context selection
-rule, checks, or weights change materially. Before evaluating a profile, declare its purpose,
-representative tasks, acceptance criteria, required-context ground truth, versioned checks, and
-evidence.
+Do not infer cross-profile coverage. Version a profile when its requirements, selection rule,
+checks, or weights change materially. Before evaluating one, declare its purpose, tasks,
+acceptance criteria, ground truth, checks, and evidence.
 
 A future observed suite should version scenarios covering implementation, cross-cutting change,
 diagnosis, deployment, documentation, review, authorization boundaries, and specialist tasks. Each
@@ -80,16 +75,16 @@ Compare reports directly only when these all match:
 - the observed suite version, task set, revision policy, agents, tools, and configurations; and
 - measurement units and judgment method.
 
-When they match, use `regression-detected` to flag meaningful worsening against the declared
-baseline. Otherwise, describe the difference without claiming a trend.
+If they match, use `regression-detected` for meaningful worsening against the baseline. Otherwise,
+describe the difference without claiming a trend.
 
 ## Calibration examples
 
-- The routing table links the correct UI docs, but a required performance playbook has unrelated
-  media sections: Precision is Partial for that check.
+- Routing links the right UI docs, but a required playbook has unrelated media sections:
+  Precision is Partial for that check.
 - Every locked requirement has a route: static Recall can be 100% and
-  `complete-for-current-static-checks`, while observed Recall stays `not-measured`.
-- Guidance looks actionable and passes every static check: static Sufficiency can be complete, but
-  it cannot become observed until paired oracle and routed tasks run.
-- The generator confirms file lengths and valid evidence links: Active Context Size and related
-  structural claims can be `structurally-verified`, not `observed`.
+  `complete-for-current-static-checks` while observed Recall stays `not-measured`.
+- Guidance passes every static check: static Sufficiency can be complete, but it is not observed
+  until paired oracle and routed tasks run.
+- The generator confirms file lengths and evidence links: Active Context Size can be
+  `structurally-verified`, not `observed`.

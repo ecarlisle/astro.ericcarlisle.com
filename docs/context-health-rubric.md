@@ -2,8 +2,8 @@
 
 **Use when:** Auditing, scoring, or reporting Context Health, or changing its methodology.
 
-Context Health Core 0.1 is an experimental methodology. It describes how well a repository's
-coding-agent context supports a declared task profile. It keeps four things separate:
+Context Health Core 0.1 is an experimental methodology for describing how well a repository's agent
+context supports a declared task profile. It separates:
 
 - **static assessment** of repository readiness;
 - **observed evaluation** from representative task runs;
@@ -11,8 +11,7 @@ coding-agent context supports a declared task profile. It keeps four things sepa
 - **profile coverage**, including profiles not yet evaluated.
 
 Use the [Context Health refresh skill](../.agents/skills/context-health-refresh/SKILL.md) for the
-repository procedure. This rubric owns the methodology, split across three files. Read all three
-before an audit:
+procedure. This rubric owns the methodology in three files; read all three before an audit:
 
 | File | Owns |
 |---|---|
@@ -80,8 +79,8 @@ Never infer observed performance from static evidence.
 
 ## Evidence maturity model v1
 
-Assign one level to every assessed metric and explain why it qualifies. Maturity is ordinal
-provenance. It is not a percentage or a second health score.
+Assign each assessed metric one level, with a reason. Maturity is ordinal provenance, not a
+percentage or a second health score.
 
 1. `declared`: a documented claim with identified evidence and explicit limitations.
 2. `structurally-verified`: deterministic checks confirm the relevant files, links, headings,
