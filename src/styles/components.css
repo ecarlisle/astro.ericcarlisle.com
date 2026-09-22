@@ -1,8 +1,8 @@
 .card {
   position: relative;
   padding: var(--space-component);
-  background: var(--color-card-bg);
-  border: var(--size-border-pixel) solid var(--color-card-border);
+  background: var(--bg-surface);
+  border: var(--size-border-pixel) solid var(--border-main);
   border-radius: var(--radius-lg);
   transition:
     transform var(--transition-normal),
@@ -51,13 +51,13 @@
 .callout {
   padding: var(--space-component);
   border-left: var(--size-border-thick) solid var(--color-link);
-  background: var(--color-card-bg);
+  background: var(--bg-surface);
   border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
 }
 
 .callout strong {
-  color: var(--color-text-primary);
+  color: var(--text-primary);
 }
 
 /* ── Note variant: sparing use for asides, updates, or editorial notes.
@@ -80,7 +80,7 @@
   font-size: var(--type-size-small);
   border-radius: var(--radius-full);
   background: var(--bg-surface-elevated);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   text-decoration: none;
   transition:
     background var(--transition-fast),
@@ -101,12 +101,12 @@
   font-size: var(--type-size-small);
   border-radius: var(--radius-full);
   background: var(--bg-surface-elevated);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
 }
 
 .meta {
   font-size: var(--type-size-small);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   display: flex;
   gap: var(--space-inline);
   flex-wrap: wrap;
@@ -116,7 +116,7 @@
 .meta time,
 .meta strong {
   font-family: var(--font-mono);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   font-size: 0.9375em;
 }
 
@@ -145,7 +145,7 @@
 .grid--featured-first > :first-child .card-body > p:not(.meta) {
   max-width: var(--layout-rail-prose);
   font-size: var(--type-size-large);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   -webkit-line-clamp: 4;
 }
 
@@ -159,7 +159,7 @@
 
 .collection-description {
   margin-bottom: 0;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
 }
 
 /* ── Shared technical page-header surface and contextual eyebrow ── */
@@ -275,7 +275,7 @@
   padding: var(--space-inline) var(--space-inline-strong);
   border-radius: var(--radius-md);
   text-decoration: none;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   transition:
     background var(--transition-fast),
     color var(--transition-fast);
@@ -289,7 +289,7 @@
 .post-nav .post-nav-label {
   display: block;
   margin-bottom: var(--space-xs);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--type-size-small);
 }
 
@@ -324,7 +324,7 @@
 
 .toc h2 {
   margin-bottom: var(--space-inline);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: inherit;
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
@@ -344,7 +344,7 @@
   display: block;
   padding: 0.2em 0;
   padding-left: var(--space-inline);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   border-left: var(--size-border-pixel) solid transparent;
   text-decoration: none;
   transition:
@@ -363,7 +363,7 @@
   align-items: center;
   gap: var(--space-xs);
   margin-bottom: var(--space-component);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--type-size-small);
   text-decoration: none;
   transition: color var(--transition-fast);
@@ -374,7 +374,7 @@
 }
 
 .reading-time {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: var(--type-size-small);
 }
@@ -391,7 +391,7 @@
 .stat {
   padding: var(--space-component);
   text-align: center;
-  background: var(--color-card-bg);
+  background: var(--bg-surface);
   border: var(--size-border-pixel) solid var(--border-muted);
   border-radius: var(--radius-md);
 }
@@ -408,7 +408,7 @@
 .stat-label {
   display: block;
   margin-top: var(--space-xs);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: var(--type-size-small);
 }
