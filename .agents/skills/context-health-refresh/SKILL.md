@@ -9,7 +9,7 @@ Use [the Context Health rubric](../../../docs/context-health-rubric.md) as the m
 
 ## Establish the audit
 
-1. Read the rubric completely.
+1. Read the rubric completely: [the rubric](../../../docs/context-health-rubric.md), [metrics](../../../docs/context-health-metrics.md), and [evidence and audits](../../../docs/context-health-audit.md).
 2. Declare whether the audit is task-specific or repository-wide.
 3. Record the task, expected outcome, requirements, included context sources, explicit exclusions, profile identifier, and profile version.
 4. Perform the rubric’s preliminary context inventory. Load only applicable routes by default and record why additional context materially expands the scope.
