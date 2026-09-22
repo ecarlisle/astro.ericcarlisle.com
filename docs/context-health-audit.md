@@ -75,8 +75,8 @@ Compare reports directly only when these all match:
 - the observed suite version, task set, revision policy, agents, tools, and configurations; and
 - measurement units and judgment method.
 
-If they match, use `regression-detected` for meaningful worsening against the baseline. Otherwise,
-describe the difference without claiming a trend.
+If they match, flag meaningful worsening as `regression-detected`. Otherwise, describe the
+difference without claiming a trend.
 
 ## Calibration examples
 
