@@ -4,8 +4,7 @@ Use the smallest number of exercises needed to fill material evidence gaps. Ask 
 
 ## Start
 
-Ask what the profile will be used for and which existing writing the person considers
-representative. Inspect available samples before eliciting new prose.
+Ask what the profile will be used for and which existing writing the person considers representative. Inspect available samples before eliciting new prose.
 
 ## Behavioral exercises
 
@@ -21,8 +20,7 @@ Choose only exercises that address an unresolved dimension:
 
 ## Contrastive choices
 
-Present two or three meaningfully different versions of the same passage. Vary one or two
-dimensions at a time:
+Present two or three meaningfully different versions of the same passage. Vary one or two dimensions at a time:
 
 - directness versus setup;
 - connected reasoning versus fragmented emphasis;
@@ -31,11 +29,8 @@ dimensions at a time:
 - restrained versus conspicuous humor; or
 - conversational versus formal diction.
 
-Ask which is closest, which is least compatible, and what caused the reaction. Do not reveal a
-preferred answer.
+Ask which is closest, which is least compatible, and what caused the reaction. Do not reveal a preferred answer.
 
 ## Stop
 
-Stop when stable claims have sufficient evidence, relevant registers are represented, and further
-answers repeat existing conclusions. Return unresolved questions instead of continuing for
-completeness.
+Stop when stable claims have sufficient evidence, relevant registers are represented, and further answers repeat existing conclusions. Return unresolved questions instead of continuing for completeness.

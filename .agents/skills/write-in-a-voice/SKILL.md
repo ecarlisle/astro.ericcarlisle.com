@@ -28,12 +28,9 @@ version: 2
 
 # Write in a Voice
 
-Use [the canonical voice profile](../../voice/profile.md) as the authorial target. Combine it with
-the current request, supplied facts, surrounding prose, genre, audience, and project editorial
-guidance. Do not use the profile as a source of subject matter.
+Use [the canonical voice profile](../../voice/profile.md) as the authorial target. Combine it with the current request, supplied facts, surrounding prose, genre, audience, and project editorial guidance. Do not use the profile as a source of subject matter.
 
-This skill replaces the former `copy-edit` skill. Copy editing remains one supported mode rather
-than a separate overlapping skill.
+This skill replaces the former `copy-edit` skill. Copy editing remains one supported mode rather than a separate overlapping skill.
 
 ## Editorial contract
 
@@ -57,8 +54,7 @@ Improve only as the requested mode permits:
 - weak openings or endings; and
 - paragraphs that drift before reaching their point.
 
-Do not add facts, experiences, quotations, outcomes, measurements, opinions, or implications that
-the writer did not supply.
+Do not add facts, experiences, quotations, outcomes, measurements, opinions, or implications that the writer did not supply.
 
 ## Establish the task
 
@@ -72,13 +68,11 @@ Determine:
 - length and formatting constraints; and
 - revision distance.
 
-Ask only when missing information would materially change the result. Current explicit direction
-overrides profile defaults.
+Ask only when missing information would materially change the result. Current explicit direction overrides profile defaults.
 
 ## Choose the lightest mode
 
-Read [editing modes](references/editing-modes.md) and select the lightest mode that satisfies the
-request:
+Read [editing modes](references/editing-modes.md) and select the lightest mode that satisfies the request:
 
 - draft from notes;
 - continue;
@@ -90,8 +84,7 @@ request:
 - developmental feedback; or
 - sentence alternatives.
 
-Do not perform a full rewrite when a copy edit will do. Do not rewrite effective sentences merely
-to demonstrate activity.
+Do not perform a full rewrite when a copy edit will do. Do not rewrite effective sentences merely to demonstrate activity.
 
 ## Apply the profile
 
@@ -105,18 +98,13 @@ Prioritize:
 6. genre and audience expectations; and
 7. surface polish.
 
-Use stable traits across registers, but do not make every genre sound identical. Technical
-instructions should remain operational. Professional copy should remain proportionate. Reflective
-articles may preserve visible reasoning and unresolved questions.
+Use stable traits across registers, but do not make every genre sound identical. Technical instructions should remain operational. Professional copy should remain proportionate. Reflective articles may preserve visible reasoning and unresolved questions.
 
-Imitate method, not subject matter. Do not import experiences, opinions, project names, metaphors,
-jokes, or recurring topics from the profile or unrelated samples.
+Imitate method, not subject matter. Do not import experiences, opinions, project names, metaphors, jokes, or recurring topics from the profile or unrelated samples.
 
 ## Load task-relevant guidance
 
-Read [AI-writing anti-patterns](references/anti-patterns.md) before drafting new prose or making
-substantial edits. This includes draft, continue, expand, rewrite, and structural-revision modes.
-Use [the vocabulary guide](references/vocabulary.md) when project terminology is relevant.
+Read [AI-writing anti-patterns](references/anti-patterns.md) before drafting new prose or making substantial edits. This includes draft, continue, expand, rewrite, and structural-revision modes. Use [the vocabulary guide](references/vocabulary.md) when project terminology is relevant.
 
 ## Drafting
 
@@ -147,16 +135,13 @@ The continuation should feel editable as part of the same draft, not pasted in f
 
 ## Preserve the path of thought
 
-When the writing describes a change in understanding, preserve the movement from concrete
-observation through inconsistency, prior assumption, changed perspective, useful distinction, and
-measured conclusion or unresolved question.
+When the writing describes a change in understanding, preserve the movement from concrete observation through inconsistency, prior assumption, changed perspective, useful distinction, and measured conclusion or unresolved question.
 
 Do not replace exploratory reasoning with a polished summary of its final conclusion.
 
 ## Use humor selectively
 
-Prefer dry observation, understatement, restrained self-awareness, and situational humor. Humor
-should feel discovered in the material rather than applied to it.
+Prefer dry observation, understatement, restrained self-awareness, and situational humor. Humor should feel discovered in the material rather than applied to it.
 
 Do not:
 
@@ -168,17 +153,14 @@ Do not:
 
 ## Capture qualifying feedback
 
-During writing-related repository work, append one concise candidate to
-[the evidence ledger](../../voice/evidence.md) when the writer:
+During writing-related repository work, append one concise candidate to [the evidence ledger](../../voice/evidence.md) when the writer:
 
 - states an explicit voice preference;
 - explains why a draft sounds wrong;
 - substantially rewrites the prose; or
 - identifies a passage as representative.
 
-Do not record routine acceptance, isolated word choices, hurried commands, typos, or likely
-dictation artifacts. Do not update [the canonical profile](../../voice/profile.md) silently. Route
-profile promotion through `analyze-writing-voice`.
+Do not record routine acceptance, isolated word choices, hurried commands, typos, or likely dictation artifacts. Do not update [the canonical profile](../../voice/profile.md) silently. Route profile promotion through `analyze-writing-voice`.
 
 ## Final review
 
@@ -197,6 +179,4 @@ Do not introduce errors, slang, random variation, or awkwardness merely to simul
 
 ## Output behavior
 
-Lead with the requested prose. Keep commentary brief. Explain only consequential editorial choices,
-material ambiguities, placeholders, or unsupported claims. Do not provide multiple versions unless
-the writer requests alternatives.
+Lead with the requested prose. Keep commentary brief. Explain only consequential editorial choices, material ambiguities, placeholders, or unsupported claims. Do not provide multiple versions unless the writer requests alternatives.

@@ -1076,10 +1076,7 @@ Generalized anti-patterns should be supplemented by observed behavior from actua
 
 The following tags can be used when reviewing before-and-after examples and model outputs. Each tag identifies a specific anti-pattern for concise annotation.
 
-Most tags map directly to the numbered pattern with the same meaning. `VOICE-SUBSTITUTED` is a
-specific alias of `GENERIC-VOICE`. `HUMOR-OVERUSED`, `TONAL-WHIPLASH`,
-`INVENTED-COMEDIC-EXPERIENCE`, `EXTENDED-COMIC-METAPHOR`, and `PUNCHLINE-PARAGRAPH` are diagnostic
-sub-tags of `FORCED-HUMOR`.
+Most tags map directly to the numbered pattern with the same meaning. `VOICE-SUBSTITUTED` is a specific alias of `GENERIC-VOICE`. `HUMOR-OVERUSED`, `TONAL-WHIPLASH`, `INVENTED-COMEDIC-EXPERIENCE`, `EXTENDED-COMIC-METAPHOR`, and `PUNCHLINE-PARAGRAPH` are diagnostic sub-tags of `FORCED-HUMOR`.
 
 | Tag | Definition |
 | --- | --- |

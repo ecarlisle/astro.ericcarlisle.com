@@ -17,8 +17,7 @@ Record:
 - confidence; and
 - initial status: `candidate`, `promoted`, `rejected`, or `superseded`.
 
-Keep evidence records immutable. Record later status changes by appending status-history rows; the
-latest dated status for an evidence ID is authoritative.
+Keep evidence records immutable. Record later status changes by appending status-history rows; the latest dated status for an evidence ID is authoritative.
 
 ## Weight
 
@@ -54,10 +53,8 @@ Low-weight evidence may create a candidate. It cannot establish a stable rule al
 
 ## Contamination controls
 
-Do not learn voice from agent-generated prose, copied material, code, logs, reports, the current
-profile, or topic vocabulary that appears only because of the subject.
+Do not learn voice from agent-generated prose, copied material, code, logs, reports, the current profile, or topic vocabulary that appears only because of the subject.
 
 An accepted draft may mean "usable," not "authentically mine."
 
-For prompts, analyze conversational reasoning and posture. Exclude likely typing and dictation
-artifacts from mechanical conclusions.
+For prompts, analyze conversational reasoning and posture. Exclude likely typing and dictation artifacts from mechanical conclusions.

@@ -1,5 +1,7 @@
 # AstroBlog — Ready for Real Content Checklist
 
+**Use when:** Checking or updating launch readiness.
+
 ## Code/Foundation
 
 - [x] Contact page route exists
@@ -13,7 +15,7 @@
 
 ## Verify Before Launch
 
-- [ ] Confirm `AGENTS.md` reflects current Astro/package scripts
+- [ ] Confirm `docs/testing.md` reflects current package scripts
 - [ ] Confirm `astro.config.mjs` uses `https://ericcarlisle.com`
 - [ ] Run `pnpm build`
 - [ ] Run `pnpm typecheck`
@@ -30,8 +32,7 @@
 
 - [ ] Mark placeholder/test posts clearly
 - [ ] Decide which placeholder posts to keep until real content replaces them
-- [ ] Decide whether `working-with-id-without-losing-ourselves.mdx` should be renamed to
-      `working-with-ai-without-losing-ourselves.mdx`
+- [ ] Decide whether `working-with-id-without-losing-ourselves.mdx` should be renamed to `working-with-ai-without-losing-ourselves.mdx`
 - [ ] Finalize About page copy
 - [ ] Finalize Portfolio page copy
 - [ ] Draft portfolio case study pages

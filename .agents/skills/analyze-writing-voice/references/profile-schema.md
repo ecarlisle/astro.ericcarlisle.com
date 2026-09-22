@@ -15,5 +15,4 @@ Keep the canonical profile compact enough to load during writing tasks.
 9. **Unresolved questions**
 10. **Change history**
 
-Use `high`, `medium`, or `low` confidence. Mark unsupported dimensions as unresolved rather than
-inventing a preference.
+Use `high`, `medium`, or `low` confidence. Mark unsupported dimensions as unresolved rather than inventing a preference.

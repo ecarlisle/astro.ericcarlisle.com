@@ -1,8 +1,8 @@
 # Reviewer Checklist
 
-This checklist supports code review in AstroBlog.
+**Use when:** Reviewing a diff, pull request, or documentation change.
 
-Use it to review diffs after implementation.
+Review in one pass. Each section links to the doc that owns its rules instead of restating them.
 
 ## Required Output Format
 
@@ -24,231 +24,48 @@ Checks observed:
 
 ## 1. Request Fit
 
-Confirm:
+Request changes if the diff solves a different problem, includes unrelated refactors or files, broadens scope without approval, or ignores a smaller safe change.
 
-- The change addresses the original request.
-- The implementation does not expand scope unnecessarily.
-- The smallest safe change was preferred.
-- No unrelated files were changed without a clear reason.
+## 2. Validation
 
-Request changes if:
-
-- The implementation solves a different problem.
-- The diff includes unrelated refactors.
-- The task was broadened without approval.
-
-## 2. Build, Type, and Lint
-
-Check whether appropriate validation was run.
-
-Common checks:
-
-```sh
-pnpm typecheck
-pnpm lint
-pnpm build
-pnpm lighthouse:all
-```
-
-Use `pnpm` only.
-
-Request changes if:
-
-- Relevant checks failed and were ignored.
-- Completion is claimed despite failing validation.
-- The implementation affects build behavior but no build/typecheck was run or explained.
+The checks required by [Testing](testing.md#when-to-run-each-check) were run, or their omission is explained. Request changes if checks failed and were ignored, or if completion is claimed despite failures.
 
 ## 3. Accessibility
 
-Check for:
-
-- Semantic HTML
-- Clear heading hierarchy
-- Heading permalinks (unique explicit IDs, sibling non-nested anchors, accessible labels, visible focus, fragment lands clear of the fixed header, reduced-motion-safe `:target`, no runtime JavaScript)
-- Keyboard navigation
-- Focus-visible states
-- Reduced-motion behavior
-- Color contrast
-- Meaningful alt text
-- Correct labels for forms and controls
-- Minimum touch targets
-- No inaccessible custom interactions
-
-Request changes if:
-
-- Interactive elements are not keyboard accessible.
-- Links/buttons are semantically wrong.
-- Focus states are removed.
-- Images lack needed alt text.
-- Motion ignores reduced-motion preferences.
+Rules: [Accessibility Rules](performance-seo-accessibility.md#accessibility-rules). Request changes if interactive elements are not keyboard accessible, links and buttons are semantically wrong, focus states are removed, images lack needed alt text, or motion ignores reduced-motion preferences.
 
 ## 4. SEO and Metadata
 
-Check for preservation of:
+Rules: [SEO Rules](performance-seo-accessibility.md#seo-rules) and the [indexing policy](performance-seo-accessibility.md#indexing-and-sitemap-policy). Request changes if metadata breaks, routes or slugs change without approval or a redirect, or SEO-critical behavior changes without `pnpm validate:seo`.
 
-- Canonical URLs
-- Page titles
-- Meta descriptions
-- Open Graph metadata
-- Structured data when present
-- RSS behavior
-- Sitemap output
-- Useful internal links
-- Valid content frontmatter
+## 5. Performance and JavaScript
 
-Request changes if:
+Rules: [Performance Rules](performance-seo-accessibility.md#performance-rules) and [Change Policy](change-policy.md#changes-that-need-care). Request changes if:
 
-- Metadata is broken or missing.
-- Route/slug changes were made without approval.
-- SEO-critical behavior changed without validation.
-- Content schema changes were not reflected in docs/content.
-
-## 5. Performance
-
-Check for:
-
-- No unnecessary client-side JavaScript
-- No unnecessary hydration
-- No avoidable third-party scripts
-- No oversized dependencies
-- Font loading remains local and efficient
-- Images remain optimized
-- Layout shifts are not introduced
-- Core Web Vitals are preserved
-
-Request changes if:
-
-- Avoidable JavaScript is added.
-- A new dependency is added without approval.
-- A layout or font change risks performance without validation.
-- Lighthouse-sensitive behavior changes without running or explaining checks.
+- JavaScript or hydration was added for something HTML, CSS, or Astro can handle;
+- a dependency or third-party script was added without approval; or
+- font, image, or layout changes risk Core Web Vitals without Lighthouse evidence.
 
 ## 6. Styling and Design Tokens
 
-Check for:
+Rules: [KISS Design System](design-system/README.md). Request changes if styles duplicate existing tokens, create an inconsistent pattern, introduce Tailwind or another framework without approval, or exceed the requested design change.
 
-- Existing design tokens used before new tokens
-- Typography conventions preserved
-- Layout spacing remains consistent
-- Global styles used for global concerns
-- Component styles used only for local concerns
-- No new styling framework introduced
+## 7. Content and Voice
 
-Request changes if:
+Rules: [Content Status](content-status.md), [Content Model](content-model.md), and [Editorial Guidelines](editorial-guidelines.md). Request changes if placeholder content is deleted without approval, voice-sensitive prose is flattened into generic copy, or frontmatter violates the schema.
 
-- Styles duplicate existing tokens.
-- The change creates an inconsistent pattern.
-- Tailwind or another styling framework is introduced without explicit approval.
-- User-facing design changes exceed the request.
+## 8. Architecture
 
-## 7. JavaScript and Hydration
+Request changes if the change invents architecture where a simple edit works, moves or renames core files without approval, or adds coupling or unnecessary abstraction. Pages should stay thin, layouts should own shared framing, and existing patterns should be reused.
 
-Check whether new JavaScript is justified.
+## 9. Documentation Drift
 
-Confirm:
-
-- Static-first behavior is preserved.
-- Progressive enhancement is used when appropriate.
-- Hydration is avoided unless needed.
-- Keyboard and screen-reader behavior are preserved.
-- Performance impact was considered.
-
-Request changes if:
-
-- JavaScript was added for something HTML/CSS/Astro can handle.
-- Hydration is added without clear need.
-- Accessibility is reduced.
-
-## 8. Content and Voice
-
-Check for:
-
-- Placeholder content preserved unless removal was requested
-- Eric's editorial voice not flattened into generic marketing copy
-- Technical claims remain credible
-- Content fields match `src/content.config.ts`
-- Tags/categories still support site behavior
-
-Request changes if:
-
-- Placeholder content is deleted without approval.
-- Voice-sensitive content is rewritten too generically.
-- Frontmatter violates the schema.
-
-## 9. Architecture
-
-Check for:
-
-- Existing patterns reused
-- Components remain focused
-- Pages remain reasonably thin
-- Layouts own shared framing
-- Utilities remain reusable and clear
-- No unnecessary abstraction layers
-
-Request changes if:
-
-- The implementation invents architecture where a simple edit would work.
-- Core files are moved/renamed without approval.
-- The change creates coupling or ambiguity.
-
-## 10. Documentation Drift
-
-Check whether docs need updates.
-
-Docs commonly affected:
-
-```txt
-docs/architecture.md
-docs/testing.md
-docs/performance-seo-accessibility.md
-docs/editorial-guidelines.md
-docs/content-status.md
-docs/agent-workflow.md
-docs/change-policy.md
-docs/reviewer-checklist.md
-docs/deployment.md
-```
-
-Request changes if:
-
-- Behavior changed but docs were not updated.
-- Workflow or guardrails changed but `AGENTS.md` or docs were not updated.
-- Scripts or validation commands changed without docs updates.
-
-### Which Documentation to Review by Change Type
-
-| Change type | Documentation to review |
-|-------------|------------------------|
-| New or changed package command | README, testing docs, AGENTS.md |
-| Content schema change | content-model.md, content-authoring.md |
-| Draft/publication behavior | content-authoring.md |
-| New route | architecture.md, SEO-related docs |
-| New reusable visual pattern | design-system inventory and reference page |
-| New environment variable | `.env.local` / deployment docs |
-| Deployment or CI change | deployment.md |
-| Structured-data change | structured-data.md |
-| Accessibility or performance convention | performance-seo-accessibility.md |
-| Editorial or voice change | editorial-guidelines.md |
-
-Keep this table in sync with the documentation index in README.md.
+Every fact has one owning doc; [Architecture](architecture.md#documentation-and-sources-of-truth) maps topics to docs. Request changes if behavior, scripts, validation, workflow, or guardrails changed without updating the owning doc, or if the diff restates a fact that another doc already owns.
 
 ## Reviewer Verdict Guidance
 
-Use `approve` when:
-
-- The change fits the request.
-- No required issues are found.
-- Validation is adequate or lack of validation is clearly justified.
-
-Use `approve with notes` when:
-
-- The change is acceptable.
-- Notes are optional, future-facing, or minor.
-
-Use `request changes` when:
-
-- There is a correctness issue.
-- There is a guardrail violation.
-- There is avoidable accessibility, SEO, or performance risk.
-- Required validation failed or was skipped without explanation.
+| Verdict | Use when |
+|---|---|
+| `approve` | The change fits the request, no required issues exist, and validation is adequate or its absence is justified |
+| `approve with notes` | The change is acceptable; notes are optional, minor, or future-facing |
+| `request changes` | There is a correctness issue, a guardrail violation, avoidable accessibility, SEO, or performance risk, or validation that failed or was skipped without explanation |

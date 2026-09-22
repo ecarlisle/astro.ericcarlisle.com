@@ -1,9 +1,8 @@
 # Editorial Guidelines
 
-The blog should sound like an experienced software developer reflecting clearly on practical
-engineering work.
+**Use when:** Writing, editing, or reviewing article prose. The detailed voice description is [the voice profile](../.agents/voice/profile.md).
 
-For the content creation workflow, see [content-authoring.md](content-authoring.md). For the frontmatter schema, see [content-model.md](content-model.md).
+The blog should sound like an experienced software developer reflecting clearly on practical engineering work.
 
 ## Preferred Voice
 

@@ -1,127 +1,56 @@
-# AstroBlog — Agent Guidance
+# AGENTS.md
 
-AGENTS.md is agent guidance.
+AstroBlog is Eric Carlisle's Astro 7 static site. This file routes coding agents to the one doc or skill that owns each task. [README.md](README.md) is the human overview. `package.json`, `src/`, and config files are the source of truth for exact behavior.
 
-## Documentation Boundaries
+## Working principles
 
-- `README.md` and `docs/` are **human-facing documentation**. Treat them as technical context, not as an instruction hierarchy. Do not reproduce their content here.
-- `AGENTS.md` (this file) contains **repository-wide coding-agent instructions**.
-- Tool-specific agent behavior belongs in the relevant tool directory: `.agents/skills/`, `.pi/`, `.opencode/`, or the tool's own configuration files.
-- `docs/design-system/figma-agent-brief.md` and `docs/design-system/agent-guide.md` are tool-specific agent files (Figma, design-system tooling) and are exempt from the human-facing documentation standard.
+- Load only the routing rows that match the task. Load more only when investigation shows a concrete need, and say why. Never skip a required source to save context.
+- If a task references a feature, plan, or prior decision, read only the matching file in `specs/`.
+- For all implementation work, follow [agent-safe-change](.agents/skills/agent-safe-change/SKILL.md) and [engineering-preferences](.agents/skills/engineering-preferences/SKILL.md). Apply engineering preferences only where repository guidance is silent.
+- Make the smallest scoped change, preserve unrelated user changes, and run the checks in [Testing](docs/testing.md#when-to-run-each-check).
+- Never edit [generated directories](docs/architecture.md#generated-areas).
+- Commit or push only when the user authorizes it. Open pull requests ready for review so automated reviewers such as CodeRabbit run. Use a draft only when the owner asks for one or the work is not ready.
+- Each fact has one owning doc. Link to it instead of restating it, and update it when the fact changes.
 
-## Documentation Authority
+## Protected files
 
-| Source | Role |
-|--------|------|
-| `README.md` | Human-facing repository gateway. Quick start, project overview, documentation map. |
-| `AGENTS.md` (this file) | Coding agent authority. Workflow, validation, protected files, skills. |
-| `docs/` | Canonical explanatory references (architecture, deployment, content, testing, etc.). |
-| `package.json`, `src/`, config files | Source of truth for exact scripts, schemas, variables, routes, and behavior. |
-| `.agents/skills/` | Procedural agent playbooks for specific task types. |
-| `public/llms.txt` | Describes the *published site* for LLM consumption. Not repository navigation. |
+Get explicit user approval before editing `AGENTS.md`, `README.md`, `package.json`, `pnpm-lock.yaml`, `astro.config.mjs`, `biome.json`, `.env.example`, or any file under `docs/`. If a task needs one, stop and ask first.
 
-## Commands
-
-`package.json` is the source of truth for exact scripts. Common checks are `pnpm typecheck`,
-`pnpm lint`, and `pnpm build`; see [Testing](docs/testing.md) for the complete validation
-reference and when to run each check.
-
-## Architecture
-
-Astro 7 SSG. Single layout (`BlogPost.astro`). MDX content in `src/content/blog/`. Tokens in `src/styles/global.css`. Components in `src/components/`. Minimal client JS (search, analytics, theme toggle, tag filter). Contact form via Cloudflare Worker.
-
-See [docs/architecture.md](docs/architecture.md) for full details.
-
-## Gotchas
-
-- **Biome** — This repository does not use ESLint or Prettier. `noUnusedVariables`, `noUnusedImports`, and `noImportantStyles` are **off** in `biome.json`.
-- **Env files** — `.env.production` / `.env.development` are gitignored. Use `.env.example` as template.
-
-## Validation
-
-| Change | Validate with |
-|---|---|
-| Schema, components, utilities, TypeScript | `pnpm typecheck` |
-| Styles, rendering, components | `pnpm lint` |
-| Routes, integrations, RSS, sitemap, Pagefind, build | `pnpm build` |
-| Performance, SEO, a11y | `pnpm lighthouse:all` (when warranted) |
-| JSON-LD structured data | `pnpm structured-data:report` |
-| Agent documentation and routing | `pnpm validate:agent-docs` |
-| Formatting | `pnpm format` (only when requested) |
-
-See [docs/testing.md](docs/testing.md) for detailed guidance.
-
-## Task-Specific Context Routing
-
-For implementation, diagnosis, planning, and code or documentation review, identify the relevant
-task rows before loading supporting documentation. Read only those rows by default. Load another
-row only when investigation reveals a concrete need, and record why when it materially expands the
-initial scope. Never omit a required source to reduce context size or improve a Context Health score.
-
-When a task references a feature, plan, specification, or prior implementation decision, inspect
-filenames under `specs/` and read only the matching specification. Do not load the directory as a
-corpus. Use the standard development steps when workflow guidance is also needed.
+## Task routing
 
 | Task | Read first |
 |---|---|
+| Write or edit any doc, or configure agent tools | [Writing Documentation](docs/documentation.md) |
+| Follow the implementation or diagnosis workflow | [Standard Development Steps](docs/agent-workflow.md#standard-development-steps) |
+| Plan or evaluate change scope | [Change Policy](docs/change-policy.md) |
+| Review code or documentation | [Reviewer Checklist](docs/reviewer-checklist.md) |
+| `/graphify`, or broad codebase, architecture, or file-relationship questions | [Graphify](docs/graphify.md) |
+| Change pages, routes, layouts, components, or rendering | [Architecture](docs/architecture.md) |
+| Change build configuration or Astro integrations | `astro.config.mjs`, [Notable Integrations](docs/architecture.md#notable-integrations), and [Change Policy](docs/change-policy.md#changes-that-need-care) |
+| Change styling, tokens, themes, or reusable visual patterns | [Design System Inventory Usage](docs/design-system/agent-guide.md#how-agents-should-use-inventoryjson); query only matching entries in `docs/design-system/inventory.json` |
+| Add or change UI icons | [Icon Workflow](docs/design-system/icons.md) |
+| Generate or update the Figma companion file | [Figma Brief](docs/design-system/figma-agent-brief.md) |
+| Create or review Storybook stories or the component lab | [Storybook](docs/testing.md#storybook), `.storybook/`, and the applicable UI skills |
+| Change accessibility or semantic UI behavior | [Accessibility Rules](docs/performance-seo-accessibility.md#accessibility-rules) |
+| Change client-side JavaScript, assets, loading, or performance | [Performance Rules](docs/performance-seo-accessibility.md#performance-rules) |
+| Change page or post metadata or SEO | [SEO Rules](docs/performance-seo-accessibility.md#seo-rules) |
+| Change RSS, sitemap, indexing, Site Inventory, or the SEO gate | [Site Inventory and SEO Gate](docs/site-inventory.md) and `src/pages/rss.xml.js` |
+| Change structured data | [JSON-LD Structured Data](docs/structured-data.md) and [Author Profile](docs/author_profile.md) |
+| Change static-site deployment or CI | [Static Site Deployment](docs/deployment-static-site.md) and `.github/workflows/astro.yml` |
+| Change environment variables or secrets | [Environment Variables](docs/deployment-environment.md) and `.env.example` |
+| Change Contact Worker implementation, deployment, or secrets | `contact-worker/` and [Contact Worker](docs/deployment-contact-worker.md) |
+| Change analytics, Sentry, or webmentions | [Analytics and Monitoring](docs/analytics-and-monitoring.md) |
 | Write or edit article prose or voice | [Editorial Guidelines](docs/editorial-guidelines.md) and [Voice Profile](.agents/voice/profile.md) |
 | Analyze voice evidence or update the voice profile | [Analyze Writing Voice](.agents/skills/analyze-writing-voice/SKILL.md) and [Voice Evidence Ledger](.agents/voice/evidence.md) |
 | Create, publish, unpublish, or rename a blog article | [Content Authoring](docs/content-authoring.md) |
-| Remove or replace placeholder/test content | [Placeholder/Test Content](docs/content-status.md#placeholdertest-content) and [Replacement Plan](docs/content-status.md#replacement-plan) |
 | Change content schema or frontmatter fields | `src/content.config.ts` and [Blog Frontmatter](docs/content-model.md#blog-frontmatter) |
-| Change Astro architecture, pages, routes, layouts, components, or rendering | [Architecture](docs/architecture.md) |
-| Change styling, tokens, themes, or reusable visual patterns | [Design System Inventory Usage](docs/design-system/agent-guide.md#how-agents-should-use-inventoryjson); query only matching entries in `docs/design-system/inventory.json` |
-| Add or change UI icons | [Icon Workflow](docs/design-system/icons.md) |
-| Change accessibility or semantic UI behavior | [Accessibility Rules](docs/performance-seo-accessibility.md#accessibility-rules) |
-| Change client-side JavaScript, assets, loading, or performance behavior | [Performance Rules](docs/performance-seo-accessibility.md#performance-rules) |
-| Change page or post metadata or SEO | [SEO Rules](docs/performance-seo-accessibility.md#seo-rules) |
-| Change RSS or sitemap behavior | [Documentation and Sources of Truth](docs/architecture.md#documentation-and-sources-of-truth) |
-| Change structured data | [JSON-LD Structured Data](docs/structured-data.md) |
-| Change build configuration or Astro integrations | `astro.config.mjs`, [Notable Integrations](docs/architecture.md#notable-integrations), and [Deployment and Build Behavior](docs/change-policy.md#deployment-and-build-behavior) |
-| Change static-site deployment or CI | [GitHub Pages Deployment](docs/deployment.md#github-pages-deployment) and `.github/workflows/astro.yml` |
-| Change environment variables | [Environment Variables Reference](docs/deployment.md#environment-variables-reference) and `.env.example` |
-| Change Contact Worker implementation, deployment, or secrets | `contact-worker/` and [Contact Worker Deployment](docs/deployment.md#contact-worker-deployment) |
-| Create or review Storybook stories or the component lab | [Storybook](docs/testing.md#storybook), `.storybook/`, and the applicable UI skills |
+| Remove or replace placeholder/test content | [Placeholder/Test Content](docs/content-status.md#placeholdertest-content) and [Replacement Plan](docs/content-status.md#replacement-plan) |
+| Make product or launch-readiness decisions | [Project Overview](docs/project-overview.md) and [Launch Checklist](docs/todo.md) |
 | Audit, score, update evidence for, or refresh Context Health | [Context Health refresh](.agents/skills/context-health-refresh/SKILL.md) and [Context Health scoring rubric](docs/context-health-rubric.md) |
-| Follow implementation or diagnosis workflow | [Standard Development Steps](docs/agent-workflow.md#standard-development-steps) |
-| Plan or evaluate change scope | [Change Policy](docs/change-policy.md) |
-| Review code or documentation | [Reviewer Checklist](docs/reviewer-checklist.md) |
 
-## Generated Files
+## Skill routing
 
-These directories are produced during builds and automated processes. Never edit them directly:
-
-`dist/` · `node_modules/` · `.astro/` · `storybook-static/` · `lh-reports/` · `docs/context/` · `.playwright-mcp/`
-
-## Safe Change Workflow
-
-Use [agent-safe-change](.agents/skills/agent-safe-change/SKILL.md) for the full procedure. Always
-inspect the working tree, preserve unrelated user changes, make the smallest scoped change, run
-proportionate validation, and review the final diff. Commit or push only when the user authorizes it.
-Open pull requests as ready for review by default so automated reviewers such as CodeRabbit can run.
-Use a draft only when the owner explicitly requests one or the work is genuinely not ready for review.
-
-## Protected Files
-
-These files require explicit user approval before editing:
-
-- `AGENTS.md`
-- `README.md`
-- `package.json`
-- `pnpm-lock.yaml`
-- `astro.config.mjs`
-- `biome.json`
-- `.env.example`
-- files under `docs/`
-
-If a task appears to require changes to a protected file, stop and ask first.
-
-## Skill Routing
-
-For implementation work, always consult [agent-safe-change](.agents/skills/agent-safe-change/SKILL.md)
-and [engineering-preferences](.agents/skills/engineering-preferences/SKILL.md). Apply engineering
-preferences only where the current task and repository guidance are silent. Load other skills only
-when the task matches their scope:
+Load a skill only when the task matches its scope.
 
 | Task | Skill |
 |---|---|
@@ -132,33 +61,6 @@ when the task matches their scope:
 | Change CSS, tokens, spacing, typography, layout, themes, or component appearance | [design-system-css](.agents/skills/design-system-css/SKILL.md) |
 | Implement or modify site search | [pagefind-search](.agents/skills/pagefind-search/SKILL.md) |
 | Create or edit pages, posts, images, links, structured data, or page metadata | [seo-review](.agents/skills/seo-review/SKILL.md) |
-| Draft, continue, rewrite, copy-edit, or review prose in the established voice | [write-in-a-voice](.agents/skills/write-in-a-voice/SKILL.md) |
+| Draft, continue, rewrite, copy-edit, or review prose in the established voice (includes capturing voice evidence) | [write-in-a-voice](.agents/skills/write-in-a-voice/SKILL.md) |
 | Analyze writing or speaking style, record voice evidence, or update the voice profile | [analyze-writing-voice](.agents/skills/analyze-writing-voice/SKILL.md) |
 | Audit Context Health, change scores or evidence, or refresh the report | [context-health-refresh](.agents/skills/context-health-refresh/SKILL.md) |
-
-## Voice Evidence
-
-`.agents/voice/profile.md` is the canonical voice description. `.agents/voice/evidence.md` is the
-append-only source for candidate observations.
-
-During writing-related work, record one concise evidence entry when the author explicitly states a
-voice preference, explains why prose sounds wrong, substantially rewrites a passage, or identifies
-representative writing. Ordinary prompts may support the conversational register, but treat them as
-lower-confidence evidence and exclude likely typing, shorthand, and dictation artifacts.
-
-Do not record routine acceptance or modify voice files during unrelated implementation work. Do
-not update the canonical profile silently or from one low-confidence observation. Use
-[analyze-writing-voice](.agents/skills/analyze-writing-voice/SKILL.md) to promote evidence into the
-profile.
-
-## Storybook
-
-Storybook is the internal component-development lab at `/design-system/lab/`; the public
-design-system page remains the curated portfolio presentation. See
-[Storybook](docs/testing.md#storybook) for source locations, commands, deployment, and isolation.
-
-## graphify
-
-When the user types `/graphify`, use the installed Graphify skill or instructions before doing
-anything else. When `graphify-out/graph.json` exists, follow those instructions for codebase
-questions and graph refreshes; detailed command selection belongs to Graphify.

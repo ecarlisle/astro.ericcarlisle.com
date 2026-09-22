@@ -1,20 +1,8 @@
 # Content Status
 
-The AstroBlog codebase is close to feature-complete, but much of the current blog content is
-placeholder or test content. It exists to validate:
+**Use when:** Removing, replacing, or judging placeholder/test content, or deciding what content is real.
 
-- Blog listing pages
-- Pagination
-- Tag pages
-- Search indexing
-- Post layout
-- Hero images
-- Typography
-- Code block styling
-- Metadata rendering
-- RSS and sitemap generation
-
-Many current posts are placeholder or test content. Removing them without considering the behaviors they support (pagination, tags, search, metadata, RSS, sitemap) can leave gaps in test coverage.
+This file is the single source for placeholder-content policy.
 
 ## Real or Near-Real Content
 
@@ -27,13 +15,17 @@ docs/author_profile.md
 
 ## Placeholder/Test Content
 
-Most current technical blog posts appear to support style, taxonomy, pagination, and functionality
-testing. They may contain useful examples, but their presence does not indicate that their editorial
-content is final or ready to publish.
+Most current blog posts are placeholder or test content. Their presence does not mean the writing is final or ready to publish. They exercise:
+
+- blog listings, pagination, and tag pages;
+- search indexing, RSS, and sitemap generation; and
+- post layout, hero images, typography, code blocks, and metadata rendering.
+
+Keep placeholder posts unless removal was requested. Before removing one, confirm which of those behaviors still have coverage.
 
 ## Replacement Plan
 
 1. Preserve frontmatter schema compatibility.
-2. Preserve enough posts to test pagination until pagination is no longer needed.
-3. Preserve tag variety until tag pages are validated.
-4. Confirm RSS, sitemap, Pagefind, and Lighthouse behavior after major content changes.
+2. Keep enough posts to test pagination until it is no longer needed.
+3. Keep tag variety until tag pages are validated.
+4. After major content changes, confirm RSS, sitemap, Pagefind, and Lighthouse behavior.

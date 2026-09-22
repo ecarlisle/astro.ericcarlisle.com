@@ -1,95 +1,30 @@
 # JSON-LD Structured Data
 
-This site uses [JSON-LD](https://json-ld.org/) for structured data. All schema
-generation happens in a single component.
+**Use when:** Changing JSON-LD output or its validation report.
 
-## Where Schema Is Defined
+## Where schema is defined
 
-- **`src/components/SchemaOrg.astro`** — Generates all JSON-LD entities. The
-  component accepts a `type` prop that selects which schema types to emit for
-  the current page.
-- **`src/components/BaseHead.astro`** — Invokes `SchemaOrg` on every page
-  (line 124) and passes page-level metadata as props.
+- **`src/components/SchemaOrg.astro`** generates every JSON-LD entity. Its `type` prop selects the schema types for the page.
+- **`src/components/BaseHead.astro`** renders `SchemaOrg` on every page with page metadata, as an inline `<script type="application/ld+json">` in `<head>`.
+- Entity design follows [ADR 004](decisions/004-connected-schema-org-graph-for-structured-data.md). Author data comes from [Author Profile](author_profile.md).
 
-The rendered JSON-LD is injected as an inline `<script type="application/ld+json">`
-element in the page `<head>`.
+## Report
 
-## Running the Report
+`pnpm structured-data:report` (alias `pnpm jsonld:report`) builds the site and scans the output. Reports are written to `data/structured-data/` as `jsonld-report.json` (for tooling) and `jsonld-report.md` (for people).
 
-```sh
-pnpm structured-data:report
-```
+The report checks:
 
-Or the shorter alias:
+- JSON-LD present on every HTML page (a missing block is reported but does not fail);
+- **top-level entity types**, meaning each `@graph` entry's `@type`, or the root's;
+- **nested types**, found recursively inside properties and counted separately, never twice;
+- `@id` values per page; and
+- JSON parse errors, which are the only thing that makes it exit non-zero.
 
-```sh
-pnpm jsonld:report
-```
+Example: in a `BreadcrumbList` whose `itemListElement` holds `ListItem` entries pointing at a `WebPage`, the top-level type is `BreadcrumbList` and the nested types are `ListItem` and `WebPage`.
 
-Both commands build the site and then scan the output for JSON-LD blocks.
+## Not yet validated
 
-## Report Output
-
-Reports are written to `data/structured-data/`:
-
-| File | Format | Purpose |
-|---|---|---|
-| `jsonld-report.json` | JSON | Machine-readable report for tooling |
-| `jsonld-report.md` | Markdown | Human-readable summary |
-
-## What the Report Checks
-
-- Presence of JSON-LD on every HTML page
-- **Top-level entity types** — the `@type` values declared at the top level of
-  each JSON-LD `@graph` entry (or root object when there is no `@graph`). These
-  are the primary schema types for the page (e.g. `BlogPosting`, `WebPage`,
-  `Person`).
-- **Nested/supporting schema object types** — `@type` values found recursively
-  inside properties of top-level entities (e.g. `ImageObject` inside a
-  `BlogPosting`'s `image` property, or `ListItem` inside a `BreadcrumbList`'s
-  `itemListElement`). These are collected separately from top-level types and
-  are **not** double-counted with the top-level entity coverage.
-- `@id` values found per page
-- Parse errors (malformed JSON)
-- Pages that are missing JSON-LD entirely
-
-### Top-Level vs Nested: An Example
-
-Given this JSON-LD snippet:
-
-```json
-{
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "item": { "@type": "WebPage", ... } },
-    { "@type": "ListItem", "position": 2, ... }
-  ]
-}
-```
-
-- **Top-level entity type**: `BreadcrumbList`
-- **Nested/supporting types**: `ListItem`, `WebPage`
-
-Both lists are reported separately so you can distinguish which schema types are
-the page's primary entities vs supporting objects referenced in property values.
-
-## What It Does Not Yet Validate
-
-- Schema.org property correctness (required vs optional properties)
-- `@id` reference consistency (whether referenced `@id` values exist elsewhere
-  in the graph)
-- Missing recommended types for specific page kinds
-- Whether types match the expected page purpose
-- Cross-page consistency of `@id` conventions
-
-## CI Possibility
-
-The `pnpm structured-data:report` command exits with a non-zero status only if
-JSON-LD parse errors are detected. This makes it suitable for a CI check step.
-Pages with no JSON-LD are reported but do not fail the script.
-
-In the future, a CI workflow could:
-
-1. Run `pnpm structured-data:report`
-2. Fail the build if parse errors exist
-3. Optionally upload the report as a build artifact
+- Schema.org required vs. optional properties
+- Whether referenced `@id` values exist in the graph
+- Missing recommended types for a page kind, or types that do not fit the page's purpose
+- Cross-page `@id` conventions

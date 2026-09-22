@@ -1,5 +1,7 @@
 # Connected Schema.org graph for structured data
 
+**Use when:** Changing how JSON-LD entities are structured or linked.
+
 - Status: Accepted
 - Date: 2026-07-12 (documenting existing decision)
 

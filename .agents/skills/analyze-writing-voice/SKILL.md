@@ -21,8 +21,7 @@ version: 2
 
 # Analyze Writing Voice
 
-Turn authentic evidence into a portable description of how the writer communicates. The canonical
-profile is this skill's output and the `write-in-a-voice` skill's input.
+Turn authentic evidence into a portable description of how the writer communicates. The canonical profile is this skill's output and the `write-in-a-voice` skill's input.
 
 Read:
 
@@ -30,9 +29,7 @@ Read:
 - [the evidence ledger](../../voice/evidence.md); and
 - [the evidence model](references/evidence-model.md).
 
-Use [the interview guide](references/interview-guide.md) only when material gaps require elicited
-evidence. Use [the profile schema](references/profile-schema.md) when creating or restructuring the
-profile.
+Use [the interview guide](references/interview-guide.md) only when material gaps require elicited evidence. Use [the profile schema](references/profile-schema.md) when creating or restructuring the profile.
 
 ## Supported operations
 
@@ -40,8 +37,7 @@ profile.
 - **Create a profile** — synthesize an initial profile from sufficient evidence.
 - **Update a profile** — propose and apply evidence-supported changes.
 - **Review evidence** — resolve duplicates, contradictions, scope, and confidence.
-- **Validate a profile** — test whether the profile predicts the writer's preferences on material
-  not used to create the relevant rule.
+- **Validate a profile** — test whether the profile predicts the writer's preferences on material not used to create the relevant rule.
 
 ## Separate the evidence layers
 
@@ -52,8 +48,7 @@ Distinguish:
 - **Register** — adaptation to genre, audience, purpose, and medium; and
 - **Mechanics** — house conventions such as capitalization, citation form, or Oxford commas.
 
-Do not turn a mechanical preference into a personality trait. Do not flatten different registers
-into an averaged voice.
+Do not turn a mechanical preference into a personality trait. Do not flatten different registers into an averaged voice.
 
 ## Evaluate evidence
 
@@ -66,10 +61,7 @@ Prefer evidence in this order:
 5. repeated patterns across ordinary writer-authored prompts; and
 6. an isolated prompt characteristic or agent inference.
 
-Prompts are important evidence for the conversational or speaking-style register. Evaluate their
-reasoning, framing, qualification, vocabulary, self-correction, humor, and relationship with the
-reader. Do not learn spelling, punctuation, capitalization, fragments, or brevity from hurried
-commands, transcription errors, or dictation artifacts.
+Prompts are important evidence for the conversational or speaking-style register. Evaluate their reasoning, framing, qualification, vocabulary, self-correction, humor, and relationship with the reader. Do not learn spelling, punctuation, capitalization, fragments, or brevity from hurried commands, transcription errors, or dictation artifacts.
 
 Do not treat:
 
@@ -83,9 +75,7 @@ as primary evidence of the writer's voice.
 
 ## Record before promoting
 
-Add one concise entry to [the evidence ledger](../../voice/evidence.md) for each distinct,
-qualifying observation. Include source, authorship, context, register, evidence type, confidence,
-and status. Count unique evidence, not the number of agents that noticed it.
+Add one concise entry to [the evidence ledger](../../voice/evidence.md) for each distinct, qualifying observation. Include source, authorship, context, register, evidence type, confidence, and status. Count unique evidence, not the number of agents that noticed it.
 
 Do not update the canonical profile from:
 
@@ -94,8 +84,7 @@ Do not update the canonical profile from:
 - a pattern explainable only by task constraints; or
 - a contradiction that has not been examined by register.
 
-Promote explicit preferences immediately when they are unambiguous. Require repeated independent
-evidence or writer confirmation for inferred stable traits.
+Promote explicit preferences immediately when they are unambiguous. Require repeated independent evidence or writer confirmation for inferred stable traits.
 
 ## Update the profile
 
@@ -107,15 +96,13 @@ When a profile change is authorized:
 4. Propose the smallest profile change.
 5. Preserve the previous meaning where evidence has not changed.
 6. Update the profile version and change history.
-7. Append a `promoted` row to the evidence status history. Treat the latest dated status row for
-   an evidence ID as authoritative.
+7. Append a `promoted` row to the evidence status history. Treat the latest dated status row for an evidence ID as authoritative.
 
 Do not silently rewrite the profile during an unrelated task.
 
 ## Elicit missing evidence
 
-Do not begin with a comprehensive questionnaire. Ask one focused question or exercise at a time,
-then adapt the next question to what remains uncertain.
+Do not begin with a comprehensive questionnaire. Ask one focused question or exercise at a time, then adapt the next question to what remains uncertain.
 
 Prefer:
 
@@ -124,13 +111,11 @@ Prefer:
 - revision of bland or over-polished prose; and
 - critique of a plausible but imperfect imitation.
 
-Stop when additional questions are unlikely to change the profile materially. Record unresolved
-questions rather than interviewing for artificial completeness.
+Stop when additional questions are unlikely to change the profile materially. Record unresolved questions rather than interviewing for artificial completeness.
 
 ## Validate the analysis
 
-Use held-out passages or new writing tasks. Test more than one register only when the profile makes
-cross-register claims.
+Use held-out passages or new writing tasks. Test more than one register only when the profile makes cross-register claims.
 
 Check whether the profile:
 
@@ -152,5 +137,4 @@ For analysis-only work, return:
 4. proposed profile changes; and
 5. confidence and provenance limitations.
 
-For an authorized repository update, edit the evidence ledger first and the canonical profile
-second. Keep both concise.
+For an authorized repository update, edit the evidence ledger first and the canonical profile second. Keep both concise.

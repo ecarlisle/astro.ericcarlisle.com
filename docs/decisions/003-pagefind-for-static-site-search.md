@@ -1,5 +1,7 @@
 # Pagefind for static site search
 
+**Use when:** Changing or replacing site search.
+
 - Status: Accepted
 - Date: 2026-07-12 (documenting existing decision)
 
