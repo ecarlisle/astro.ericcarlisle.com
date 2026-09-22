@@ -178,7 +178,4 @@ Output Format
 When reporting findings, use this format:
 
 ### Issue: [short name]
-**Where:** [page, component, route, or metadata field]
-**Problem:** [brief explanation]
-**Fix:** [specific recommendation or code change]
-**Verify:** [rendered metadata, schema validation, heading check, preview check, or indexing check]
+**Where:** [page, component, route, or metadata field] **Problem:** [brief explanation] **Fix:** [specific recommendation or code change] **Verify:** [rendered metadata, schema validation, heading check, preview check, or indexing check]

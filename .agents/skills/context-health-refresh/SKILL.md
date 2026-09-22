@@ -33,23 +33,16 @@ Do not omit required context to improve Precision. Do not include unrelated cont
 
 For every metric, maintain separate `assessed` and `observed` records.
 
-- Static assessment may classify repository evidence, calculate the locked check score, report a
-  deterministic size estimate, and assign an evidence-maturity level with a reason.
-- Observed evaluation requires a versioned representative task suite. Never infer it from static
-  files, structural validation, generated output, or an agent’s confidence.
-- When no suite has run, use `not-measured`, null result fields, and consistent zero counts. Do not
-  create plausible tasks, agents, configurations, variance, confidence, or outcomes.
+- Static assessment may classify repository evidence, calculate the locked check score, report a deterministic size estimate, and assign an evidence-maturity level with a reason.
+- Observed evaluation requires a versioned representative task suite. Never infer it from static files, structural validation, generated output, or an agent’s confidence.
+- When no suite has run, use `not-measured`, null result fields, and consistent zero counts. Do not create plausible tasks, agents, configurations, variance, confidence, or outcomes.
 - Do not calculate an aggregate Context Health score or average unevaluated profiles.
-- Treat 100% as completion of finite current static checks, not proof of universal readiness or
-  task success.
+- Treat 100% as completion of finite current static checks, not proof of universal readiness or task success.
 - Do not introduce universal token thresholds or convert size into a health label.
 
-Assign maturity using the rubric’s versioned levels: `declared`, `structurally-verified`,
-`observed`, `repeated`, or `resilient`. Maturity is not a percentage. Explain the evidence that
-qualifies each metric and do not promote static evidence to an observed level.
+Assign maturity using the rubric’s versioned levels: `declared`, `structurally-verified`, `observed`, `repeated`, or `resilient`. Maturity is not a percentage. Explain the evidence that qualifies each metric and do not promote static evidence to an observed level.
 
-Describe external standards and projects only as bounded influences. Do not imply that they define
-or endorse Context Health.
+Describe external standards and projects only as bounded influences. Do not imply that they define or endorse Context Health.
 
 ## Record structured source references
 
@@ -80,8 +73,7 @@ Use PR diff links only to discuss a PR change, never as permanent report evidenc
 7. Confirm an unmeasured report contains no invented observed runs or outcomes.
 8. When the rubric, schema, maturity definitions, checks, weights, or task profile changes materially, increment the relevant version and do not compare with older reports unless they are regenerated under the same methodology.
 
-The portable scenario taxonomy documents future evaluation coverage only. Do not build a runner,
-simulator, telemetry system, or synthetic observed dataset during an ordinary refresh.
+The portable scenario taxonomy documents future evaluation coverage only. Do not build a runner, simulator, telemetry system, or synthetic observed dataset during an ordinary refresh.
 
 Use `write-in-a-voice` for meaningful explanatory prose changes. Editing must not alter evidence, certainty, result classifications, weights, or calculated scores.
 

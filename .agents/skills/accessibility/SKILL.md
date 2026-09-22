@@ -120,7 +120,4 @@ Output Format
 When reporting findings, use this format:
 
 ### Issue: [short name]
-**Where:** [component, file, or UI area]
-**Problem:** [brief explanation]
-**Fix:** [specific recommendation or code change]
-**Verify:** [keyboard, screen reader, contrast, or behavior check]
+**Where:** [component, file, or UI area] **Problem:** [brief explanation] **Fix:** [specific recommendation or code change] **Verify:** [keyboard, screen reader, contrast, or behavior check]
