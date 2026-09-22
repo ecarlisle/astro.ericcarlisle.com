@@ -73,6 +73,7 @@ Recommended semantic roles:
 - `--text-primary`, `--text-secondary`, `--text-muted`: text hierarchy
 - `--color-danger`, `--color-warning`: error and warning states (status only; `--brand-highlight` stays callout-only)
 - `--border-main`, `--border-muted`, `--border-control`: structure and controls
+- `--z-decoration`, `--z-raised`, `--z-control`, `--z-header`, `--z-header-accent`, `--z-skip-link`: layering order, low to high
 
 Do not add many more hues. Prefer semantic roles and tonal steps over more color variety.
 Color changes must remain WCAG 2 AA compliant for normal text in both dark and light mode. Check at least:

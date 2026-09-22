@@ -120,7 +120,7 @@ const {
     gap: var(--space-sm);
     padding: var(--space-component);
     background: oklch(0 0 0 / 0.3);
-    z-index: 1;
+    z-index: var(--z-raised);
   }
 
   .stl-overlay:has(.stl-canvas:not([hidden])) {
@@ -151,7 +151,7 @@ const {
     position: absolute;
     bottom: var(--space-component);
     right: var(--space-component);
-    z-index: 2;
+    z-index: var(--z-control);
   }
 
   .stl-download {

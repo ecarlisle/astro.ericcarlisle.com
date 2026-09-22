@@ -106,7 +106,7 @@ const { Image } = await import('astro:assets');
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 1;
+    z-index: var(--z-raised);
     cursor: pointer;
   }
 
@@ -125,7 +125,7 @@ const { Image } = await import('astro:assets');
     min-width: var(--size-touch-target-min);
     min-height: var(--size-touch-target-min);
     position: relative;
-    z-index: 2;
+    z-index: var(--z-control);
   }
 
   .yf-play:hover {

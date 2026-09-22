@@ -146,6 +146,14 @@
 
   /* Breakpoints */
   --bp-mobile: 720px;
+
+  /* Z-index scale */
+  --z-decoration: -1;
+  --z-raised: 1;
+  --z-control: 2;
+  --z-header: 100;
+  --z-header-accent: 101;
+  --z-skip-link: 9999;
 }
 
 /* ========================================================================
@@ -481,7 +489,7 @@ hr {
   position: absolute;
   top: -100%;
   left: var(--space-component);
-  z-index: 9999;
+  z-index: var(--z-skip-link);
   padding: var(--space-inline) var(--space-component);
   background: var(--bg-surface);
   color: var(--text-primary);
@@ -515,7 +523,7 @@ hr {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 101;
+  z-index: var(--z-header-accent);
   height: 3px;
   background: var(--color-link);
   width: 0%;
