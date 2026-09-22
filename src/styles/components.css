@@ -176,7 +176,7 @@
 .technical-surface::before,
 .technical-surface::after {
   position: absolute;
-  z-index: -1;
+  z-index: var(--z-decoration);
   inset: 0;
   content: "";
   pointer-events: none;

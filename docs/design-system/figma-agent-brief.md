@@ -270,6 +270,17 @@ main {
 | `--border-muted` | `#1a2638` | Header border, subtle separators |
 | `--border-control` | `#61728b` | Form input borders (3:1+ on all surfaces) |
 
+### Z-index scale
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--z-decoration` | `-1` | Decorative background elements inside an isolated stacking context (grid backdrop, card image backdrops) |
+| `--z-raised` | `1` | Content raised above a local backdrop or clickable overlay (Card link overlay, Tag, CategoryTag, STL/YouTube facade overlays) |
+| `--z-control` | `2` | A control sitting above an overlay at `--z-raised` (STL reset button, YouTube play button) |
+| `--z-header` | `100` | Fixed site header |
+| `--z-header-accent` | `101` | Reading-progress bar — sits above the header |
+| `--z-skip-link` | `9999` | Skip-to-content link on focus — must clear everything |
+
 ### Light palette
 
 | Token | Hex | Usage |

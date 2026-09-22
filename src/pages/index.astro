@@ -255,7 +255,7 @@ const posts = (await getSortedPosts()).slice(0, 6);
 
   :global(.grid--featured-first > :first-child::before) {
     position: absolute;
-    z-index: -1;
+    z-index: var(--z-decoration);
     top: -10rem;
     right: -7rem;
     width: 24rem;
