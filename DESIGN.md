@@ -67,7 +67,7 @@ The palette should feel modern, technical, readable, and slightly energetic with
 
 Recommended semantic roles:
 - `--brand-primary`: primary blue for normal links, active navigation, buttons, and reading progress
-- `--brand-accent`: teal/green accent for hover states, focus, selected tags, and small interactive highlights
+- `--brand-accent`: teal/green accent for hover states, success, selected tags, and small interactive highlights
 - `--brand-highlight`: warm highlight used sparingly for special callouts, warnings, or unique metadata. Implemented as `.callout--note` in `src/styles/components.css` (documented in the design-system reference) — this is the intended usage; avoid adding more `--brand-highlight` surfaces without a specific reason.
 - `--bg-main`, `--bg-surface`, `--bg-surface-elevated`: page and component surfaces
 - `--text-primary`, `--text-secondary`, `--text-muted`: text hierarchy
@@ -98,11 +98,15 @@ Suggested Blue Relay tokens:
   --brand-primary: #5EA8FF;
   --brand-accent: #38D9A9;
   --brand-highlight: #FFB86B;
+  --color-danger: #FF8A8A;
+  --color-warning: #F5D35C;
   --color-link: var(--brand-primary);
   --color-link-hover: var(--brand-accent);
   --color-action: var(--brand-primary);
-  --color-action-hover: var(--brand-accent);
-  --color-focus: var(--brand-accent);
+  --color-action-hover: #3D8EE0;
+  --color-action-active: #3787D8;
+  --color-on-action: var(--bg-surface);
+  --color-focus: var(--color-link);
   --border-main: #26344D;
   --border-muted: #1A2638;
   --border-control: #61728B;
@@ -117,18 +121,22 @@ Suggested Blue Relay tokens:
   --brand-primary: #005FCC;
   --brand-accent: #007A5A;
   --brand-highlight: #A14B00;
+  --color-danger: #B42318;
+  --color-warning: #7A5B00;
   --color-link: var(--brand-primary);
   --color-link-hover: var(--brand-accent);
   --color-action: var(--brand-primary);
-  --color-action-hover: var(--brand-accent);
-  --color-focus: var(--brand-accent);
+  --color-action-hover: #004799;
+  --color-action-active: #003A7D;
+  --color-on-action: var(--bg-surface);
+  --color-focus: var(--color-link);
   --border-main: #CBD5E1;
   --border-muted: #E2E8F0;
   --border-control: #64748B;
 }
 ```
 
-These values are guidance for the next refinement pass. If implementation testing reveals a contrast issue, adjust the token while preserving the blue-led direction.
+These values mirror the shipped tokens in `src/styles/global.css`, which is the source of truth; if they ever differ, trust the CSS. If implementation testing reveals a contrast issue, adjust the token while preserving the blue-led direction.
 
 ## Spacing and Rhythm
 
