@@ -1,16 +1,10 @@
 # Performance, SEO, and Accessibility
 
-This site prioritizes:
+**Use when:** Changing client JavaScript, assets, metadata, indexing, or accessible UI behavior, or
+reviewing a change for those risks.
 
-- Fast static pages
-- Minimal JavaScript
-- Semantic HTML
-- Clear heading hierarchy
-- Accessible navigation
-- Responsive images
-- Useful metadata
-- Valid RSS and sitemap output
-- Search indexing through Pagefind
+This file owns the site's performance, SEO, indexing, and accessibility rules. Validation commands
+are in [Testing](testing.md#when-to-run-each-check).
 
 ## Performance Rules
 
@@ -59,18 +53,9 @@ Tag routing is deterministic: a tag becomes indexable the moment it contains mor
 returns to `noindex` if it drops back to one, because the tag page and the policy both read the same
 `src/content/blog/` frontmatter.
 
-Because the site deploys to GitHub Pages (which cannot serve true HTTP 301 redirects), aliases use
-Astro's static `Astro.redirect(...)` output — a meta-refresh document that is already `noindex`, points its
-canonical at the destination, and offers a direct link. See `docs/deployment.md` for the hosting note.
-
-## Validation
-
-| Area | Command |
-|------|--------|
-| Performance, accessibility, SEO | `pnpm lighthouse:all` |
-| SEO indexing hygiene (deterministic gate, after build) | `pnpm validate:seo` |
-| Structured data | `pnpm structured-data:report` |
-| TypeScript and Astro | `pnpm typecheck` |
+Redirect aliases are static `Astro.redirect(...)` pages because GitHub Pages cannot send HTTP
+redirects (see [Redirects](deployment-static-site.md#redirects)). To add one, follow
+[Rename or move an article](content-authoring.md#rename-or-move-an-article).
 
 ## Accessibility Rules
 

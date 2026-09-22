@@ -1,5 +1,7 @@
 # AstroBlog — Ready for Real Content Checklist
 
+**Use when:** Checking or updating launch readiness.
+
 ## Code/Foundation
 
 - [x] Contact page route exists
@@ -13,7 +15,7 @@
 
 ## Verify Before Launch
 
-- [ ] Confirm `AGENTS.md` reflects current Astro/package scripts
+- [ ] Confirm `docs/testing.md` reflects current package scripts
 - [ ] Confirm `astro.config.mjs` uses `https://ericcarlisle.com`
 - [ ] Run `pnpm build`
 - [ ] Run `pnpm typecheck`

@@ -1,5 +1,7 @@
 # Static-first Astro architecture with minimal client JavaScript
 
+**Use when:** Adding client JavaScript, hydration, or server rendering, or revisiting the static-first approach.
+
 - Status: Accepted
 - Date: 2026-07-12 (documenting existing decision)
 

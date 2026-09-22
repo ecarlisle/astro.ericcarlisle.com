@@ -1,5 +1,7 @@
 # Separate Cloudflare Worker for contact-form processing
 
+**Use when:** Changing how the contact form is processed, hosted, or deployed.
+
 - Status: Accepted
 - Date: 2026-07-12 (documenting existing decision)
 
@@ -49,4 +51,4 @@ The Worker:
 - `contact-worker/src/index.ts` — Worker implementation
 - `contact-worker/wrangler.toml` — Worker configuration
 - `src/pages/contact.astro` — Frontend form implementation
-- `docs/deployment.md` — Deployment procedures for both surfaces
+- `docs/deployment-static-site.md` and `docs/deployment-contact-worker.md` — Deployment procedures for both surfaces

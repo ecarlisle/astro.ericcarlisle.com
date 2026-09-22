@@ -1,49 +1,36 @@
 # Content Model
 
-A human-readable reference for the blog frontmatter schema. For the authoring workflow, see [content-authoring.md](content-authoring.md). For voice and editorial standards, see [editorial-guidelines.md](editorial-guidelines.md).
+**Use when:** Reading or changing blog frontmatter fields or the content schema.
 
-Blog posts live in:
-
-`src/content/blog/**/*.{md,mdx}`
-
-The authoritative schema is defined in:
-
-[`src/content.config.ts`](../src/content.config.ts)
+Blog posts live in `src/content/blog/**/*.{md,mdx}`. The authoritative schema is
+[`src/content.config.ts`](../src/content.config.ts). The authoring workflow is in
+[Content Authoring](content-authoring.md).
 
 ## Blog Frontmatter
 
-Fields in the current schema:
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `title` | string | Yes | |
+| `description` | string | Yes | Max 165 characters |
+| `pubDate` | date | Yes | Sort order, RSS, structured data |
+| `updatedDate` | date | No | Meaningful updates only |
+| `draft` | boolean | No | Excludes the post from all output |
+| `tags` | string[] | No | |
+| `heroImage` | Astro image | No | |
+| `coverAlt` | string | No | Expected whenever `heroImage` is set |
+| `socialTitle` | string | No | Max 60 characters |
+| `socialDescription` | string | No | Max 200 characters |
+| `socialImage` | Astro image | No | |
+| `twitterHandle` | string | No | Adds `twitter:creator` |
+| `share` | object | No | See below |
 
-- `title` - required string
-- `description` - required string, limited to 165 characters
-- `draft` - optional boolean
-- `pubDate` - required date
-- `updatedDate` - optional date
-- `heroImage` - optional Astro image
-- `coverAlt` - optional string
-- `tags` - optional array of strings
-- `socialTitle` - optional string, limited to 60 characters
-- `socialDescription` - optional string, limited to 200 characters
-- `socialImage` - optional Astro image
-- `twitterHandle` - optional string
-- `share` - optional sharing configuration
+Use `socialTitle`, `socialDescription`, and `socialImage` only when the social preview should
+differ from the page title, description, or hero image.
 
-The `share` object supports:
+`share` supports:
 
-- `enabled` - boolean that defaults to `true`
-- `networks` - optional array containing `twitter`, `facebook`, `linkedin`, or `bluesky`
-- `scheduledFor` - optional date
+- `enabled`: boolean, defaults to `true`
+- `networks`: any of `twitter`, `facebook`, `linkedin`, or `bluesky`
+- `scheduledFor`: date
 
-## Description Length
-
-Post descriptions should be concise and useful. The schema currently limits `description` to 165
-characters.
-
-## Social Metadata
-
-Use `socialTitle`, `socialDescription`, and `socialImage` when the social preview should differ from
-the page title, description, or hero image.
-
-## Placeholder Content
-
-Many existing posts are placeholder or test posts. Their presence does not indicate that their editorial content is final or ready to publish.
+Many existing posts are placeholders; see [Content Status](content-status.md).

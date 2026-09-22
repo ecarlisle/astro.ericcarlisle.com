@@ -1,5 +1,8 @@
 # Author Profile
 
+**Use when:** Setting author identity, social links, canonical base URL, or `Person` structured
+data.
+
 This document is the authoritative source of truth for the author's identity, personal website, and official social media channels. Site metadata, footers, headers, and social sharing components should reference these links rather than template placeholders or default Astro social accounts.
 
 ## Identity & Biography
