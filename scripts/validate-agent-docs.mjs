@@ -46,7 +46,7 @@ function markdownFiles(directory) {
 }
 
 function withoutCodeFences(source) {
-  return source.replace(/^```[\s\S]*?^```/gm, '');
+  return source.replace(/^[ \t]*(`{3,}|~{3,})[\s\S]*?^[ \t]*\1/gm, '');
 }
 
 function skillFiles() {

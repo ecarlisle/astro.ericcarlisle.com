@@ -15,11 +15,14 @@ Blog posts live in `src/content/blog/**/*.{md,mdx}`. The authoritative schema is
 | `draft` | boolean | No | Excludes the post from all output |
 | `tags` | string[] | No | |
 | `heroImage` | Astro image | No | |
-| `coverAlt` | string | No | Expected whenever `heroImage` is set |
+| `heroPrompt` | string | No | Prompt used by `scripts/generate-hero-image.mjs` |
+| `coverAlt` | string | Conditional | Required when `heroImage` is set (schema-enforced) |
 | `socialTitle` | string | No | Max 60 characters |
 | `socialDescription` | string | No | Max 200 characters |
 | `socialImage` | Astro image | No | |
 | `twitterHandle` | string | No | Adds `twitter:creator` |
+| `video` | object | No | Emits a `VideoObject`: `name`, `description`, `thumbnail` (image), `uploadDate` (`YYYY-MM-DD`), `duration` (ISO 8601, e.g. `PT4M13S`), `embedUrl` |
+| `model3d` | object | No | Emits a `3DModel`: `name`, `description`, `contentUrl`, `encodingFormat` (`model/stl`) |
 | `share` | object | No | See below |
 
 Use `socialTitle`, `socialDescription`, and `socialImage` only when the social preview should differ from the page title, description, or hero image.

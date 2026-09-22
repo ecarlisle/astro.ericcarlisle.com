@@ -2,7 +2,7 @@
 
 **Use when:** Changing CI, GitHub Pages deployment, Cloudflare zone settings, or the page-quality footer, or recovering from a bad deploy.
 
-The site has two independent deployment surfaces. Neither requires redeploying the other.
+The site has two deployment surfaces. Each can deploy alone while the Worker URL and its request/response contract stay the same. `PUBLIC_CONTACT_API_URL` is baked into the static build, so changing the Worker URL, or its API in a breaking way, requires rebuilding and redeploying the static site too.
 
 | Surface | Path | Guide |
 |---|---|---|

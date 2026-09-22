@@ -51,6 +51,16 @@ Set these with `wrangler secret put <NAME> --env production`.
 
 `wrangler.toml` environments: `development` → `ericcarlisle-contact-dev`, `production` → `ericcarlisle-contact`.
 
+## Sentry (not active)
+
+Sentry is installed but has no DSN, so these are unset today. Set them only when [enabling Sentry](analytics-and-monitoring.md#sentry).
+
+| Variable | Purpose |
+|---|---|
+| `SENTRY_AUTH_TOKEN` | Source-map upload authentication |
+| `SENTRY_ORG` | Sentry organization |
+| `SENTRY_PROJECT` | Sentry project |
+
 ## Rotate compromised keys
 
 1. Rotate the key in Turnstile or Resend.

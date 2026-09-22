@@ -2,7 +2,7 @@
 
 **Use when:** Changing, deploying, debugging, or rolling back the contact form Worker in `contact-worker/`.
 
-The Worker deploys independently of the static site. Its secrets are listed in [Environment Variables](deployment-environment.md#contact-worker-secrets). The reasons for keeping it separate are recorded in [ADR 002](decisions/002-separate-cloudflare-worker-for-contact-form.md).
+The Worker deploys separately from the static site, except when its URL or API contract changes (see [Static Site Deployment](deployment-static-site.md)). Its secrets are listed in [Environment Variables](deployment-environment.md#contact-worker-secrets). The reasons for keeping it separate are recorded in [ADR 002](decisions/002-separate-cloudflare-worker-for-contact-form.md).
 
 ## Request flow
 
