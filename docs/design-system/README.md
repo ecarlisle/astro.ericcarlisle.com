@@ -53,8 +53,8 @@ permalinks) are defined in [Accessibility Rules](../performance-seo-accessibilit
 
 | Change | Review or update |
 |---|---|
-| Token added or renamed | Token source, inventory, and the matching Figma reference ([typography](figma-reference-typography.md), [layout](figma-reference-layout.md), [colors](figma-reference-colors.md)) |
-| Component or page layout changed | Figma [components](figma-reference-components.md) or [templates](figma-reference-templates.md) |
+| Token added or renamed | Token source, inventory, and the matching Reference section of the [Figma brief](figma-agent-brief.md) |
+| Component or page layout changed | The Components or Page Templates section of the [Figma brief](figma-agent-brief.md) |
 | Component or shared CSS pattern added or changed | Source, inventory, canonical example or reference page |
 | Usage guidance changes | This file, inventory, [agent guide](agent-guide.md) |
 | Theme behavior changes | Tokens, examples, contrast validation |

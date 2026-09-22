@@ -25,6 +25,9 @@ and agents.
   a routing row.
 - `AGENTS.md` holds only principles, protected files, and routing tables. Topic detail belongs
   in `docs/`.
+- Exempt: paste-in payloads that must be one file,
+  [figma-agent-brief.md](design-system/figma-agent-brief.md) being the only one. It still follows
+  every other rule.
 
 ## Agent tools
 
