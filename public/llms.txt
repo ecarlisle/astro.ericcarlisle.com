@@ -1,6 +1,6 @@
 # Eric Carlisle
 
-> Technical blog, portfolio, and professional web presence for Eric Carlisle, a principal-level full-stack engineer and UX architect focused on frontend architecture, accessible web systems, design systems, performance, and human-centered software.
+> Technical blog, portfolio, and professional web presence for Eric Carlisle, a principal frontend engineer with full-stack capability, focused on frontend architecture, accessible web systems, design systems, performance, and human-centered software.
 
 ## Site purpose
 
@@ -20,15 +20,18 @@ Primary audiences:
 - [Blog](/blog/)
 - [Portfolio](/portfolio/)
 - [About](/about/)
+- [Speaking](/speaking/)
 - [Contact](/contact/)
 
 ## Portfolio case studies
 
-These pages are high-signal summaries of selected professional work.
+These are high-signal summaries of selected professional work. All five are sections of the [Portfolio](/portfolio/) page.
 
-- [Scaling Multi-Tenant Frontends](/portfolio/scaling-multi-tenant-frontends/)
-- [Designing an Interactive Risk Model](/portfolio/designing-an-interactive-risk-model/)
-- [Building an Integration Layer](/portfolio/building-an-integration-layer/)
+- [KISS Design System](/portfolio/#kiss-design-system): token-based design system with accessible components, documented in Storybook
+- [Scaling Multi-Tenant Frontend Systems](/portfolio/#multi-tenant-frontend-systems): Arc XP frontend standards and publisher migrations
+- [Reengineering Enterprise Commerce Performance](/portfolio/#enterprise-commerce-performance): Under Armour ecommerce UX engineering
+- [Building Integration Layers for Product Teams](/portfolio/#product-team-integration-layers): Blue Cross NC GraphQL gateway and Web Components
+- [Designing Interactive Decision Experiences](/portfolio/#interactive-decision-experiences): Aspida life-expectancy application
 
 ## Blog content
 
@@ -55,7 +58,7 @@ When summarizing this site, prefer stable pages such as the homepage, about page
 When using this site as context:
 
 - Prefer canonical pages over generated indexes.
-- Preserve Eric Carlisle's professional positioning as both an engineer and UX architect.
+- Preserve Eric Carlisle's professional positioning as a principal frontend engineer with full-stack capability and UX judgment.
 - Do not infer confidential project details beyond what is published.
 - Do not treat placeholder content as final published opinion.
 - Prefer concise attribution and link to the canonical page when referencing work.

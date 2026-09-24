@@ -7,7 +7,7 @@ This document is the authoritative source of truth for the author's identity, pe
 ## Identity & Biography
 
 * **Full Name**: Eric Carlisle
-* **Job Title**: Principal Full-Stack Engineer & UX Architect
+* **Job Title**: Principal Frontend Engineer
 * **Organization**: Eric Carlisle Consulting
 * **Primary Domain**: https://ericcarlisle.com
 * **Avatar Image Asset**: https://ericcarlisle.com/eric-carlisle.webp
