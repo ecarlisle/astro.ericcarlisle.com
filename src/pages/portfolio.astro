@@ -1,5 +1,6 @@
 ---
 import YouTubeFacade from '@components/YouTubeFacade.astro';
+import ogPortfolio from '@images/og-portfolio.jpg';
 import { featuredTalk } from '../data/talks';
 import Layout from '../layouts/BlogPost.astro';
 ---
@@ -8,6 +9,7 @@ import Layout from '../layouts/BlogPost.astro';
   title="Frontend Engineering & UX Portfolio"
   description="Selected case studies and projects by Principal Frontend Engineer & UX Architect Eric Carlisle — design systems, frontend architecture, performance, and accessibility in enterprise web engineering."
   pageType="portfolio"
+  socialImage={ogPortfolio}
   breadcrumbs={[
     { name: 'Home', item: 'https://ericcarlisle.com/' },
     { name: 'Portfolio', item: 'https://ericcarlisle.com/portfolio/' },

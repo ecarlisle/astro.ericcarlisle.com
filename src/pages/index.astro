@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import avatarImage from '@images/eric-carlisle.png';
+import ogHome from '@images/og-home.jpg';
 import BaseHead from '../components/BaseHead.astro';
 import Card from '../components/Card.astro';
 import CategoryTag from '../components/CategoryTag.astro';
@@ -16,7 +17,7 @@ const posts = (await getSortedPosts()).slice(0, 6);
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead title="Eric Carlisle | Principal Frontend Engineer & UX Architect" description="Principal Frontend Engineer & UX Architect. Explore my portfolio, design systems, and technical writing on web performance, accessibility, and scalable frontend architecture." pageType="homepage" />
+    <BaseHead title="Eric Carlisle | Principal Frontend Engineer & UX Architect" description="Principal Frontend Engineer & UX Architect. Explore my portfolio, design systems, and technical writing on web performance, accessibility, and scalable frontend architecture." pageType="homepage" image={ogHome} />
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
