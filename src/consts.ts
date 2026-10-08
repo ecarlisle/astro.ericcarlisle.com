@@ -12,4 +12,5 @@ export const AUTHOR_AVATAR = '/eric-carlisle.webp';
 export const AUTHOR_JOB_TITLE = 'Principal Frontend Engineer';
 export const AUTHOR_ORG = 'Eric Carlisle Consulting';
 export const GA_MEASUREMENT_ID = 'G-70E1BWCFJ3';
+export const CLARITY_PROJECT_ID = 'y0939z2otd';
 export const WEBMENTION_IO_DOMAIN = 'ericcarlisle.com';

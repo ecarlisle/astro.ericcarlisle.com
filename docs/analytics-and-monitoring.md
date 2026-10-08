@@ -5,12 +5,19 @@
 | Integration | State | Source |
 |---|---|---|
 | GA4 | Active on all pages, run in a Partytown web worker | `src/components/GoogleAnalytics.astro`; `GA_MEASUREMENT_ID` in `src/consts.ts` |
+| Microsoft Clarity | Active on all pages, loaded on first user interaction or browser idle | `src/components/MicrosoftClarity.astro`; `CLARITY_PROJECT_ID` in `src/consts.ts` |
 | Sentry | Installed, **inert** (no DSN) | `@sentry/astro` in `astro.config.mjs` |
 | Webmentions | Live when `WEBMENTION_IO_TOKEN` is set | [Environment Variables](deployment-environment.md#frontend) |
 
 ## GA4
 
 If events are missing, first rule out ad blockers, then check `GA_MEASUREMENT_ID`. Verify with GA DebugView and look for console errors.
+
+## Microsoft Clarity
+
+Clarity records sessions and heatmaps and sets cookies. It runs on the main thread, not in Partytown, because session recording needs synchronous DOM access. To keep it out of early load, the tag loads on the first pointer, key, scroll, or touch event, or on browser idle after `load`.
+
+If recordings are missing, check ad blockers, then `CLARITY_PROJECT_ID`, then the Clarity dashboard.
 
 ## Sentry
 
